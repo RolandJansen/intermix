@@ -1,0 +1,3 @@
+describe('A score', function() {
+
+});

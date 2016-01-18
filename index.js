@@ -1,1 +1,3 @@
-console.log('Nothing here so far.');
+var Intermix = require('./src/core.js');
+
+window.itx = new Intermix();
