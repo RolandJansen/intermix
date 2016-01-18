@@ -1,5 +1,7 @@
 /**
- *
+ * This is the starting point of the library.
+ * It spawns the audio context object and
+ * connects it to the audio output.
  */
 
 var intermix = function() {

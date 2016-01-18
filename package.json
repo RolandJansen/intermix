@@ -10,10 +10,12 @@
   "scripts": {
     "lint": "jshint src/",
     "build": "npm run build:js",
+    "watch": "npm run watch:js",
     "test": "jasmine-node tests/specs/",
     "clean": "rimraf dist",
-    "build:js": "browserify index.js > dist/intermix.js",
-    "prebuild:js": "npm run lint"
+    "build:js": "browserify index.js -d -v -p [minifyify --no-map]> dist/intermix.min.js",
+    "prebuild:js": "npm run lint",
+    "watch:js": "watchify index.js -o dist/intermix.js -d -v -p [minifyify --map dist/intermix.map.json --output dist/intermix.map.json]"
   },
   "repository": {
     "type": "git",
@@ -42,6 +44,8 @@
     "jasmine-node": "^1.14.5",
     "jshint": "^2.9.1",
     "karma-jasmine": "^0.3.6",
-    "rimraf": "^2.5.0"
+    "minifyify": "^7.1.0",
+    "rimraf": "^2.5.0",
+    "watchify": "^3.7.0"
   }
 }
