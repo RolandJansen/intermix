@@ -1,9 +1,9 @@
 /**
  *
  */
-
+'use strict';
 var Oscillator = function() {
 
 };
 
-module.exports = oscillator;
+module.exports = Oscillator;

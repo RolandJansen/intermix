@@ -3,7 +3,7 @@
  * It spawns the audio context object and
  * connects it to the audio output.
  */
-
+'use strict';
 var intermix = function() {
   /**
    * create audio context
@@ -12,11 +12,11 @@ var intermix = function() {
   this.audioCtx = null;
   this.output = null;
 
-  if(AudioContext) {
+  if (AudioContext) {
     this.audioCtx = new AudioContext();
   }
 
-  this.output = audioCtx.destination;
+  this.output = this.audioCtx.destination;
 
 };
 

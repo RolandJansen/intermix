@@ -8,12 +8,12 @@
     "test": "tests"
   },
   "scripts": {
-    "lint": "jshint src/",
+    "lint": "eslint src/",
     "build": "npm run build:js",
     "watch": "npm run watch:js",
     "test": "jasmine-node tests/specs/",
     "clean": "rimraf dist",
-    "build:js": "browserify index.js -d -v -p [minifyify --no-map]> dist/intermix.min.js",
+    "build:js": "browserify index.js -o dist/intermix.min-js -d -v -p [minifyify --no-map]",
     "prebuild:js": "npm run lint",
     "watch:js": "watchify index.js -o dist/intermix.js -d -v -p [minifyify --map dist/intermix.map.json --output dist/intermix.map.json]"
   },
@@ -40,9 +40,9 @@
   "homepage": "https://github.com/RolandJansen/intermix.js#readme",
   "devDependencies": {
     "browserify": "^13.0.0",
+    "eslint": "^1.10.3",
     "jasmine-core": "^2.4.1",
     "jasmine-node": "^1.14.5",
-    "jshint": "^2.9.1",
     "karma-jasmine": "^0.3.6",
     "minifyify": "^7.1.0",
     "rimraf": "^2.5.0",
