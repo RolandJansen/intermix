@@ -4,12 +4,12 @@
  * connects it to the audio output.
  */
 'use strict';
-var intermix = function() {
+var Intermix = function() {
   /**
    * create audio context
    */
   var AudioContext = window.AudioContext || window.webkitAudioContext;
-  this.audioCtx = null;
+  this.audioCtx = 1;
   this.output = null;
 
   if (AudioContext) {
@@ -20,4 +20,4 @@ var intermix = function() {
 
 };
 
-module.exports = intermix;
+module.exports = Intermix;

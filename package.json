@@ -15,7 +15,8 @@
     "clean": "rimraf dist",
     "build:js": "browserify index.js -o dist/intermix.min-js -d -v -p [minifyify --no-map]",
     "prebuild:js": "npm run lint",
-    "watch:js": "watchify index.js -o dist/intermix.js -d -v -p [minifyify --map dist/intermix.map.json --output dist/intermix.map.json]"
+    "watch:jswatchify": "watchify index.js -o dist/intermix.js -d -v -p [minifyify --map dist/intermix.map.json --output dist/intermix.map.json]",
+    "watch:js": "karma start"
   },
   "repository": {
     "type": "git",
@@ -42,7 +43,9 @@
     "browserify": "^13.0.0",
     "eslint": "^1.10.3",
     "jasmine-core": "^2.4.1",
-    "jasmine-node": "^1.14.5",
+    "karma": "^0.13.19",
+    "karma-browserify": "^4.4.2",
+    "karma-chrome-launcher": "^0.2.2",
     "karma-jasmine": "^0.3.6",
     "minifyify": "^7.1.0",
     "rimraf": "^2.5.0",
