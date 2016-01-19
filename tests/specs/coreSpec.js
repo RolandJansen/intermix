@@ -3,7 +3,7 @@
 var Intermix = require('../../src/core.js');
 describe('The intermix core', function() {
 
-  var intermix = null;
+  var intermix = null
 
   beforeEach(function() {
     intermix = new Intermix();

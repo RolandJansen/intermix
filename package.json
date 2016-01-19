@@ -42,6 +42,7 @@
   "devDependencies": {
     "browserify": "^13.0.0",
     "eslint": "^1.10.3",
+    "eslintify": "^1.1.1",
     "jasmine-core": "^2.4.1",
     "karma": "^0.13.19",
     "karma-browserify": "^4.4.2",

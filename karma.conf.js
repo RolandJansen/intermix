@@ -1,5 +1,6 @@
 // Karma configuration
 // Generated on Tue Jan 19 2016 03:54:15 GMT+0100 (Mitteleuropäische Zeit)
+var eslintify = require('eslintify');
 
 module.exports = function(config) {
   config.set({
@@ -15,6 +16,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
+      //'src/*.js',
       'tests/specs/*Spec.js'
     ],
 
@@ -27,6 +29,7 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
+      //'src/*.js': [ 'browserify' ],
       'tests/specs/*Spec.js': [ 'browserify' ]
     },
 
@@ -68,9 +71,14 @@ module.exports = function(config) {
     concurrency: Infinity,
 
     // browserify configuration
+    // since karma preprocessors won't work with browserify
+    // we have to pipe them in via transform.
     browserify: {
-      debug: true
-      //plugin: [ ['minifyify', {'map': 'dist/intermix.map.json', 'output': 'dist/intermix.map.json'}] ]
+      watch: true,
+      debug: true,
+      transform: [ ['eslintify', {'continuous': true}] ],
+      plugin: [ ['minifyify', {'map': 'dist/intermix.map.json', 'output': 'dist/intermix.map.json'}] ]
     }
-  })
-}
+
+  });
+};
