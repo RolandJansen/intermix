@@ -4,5 +4,3 @@ var Intermix=require("./src/core.js");window.itx=new Intermix;
 "use strict";var Intermix=function(){var t=window.AudioContext||window.webkitAudioContext;this.audioCtx=null,this.output=null,t&&(this.audioCtx=new t),this.output=this.audioCtx.destination,console.log(this.output)};module.exports=Intermix;
 },{}]},{},[1])
 
-
-//# sourceMappingURL=dist/intermix.map.json

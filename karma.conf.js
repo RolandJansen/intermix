@@ -16,7 +16,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      //'src/*.js',
+      'src/*.js',
       'tests/specs/*Spec.js'
     ],
 
@@ -72,7 +72,8 @@ module.exports = function(config) {
 
     // browserify configuration
     // since karma preprocessors won't work with browserify
-    // we have to pipe them in via transform.
+    // we have to pipe them in via transform. See:
+    // https://github.com/karma-runner/karma-coverage/issues/16 (post from eib)
     browserify: {
       watch: true,
       debug: true,

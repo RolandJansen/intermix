@@ -17,6 +17,7 @@ var Intermix = function() {
   }
 
   this.output = this.audioCtx.destination;
+  console.log(this.output);
 
 };
 
