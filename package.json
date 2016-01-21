@@ -9,13 +9,14 @@
   },
   "scripts": {
     "lint": "eslint src/",
-    "build": "npm run build:js",
+    "build": "npm run build:js && npm run build:minijs",
     "watch": "npm run watch:js",
     "test": "jasmine-node tests/specs/",
     "clean": "rimraf dist",
-    "build:js": "browserify index.js -o dist/intermix.min-js -d -v -p [minifyify --no-map]",
+    "build:js": "browserify index.js -o dist/intermix.js -v",
+    "build:minijs": "browserify index.js -o dist/intermix.min.js -d -v -p [minifyify --map dist/intermix.map.json --output dist/intermix.map.json]"
     "prebuild:js": "npm run lint",
-    "watch:jswatchify": "watchify index.js -o dist/intermix.js -d -v -p [minifyify --map dist/intermix.map.json --output dist/intermix.map.json]",
+    "watch:jswatchify": "watchify index.js -o dist/intermix.min.js -d -v -p [minifyify --map dist/intermix.map.json --output dist/intermix.map.json]",
     "watch:js": "karma start"
   },
   "repository": {
