@@ -12,10 +12,10 @@
     "build": "npm run build:js && npm run build:minijs",
     "watch": "npm run watch:js",
     "test": "jasmine-node tests/specs/",
-    "clean": "rimraf dist",
-    "build:js": "browserify index.js -o dist/intermix.js -v",
-    "build:minijs": "browserify index.js -o dist/intermix.min.js -d -v -p [minifyify --map dist/intermix.map.json --output dist/intermix.map.json]"
-    "prebuild:js": "npm run lint",
+    "clean": "rimraf dist/*",
+    "build:js": "browserify index.js -o dist/intermix.js -v -p browserify-derequire -s Intermix",
+    "build:minijs": "browserify index.js -o dist/intermix.min.js -d -v -p browserify-derequire -p [minifyify --map dist/intermix.map.json --output dist/intermix.map.json]",
+    "prebuild:js": "npm run clean && npm run lint",
     "watch:jswatchify": "watchify index.js -o dist/intermix.min.js -d -v -p [minifyify --map dist/intermix.map.json --output dist/intermix.map.json]",
     "watch:js": "karma start"
   },
@@ -42,6 +42,7 @@
   "homepage": "https://github.com/RolandJansen/intermix.js#readme",
   "devDependencies": {
     "browserify": "^13.0.0",
+    "browserify-derequire": "^0.9.4",
     "eslint": "^1.10.3",
     "eslintify": "^1.1.1",
     "jasmine-core": "^2.4.1",
