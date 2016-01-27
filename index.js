@@ -1,3 +1,8 @@
-var Intermix = require('./src/core.js');
+'use strict';
 
-window.itx = new Intermix();
+// var Intermix = require('./src/core.js');
+// module.exports = Intermix;
+
+var test = require('./src/oscillator.js');
+
+test(5);

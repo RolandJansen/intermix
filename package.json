@@ -13,8 +13,8 @@
     "watch": "npm run watch:js",
     "test": "jasmine-node tests/specs/",
     "clean": "rimraf dist/*",
-    "build:js": "browserify index.js -o dist/intermix.js -v -p browserify-derequire -s Intermix",
-    "build:minijs": "browserify index.js -o dist/intermix.min.js -d -v -p browserify-derequire -p [minifyify --map dist/intermix.map.json --output dist/intermix.map.json]",
+    "build:js": "browserify src/main.js -o dist/intermix.js -v -p browserify-derequire -s Intermix",
+    "build:minijs": "browserify src/main.js -o dist/intermix.min.js -d -v -p browserify-derequire -p [minifyify --map dist/intermix.map.json --output dist/intermix.map.json]",
     "prebuild:js": "npm run clean && npm run lint",
     "watch:jswatchify": "watchify index.js -o dist/intermix.min.js -d -v -p [minifyify --map dist/intermix.map.json --output dist/intermix.map.json]",
     "watch:js": "karma start"
