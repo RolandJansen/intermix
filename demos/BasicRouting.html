@@ -32,8 +32,8 @@
           <code>AudioBufferSourceNode -> GainNode -> AudioDestinationNode</code>
         </p>
         <form>
-          <input class="btn btn-default" type="button" value="Start" onclick="playAudio('start')">
-          <input class="btn btn-default" type="button" value="Stop" onclick="playAudio('stop')">
+          <input class="btn btn-default" type="button" value="Start" onclick="play()">
+          <input class="btn btn-default" type="button" value="Stop" onclick="stop()">
           Volume:
           <input id="gain"
           data-slider-id='gainSlider'
@@ -65,48 +65,32 @@
                     }
       });
 
-      var im = new Intermix();
-      var audioLoop;
-      var audioBuffer;
-      var gain = im.audioCtx.createGain();
-      gain.connect(im.audioCtx.destination);
+      var sound;
 
       function handleFileComplete(e) {
-        audioLoop = e.result;
-        console.log('Audioloop loaded.');
-        setupAudio(audioLoop);
+        var audioFile = e.result;
+        console.log(audioFile);
+        var soundWave = new Intermix.SoundWave(audioFile);
+        console.log(soundWave.buffer);
+        // this is crap and needs to be fixed asap!
+        setTimeout(function() {
+          sound = new Intermix.Sound(soundWave.buffer);
+        }, 500);
       };
 
-      function setupAudio(buffer) {
-        im.audioCtx.decodeAudioData(buffer, function(decoded) {
-          audioBuffer = decoded;
-        });
-
-      };
-
-      function playAudio(state) {
+      function play() {
         var loop = document.getElementById('loop').checked;
+        console.log(sound.loop);
+        sound.play(loop);
+      }
 
-        if (state === 'start') {
-          audioLoop = null;
-          audioLoop = im.audioCtx.createBufferSource();
-          audioLoop.buffer = audioBuffer;
-          audioLoop.connect(gain);
-          audioLoop.loop = loop;
-          audioLoop.start();
-        } else {
-
-          if (audioLoop !== null) {
-            audioLoop.stop();
-            audioLoop = null;
-          }
-        }
-
-      };
+      function stop() {
+        sound.stop();
+      }
 
       // change gain
       slider.on('slide', function(e) {
-        gain.gain.value = e;
+        sound.gainNode.gain.value = e;
       });
 
       (function() {

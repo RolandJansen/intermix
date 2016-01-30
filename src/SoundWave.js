@@ -1,35 +1,35 @@
 'use strict';
 
-var im = require('./core.js');
+var core = require('./core.js');
 
-im.SoundWave = function(binaryData, collection) {
+var SoundWave = function(binaryData, collection) {
 
-  this.bufferSource = null;
+  this.audioCtx = null;
+  this.buffer = null;
+
+
+  if (core.ac) {
+    this.audioCtx = core.ac;
+    console.log(this.audioCtx);
+  } else {
+    console.log('No AudioContext found');
+  }
+
+  var self = this;
 
   if (binaryData) {
-    //create an audio buffer with audioCtx.decodeAudioData
+    this.audioCtx.decodeAudioData(binaryData).then(function(decoded) {
+      self.buffer = decoded;
+      console.log('buffer created');
+    });
   } else {
-    //throw error
+    //TODO: throw error
   }
 
   if (collection) {
-    //put buffer into soundbank
+    //TODO: put buffer into soundbank
   }
-  console.log('SoundWave');
 
-  //todo:
-  //put the buffer into a collection called soundbank
-  //create methods to play, stop and loop the sound.
 };
 
-im.SoundWave.prototype.play = function(loop) {
-  console.log(loop);
-  //create audiobuffersource, attach to destination
-  //when playing is stopped, destroy buffersource and routing
-};
-
-im.SoundWave.prototype.stop = function() {
-  //stop playing the buffersource, destroy everything
-};
-
-module.exports = im.SoundWave;
+module.exports = SoundWave;

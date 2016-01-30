@@ -1,6 +1,8 @@
 'use strict';
 
-var Intermix = require('./core.js');
-require('./SoundWave.js');
+//Intermix = require('./core.js');
+var Intermix = {};
+Intermix.SoundWave = require('./SoundWave.js');
+Intermix.Sound = require('./Sound.js');
 
 module.exports = Intermix;

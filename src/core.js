@@ -1,30 +1,27 @@
 /**
- * This is the starting point of the library.
- * It spawns the audio context object and
- * connects it to the audio output.
+ * This simply creates the audio context objects
+ * and exports it.
  *
  * TODO: - Should we do backwards-compatibility for older api-versions?
  *       - Check for mobile/iOS compatibility.
+ *       - Check if we're running on node (and throw an error if so)
  */
 'use strict';
 
-var Intermix = function() {
-  /**
-   * create audio context
-   */
-  var AudioContext = window.AudioContext || window.webkitAudioContext;
-  this.audioCtx = null;
-  this.output = null;
+var audioCtx = null;
 
-  if (AudioContext) {
-    this.audioCtx = new AudioContext();
+(function() {
+
+  window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+  if (window.AudioContext) {
+    audioCtx = new window.AudioContext();
   } else {
-    //throw error, probably surround with try/catch
+    //TODO: throw error, probably surround with try/catch
   }
 
-  this.output = this.audioCtx.destination;
-  console.log(this.output);
+})();
 
+module.exports = {
+  ac: audioCtx
 };
-
-module.exports = Intermix;
