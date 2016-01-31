@@ -21,12 +21,16 @@ var Sound = function(audioCtx, soundBuffer) {
   this.gainNode = null;
   this.pannerNode = null;
 
+  this.soundLength = 0;
   this.startOffset = 0;
   this.startTime = 0;
+  this.loopStart = 0;
+  this.loopEnd = null;
 
   if (soundBuffer && audioCtx) {
     this.audioCtx = audioCtx;
     this.buffer = soundBuffer;
+    this.soundLength = this.loopEnd = soundBuffer.duration;
     this.setupAudioChain();
   } else {
     throw new Error('Error initialising Sound object: parameter missing.');
@@ -65,8 +69,14 @@ Sound.prototype.play = function(loop) {
   if (typeof loop !== 'undefined') {
     this.loop = loop;
   }
+
   this.createBufferSource();
   this.bufferSource.loop = this.loop;
+
+  if (this.loop) {
+    this.bufferSource.loopStart = this.loopStart;
+    this.bufferSource.loopEnd = this.loopEnd;
+  }
 
   if (this.startOffset === 0 || this.startOffset >= this.buffer.duration) {
     console.log('resetting starttime');
@@ -92,6 +102,16 @@ Sound.prototype.stop = function(paused) {
 Sound.prototype.pause = function() {
   this.isPaused = true;
   this.stop(this.isPaused);
+};
+
+Sound.prototype.setLoopStart = function(value) {
+  this.loopStart = value * this.soundLength;
+  this.bufferSource.loopStart = this.loopStart;
+};
+
+Sound.prototype.setLoopEnd = function(value) {
+  this.loopEnd = value * this.soundLength;
+  this.bufferSource.loopEnd = this.loopEnd;
 };
 
 module.exports = Sound;
