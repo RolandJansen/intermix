@@ -8,7 +8,6 @@ var SoundWave = function(audioCtx, binaryData, collection) {
 
   if (audioCtx) {
     this.audioCtx = audioCtx;
-    console.log(this.audioCtx);
   } else {
     console.log('No AudioContext found');
   }

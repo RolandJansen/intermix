@@ -33,7 +33,6 @@ Sound.prototype.setupAudioChain = function() {
 
 Sound.prototype.createBufferSource = function() {
   var self = this;
-  console.log('buffer is: ' + this.buffer);
   this.bufferSource = this.audioCtx.createBufferSource();
   this.bufferSource.buffer = this.buffer;
   this.bufferSource.connect(this.gainNode);
@@ -71,8 +70,6 @@ Sound.prototype.stop = function(paused) {
   if (paused) {
     this.startOffset = this.audioCtx.currentTime - this.startTime;
     this.paused = false;
-  } else {
-    this.startOffset = 0;
   }
   if (this.bufferSource !== null) {
     this.bufferSource.stop();

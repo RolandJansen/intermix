@@ -35,6 +35,11 @@
           <input class="btn btn-default" type="button" value="Start" onclick="play()">
           <input class="btn btn-default" type="button" value="Stop" onclick="stop()">
           <input class="btn btn-default" type="button" value="Pause" onclick="pause()">
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" id="loop" value="">loop
+            </label>
+          </div>
           Volume:
           <input id="gain"
           data-slider-id='gainSlider'
@@ -43,16 +48,17 @@
           data-slider-max="1"
           data-slider-step="0.1"
           data-slider-value="1"
-          >
+          ><br>
+          Stereo Position:
           <input id="pan"
           data-slider-id='panSlider'
           type="text"
+          data-slider-min="-1"
+          data-slider-max="1"
+          data-slider-step="0.1"
+          data-slider-value="0"
           >
-          <div class="checkbox">
-            <label>
-              <input type="checkbox" id="loop" value="">loop
-            </label>
-          </div>
+
         </form>
       </div>
     </div>
@@ -63,7 +69,13 @@
     </footer>
 
     <script type="text/javascript">
-      var slider = new Slider('#gain', {
+      var gainSlider = new Slider('#gain', {
+                    formatter: function(value) {
+                        return 'Current value: ' + value;
+                    }
+      });
+
+      var panSlider = new Slider('#pan', {
                     formatter: function(value) {
                         return 'Current value: ' + value;
                     }
@@ -76,7 +88,6 @@
         var audioFile = e.result;
         console.log(audioFile);
         var soundWave = new Intermix.SoundWave(audioCtx, audioFile);
-        console.log(soundWave.buffer);
         // this is crap and needs to be fixed asap!
         setTimeout(function() {
           sound = new Intermix.Sound(audioCtx, soundWave.buffer);
@@ -97,8 +108,12 @@
       }
 
       // change gain
-      slider.on('slide', function(e) {
+      gainSlider.on('slide', function(e) {
         sound.gainNode.gain.value = e;
+      });
+
+      panSlider.on('slide', function(e) {
+        sound.pannerNode.pan.value = e;
       });
 
       (function() {
