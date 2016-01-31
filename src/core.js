@@ -23,5 +23,5 @@ var audioCtx = null;
 })();
 
 module.exports = {
-  ac: audioCtx
+  audioCtx: audioCtx
 };

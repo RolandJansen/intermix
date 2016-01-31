@@ -1,15 +1,13 @@
 'use strict';
 
-var core = require('./core.js');
-
-var SoundWave = function(binaryData, collection) {
+var SoundWave = function(audioCtx, binaryData, collection) {
 
   this.audioCtx = null;
   this.buffer = null;
 
 
-  if (core.ac) {
-    this.audioCtx = core.ac;
+  if (audioCtx) {
+    this.audioCtx = audioCtx;
     console.log(this.audioCtx);
   } else {
     console.log('No AudioContext found');

@@ -34,6 +34,7 @@
         <form>
           <input class="btn btn-default" type="button" value="Start" onclick="play()">
           <input class="btn btn-default" type="button" value="Stop" onclick="stop()">
+          <input class="btn btn-default" type="button" value="Pause" onclick="pause()">
           Volume:
           <input id="gain"
           data-slider-id='gainSlider'
@@ -42,7 +43,10 @@
           data-slider-max="1"
           data-slider-step="0.1"
           data-slider-value="1"
-          onchange="changeGain()"
+          >
+          <input id="pan"
+          data-slider-id='panSlider'
+          type="text"
           >
           <div class="checkbox">
             <label>
@@ -65,27 +69,31 @@
                     }
       });
 
+      var audioCtx = Intermix.audioCtx;
       var sound;
 
       function handleFileComplete(e) {
         var audioFile = e.result;
         console.log(audioFile);
-        var soundWave = new Intermix.SoundWave(audioFile);
+        var soundWave = new Intermix.SoundWave(audioCtx, audioFile);
         console.log(soundWave.buffer);
         // this is crap and needs to be fixed asap!
         setTimeout(function() {
-          sound = new Intermix.Sound(soundWave.buffer);
+          sound = new Intermix.Sound(audioCtx, soundWave.buffer);
         }, 500);
       };
 
       function play() {
         var loop = document.getElementById('loop').checked;
-        console.log(sound.loop);
         sound.play(loop);
       }
 
       function stop() {
         sound.stop();
+      }
+
+      function pause() {
+        sound.pause();
       }
 
       // change gain
@@ -94,7 +102,6 @@
       });
 
       (function() {
-        console.log('loading sample.');
         var queue = new createjs.LoadQueue();
         queue.addEventListener('fileload', handleFileComplete);
         queue.loadFile({src:'assets/samples/554__bebeto__ambient-loop.mp3', type:createjs.AbstractLoader.BINARY});

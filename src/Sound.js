@@ -1,26 +1,24 @@
 'use strict';
 
-var core = require('./core.js');
-
-var Sound = function(soundWave) {
+var Sound = function(audioCtx, soundBuffer) {
 
   this.audioCtx = null;
   this.buffer = null;
   this.bufferSource = null;
   this.loop = false;
+  this.isPaused = false;
   this.gainNode = null;
   this.pannerNode = null;
 
-  if (core.ac) {
-    this.audioCtx = core.ac;
-  }
+  this.startOffset = 0;
+  this.startTime = 0;
 
-  if (soundWave) {
-    this.buffer = soundWave;
+  if (soundBuffer && audioCtx) {
+    this.audioCtx = audioCtx;
+    this.buffer = soundBuffer;
     this.setupAudioChain();
   } else {
-    //TODO: throw error
-    console.log('audiochain not ready');
+    throw new Error('Error initialising Sound object: parameter missing.');
   }
 };
 
@@ -30,8 +28,6 @@ Sound.prototype.setupAudioChain = function() {
   this.gainNode.connect(this.pannerNode);
   this.pannerNode.connect(this.audioCtx.destination);
   this.gainNode.gain.value = 1;
-  // test
-  //
   console.log('audiochain ready');
 };
 
@@ -51,35 +47,43 @@ Sound.prototype.destroyBufferSource = function() {
   if (this.bufferSource !== null) {
     this.bufferSource.disconnect();
     this.bufferSource = null;
+    console.log('BufferSourceNode destroyed');
   }
-  console.log('BufferSourceNode destroyed');
 };
 
-// Sound.prototype.resetBufferSource = function() {
-//   this.destroyBufferSource();
-//   this.createBufferSource();
-// };
-
 Sound.prototype.play = function(loop) {
-  if (loop) {
+  if (typeof loop !== 'undefined') {
     this.loop = loop;
   }
   this.createBufferSource();
   this.bufferSource.loop = this.loop;
-  console.log(this.bufferSource);
-  this.bufferSource.start();
-  console.log('Sound started with loop = ' + loop);
+
+  if (this.startOffset === 0 || this.startOffset >= this.buffer.duration) {
+    console.log('resetting starttime');
+    this.startTime = this.audioCtx.currentTime;
+  }
+
+  this.bufferSource.start(this.startTime, this.startOffset);
+  this.startOffset = 0;
 };
 
-Sound.prototype.stop = function() {
+Sound.prototype.stop = function(paused) {
+  if (paused) {
+    this.startOffset = this.audioCtx.currentTime - this.startTime;
+    this.paused = false;
+  } else {
+    this.startOffset = 0;
+  }
   if (this.bufferSource !== null) {
     this.bufferSource.stop();
-    if (this.loop) {
-      this.destroyBufferSource();
-    }
   } else {
     //fail silently
   }
+};
+
+Sound.prototype.pause = function() {
+  this.isPaused = true;
+  this.stop(this.isPaused);
 };
 
 module.exports = Sound;
