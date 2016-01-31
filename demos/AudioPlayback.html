@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title></title>
+    <title>Intermix Demo</title>
     <link rel="stylesheet"
     href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
     integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"
@@ -19,54 +19,65 @@
     <div class="container row">
       <div class="nav col-md-4">
         <h3>Demos:</h3>
-        <ul>
-          <li>Basic Routing</li>
+        <ul class="nav nav-pills nav-stacked">
+          <li role="presentation" class="active"><a href="#">Audio Playback</a></li>
+          <li role="presentation"><a href="StepSequencer.html">Stepsequencer</a></li>
         </ul>
       </div>
       <div class="demo col-md-8">
-        <h1>Basic Routing</h1>
-        <p>
-          This demo plays a sound, volume is adjustable. Technically it's like this:
-        </p>
-        <p>
-          <code>AudioBufferSourceNode -> GainNode -> AudioDestinationNode</code>
-        </p>
-        <form>
-          <input class="btn btn-default" type="button" value="Start" onclick="play()">
-          <input class="btn btn-default" type="button" value="Stop" onclick="stop()">
-          <input class="btn btn-default" type="button" value="Pause" onclick="pause()">
-          <div class="checkbox">
-            <label>
-              <input type="checkbox" id="loop" value="">loop
-            </label>
+        <h1>Audio Playback</h1>
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            This demo plays a sound that can be looped. Volume and panning are adjustable.
           </div>
-          Volume:
-          <input id="gain"
-          data-slider-id='gainSlider'
-          type="text"
-          data-slider-min="0"
-          data-slider-max="1"
-          data-slider-step="0.1"
-          data-slider-value="1"
-          ><br>
-          Stereo Position:
-          <input id="pan"
-          data-slider-id='panSlider'
-          type="text"
-          data-slider-min="-1"
-          data-slider-max="1"
-          data-slider-step="0.1"
-          data-slider-value="0"
-          >
+          <div class="panel-body">
+            <form>
+              <input class="btn btn-default" type="button" value="Start" onclick="play()">
+              <input class="btn btn-default" type="button" value="Stop" onclick="stop()">
+              <input class="btn btn-default" type="button" value="Pause" onclick="pause()">
+              <br><br>
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" id="loop" value="">loop
+                </label>
+              </div><br>
+              Loop Range:<br>
+              <input id="loopRange"
+              data-slider-id='gainSlider'
+              type="text"
+              data-slider-min="0"
+              data-slider-max="1"
+              data-slider-step="0.1"
+              data-slider-value="[0, 1]"
+              ><br><br>
+              Volume:<br>
+              <input id="gain"
+              data-slider-id='gainSlider'
+              type="text"
+              data-slider-min="0"
+              data-slider-max="1"
+              data-slider-step="0.1"
+              data-slider-value="1"
+              ><br><br>
+              Stereo Position:<br>
+              <input id="pan"
+              data-slider-id='panSlider'
+              type="text"
+              data-slider-min="-1"
+              data-slider-max="1"
+              data-slider-step="0.1"
+              data-slider-value="0"
+              >
 
-        </form>
+            </form>
+          </div>
+          <div class="panel-footer">
+            Audio material licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc/3.0/">Creative Commons Attribution-NonCommercial 3.0 Unported License</a>.
+            Copyright by <a href="https://freesound.org/people/bebeto/">bebeto</a>.
+          </div>
+        </div>
       </div>
     </div>
-    <footer>
-      <!-- <a rel="license" href="http://creativecommons.org/licenses/by-nc/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc/3.0/88x31.png" /></a><br> -->
-      Audio material licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc/3.0/">Creative Commons Attribution-NonCommercial 3.0 Unported License</a>.
-      Copyright by <a href="https://freesound.org/people/bebeto/">bebeto</a>.
-    </footer>
 
     <script type="text/javascript">
       var gainSlider = new Slider('#gain', {
@@ -76,6 +87,12 @@
       });
 
       var panSlider = new Slider('#pan', {
+                    formatter: function(value) {
+                        return 'Current value: ' + value;
+                    }
+      });
+
+      var loopSlider = new Slider('#loopRange', {
                     formatter: function(value) {
                         return 'Current value: ' + value;
                     }
