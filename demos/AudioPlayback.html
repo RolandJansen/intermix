@@ -67,6 +67,15 @@
               data-slider-max="1"
               data-slider-step="0.1"
               data-slider-value="0"
+              ><br><br>
+              Frequency:<br>
+              <input id="freq"
+              data-slider-id='freqSlider'
+              type="text"
+              data-slider-min="0.1"
+              data-slider-max="3"
+              data-slider-step="0.1"
+              data-slider-value="1"
               >
             </form>
           </div>
@@ -97,18 +106,14 @@
                     }
       });
 
+      var freqSlider = new Slider('#freq', {
+                    formatter: function(value) {
+                        return 'Current value: ' + value;
+                    }
+      });
+
       var audioCtx = Intermix.audioCtx;
       var sound;
-
-      function handleFileComplete(e) {
-        var audioFile = e.result;
-        console.log(audioFile);
-        var soundWave = new Intermix.SoundWave(audioCtx, audioFile);
-        // this is crap and needs to be fixed asap!
-        setTimeout(function() {
-          sound = new Intermix.Sound(audioCtx, soundWave.buffer);
-        }, 500);
-      };
 
       function play() {
         var loop = document.getElementById('loop').checked;
@@ -136,6 +141,20 @@
         sound.setLoopStart(e[0]);
         sound.setLoopEnd(e[1]);
       });
+
+      freqSlider.on('slide', function(e) {
+        sound.setFrequency(e);
+      });
+
+      function handleFileComplete(e) {
+        var audioFile = e.result;
+        console.log(audioFile);
+        var soundWave = new Intermix.SoundWave(audioCtx, audioFile);
+        // this is crap and needs to be fixed asap!
+        setTimeout(function() {
+          sound = new Intermix.Sound(audioCtx, soundWave.buffer);
+        }, 500);
+      };
 
       (function() {
         var queue = new createjs.LoadQueue();

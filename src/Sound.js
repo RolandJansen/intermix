@@ -41,8 +41,8 @@ Sound.prototype.createBufferSource = function() {
   this.bufferSource.buffer = this.buffer;
   this.bufferSource.connect(this.gainNode);
   this.bufferSource.onended = function() {
-    self.destroyBufferSource();
     console.log('onended fired');
+    self.destroyBufferSource();
   };
 };
 
@@ -54,9 +54,16 @@ Sound.prototype.destroyBufferSource = function() {
   }
 };
 
-Sound.prototype.play = function(loop) {
+Sound.prototype.play = function(loop, time) {
   if (typeof loop !== 'undefined') {
     this.loop = loop;
+  }
+
+  if (time) {
+    console.log('set time: ' + time);
+    this.startTime = time;
+  } else {
+    this.startTime = this.audioCtx.currentTime;
   }
 
   this.createBufferSource();
@@ -67,10 +74,10 @@ Sound.prototype.play = function(loop) {
     this.bufferSource.loopEnd = this.loopEnd;
   }
 
-  if (this.startOffset === 0 || this.startOffset >= this.buffer.duration) {
-    console.log('resetting starttime');
-    this.startTime = this.audioCtx.currentTime;
-  }
+  // if (this.startOffset === 0 || this.startOffset >= this.buffer.duration) {
+  //   console.log('resetting starttime');
+  //   this.startTime = this.audioCtx.currentTime;
+  // }
 
   this.bufferSource.start(this.startTime, this.startOffset);
   this.startOffset = 0;
@@ -101,6 +108,31 @@ Sound.prototype.setLoopStart = function(value) {
 Sound.prototype.setLoopEnd = function(value) {
   this.loopEnd = value * this.soundLength;
   this.bufferSource.loopEnd = this.loopEnd;
+};
+
+Sound.prototype.resetLoop = function() {
+  this.loopStart = 0;
+  this.loopEnd = this.soundLength;
+};
+
+Sound.prototype.setFrequency = function(freq) {
+  this.bufferSource.playbackRate.value = freq;
+};
+
+Sound.prototype.getFrequency = function() {
+  return this.bufferSource.playbackRate.value;
+};
+
+Sound.prototype.setTone = function(semiTone) {
+  this.bufferSource.detune.value = semiTone * 100;
+};
+
+Sound.prototype.getTone = function() {
+  return this.bufferSource.detune.value;
+};
+
+Sound.prototype.getUID = function() {
+  return Math.random().toString().substr(2, 8);
 };
 
 module.exports = Sound;

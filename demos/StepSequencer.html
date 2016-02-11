@@ -25,13 +25,113 @@
         </ul>
       </div>
       <div class="demo col-md-8">
-        <h1>Demo Title</h1>
+        <h1>Stepsequencer</h1>
         <div class="panel panel-primary">
           <div class="panel-heading">
-            Short description of what the demo does.
+            Plays four audio tracks.
           </div>
           <div class="panel-body">
-            Demo content
+            <input class="btn btn-default" type="button" value="Start" onclick="play()">
+            <input class="btn btn-default" type="button" value="Stop" onclick="stop()">
+            BPM: <input id="bpm" type="text" name="name" value="120">
+            <br><br>
+            <table id="sequencer" class="table-bordered">
+              <tr id="seqStepLabel" class="seqRow">
+                <td>&nbsp;</td>
+                <td id="stepLabel00" class="seqStepLabel">01</td>
+                <td id="stepLabel01" class="seqStepLabel">02</td>
+                <td id="stepLabel02" class="seqStepLabel">03</td>
+                <td id="stepLabel03" class="seqStepLabel">04</td>
+                <td id="stepLabel04" class="seqStepLabel">05</td>
+                <td id="stepLabel05" class="seqStepLabel">06</td>
+                <td id="stepLabel06" class="seqStepLabel">07</td>
+                <td id="stepLabel07" class="seqStepLabel">08</td>
+                <td id="stepLabel08" class="seqStepLabel">09</td>
+                <td id="stepLabel09" class="seqStepLabel">10</td>
+                <td id="stepLabel10" class="seqStepLabel">11</td>
+                <td id="stepLabel11" class="seqStepLabel">12</td>
+                <td id="stepLabel12" class="seqStepLabel">13</td>
+                <td id="stepLabel13" class="seqStepLabel">14</td>
+                <td id="stepLabel14" class="seqStepLabel">15</td>
+                <td id="stepLabel15" class="seqStepLabel">16</td>
+              </tr>
+              <tr id="bd" class="seqRow">
+                <td class="seqStepLabel">Bassdrum</td>
+                <td id="bd0" class="seqStep">&nbsp;</td>
+                <td id="bd1" class="seqStep">&nbsp;</td>
+                <td id="bd2" class="seqStep">&nbsp;</td>
+                <td id="bd3" class="seqStep">&nbsp;</td>
+                <td id="bd4" class="seqStep">&nbsp;</td>
+                <td id="bd5" class="seqStep">&nbsp;</td>
+                <td id="bd6" class="seqStep">&nbsp;</td>
+                <td id="bd7" class="seqStep">&nbsp;</td>
+                <td id="bd8" class="seqStep">&nbsp;</td>
+                <td id="bd9" class="seqStep">&nbsp;</td>
+                <td id="bd10" class="seqStep">&nbsp;</td>
+                <td id="bd11" class="seqStep">&nbsp;</td>
+                <td id="bd12" class="seqStep">&nbsp;</td>
+                <td id="bd13" class="seqStep">&nbsp;</td>
+                <td id="bd14" class="seqStep">&nbsp;</td>
+                <td id="bd15" class="seqStep">&nbsp;</td>
+              </tr>
+              <tr id="sd" class="seqRow">
+                <td class="seqStepLabel">Snare</td>
+                <td id="sd00" class="seqStep">&nbsp;</td>
+                <td id="sd01" class="seqStep">&nbsp;</td>
+                <td id="sd02" class="seqStep">&nbsp;</td>
+                <td id="sd03" class="seqStep">&nbsp;</td>
+                <td id="sd04" class="seqStep">&nbsp;</td>
+                <td id="sd05" class="seqStep">&nbsp;</td>
+                <td id="sd06" class="seqStep">&nbsp;</td>
+                <td id="sd07" class="seqStep">&nbsp;</td>
+                <td id="sd08" class="seqStep">&nbsp;</td>
+                <td id="sd09" class="seqStep">&nbsp;</td>
+                <td id="sd10" class="seqStep">&nbsp;</td>
+                <td id="sd11" class="seqStep">&nbsp;</td>
+                <td id="sd12" class="seqStep">&nbsp;</td>
+                <td id="sd13" class="seqStep">&nbsp;</td>
+                <td id="sd14" class="seqStep">&nbsp;</td>
+                <td id="sd15" class="seqStep">&nbsp;</td>
+              </tr>
+              <tr id="hh" class="seqRow">
+                <td class="seqStepLabel">Hihat</td>
+                <td id="hh00" class="seqStep">&nbsp;</td>
+                <td id="hh01" class="seqStep">&nbsp;</td>
+                <td id="hh02" class="seqStep">&nbsp;</td>
+                <td id="hh03" class="seqStep">&nbsp;</td>
+                <td id="hh04" class="seqStep">&nbsp;</td>
+                <td id="hh05" class="seqStep">&nbsp;</td>
+                <td id="hh06" class="seqStep">&nbsp;</td>
+                <td id="hh07" class="seqStep">&nbsp;</td>
+                <td id="hh08" class="seqStep">&nbsp;</td>
+                <td id="hh09" class="seqStep">&nbsp;</td>
+                <td id="hh10" class="seqStep">&nbsp;</td>
+                <td id="hh11" class="seqStep">&nbsp;</td>
+                <td id="hh12" class="seqStep">&nbsp;</td>
+                <td id="hh13" class="seqStep">&nbsp;</td>
+                <td id="hh14" class="seqStep">&nbsp;</td>
+                <td id="hh15" class="seqStep">&nbsp;</td>
+              </tr>
+              <tr id="bass" class="seqRow">
+                <td class="seqStepLabel">Bass</td>
+                <td id="bass00" class="seqStep">&nbsp;</td>
+                <td id="bass01" class="seqStep">&nbsp;</td>
+                <td id="bass02" class="seqStep">&nbsp;</td>
+                <td id="bass03" class="seqStep">&nbsp;</td>
+                <td id="bass04" class="seqStep">&nbsp;</td>
+                <td id="bass05" class="seqStep">&nbsp;</td>
+                <td id="bass06" class="seqStep">&nbsp;</td>
+                <td id="bass07" class="seqStep">&nbsp;</td>
+                <td id="bass08" class="seqStep">&nbsp;</td>
+                <td id="bass09" class="seqStep">&nbsp;</td>
+                <td id="bass10" class="seqStep">&nbsp;</td>
+                <td id="bass11" class="seqStep">&nbsp;</td>
+                <td id="bass12" class="seqStep">&nbsp;</td>
+                <td id="bass13" class="seqStep">&nbsp;</td>
+                <td id="bass14" class="seqStep">&nbsp;</td>
+                <td id="bass15" class="seqStep">&nbsp;</td>
+              </tr>
+            </table>
           </div>
           <div class="panel-footer">
             Audio material licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc/3.0/">Creative Commons Attribution-NonCommercial 3.0 Unported License</a>.
@@ -43,7 +143,107 @@
     </div>
 
     <script type="text/javascript">
-      // demo functionallity
+
+      var queue = new createjs.LoadQueue();
+      var audioCtx = Intermix.audioCtx;
+      var bdSound, sdSound, hhSound, bassSound;
+      var bdSeq = [1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1];
+      var sdSeq = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1];
+      var hhSeq = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+      var seqSteps = 16;
+
+      var bpm = 120;
+      var sixteenthNote = 0.03125;
+      var running = false;
+
+      function play() {
+        var j = 2;
+        console.log(document.getElementById('bd' + (j-1)));
+        bpm = document.getElementById('bpm').value;
+        set16thNote(bpm);
+        running = true;
+        startSequence(bpm);
+      };
+
+      // function stop() {
+      //   running = false;
+      // };
+
+      function startSequence(beatsPerMinute) {
+        var now = audioCtx.currentTime;
+        var tick = 60 / (beatsPerMinute * 4); //duration of a 16th note
+
+        console.log('tick is: ' + tick);
+        for (var i = 0; i < 16; i++) {
+          var time = now + tick * (i + 1);
+          if (bdSeq[i] === 1) {
+            console.log('Starting Bassdrum at: ' + time);
+            bdSound.play(false, time);
+          }
+          if (sdSeq[i] === 1) {
+            console.log('Starting Snare at: ' + time);
+            sdSound.play(false, time);
+          }
+          if (hhSeq[i] === 1) {
+            console.log('Starting Hihat at: ' + time);
+            hhSound.play(false, time);
+          }
+        }
+
+        // var bgColor = '#f0f0f0';
+        // for (var i = 0; i < 16; i++) {
+        //   var bdStep = document.getElementById('bd' + i);
+        //   bdStep.style.backgroundColor = bgColor;
+        //
+        //   if (i > 0) {
+        //     var bdStepPre = document.getElementById('bd' + (i - 1));
+        //     bdStepPre.style.backgroundColor = 'white';
+        //   } else {
+        //     var bdStepPre = document.getElementById('bd15');
+        //     bdStepPre.style.backgroundColor = 'white';
+        //   }
+          // setTimeout(function() {
+          //   console.log(i);
+          //   var bdStep = document.getElementById('bd' + i);
+          //   bdStep.style.backgroundColor = bgColor;
+          //   if (i > 0) {
+          //     //document.getElementById('bd' + (i-1)).style.background-color = 'white';
+          //   }
+          // }, 500);
+        // }
+      }
+
+      function set16thNote(beats) {
+        sixteenthNote = 60 / (beats * 16);
+      }
+
+      function handleComplete() {
+        var bdRaw = queue.getResult('kick');
+        var sdRaw = queue.getResult('snare');
+        var hhRaw = queue.getResult('hihat');
+        var bassRaw = queue.getResult('bass');
+        var bdBuffer = new Intermix.SoundWave(audioCtx, bdRaw);
+        var sdBuffer = new Intermix.SoundWave(audioCtx, sdRaw);
+        var hhBuffer = new Intermix.SoundWave(audioCtx, hhRaw);
+        var bassBuffer = new Intermix.SoundWave(audioCtx, bassRaw);
+        setTimeout(function() {
+          bdSound = new Intermix.Sound(audioCtx, bdBuffer.buffer);
+          sdSound = new Intermix.Sound(audioCtx, sdBuffer.buffer);
+          hhSound = new Intermix.Sound(audioCtx, hhBuffer.buffer);
+          bassSound = new Intermix.Sound(audioCtx, bassBuffer.buffer);
+        }, 500);
+      }
+
+      (function() {
+        queue.on('complete', handleComplete, this);
+        queue.loadManifest([
+          {id: 'kick', src:'assets/samples/Casio\ SK-1/skkick.wav', type:createjs.AbstractLoader.BINARY},
+          {id: 'snare', src:'assets/samples/Casio\ SK-1/sksnare.wav', type:createjs.AbstractLoader.BINARY},
+          {id: 'hihat', src:'assets/samples/Casio\ SK-1/skclhat.wav', type:createjs.AbstractLoader.BINARY},
+          {id: 'bass', src:'assets/samples/JX3-BS05.WAV', type:createjs.AbstractLoader.BINARY},
+        ]);
+
+      })();
     </script>
   </body>
 </html>

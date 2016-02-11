@@ -1,3 +1,18 @@
 #gainSlider .slider-selection {
 	background: #BABABA;
 }
+
+.seqRow {
+	height: 2em;
+}
+
+.seqStep {
+	width: 2em;
+
+
+}
+
+.seqStepLabel {
+	background-color: #f0f0f0;
+	text-align: center;
+}

@@ -1,0 +1,32 @@
+Attention all old-school electron-heads:
+
+This is a small sample collection showcasing the simple analogue drum
+sounds from that loveable lil' sound toy, the Casio SK-1 Sampler.
+
+All sounds are normalized to 0dB in 44.1 KHz, 16 bit Mono, Windows WAV
+format. Some noise reduction was used to eliminate a very slight 60Hz
+hum caused by the power supply used.
+
+
+The files included in this ZIP file are:
+
+
+   1)skclhat.wav   (closed hi-hat)   
+   2)skophat.wav   (open hi-hat)
+   3)skkick.wav    (kick drum)
+   4)sksnare.wav   (snare drum)
+   5)skhitom.wav   (high toms)
+   6)sklotom.wav   (low toms)
+   7)skloop.wav    (factory "Disco" rhythm preset) 
+   8)casio_sk1.txt (This text file)
+
+    These samples are not for sale. You can use them freely for whatever
+you like. If you write any music with these samples, feel free to
+mention my name and the sample collection in the credits. You can even
+send me a copy of the song in wav, Real Audio or MPEG Layer III format
+if you like. Whatever you do, just have fun with 'em! ;)
+
+Keith Blackford (aka FaBerge)
+
+E-mail-   audioman@intrepid.net 
+Homepage- http://www.intrepid.net/~audioman  
