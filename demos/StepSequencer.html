@@ -147,48 +147,59 @@
       var queue = new createjs.LoadQueue();
       var audioCtx = Intermix.audioCtx;
       var bdSound, sdSound, hhSound, bassSound;
-      var bdSeq = [1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1];
-      var sdSeq = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1];
+      var bdSeq = [1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0];
+      var sdSeq = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0];
       var hhSeq = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
       var seqSteps = 16;
 
       var bpm = 120;
       var sixteenthNote = 0.03125;
       var running = false;
+      var nextStep = 0;
 
       function play() {
         var j = 2;
-        console.log(document.getElementById('bd' + (j-1)));
+        //console.log(document.getElementById('bd' + (j-1)));
         bpm = document.getElementById('bpm').value;
         set16thNote(bpm);
         running = true;
         startSequence(bpm);
       };
 
-      // function stop() {
-      //   running = false;
-      // };
+      function stop() {
+        running = false;
+      };
 
       function startSequence(beatsPerMinute) {
         var now = audioCtx.currentTime;
-        var tick = 60 / (beatsPerMinute * 4); //duration of a 16th note
 
-        console.log('tick is: ' + tick);
-        for (var i = 0; i < 16; i++) {
-          var time = now + tick * (i + 1);
-          if (bdSeq[i] === 1) {
-            console.log('Starting Bassdrum at: ' + time);
-            bdSound.play(false, time);
+        if (running) {
+          var tick = 60 / (beatsPerMinute * 4); //duration of a 16th note
+          if (nextStep > 0) {
+            now = nextStep + tick;
           }
-          if (sdSeq[i] === 1) {
-            console.log('Starting Snare at: ' + time);
-            sdSound.play(false, time);
+
+          for (var i = 0; i < 16; i++) {
+            nextStep = now + tick * (i + 1);
+            console.log(nextStep);
+            if (bdSeq[i] === 1) {
+              console.log(bdSound.bufferSourceNodes);
+              bdSound.play(nextStep);
+            }
+            if (sdSeq[i] === 1) {
+              console.log('Starting Snare at: ' + nextStep);
+              sdSound.play(nextStep);
+            }
+            if (hhSeq[i] === 1) {
+              console.log('Starting Hihat at: ' + nextStep);
+              hhSound.play(nextStep);
+            }
           }
-          if (hhSeq[i] === 1) {
-            console.log('Starting Hihat at: ' + time);
-            hhSound.play(false, time);
-          }
-        }
+        };
+
+
+
+
 
         // var bgColor = '#f0f0f0';
         // for (var i = 0; i < 16; i++) {

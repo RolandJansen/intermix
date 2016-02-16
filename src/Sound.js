@@ -4,7 +4,7 @@ var Sound = function(audioCtx, soundBuffer) {
 
   this.audioCtx = null;
   this.buffer = null;
-  this.bufferSource = null;
+  this.queue = [];          //all currently active streams
   this.loop = false;
   this.isPaused = false;
   this.gainNode = null;
@@ -37,59 +37,66 @@ Sound.prototype.setupAudioChain = function() {
 
 Sound.prototype.createBufferSource = function() {
   var self = this;
-  this.bufferSource = this.audioCtx.createBufferSource();
-  this.bufferSource.buffer = this.buffer;
-  this.bufferSource.connect(this.gainNode);
-  this.bufferSource.onended = function() {
+  var bufferSource = this.audioCtx.createBufferSource();
+  bufferSource.buffer = this.buffer;
+  bufferSource.connect(this.gainNode);
+  bufferSource.onended = function() {
     console.log('onended fired');
-    self.destroyBufferSource();
+    self.destroyBufferSource(bufferSource);
   };
+  return bufferSource;
 };
 
-Sound.prototype.destroyBufferSource = function() {
-  if (this.bufferSource !== null) {
-    this.bufferSource.disconnect();
-    this.bufferSource = null;
-    console.log('BufferSourceNode destroyed');
-  }
+Sound.prototype.destroyBufferSource = function(bsNode) {
+  var self = this;
+  bsNode.disconnect();
+  this.queue.forEach(function(node, index) {
+    if (node === bsNode) {
+      self.queue.splice(index, 1);
+    }
+  });
+  bsNode = null; //probably futile
+  console.log('BufferSourceNode destroyed');
+  console.log('queue in queue: ' + this.queue.length);
 };
 
-Sound.prototype.play = function(loop, time) {
-  if (typeof loop !== 'undefined') {
-    this.loop = loop;
-  }
+Sound.prototype.play = function(delay, playLooped) {
+  var startTime = 0;
 
-  if (time) {
-    console.log('set time: ' + time);
-    this.startTime = time;
+  if (delay) {
+    console.log('set start time: ' + delay);
+    startTime = delay;
   } else {
-    this.startTime = this.audioCtx.currentTime;
+    startTime = this.audioCtx.currentTime;
   }
+  var bs = this.createBufferSource();
+  bs.loop = playLooped;
 
-  this.createBufferSource();
-  this.bufferSource.loop = this.loop;
-
-  if (this.loop) {
-    this.bufferSource.loopStart = this.loopStart;
-    this.bufferSource.loopEnd = this.loopEnd;
-  }
+  // if (playLooped) {
+  //   bs.loopStart = this.loopStart;
+  //   bs.loopEnd = this.loopEnd;
+  // }
 
   // if (this.startOffset === 0 || this.startOffset >= this.buffer.duration) {
   //   console.log('resetting starttime');
   //   this.startTime = this.audioCtx.currentTime;
   // }
+  this.queue.push(bs);
+  //bs.start(startTime, this.startOffset);
+  bs.start(startTime);
 
-  this.bufferSource.start(this.startTime, this.startOffset);
   this.startOffset = 0;
 };
 
 Sound.prototype.stop = function(paused) {
-  if (paused) {
+  if (paused) { //this has to be rewritten since there could be multiple start times.
     this.startOffset = this.audioCtx.currentTime - this.startTime;
     this.paused = false;
   }
-  if (this.bufferSource !== null) {
-    this.bufferSource.stop();
+  if (this.queue.length > 0) {
+    this.queue.forEach(function(node) {
+      node.stop();
+    });
   } else {
     //fail silently
   }
