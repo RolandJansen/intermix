@@ -57,7 +57,6 @@ Sound.prototype.destroyBufferSource = function(bsNode) {
   });
   bsNode = null; //probably futile
   console.log('BufferSourceNode destroyed');
-  console.log('queue in queue: ' + this.queue.length);
 };
 
 Sound.prototype.play = function(delay, playLooped) {

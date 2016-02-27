@@ -3,10 +3,11 @@
  */
 'use strict';
 
-var Part = function(audioCtx, instrument) {
+var Part = function(audioCtx, instrument, length) {
   this.audioCtx;
   this.instrument;
   this.resolution = 16;
+  this.multiply = 4;
   this.length = 1;      //1 = one bar (4 beats)
   this.name = 'Part';
   this.data;
@@ -22,10 +23,15 @@ var Part = function(audioCtx, instrument) {
     throw new Error('Failed to initialize part. AudioCtx and/or instrument missing.');
   }
 
+  if (length) {
+    this.length = length;
+  }
+
 };
 
 Part.prototype.initPart = function() {
   this.pattern = this.initPattern(this.length);
+  //do we really need this? And, if yes, why?
   this.data = {
     'name': this.name,
     'instrument': this.instrument,
@@ -54,12 +60,18 @@ Part.prototype.initPattern = function(length) {
  * @return {Object} The current context to make the function chainable.
  */
 Part.prototype.addEvent = function(seqEvent, position) {
-  this.pattern[position].push(seqEvent);
+  if (position <= this.resolution) {
+    var pos = (position - 1) * this.multiply;
+    this.pattern[pos].push(seqEvent);
+  }
   return this;
 };
 
-Part.prototype.removeEvent = function() {
-
+Part.prototype.removeEvent = function(position) {
+  //removes all entries at a specific position.
+  //this is not exactly what it should do.
+  var pos = position * this.multiply;
+  this.pattern[pos] = [];
 };
 
 /**
@@ -73,6 +85,16 @@ Part.prototype.clearPattern = function() {
 
 Part.prototype.getLength = function() {
   return this.pattern.length;
+};
+
+Part.prototype.getNotePositions = function() {
+  var positions = [];
+  this.pattern.forEach(function(el, index) {
+    if (el.length > 0) {
+      positions.push(index / this.multiply);
+    }
+  }, this);
+  return positions;
 };
 
 Part.prototype.extendOnStart = function(pattern, extLength) {

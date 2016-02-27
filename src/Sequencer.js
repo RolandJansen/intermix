@@ -6,32 +6,37 @@
  */
 'use strict';
 
+var work = require('webworkify');
+
 var Sequencer = function(audioCtx) {
 
   var self = this;
   this.audioCtx = audioCtx;
   this.beatsPerMinute = 120;  //beats per minute
-  this.resolution = 16;       //shortest possible note
+  this.resolution = 64;       //shortest possible note. You normally don't want to touch this.
   this.interval = 100;        //the interval in miliseconds the scheduler gets invoked.
-  this.lookahead = 0.125;     //number of miliseconds the scheduler looks ahead.
+  this.lookahead = 0.3;       //time in seconds the scheduler looks ahead.
                               //should be longer than interval.
+  this.queue = [];            //List with all parts of the score
+  this.runQueue = [];         //list with parts that are playing or will be played shortly
+
   this.now;                    //timestamp from audiocontext when the scheduler is invoked.
   this.timePerStep;           //period of time between two steps
   this.nextStepTime = 0;      //time in seconds when the next step will be triggered
-  this.queue = [];            //List with all parts of the score
-  this.runQueue = [];         //list with parts that are playing or will be played shortly
   this.nextStep = 0;          //position in the queue that will get triggered next
+  this.lastPlayedStep = 0;    //step in queue that was played (not triggered) recently (used for drawing).
   this.loop = false;          //play a section of the queue in a loop
   this.loopStart;             //first step of the loop
   this.loopEnd;               //last step of the loop
+  this.isRunning = false;     //true if sequencer is running, otherwise false
+  this.animationFrame;        //has to be overridden with a function. Will be called in the
+                              //draw function with the lastPlayedStep int as parameter.
 
   // set time per setTimePerStep
   this.timePerStep = this.setTimePerStep(this.beatsPerMinute, this.resolution);
 
-  /*eslint-disable */
-
   // Initialize the scheduler-timer
-  this.scheduleWorker = new Worker('scheduleWorker.js');
+  this.scheduleWorker = work(require('./scheduleWorker.js'));
 
   /*eslint-enable */
 
@@ -53,27 +58,34 @@ Sequencer.prototype.scheduler = function() {
 
   while (this.nextStepTime < this.now + this.lookahead) {
     if (this.queue[this.nextStep]) {
-      this.runQueue.push(this.noteQueue[this.nextStep]);
+      this.queue[this.nextStep].forEach(function(part) {
+        this.runQueue.push({
+          'instrument': part.instrument,
+          'pattern': this.copyArray(part.pattern)
+        });
+      }, this);
     }
 
     this.runQueue.forEach(function(part, index) {
-      var seqEvents = part.shift();  //return first element and remove it from part
+      var seqEvents = part.pattern.shift();  //return first element and remove it from part
       if (seqEvents) {
+        //var instrument = part.instrument;
         seqEvents.forEach(function(seqEvent) {
           if (seqEvent.note) {
-            seqEvent.sound.play(this.nextStepTime);
+            //TODO: should be extended to play real notes
+            part.instrument.play(this.nextStepTime);
           } else if (seqEvent.controller) {
             // process controller event;
           }
 
           //remove part from runQueue if empty
-          if (part.length === 0) {
+          if (part.pattern.length === 0) {
             this.runQueue.splice(index, 1);
           }
-        });
+        }, this);
       }
 
-    });
+    }, this);
 
     this.nextStepTime += this.timePerStep;
 
@@ -95,11 +107,29 @@ Sequencer.prototype.scheduler = function() {
 
 Sequencer.prototype.start = function() {
   this.scheduleWorker.postMessage('start');
+  this.isRunning = true;
+  window.requestAnimationFrame(this.draw);
 };
 
 Sequencer.prototype.stop = function() {
   this.scheduleWorker.postMessage('stop');
   this.runQueue = [];
+  this.isRunning = false;
+};
+
+Sequencer.prototype.draw = function() {
+  // first we'll have to find out, what step was recently played.
+  // this is somehow clumsy because the sequencer doesn't keep track of that.
+  var lookAheadDelta = this.nextStepTime - this.audioCtx.currentTime;
+  var stepsAhead = Math.floor(lookAheadDelta / this.timePerStep) + 1;
+  this.lastPlayedStep = this.nextStep - stepsAhead;
+
+  //should be overridden by the application
+  this.animationFrame(this.lastPlayedStep);
+
+  if (this.isRunning) {
+    window.requestAnimationFrame(this.draw);
+  }
 };
 
 Sequencer.prototype.addPart = function(part, position) {
@@ -118,6 +148,24 @@ Sequencer.prototype.createNoteEvent = function(note, length) {
 
 Sequencer.prototype.setTimePerStep = function(bpm, resolution) {
   return (60 * 4) / (bpm * resolution);
+};
+
+/**
+ * copyArray: Makes a copy of a flat array.
+ * 						Uses a pre-allocated while-loop
+ * 						which seems to be the fasted way
+ * 						(by far) of doing this:
+ * 						http://jsperf.com/new-array-vs-splice-vs-slice/113
+ * @param  {Array} sourceArray Array that should be copied.
+ * @return {Array}             Copy of the source array.
+ */
+Sequencer.prototype.copyArray = function(sourceArray) {
+  var destArray = new Array(sourceArray.length);
+  var i = sourceArray.length;
+  while (i--) {
+    destArray[i] = sourceArray[i];
+  }
+  return destArray;
 };
 
 module.exports = Sequencer;

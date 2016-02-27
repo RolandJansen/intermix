@@ -52,6 +52,7 @@
     "karma-jasmine": "^0.3.6",
     "minifyify": "^7.1.0",
     "rimraf": "^2.5.0",
-    "watchify": "^3.7.0"
+    "watchify": "^3.7.0",
+    "webworkify": "^1.1.0"
   }
 }

@@ -31,7 +31,7 @@
             Plays four audio tracks.
           </div>
           <div class="panel-body">
-            <input class="btn btn-default" type="button" value="Start" onclick="play()">
+            <input class="btn btn-default" type="button" value="Start" onclick="start()">
             <input class="btn btn-default" type="button" value="Stop" onclick="stop()">
             BPM: <input id="bpm" type="text" name="name" value="120">
             <br><br>
@@ -57,85 +57,84 @@
               </tr>
               <tr id="bd" class="seqRow">
                 <td class="seqStepLabel">Bassdrum</td>
-                <td id="bd0" class="seqStep">&nbsp;</td>
-                <td id="bd1" class="seqStep">&nbsp;</td>
-                <td id="bd2" class="seqStep">&nbsp;</td>
-                <td id="bd3" class="seqStep">&nbsp;</td>
-                <td id="bd4" class="seqStep">&nbsp;</td>
-                <td id="bd5" class="seqStep">&nbsp;</td>
-                <td id="bd6" class="seqStep">&nbsp;</td>
-                <td id="bd7" class="seqStep">&nbsp;</td>
-                <td id="bd8" class="seqStep">&nbsp;</td>
-                <td id="bd9" class="seqStep">&nbsp;</td>
-                <td id="bd10" class="seqStep">&nbsp;</td>
-                <td id="bd11" class="seqStep">&nbsp;</td>
-                <td id="bd12" class="seqStep">&nbsp;</td>
-                <td id="bd13" class="seqStep">&nbsp;</td>
-                <td id="bd14" class="seqStep">&nbsp;</td>
-                <td id="bd15" class="seqStep">&nbsp;</td>
+                <td id="bd0" class="seqStep" onclick="changeStep('bd0')"></td>
+                <td id="bd1" class="seqStep" onclick="changeStep('bd1')"></td>
+                <td id="bd2" class="seqStep" onclick="changeStep('bd2')"></td>
+                <td id="bd3" class="seqStep" onclick="changeStep('bd3')"></td>
+                <td id="bd4" class="seqStep" onclick="changeStep('bd4')"></td>
+                <td id="bd5" class="seqStep" onclick="changeStep('bd5')"></td>
+                <td id="bd6" class="seqStep" onclick="changeStep('bd6')"></td>
+                <td id="bd7" class="seqStep" onclick="changeStep('bd7')"></td>
+                <td id="bd8" class="seqStep" onclick="changeStep('bd8')"></td>
+                <td id="bd9" class="seqStep" onclick="changeStep('bd9')"></td>
+                <td id="bd10" class="seqStep" onclick="changeStep('bd10')"></td>
+                <td id="bd11" class="seqStep" onclick="changeStep('bd11')"></td>
+                <td id="bd12" class="seqStep" onclick="changeStep('bd12')"></td>
+                <td id="bd13" class="seqStep" onclick="changeStep('bd13')"></td>
+                <td id="bd14" class="seqStep" onclick="changeStep('bd14')"></td>
+                <td id="bd15" class="seqStep" onclick="changeStep('bd15')"></td>
               </tr>
               <tr id="sd" class="seqRow">
                 <td class="seqStepLabel">Snare</td>
-                <td id="sd00" class="seqStep">&nbsp;</td>
-                <td id="sd01" class="seqStep">&nbsp;</td>
-                <td id="sd02" class="seqStep">&nbsp;</td>
-                <td id="sd03" class="seqStep">&nbsp;</td>
-                <td id="sd04" class="seqStep">&nbsp;</td>
-                <td id="sd05" class="seqStep">&nbsp;</td>
-                <td id="sd06" class="seqStep">&nbsp;</td>
-                <td id="sd07" class="seqStep">&nbsp;</td>
-                <td id="sd08" class="seqStep">&nbsp;</td>
-                <td id="sd09" class="seqStep">&nbsp;</td>
-                <td id="sd10" class="seqStep">&nbsp;</td>
-                <td id="sd11" class="seqStep">&nbsp;</td>
-                <td id="sd12" class="seqStep">&nbsp;</td>
-                <td id="sd13" class="seqStep">&nbsp;</td>
-                <td id="sd14" class="seqStep">&nbsp;</td>
-                <td id="sd15" class="seqStep">&nbsp;</td>
+                <td id="sd0" class="seqStep" onclick="changeStep('sd0')"></td>
+                <td id="sd1" class="seqStep" onclick="changeStep('sd1')"></td>
+                <td id="sd2" class="seqStep" onclick="changeStep('sd2')"></td>
+                <td id="sd3" class="seqStep" onclick="changeStep('sd3')"></td>
+                <td id="sd4" class="seqStep" onclick="changeStep('sd4')"></td>
+                <td id="sd5" class="seqStep" onclick="changeStep('sd5')"></td>
+                <td id="sd6" class="seqStep" onclick="changeStep('sd6')"></td>
+                <td id="sd7" class="seqStep" onclick="changeStep('sd7')"></td>
+                <td id="sd8" class="seqStep" onclick="changeStep('sd8')"></td>
+                <td id="sd9" class="seqStep" onclick="changeStep('sd9')"></td>
+                <td id="sd10" class="seqStep" onclick="changeStep('sd10')"></td>
+                <td id="sd11" class="seqStep" onclick="changeStep('sd11')"></td>
+                <td id="sd12" class="seqStep" onclick="changeStep('sd12')"></td>
+                <td id="sd13" class="seqStep" onclick="changeStep('sd13')"></td>
+                <td id="sd14" class="seqStep" onclick="changeStep('sd14')"></td>
+                <td id="sd15" class="seqStep" onclick="changeStep('sd15')"></td>
               </tr>
               <tr id="hh" class="seqRow">
                 <td class="seqStepLabel">Hihat</td>
-                <td id="hh00" class="seqStep">&nbsp;</td>
-                <td id="hh01" class="seqStep">&nbsp;</td>
-                <td id="hh02" class="seqStep">&nbsp;</td>
-                <td id="hh03" class="seqStep">&nbsp;</td>
-                <td id="hh04" class="seqStep">&nbsp;</td>
-                <td id="hh05" class="seqStep">&nbsp;</td>
-                <td id="hh06" class="seqStep">&nbsp;</td>
-                <td id="hh07" class="seqStep">&nbsp;</td>
-                <td id="hh08" class="seqStep">&nbsp;</td>
-                <td id="hh09" class="seqStep">&nbsp;</td>
-                <td id="hh10" class="seqStep">&nbsp;</td>
-                <td id="hh11" class="seqStep">&nbsp;</td>
-                <td id="hh12" class="seqStep">&nbsp;</td>
-                <td id="hh13" class="seqStep">&nbsp;</td>
-                <td id="hh14" class="seqStep">&nbsp;</td>
-                <td id="hh15" class="seqStep">&nbsp;</td>
+                <td id="hh0" class="seqStep" onclick="changeStep('hh0')"></td>
+                <td id="hh1" class="seqStep" onclick="changeStep('hh1')"></td>
+                <td id="hh2" class="seqStep" onclick="changeStep('hh2')"></td>
+                <td id="hh3" class="seqStep" onclick="changeStep('hh3')"></td>
+                <td id="hh4" class="seqStep" onclick="changeStep('hh4')"></td>
+                <td id="hh5" class="seqStep" onclick="changeStep('hh5')"></td>
+                <td id="hh6" class="seqStep" onclick="changeStep('hh6')"></td>
+                <td id="hh7" class="seqStep" onclick="changeStep('hh7')"></td>
+                <td id="hh8" class="seqStep" onclick="changeStep('hh8')"></td>
+                <td id="hh9" class="seqStep" onclick="changeStep('hh9')"></td>
+                <td id="hh10" class="seqStep" onclick="changeStep('hh10')"></td>
+                <td id="hh11" class="seqStep" onclick="changeStep('hh11')"></td>
+                <td id="hh12" class="seqStep" onclick="changeStep('hh12')"></td>
+                <td id="hh13" class="seqStep" onclick="changeStep('hh13')"></td>
+                <td id="hh14" class="seqStep" onclick="changeStep('hh14')"></td>
+                <td id="hh15" class="seqStep" onclick="changeStep('hh15')"></td>
               </tr>
               <tr id="bass" class="seqRow">
                 <td class="seqStepLabel">Bass</td>
-                <td id="bass00" class="seqStep">&nbsp;</td>
-                <td id="bass01" class="seqStep">&nbsp;</td>
-                <td id="bass02" class="seqStep">&nbsp;</td>
-                <td id="bass03" class="seqStep">&nbsp;</td>
-                <td id="bass04" class="seqStep">&nbsp;</td>
-                <td id="bass05" class="seqStep">&nbsp;</td>
-                <td id="bass06" class="seqStep">&nbsp;</td>
-                <td id="bass07" class="seqStep">&nbsp;</td>
-                <td id="bass08" class="seqStep">&nbsp;</td>
-                <td id="bass09" class="seqStep">&nbsp;</td>
-                <td id="bass10" class="seqStep">&nbsp;</td>
-                <td id="bass11" class="seqStep">&nbsp;</td>
-                <td id="bass12" class="seqStep">&nbsp;</td>
-                <td id="bass13" class="seqStep">&nbsp;</td>
-                <td id="bass14" class="seqStep">&nbsp;</td>
-                <td id="bass15" class="seqStep">&nbsp;</td>
+                <td id="bass0" class="seqStep" onclick="changeStep('bass0')"></td>
+                <td id="bass1" class="seqStep" onclick="changeStep('bass1')"></td>
+                <td id="bass2" class="seqStep" onclick="changeStep('bass2')"></td>
+                <td id="bass3" class="seqStep" onclick="changeStep('bass3')"></td>
+                <td id="bass4" class="seqStep" onclick="changeStep('bass4')"></td>
+                <td id="bass5" class="seqStep" onclick="changeStep('bass5')"></td>
+                <td id="bass6" class="seqStep" onclick="changeStep('bass6')"></td>
+                <td id="bass7" class="seqStep" onclick="changeStep('bass7')"></td>
+                <td id="bass8" class="seqStep" onclick="changeStep('bass8')"></td>
+                <td id="bass9" class="seqStep" onclick="changeStep('bass9')"></td>
+                <td id="bass10" class="seqStep" onclick="changeStep('bass10')"></td>
+                <td id="bass11" class="seqStep" onclick="changeStep('bass11')"></td>
+                <td id="bass12" class="seqStep" onclick="changeStep('bass12')"></td>
+                <td id="bass13" class="seqStep" onclick="changeStep('bass13')"></td>
+                <td id="bass14" class="seqStep" onclick="changeStep('bass14')"></td>
+                <td id="bass15" class="seqStep" onclick="changeStep('bass15')"></td>
               </tr>
             </table>
           </div>
           <div class="panel-footer">
-            Audio material licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc/3.0/">Creative Commons Attribution-NonCommercial 3.0 Unported License</a>.
-            Copyright by <a href="https://freesound.org/people/bebeto/">bebeto</a>.
+            Drumsounds sampled from a <a href="http://www.vintagesynth.com/casio/sk1.php">Casio SK-1</a>.
           </div>
         </div>
 
@@ -144,60 +143,92 @@
 
     <script type="text/javascript">
 
+      var bdSound, sdSound, hhSound, bassSound;
+      var bdPart, sdPart, hhPart;
       var queue = new createjs.LoadQueue();
       var audioCtx = Intermix.audioCtx;
-      var bdSound, sdSound, hhSound, bassSound;
-      var bdSeq = [1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0];
-      var sdSeq = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0];
-      var hhSeq = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
-      var seqSteps = 16;
 
-      var bpm = 120;
-      var sixteenthNote = 0.03125;
-      var running = false;
-      var nextStep = 0;
+      var seq = new Intermix.Sequencer(audioCtx);
+      seq.loop = true;
+      seq.loopStart = 0;
+      seq.loopEnd = 63;   //this should be set in resolution steps (15 with 16th notes)
 
-      function play() {
-        var j = 2;
-        //console.log(document.getElementById('bd' + (j-1)));
-        bpm = document.getElementById('bpm').value;
-        set16thNote(bpm);
-        running = true;
-        startSequence(bpm);
+      function initParts() {
+        bdPart = new Intermix.Part(audioCtx, bdSound);
+        sdPart = new Intermix.Part(audioCtx, sdSound);
+        hhPart = new Intermix.Part(audioCtx, hhSound);
+
+        var seqEvent = seq.createNoteEvent(34, 1);  // create note a-3 with length of 1 (16th note)
+
+        bdPart.addEvent(seqEvent, 1);
+        bdPart.addEvent(seqEvent, 9);
+        sdPart.addEvent(seqEvent, 5);
+        sdPart.addEvent(seqEvent, 13);
+
+        for (i = 0; i < 16; i++) {
+          hhPart.addEvent(seqEvent, i + 1);
+        }
+
+        seq.addPart(bdPart, 0);
+        seq.addPart(sdPart, 0);
+        seq.addPart(hhPart, 0);
+      };
+
+      function start() {
+        seq.start();
       };
 
       function stop() {
-        running = false;
+        seq.stop();
       };
 
-      function startSequence(beatsPerMinute) {
-        var now = audioCtx.currentTime;
+      function drawActiveSteps() {
+        var bdSteps = bdPart.getNotePositions();
+        var sdSteps = sdPart.getNotePositions();
+        var hhSteps = hhPart.getNotePositions();
 
-        if (running) {
-          var tick = 60 / (beatsPerMinute * 4); //duration of a 16th note
-          if (nextStep > 0) {
-            now = nextStep + tick;
+        bdSteps.forEach(function(pos) {
+          document.getElementById('bd' + pos).style.backgroundColor = 'red';
+        });
+        sdSteps.forEach(function(pos) {
+          document.getElementById('sd' + pos).style.backgroundColor = 'red';
+        });
+        hhSteps.forEach(function(pos) {
+          document.getElementById('hh' + pos).style.backgroundColor = 'red';
+        });
+      };
+
+      function changeStep(elId, part) {
+        var el = document.getElementById(elId);
+        var pos = elId.match(/\d+/)[0];
+        var prefix = elId.replace(/\D/g,'');
+        console.log('pos: ' + pos + ', prefix: ' + prefix);
+        console.log(el.style.backgroundColor);
+        if (el.style.backgroundColor === 'red') {
+          el.style.backgroundColor = 'white';
+          if (prefix === 'bd') {
+            bdPart.removeEvent(pos);
+          } else if (prefix === 'sd') {
+            sdPart.removeEvent(pos);
+          } else if (prefix === 'hh') {
+            hhPart.removeEvent(pos);
           }
-
-          for (var i = 0; i < 16; i++) {
-            nextStep = now + tick * (i + 1);
-            console.log(nextStep);
-            if (bdSeq[i] === 1) {
-              console.log(bdSound.bufferSourceNodes);
-              bdSound.play(nextStep);
-            }
-            if (sdSeq[i] === 1) {
-              console.log('Starting Snare at: ' + nextStep);
-              sdSound.play(nextStep);
-            }
-            if (hhSeq[i] === 1) {
-              console.log('Starting Hihat at: ' + nextStep);
-              hhSound.play(nextStep);
-            }
+        } else {
+          var note = seq.createNoteEvent(34, 1);
+          el.style.backgroundColor = 'red';
+          if (prefix === 'bd') {
+            bdPart.addEvent(note, pos);
+          } else if (prefix === 'sd') {
+            sdPart.addEvent(note, pos);
+          } else if (prefix === 'hh') {
+            hhPart.addEvent(note, pos);
           }
-        };
+        }
 
-
+        // var newColor = (el.style.backgroundColor === 'white' ||
+        //   el.style.backgroundColor === '') ? 'red' : 'white';
+        // el.style.backgroundColor = newColor;
+      };
 
 
 
@@ -222,11 +253,11 @@
           //   }
           // }, 500);
         // }
-      }
+      //}
 
-      function set16thNote(beats) {
-        sixteenthNote = 60 / (beats * 16);
-      }
+      // function set16thNote(beats) {
+      //   sixteenthNote = 60 / (beats * 16);
+      // }
 
       function handleComplete() {
         var bdRaw = queue.getResult('kick');
@@ -243,6 +274,11 @@
           hhSound = new Intermix.Sound(audioCtx, hhBuffer.buffer);
           bassSound = new Intermix.Sound(audioCtx, bassBuffer.buffer);
         }, 500);
+
+        setTimeout(function() {
+          initParts();
+          drawActiveSteps();
+        }, 600);
       }
 
       (function() {
