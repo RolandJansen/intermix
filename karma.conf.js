@@ -1,5 +1,6 @@
 // Karma configuration
 // Generated on Tue Jan 19 2016 03:54:15 GMT+0100 (Mitteleuropäische Zeit)
+'use strict';
 var eslintify = require('eslintify');
 
 module.exports = function(config) {
@@ -16,13 +17,13 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'src/*.js',
       'tests/specs/*Spec.js'
     ],
 
 
     // list of files to exclude
     exclude: [
+      'tests/specs/skeletonSpec.js'
     ],
 
 

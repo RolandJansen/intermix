@@ -14,7 +14,7 @@ var core = require('./core.js');
  * var soundWave = new Intermix.SoundWave('file.wav');
  * var sound = new Intermix.Sound(soundWave.buffer);
  * sound.play;
- * @example <caption>concatenate multiple source files into one buffer<br>
+ * @example <caption>Concatenate multiple source files into one buffer<br>
  * in the given order and play them:</caption>
  * var soundWave = new Intermix.SoundWave('file1.wav,file2.wav,file3.wav');
  * var sound = new Intermix.Sound(soundWave.buffer);
@@ -25,8 +25,10 @@ var core = require('./core.js');
  * </caption>
  * var queue = new createjs.LoadQueue();
  * queue.on('complete', handleComplete);
- * queue.loadManifest([{id: 'src1', src:'file1.wav', type:createjs.AbstractLoader.BINARY},
- *     {id:"src2", src:"file2.wav", type:createjs.AbstractLoader.BINARY}]);
+ * queue.loadManifest([
+ *     {id: 'src1', src:'file1.wav', type:createjs.AbstractLoader.BINARY},
+ *     {id: 'src2', src:'file2.wav', type:createjs.AbstractLoader.BINARY}
+ * ]);
  *
  * function handleComplete() {
  *     var binData1 = queue.getResult('src1');
@@ -98,7 +100,7 @@ SoundWave.prototype.concatBinariesToAudioBuffer = function(binaryBuffers, audioB
 };
 
 /**
- * Appends two audio buffers. Suggested by Chris Wilson:
+ * Appends two audio buffers. Suggested by Chris Wilson:<br>
  * http://stackoverflow.com/questions/14143652/web-audio-api-append-concatenate-different-audiobuffers-and-play-them-as-one-son
  * @param  {AudioBuffer} buffer1 The first audio buffer
  * @param  {AudioBuffer} buffer2 The second audio buffer
