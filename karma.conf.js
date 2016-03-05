@@ -17,6 +17,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
+      'src/*.js',
       'tests/specs/*Spec.js'
     ],
 
@@ -30,7 +31,7 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      //'src/*.js': [ 'browserify' ],
+      'src/*.js': [ 'browserify' ],
       'tests/specs/*Spec.js': [ 'browserify' ]
     },
 
@@ -78,9 +79,13 @@ module.exports = function(config) {
     browserify: {
       watch: true,
       debug: true,
-      transform: [ ['eslintify', {'continuous': true}] ],
-      plugin: [ ['minifyify', {'map': 'dist/intermix.map.json', 'output': 'dist/intermix.map.json'}] ]
-    }
+      transform: [ ['eslintify', {'continuous': true}] ]
+      //plugin: [ ['minifyify', {'map': 'dist/intermix.map.json', 'output': 'dist/intermix.map.json'}] ]
+    },
+
+    // watchify: {
+    //   outfile: 'dist/intermix.js'
+    // }
 
   });
 };
