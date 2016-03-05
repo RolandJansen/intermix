@@ -1,6 +1,7 @@
 # temp files
 .DS_Store
 .tmp
+/out/
 
 # npm
 /node_modules/

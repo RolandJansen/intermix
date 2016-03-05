@@ -148,8 +148,7 @@
 
       function handleFileComplete(e) {
         var audioFile = e.result;
-        console.log(audioFile);
-        var soundWave = new Intermix.SoundWave(audioCtx, audioFile);
+        var soundWave = new Intermix.SoundWave(audioFile);
         // this is crap and needs to be fixed asap!
         setTimeout(function() {
           sound = new Intermix.Sound(audioCtx, soundWave.buffer);
