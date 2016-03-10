@@ -25,6 +25,9 @@
         </ul>
       </div>
       <div class="demo col-md-8">
+        <p id="binary">
+
+        </p>
         <h1>Stepsequencer</h1>
         <div class="panel panel-primary">
           <div class="panel-heading">
@@ -147,6 +150,7 @@
       var bdPart, sdPart, hhPart;
       var queue = new createjs.LoadQueue();
       var audioCtx = Intermix.audioCtx;
+      var binaryKick;
 
       var seq = new Intermix.Sequencer(audioCtx);
       seq.loop = true;
@@ -264,10 +268,11 @@
         var sdRaw = queue.getResult('snare');
         var hhRaw = queue.getResult('hihat');
         var bassRaw = queue.getResult('bass');
-        var bdBuffer = new Intermix.SoundWave(audioCtx, bdRaw);
-        var sdBuffer = new Intermix.SoundWave(audioCtx, sdRaw);
-        var hhBuffer = new Intermix.SoundWave(audioCtx, hhRaw);
-        var bassBuffer = new Intermix.SoundWave(audioCtx, bassRaw);
+        writeBinary(_arrayBufferToBase64(hhRaw));
+        var bdBuffer = new Intermix.SoundWave(bdRaw);
+        var sdBuffer = new Intermix.SoundWave(sdRaw);
+        var hhBuffer = new Intermix.SoundWave(hhRaw);
+        var bassBuffer = new Intermix.SoundWave(bassRaw);
         setTimeout(function() {
           bdSound = new Intermix.Sound(audioCtx, bdBuffer.buffer);
           sdSound = new Intermix.Sound(audioCtx, sdBuffer.buffer);
@@ -280,6 +285,24 @@
           drawActiveSteps();
         }, 600);
       }
+
+      function ab2str(buf) {
+        return window.btoa(String.fromCharCode.apply(null, new Uint16Array(buf)));
+      };
+
+      function writeBinary(binStr) {
+        document.getElementById('binary').innerHTML = binStr;
+      };
+
+      function _arrayBufferToBase64( buffer ) {
+        var binary = '';
+        var bytes = new Uint8Array( buffer );
+        var len = bytes.byteLength;
+        for (var i = 0; i < len; i++) {
+          binary += String.fromCharCode( bytes[ i ] );
+        }
+        return window.btoa( binary );
+      };
 
       (function() {
         queue.on('complete', handleComplete, this);

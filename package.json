@@ -19,7 +19,7 @@
     "prebuild:js": "npm run clean && npm run lint",
     "watch:jswatchify": "start cmd /k watchify src/main.js -o dist/intermix.js -v -d -p browserify-derequire -s Intermix",
     "watch:js": "karma start",
-    "docgen": "jsdoc src/SoundWave.js"
+    "docgen": "jsdoc src/SoundWave.js README.md"
   },
   "repository": {
     "type": "git",
@@ -47,6 +47,7 @@
     "browserify-derequire": "^0.9.4",
     "eslint": "^1.10.3",
     "eslintify": "^1.1.1",
+    "jasmine-ajax": "^3.2.0",
     "jasmine-core": "^2.4.1",
     "jsdoc": "^3.4.0",
     "karma": "^0.13.19",

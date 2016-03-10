@@ -3,13 +3,21 @@
 var core = require('./core.js');
 
 /**
+ * <p>
  * Creates a wrapper in which an audio buffer lives.
+ * A SoundWave object just holds audio data and does nothing else.
+ * If you want to play the sound, you have to additionally create a
+ * <a href="Sound.html">Sound</a> object.
  * It can handle one or more ArrayBuffers or filenames
  * (*.wav, *.mp3) as data sources.
- * Multiple sources will be concatenated into one audio buffer.<br>
- * You normally shouldn't use any of the provided methods.
- * A SoundWave object just holds audio data and does nothing.
- * If you want to play the sound, you have to additionally create a Sound object.
+ * </p><p>
+ * Multiple sources will be concatenated into one audio buffer.
+ * This is not the same as creating multiple SoundWave objects.
+ * It's like a wavetable: All start/end positions will be saved so
+ * you can trigger the original samples without using multiple buffers.
+ * Possible usages are multisampled sounds, loops or wavesequences (kind of).
+ * </p>
+ *
  * @example <caption>Play a sound from an audio file:</caption>
  * var soundWave = new Intermix.SoundWave('file.wav');
  * var sound = new Intermix.Sound(soundWave.buffer);
@@ -52,7 +60,7 @@ var SoundWave = function(audioSrc) {
     } else if (audioSrc instanceof Array && audioSrc[0] instanceof ArrayBuffer) {
       //multiple audio buffers to decode and concatenate
       this.concatBinariesToAudioBuffer(audioSrc);
-    } else if (typeof audioSrc === 'string' && audioSrc.indexOf(',') === 0) {
+    } else if (typeof audioSrc === 'string' && audioSrc.indexOf(',') === -1) {
       //one file to load/decode
       var binBuffer;
       this.loadFile(audioSrc, function(response) {
@@ -63,9 +71,11 @@ var SoundWave = function(audioSrc) {
       //multiple files to load/decode and cancatinate
       var binBuffers = this.loadFiles(audioSrc);
       this.concatBinariesToAudioBuffer(binBuffers);
+    } else {
+      throw new Error('Cannot create SoundWave object: Unsupported data format');
     }
   } else {
-    throw new Error('Cannot create SoundWave object: Binary data missing.');
+    //start the object with empty buffer. Usefull for testing and advanced usage.
   }
 
 };
@@ -73,12 +83,20 @@ var SoundWave = function(audioSrc) {
 /**
  * Takes binary audio data and turns it into an audio buffer object.
  * This is a wrapper for the web-audio-api decodeAudioData function.
- * @param  {ArrayBuffer} rawAudioSrc Audio data in raw binary format
- * @return {AudioBuffer}             Ready to use audio buffer
+ * It uses the new promise syntax so it probably won't work in all browsers by now.
+ * @param  {ArrayBuffer}  rawAudioSrc Audio data in raw binary format
+ * @param  {function}     [func]      Can be used to run code inside the inner decode function.
+ * @return {Promise}                  Promise object that will be replaced with the audio buffer after decoding.
  */
-SoundWave.prototype.decodeAudioData = function(rawAudioSrc) {
-  return this.audioCtx.decodeAudioData(rawAudioSrc).then(function(decoded) {
-    return decoded;
+SoundWave.prototype.decodeAudioData = function(rawAudioSrc, func) {
+  var self = this;
+
+  //new promise based syntax currently not available in Chrome <49, IE, Safari
+  this.buffer = this.audioCtx.decodeAudioData(rawAudioSrc).then(function(decoded) {
+    self.buffer = decoded;
+    if (func) {
+      func();
+    }
   });
 };
 
@@ -88,12 +106,12 @@ SoundWave.prototype.decodeAudioData = function(rawAudioSrc) {
  * @param  {AudioBuffer} audioBuffer   An existing AudioBuffer object
  * @return {AudioBuffer}               The concatenated AudioBuffer
  */
-SoundWave.prototype.concatBinariesToAudioBuffer = function(binaryBuffers, audioBuffer) {
+SoundWave.prototype.concatBinariesToAudioBuffer = function(binaryBuffers, audioBuffer, func) {
   var self = this;
 
   binaryBuffers.forEach(function(binBuffer) {
-    var tmpAudioBuffer = self.decodeAudioData(binBuffer);
-    audioBuffer = self.appendAudioBuffer(self.Buffer, tmpAudioBuffer);
+    var tmpAudioBuffer = self.decodeAudioData(binBuffer, func);
+    audioBuffer = self.appendAudioBuffer(self.buffer, tmpAudioBuffer);
   });
 
   return audioBuffer;
@@ -124,19 +142,19 @@ SoundWave.prototype.appendAudioBuffer = function(buffer1, buffer2) {
  * returned ArrayBuffer as its argument when done.
  * @param  {string}   filename       The file to be loaded
  * @param  {function} onloadCallback The function to be called
- * @param  {boolean}  [sync=true]   Asynchronous loading
+ * @param  {boolean}  [async=true]   Asynchronous loading
  * @example
  * var arrayBuffer;
  * this.loadFile('file1.wav', function(response) {
  *   arrayBuffer = response;
  * });
  */
-SoundWave.prototype.loadFile = function(filename, onloadCallback, sync) {
+SoundWave.prototype.loadFile = function(filename, onloadCallback, async) {
   var asynchronously = true;
   var request = new window.XMLHttpRequest();
 
-  if (sync) {
-    asynchronously = sync;
+  if (async) {
+    asynchronously = async;
   }
 
   request.open('GET', filename, asynchronously);
@@ -170,7 +188,7 @@ SoundWave.prototype.loadFiles = function(filenames) {
 
 SoundWave.prototype.sortBinBuffers = function(filenames, binBuffers) {
   return filenames.map(function(el) {
-    binBuffers[el];
+    return binBuffers[el];
   });
 };
 

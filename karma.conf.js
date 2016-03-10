@@ -14,7 +14,6 @@ module.exports = function(config) {
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
     frameworks: ['jasmine', 'browserify'],
 
-
     // list of files / patterns to load in the browser
     files: [
       'src/*.js',
@@ -82,10 +81,6 @@ module.exports = function(config) {
       transform: [ ['eslintify', {'continuous': true}] ]
       //plugin: [ ['minifyify', {'map': 'dist/intermix.map.json', 'output': 'dist/intermix.map.json'}] ]
     },
-
-    // watchify: {
-    //   outfile: 'dist/intermix.js'
-    // }
 
   });
 };

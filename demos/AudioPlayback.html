@@ -80,7 +80,7 @@
             </form>
           </div>
           <div class="panel-footer">
-            Audio material licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc/3.0/">Creative Commons Attribution-NonCommercial 3.0 Unported License</a>.
+            Audioloop licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc/3.0/">Creative Commons Attribution-NonCommercial 3.0 Unported License</a>.
             Copyright by <a href="https://freesound.org/people/bebeto/">bebeto</a>.
           </div>
         </div>
@@ -151,6 +151,7 @@
         var soundWave = new Intermix.SoundWave(audioFile);
         // this is crap and needs to be fixed asap!
         setTimeout(function() {
+          console.log(soundWave);
           sound = new Intermix.Sound(audioCtx, soundWave.buffer);
         }, 500);
       };
