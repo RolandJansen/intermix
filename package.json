@@ -1,6 +1,6 @@
 {
   "name": "intermix.js",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Javascript library for sound/audio-processing",
   "main": "index.js",
   "directories": {
@@ -10,15 +10,15 @@
   "scripts": {
     "lint": "eslint src/",
     "build": "npm run build:js && npm run build:minijs",
-    "watch": "npm run watch:jswatchify && npm run watch:js",
-    "watch:watchify": "watchify src/main.js -o dist/intermix.js -v -d -p browserify-derequire -s Intermix",
-    "test": "jasmine-node tests/specs/",
+    "watch": "npm run test:cmd && npm run watch:js",
+    "test": "karma start",
+    "test:cmd": "start cmd /k npm run test",
     "clean": "rimraf dist/*",
     "build:js": "browserify src/main.js -o dist/intermix.js -v -p browserify-derequire -s Intermix",
     "build:minijs": "browserify src/main.js -o dist/intermix.min.js -d -v -p browserify-derequire -p [minifyify --map dist/intermix.map.json --output dist/intermix.map.json]",
     "prebuild:js": "npm run clean && npm run lint",
-    "watch:jswatchify": "start cmd /k watchify src/main.js -o dist/intermix.js -v -d -p browserify-derequire -s Intermix",
-    "watch:js": "karma start",
+    "watch:jscmd": "start cmd /k npm run watch:js",
+    "watch:js": "watchify src/main.js -o dist/intermix.js -v -d -p browserify-derequire -s Intermix",
     "docgen": "jsdoc src/SoundWave.js README.md"
   },
   "repository": {
