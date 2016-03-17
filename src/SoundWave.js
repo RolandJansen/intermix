@@ -52,6 +52,7 @@ var SoundWave = function(audioSrc) {
 
   this.audioCtx = core.audioCtx;  //window.AudioContext
   this.buffer = null;             //AudioBuffer
+  this.metaData = [];                //start-/endpoints and length of single waves
 
   if (audioSrc) {
     if (audioSrc instanceof ArrayBuffer) {
@@ -70,7 +71,7 @@ var SoundWave = function(audioSrc) {
     } else if (typeof audioSrc === 'string' && audioSrc.indexOf(',') > -1) {
       //multiple files to load/decode and cancatinate
       var binBuffers = this.loadFiles(audioSrc);
-      this.concatBinariesToAudioBuffer(binBuffers);
+      this.buffer = this.concatBinariesToAudioBuffer(binBuffers, this.buffer);
     } else {
       throw new Error('Cannot create SoundWave object: Unsupported data format');
     }
@@ -92,6 +93,7 @@ SoundWave.prototype.decodeAudioData = function(rawAudioSrc, func) {
   var self = this;
 
   //new promise based syntax currently not available in Chrome <49, IE, Safari
+  //TODO: monkeypatch with call
   this.buffer = this.audioCtx.decodeAudioData(rawAudioSrc).then(function(decoded) {
     self.buffer = decoded;
     if (func) {
@@ -106,13 +108,12 @@ SoundWave.prototype.decodeAudioData = function(rawAudioSrc, func) {
  * @param  {AudioBuffer} audioBuffer   An existing AudioBuffer object
  * @return {AudioBuffer}               The concatenated AudioBuffer
  */
-SoundWave.prototype.concatBinariesToAudioBuffer = function(binaryBuffers, audioBuffer, func) {
-  var self = this;
-
+SoundWave.prototype.concatBinariesToAudioBuffer = function(binaryBuffers, audioBuffer) {
   binaryBuffers.forEach(function(binBuffer) {
-    var tmpAudioBuffer = self.decodeAudioData(binBuffer, func);
-    audioBuffer = self.appendAudioBuffer(self.buffer, tmpAudioBuffer);
-  });
+    var tmpAudioBuffer = this.decodeAudioData(binBuffer);
+    this.metaData.push(this.addWaveMetaData(audioBuffer, tmpAudioBuffer));
+    audioBuffer = this.appendAudioBuffer(audioBuffer, tmpAudioBuffer);
+  }, this);
 
   return audioBuffer;
 };
@@ -135,6 +136,22 @@ SoundWave.prototype.appendAudioBuffer = function(buffer1, buffer2) {
     channel.set( buffer2.getChannelData(i), buffer1.length);
   }
   return tmp;
+};
+
+/**
+ * Creates a dictionary with start/stop points and length in sample-frames
+ * of an appended waveform and adds it to the metaData array.
+ * @private
+ * @param  {AudioBuffer} existingBuffer The 'old' buffer that gets appended
+ * @param  {AudioBuffer} newBuffer      The buffer that gets appended
+ * @return {Object}                     Dictionary with start/stop/length data
+ */
+SoundWave.prototype.addWaveMetaData = function(existingBuffer, newBuffer) {
+  return {
+    start: existingBuffer.length + 1,
+    end: existingBuffer.length + newBuffer.length,
+    length: newBuffer.length
+  };
 };
 
 /**
