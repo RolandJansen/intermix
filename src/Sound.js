@@ -1,12 +1,24 @@
 'use strict';
 
-var Sound = function(audioCtx, soundBuffer) {
+var core = require('./core.js');
 
-  this.audioCtx = null;
+/**
+ * <p>
+ * Plays a sound from a SoundWave object.
+ * The sound can be started/stopped/paused.
+ * It can also be looped with an adjustable loop range.
+ * </p>
+ *
+ * @example
+ * var soundWave = new Intermix.SoundWave('audiofile.wav');
+ * var sound = new Intermix.Sound(soundWave);
+ * @param  {AudioBuffer} soundBuffer The buffer with audio data to be played
+ */
+var Sound = function(soundWave) {
+
   this.buffer = null;
   this.queue = [];          //all currently active streams
   this.loop = false;
-  this.isPaused = false;
   this.gainNode = null;
   this.pannerNode = null;
 
@@ -16,28 +28,35 @@ var Sound = function(audioCtx, soundBuffer) {
   this.loopStart = 0;
   this.loopEnd = null;
 
-  if (soundBuffer && audioCtx) {
-    this.audioCtx = audioCtx;
-    this.buffer = soundBuffer;
-    this.soundLength = this.loopEnd = soundBuffer.duration;
+  if (soundWave) {
+    this.buffer = soundWave.buffer;
+    this.soundLength = this.loopEnd = this.buffer.duration;
     this.setupAudioChain();
   } else {
     throw new Error('Error initialising Sound object: parameter missing.');
   }
 };
 
+/**
+ * [function description]
+ * @return {[type]} [description]
+ */
 Sound.prototype.setupAudioChain = function() {
-  this.gainNode = this.audioCtx.createGain();
-  this.pannerNode = this.audioCtx.createStereoPanner();
+  this.gainNode = core.createGain();
+  this.pannerNode = core.createStereoPanner();
   this.gainNode.connect(this.pannerNode);
-  this.pannerNode.connect(this.audioCtx.destination);
+  this.pannerNode.connect(core.destination);
   this.gainNode.gain.value = 1;
   console.log('audiochain ready');
 };
 
+/**
+ * [function description]
+ * @return {[type]} [description]
+ */
 Sound.prototype.createBufferSource = function() {
   var self = this;
-  var bufferSource = this.audioCtx.createBufferSource();
+  var bufferSource = core.createBufferSource();
   bufferSource.buffer = this.buffer;
   bufferSource.connect(this.gainNode);
   bufferSource.onended = function() {
@@ -47,6 +66,11 @@ Sound.prototype.createBufferSource = function() {
   return bufferSource;
 };
 
+/**
+ * [function description]
+ * @param  {[type]} bsNode [description]
+ * @return {[type]}        [description]
+ */
 Sound.prototype.destroyBufferSource = function(bsNode) {
   var self = this;
   bsNode.disconnect();
@@ -59,6 +83,12 @@ Sound.prototype.destroyBufferSource = function(bsNode) {
   console.log('BufferSourceNode destroyed');
 };
 
+/**
+ * [function description]
+ * @param  {[type]} delay      [description]
+ * @param  {[type]} playLooped [description]
+ * @return {[type]}            [description]
+ */
 Sound.prototype.play = function(delay, playLooped) {
   var startTime = 0;
 
@@ -66,7 +96,7 @@ Sound.prototype.play = function(delay, playLooped) {
     console.log('set start time: ' + delay);
     startTime = delay;
   } else {
-    startTime = this.audioCtx.currentTime;
+    startTime = core.currentTime;
   }
   var bs = this.createBufferSource();
   bs.loop = playLooped;
@@ -78,7 +108,7 @@ Sound.prototype.play = function(delay, playLooped) {
 
   // if (this.startOffset === 0 || this.startOffset >= this.buffer.duration) {
   //   console.log('resetting starttime');
-  //   this.startTime = this.audioCtx.currentTime;
+  //   this.startTime = core.currentTime;
   // }
   this.queue.push(bs);
   //bs.start(startTime, this.startOffset);
@@ -87,9 +117,14 @@ Sound.prototype.play = function(delay, playLooped) {
   this.startOffset = 0;
 };
 
+/**
+ * [function description]
+ * @param  {[type]} paused [description]
+ * @return {[type]}        [description]
+ */
 Sound.prototype.stop = function(paused) {
   if (paused) { //this has to be rewritten since there could be multiple start times.
-    this.startOffset = this.audioCtx.currentTime - this.startTime;
+    this.startOffset = core.currentTime - this.startTime;
     this.paused = false;
   }
   if (this.queue.length > 0) {
@@ -101,10 +136,14 @@ Sound.prototype.stop = function(paused) {
   }
 };
 
+/**
+ * [function description]
+ * @return {[type]} [description]
+ */
 Sound.prototype.pause = function() {
-  this.isPaused = true;
-  this.stop(this.isPaused);
+  this.stop(true);
 };
+
 
 Sound.prototype.setLoopStart = function(value) {
   this.loopStart = value * this.soundLength;

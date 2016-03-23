@@ -3,15 +3,10 @@
 //jasmine library for mocking ajax requests
 //see http://jasmine.github.io/2.4/ajax.html
 require('jasmine-ajax');
-//require('web-audio-test-api');
-var core = require('../../src/core.js');
 var SoundWave = require('../../src/SoundWave.js');
 var testData = require('../soundwave_test_data.js');
 
 describe('SoundWave', function() {
-  //these tests currently use real async calls to web audio api so
-  //we don't want mocks here
-  //WebAudioTestAPI.unuse();
 
   describe('An ArrayBuffer', function() {
     var soundWave;
@@ -31,10 +26,10 @@ describe('SoundWave', function() {
 
     beforeEach(function(done) {
       soundWave = new SoundWave();
-      core.decodeAudioData(testData.buffer1.data).then(function(decoded) {
+      soundWave.audioCtx.decodeAudioData(testData.buffer1.data).then(function(decoded) {
         buffer1 = decoded;
       });
-      core.decodeAudioData(testData.buffer2.data).then(function(decoded) {
+      soundWave.audioCtx.decodeAudioData(testData.buffer2.data).then(function(decoded) {
         buffer2 = decoded;
         done();
       });

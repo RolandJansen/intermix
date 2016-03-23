@@ -17,11 +17,9 @@ var audioCtx = null;
   if (window.AudioContext) {
     audioCtx = new window.AudioContext();
   } else {
-    //TODO: throw error, probably surround with try/catch
+    throw new Error('Couldn\'t initialize the audio context.');
   }
 
 })();
 
-module.exports = {
-  audioCtx: audioCtx
-};
+module.exports = audioCtx;

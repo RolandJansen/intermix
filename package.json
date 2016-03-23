@@ -57,6 +57,7 @@
     "minifyify": "^7.1.0",
     "rimraf": "^2.5.0",
     "watchify": "^3.7.0",
+    "web-audio-test-api": "^0.5.2",
     "webworkify": "^1.1.0"
   }
 }

@@ -50,7 +50,6 @@ var core = require('./core.js');
  */
 var SoundWave = function(audioSrc) {
 
-  this.audioCtx = core.audioCtx;  //window.AudioContext
   this.buffer = null;             //AudioBuffer
   this.metaData = [];                //start-/endpoints and length of single waves
 
@@ -94,7 +93,7 @@ SoundWave.prototype.decodeAudioData = function(rawAudioSrc, func) {
 
   //new promise based syntax currently not available in Chrome <49, IE, Safari
   //TODO: monkeypatch with call
-  this.buffer = this.audioCtx.decodeAudioData(rawAudioSrc).then(function(decoded) {
+  this.buffer = core.decodeAudioData(rawAudioSrc).then(function(decoded) {
     self.buffer = decoded;
     if (func) {
       func();
@@ -127,7 +126,7 @@ SoundWave.prototype.concatBinariesToAudioBuffer = function(binaryBuffers, audioB
  */
 SoundWave.prototype.appendAudioBuffer = function(buffer1, buffer2) {
   var numberOfChannels = Math.min(buffer1.numberOfChannels, buffer2.numberOfChannels);
-  var tmp = this.audioCtx.createBuffer(numberOfChannels,
+  var tmp = core.createBuffer(numberOfChannels,
     (buffer1.length + buffer2.length),
     buffer1.sampleRate);
   for (var i = 0; i < numberOfChannels; i++) {
