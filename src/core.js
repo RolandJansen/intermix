@@ -1,10 +1,14 @@
 /**
- * This simply creates the audio context objects
- * and exports it.
+ * This is the foundation of the Intermix library.
+ * It simply creates the audio context objects
+ * and exports it so it can be easily consumed
+ * from all classes of the library.
  *
- * TODO: - Should we do backwards-compatibility for older api-versions?
- *       - Check for mobile/iOS compatibility.
- *       - Check if we're running on node (and throw an error if so)
+ * @return {AudioContext} The AudioContext object
+ *
+ * @todo Should we do backwards-compatibility for older api-versions?
+ * @todo Check for mobile/iOS compatibility.
+ * @todo Check if we're running on node
  */
 'use strict';
 
