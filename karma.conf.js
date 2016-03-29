@@ -79,6 +79,7 @@ module.exports = function(config) {
     browserify: {
       watch: true,
       debug: true,
+      plugin: ['proxyquire-universal'],
       transform: [ ['eslintify', {'continuous': true}] ]
       //plugin: [ ['minifyify', {'map': 'dist/intermix.map.json', 'output': 'dist/intermix.map.json'}] ]
     },

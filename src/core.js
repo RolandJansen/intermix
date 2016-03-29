@@ -9,6 +9,24 @@
  * @todo Should we do backwards-compatibility for older api-versions?
  * @todo Check for mobile/iOS compatibility.
  * @todo Check if we're running on node
+ *
+ * @example <caption>Suspend and resume the audio context to
+ * create a pause button. This should be used with createAudioWorker
+ * as an error will be thrown when suspend is called on an offline audio context.
+ * You can also pause single sounds with <i>Sound.pause()</i>.
+ * Please read <a href="https://developer.mozilla.org/de/docs/Web/API/AudioContext/suspend">the developer docs at MDN</a>
+ * to get a better idea of this.</caption>
+ * susresBtn.onclick = function() {
+ *   if(Intermix.state === 'running') {
+ *     Intermix.suspend().then(function() {
+ *       susresBtn.textContent = 'Resume context';
+ *     });
+ *   } else if (Intermix.state === 'suspended') {
+ *     Intermix.resume().then(function() {
+ *       susresBtn.textContent = 'Suspend context';
+ *     });
+ *   }
+ * }
  */
 'use strict';
 

@@ -12,23 +12,28 @@ var core = require('./core.js');
  * @example
  * var soundWave = new Intermix.SoundWave('audiofile.wav');
  * var sound = new Intermix.Sound(soundWave);
- * @param  {AudioBuffer} soundBuffer The buffer with audio data to be played
+ * sound.start();
+ * @param  {Object} soundWave SoundWave object including the buffer with audio data to be played
  */
 var Sound = function(soundWave) {
 
-  this.buffer = null;
+  this.wave = null;
+  this.ac = core;           //currently just used for tests
   this.queue = [];          //all currently active streams
   this.loop = false;
   this.gainNode = null;
   this.pannerNode = null;
 
   this.soundLength = 0;
-  this.startOffset = 0;
-  this.startTime = 0;
+  this.startOffset = 0;     //the offset within the waveform
+  this.startTime = 0;       //when the sound starts to play
   this.loopStart = 0;
   this.loopEnd = null;
+  this.playbackRate = 1;
+  this.detune = 0;
 
   if (soundWave) {
+    this.wave = soundWave;
     this.buffer = soundWave.buffer;
     this.soundLength = this.loopEnd = this.buffer.duration;
     this.setupAudioChain();
@@ -38,8 +43,8 @@ var Sound = function(soundWave) {
 };
 
 /**
- * [function description]
- * @return {[type]} [description]
+ * Creates a gain and stereo-panner node, connects them
+ * (gain -> panner) and sets gain to 1 (max value).
  */
 Sound.prototype.setupAudioChain = function() {
   this.gainNode = core.createGain();
@@ -47,12 +52,12 @@ Sound.prototype.setupAudioChain = function() {
   this.gainNode.connect(this.pannerNode);
   this.pannerNode.connect(core.destination);
   this.gainNode.gain.value = 1;
-  console.log('audiochain ready');
 };
 
 /**
- * [function description]
- * @return {[type]} [description]
+ * Creates and configures a BufferSourceNode
+ * that can be played once and then destroys itself.
+ * @return {BufferSourceNode} The BufferSourceNode
  */
 Sound.prototype.createBufferSource = function() {
   var self = this;
@@ -60,46 +65,56 @@ Sound.prototype.createBufferSource = function() {
   bufferSource.buffer = this.buffer;
   bufferSource.connect(this.gainNode);
   bufferSource.onended = function() {
-    console.log('onended fired');
+    //console.log('onended fired');
     self.destroyBufferSource(bufferSource);
   };
   return bufferSource;
 };
 
 /**
- * [function description]
- * @param  {[type]} bsNode [description]
- * @return {[type]}        [description]
+ * Destroyes a given AudioBufferSourceNode and deletes it
+ * from the sourceNode queue. This is used in the onended
+ * callback of all BufferSourceNodes.
+ * This is probably futile since we already delete all node
+ * references in the stop method.
+ * @todo   Check if this can be removed
+ * @param  {AudioBufferSourceNode} bsNode the bufferSource to be destroyed.
  */
 Sound.prototype.destroyBufferSource = function(bsNode) {
-  var self = this;
   bsNode.disconnect();
   this.queue.forEach(function(node, index) {
     if (node === bsNode) {
-      self.queue.splice(index, 1);
+      this.queue.splice(index, 1);
     }
-  });
-  bsNode = null; //probably futile
-  console.log('BufferSourceNode destroyed');
+  }, this);
 };
 
 /**
- * [function description]
- * @param  {[type]} delay      [description]
- * @param  {[type]} playLooped [description]
- * @return {[type]}            [description]
+ * Starts a sound (AudioBufferSourceNode) and stores a references
+ * in a queue. This enables you to play multiple sounds at once
+ * and even stop them all at a given time.
+ * @param  {float}   delay      Time in seconds the sound pauses before the stream starts
+ * @param  {Boolean} playLooped Whether the sound should be looped or not
+ * @return {Void}
  */
-Sound.prototype.play = function(delay, playLooped) {
+Sound.prototype.start = function(delay, playLooped, duration) {
   var startTime = 0;
 
   if (delay) {
-    console.log('set start time: ' + delay);
     startTime = delay;
   } else {
     startTime = core.currentTime;
   }
   var bs = this.createBufferSource();
-  bs.loop = playLooped;
+
+  if (playLooped) {
+    bs.loop = playLooped;
+    bs.loopStart = this.loopStart;
+    bs.loopEnd = this.loopEnd;
+  }
+
+  bs.playbackRate.value = this.playbackRate;
+  bs.detune.value = this.detune;
 
   // if (playLooped) {
   //   bs.loopStart = this.loopStart;
@@ -112,68 +127,135 @@ Sound.prototype.play = function(delay, playLooped) {
   // }
   this.queue.push(bs);
   //bs.start(startTime, this.startOffset);
-  bs.start(startTime);
+
+  if (duration) {
+    bs.start(startTime, this.startOffset, duration);
+  } else {
+    bs.start(startTime, this.startOffset);
+  }
 
   this.startOffset = 0;
 };
 
 /**
- * [function description]
- * @param  {[type]} paused [description]
- * @return {[type]}        [description]
+ * Stops all audio stream, even the ones that are just scheduled.
+ * It also cleans the queue so that the sound object is ready for another round.
+ * @return {Void}
  */
-Sound.prototype.stop = function(paused) {
-  if (paused) { //this has to be rewritten since there could be multiple start times.
-    this.startOffset = core.currentTime - this.startTime;
-    this.paused = false;
-  }
+Sound.prototype.stop = function() {
   if (this.queue.length > 0) {
     this.queue.forEach(function(node) {
       node.stop();
+      node.disconnect();
     });
+    this.queue = [];  //release all references
   } else {
     //fail silently
   }
 };
 
 /**
- * [function description]
- * @return {[type]} [description]
+ * Stops the audio stream and store the current positions
+ * as an offset for when the sound get restarted.
+ * Remember that this doesn't work with loops that are shorter
+ * than the buffer itself. If you want a global, accurate pause function
+ * use suspend/resume from the core module.
+ * @todo    Needs to be rewritten since there could be multiple start times.
+ * @return  {Void}
  */
 Sound.prototype.pause = function() {
-  this.stop(true);
+  this.startOffset = (core.currentTime - this.startTime) % this.soundLength;
+  this.stop();
 };
 
-
+/**
+ * Sets the startpoint of the loop
+ * @param  {float} value  loop start in seconds
+ * @return {Void}
+ */
 Sound.prototype.setLoopStart = function(value) {
-  this.loopStart = value * this.soundLength;
-  this.bufferSource.loopStart = this.loopStart;
+  //this.loopStart = value * this.soundLength;
+  this.loopStart = value;
 };
 
+/**
+ * Sets the endpoint of the loop
+ * @param  {float} value  loop end in seconds
+ * @return {Void}
+ */
 Sound.prototype.setLoopEnd = function(value) {
-  this.loopEnd = value * this.soundLength;
-  this.bufferSource.loopEnd = this.loopEnd;
+  this.loopEnd = value;
 };
 
+/**
+ * Resets the start and endpoint to start end endpoint of the AudioBuffer
+ * @return {Void}
+ */
 Sound.prototype.resetLoop = function() {
   this.loopStart = 0;
   this.loopEnd = this.soundLength;
 };
 
-Sound.prototype.setFrequency = function(freq) {
-  this.bufferSource.playbackRate.value = freq;
+/**
+ * Set the playback rate of the sound in percentage
+ * (1 = 100%, 2 = 200%)
+ * @param  {float}   rate Rate in percentage
+ * @return {Void}
+ */
+Sound.prototype.setPlaybackRate = function(rate) {
+  this.playbackRate = rate;
 };
 
-Sound.prototype.getFrequency = function() {
-  return this.bufferSource.playbackRate.value;
+/**
+ * Get the current playback rate
+ * @return {float}  The playback rate in percentage (1.25 = 125%)
+ */
+Sound.prototype.getPlaybackRate = function() {
+  return this.playbackRate;
 };
 
+/**
+ * Set the tone within two octave (+/-12 tones)
+ * @param  {Integer}  semi tone
+ * @return {Void}
+ */
 Sound.prototype.setTone = function(semiTone) {
-  this.bufferSource.detune.value = semiTone * 100;
+  if (semiTone >= -12 && semiTone <= 12) {
+    this.detune = semiTone * 100;
+  } else {
+    throw new Error('Semi tone is ' + semiTone + '. Must be between +/-12.');
+  }
 };
 
+/**
+ * Get the last played semitone. This doesn't has to be an
+ * integer between -/+12 as the sound can be detuned with
+ * more precision.
+ * @return {float}  Semitone between -/+12
+ */
 Sound.prototype.getTone = function() {
-  return this.bufferSource.detune.value;
+  return this.detune / 100;
+};
+
+/**
+ * Detune the sound oscillation in cents (+/- 1200)
+ * @param  {Integer}  detune  detune in cents
+ * @return {Void}
+ */
+Sound.prototype.setDetune = function(detune) {
+  if (detune >= -1200 && detune <= 1200) {
+    this.detune = detune;
+  } else {
+    throw new Error('Detune parameter is ' + detune + '. Must be between +/-1200.');
+  }
+};
+
+/**
+ * get the current detune in cents (+/- 1200)
+ * @return {Integer}  Detune in cents
+ */
+Sound.prototype.getDetune = function() {
+  return this.detune;
 };
 
 Sound.prototype.getUID = function() {

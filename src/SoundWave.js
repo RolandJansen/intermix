@@ -20,12 +20,12 @@ var core = require('./core.js');
  *
  * @example <caption>Play a sound from an audio file:</caption>
  * var soundWave = new Intermix.SoundWave('file.wav');
- * var sound = new Intermix.Sound(soundWave.buffer);
+ * var sound = new Intermix.Sound(soundWave);
  * sound.play;
  * @example <caption>Concatenate multiple source files into one buffer<br>
  * in the given order and play them:</caption>
  * var soundWave = new Intermix.SoundWave('file1.wav,file2.wav,file3.wav');
- * var sound = new Intermix.Sound(soundWave.buffer);
+ * var sound = new Intermix.Sound(soundWave);
  * sound.play;
  * @example <caption>
  * Using ArrayBuffers instead of filenames will come in handy if you want<br>
