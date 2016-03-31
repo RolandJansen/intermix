@@ -1,19 +1,35 @@
 'use strict';
 
-var testObj = require('../../src/x.js');
+var WebAudioTestAPI = require('web-audio-test-api');
+var proxyquire =  require('proxyquire'); //fake require in the module under test
+var ac = new WebAudioTestAPI.AudioContext();
+
+// All 'new' features of the api have to be enabled here
+WebAudioTestAPI.setState({});
+
+// Inject the mocked audioContext into the module under test,
+// @noCallThru prevents calls to the real api if something is
+// not found on the stub.
+var Sound = proxyquire('../../src/Sound.js', { 'core': ac, '@noCallThru': true});
+
 describe('A something', function() {
-  var x;
+  var sound;
 
   beforeEach(function() {
-    x = 1;
+    sound = new Sound();
   });
 
   afterEach(function() {
-    x = null;
+    sound = null;
+  });
+
+  it('ensure that we\'re testing against the WebAudioTestAPI', function() {
+    expect(global.AudioContext.WEB_AUDIO_TEST_API_VERSION).toBeDefined(); //is the api mock there?
+    expect(sound.ac.$processTo().toBeDefined());                          //are we testing against it?
   });
 
   it('should do something', function() {
-    expect(x).toBeDefined();
+    expect(sound).toBeDefined();
   });
 
 });
