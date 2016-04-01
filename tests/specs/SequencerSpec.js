@@ -10,17 +10,17 @@ WebAudioTestAPI.setState({});
 // Inject the mocked audioContext into the module under test,
 // @noCallThru prevents calls to the real api if something is
 // not found on the stub.
-var Sound = proxyquire('../../src/Sound.js', { 'core': ac, '@noCallThru': true});
+var Sequencer = proxyquire('../../src/Sequencer.js', { 'core': ac, '@noCallThru': true});
 
-describe('A something', function() {
-  var sound;
+describe('A Sequencer', function() {
+  var sequencer;
 
   beforeEach(function() {
-    sound = new Sound();
+    sequencer = new Sequencer();
   });
 
   afterEach(function() {
-    sound = null;
+    sequencer = null;
   });
 
   it('ensure that we\'re testing against the WebAudioTestAPI', function() {
@@ -29,7 +29,7 @@ describe('A something', function() {
   });
 
   it('should be defined', function() {
-    expect(sound).toBeDefined();
+    expect(sequencer).toBeDefined();
   });
 
 });

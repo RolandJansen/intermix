@@ -1,17 +1,18 @@
+'use strict';
+
+var core = require('./core.js');
+var work = require('webworkify');
+
 /**
  * Sequencer
  *
  * Scheduling inspired by "A Tale of Two Clocks" by Chris Wilson:
  * http://www.html5rocks.com/en/tutorials/audio/scheduling/
  */
-'use strict';
-
-var work = require('webworkify');
-
-var Sequencer = function(audioCtx) {
+var Sequencer = function() {
 
   var self = this;
-  this.audioCtx = audioCtx;
+  this.ac = core;             //currently just used for tests
   this.beatsPerMinute = 120;  //beats per minute
   this.resolution = 64;       //shortest possible note. You normally don't want to touch this.
   this.interval = 100;        //the interval in miliseconds the scheduler gets invoked.
@@ -46,11 +47,11 @@ var Sequencer = function(audioCtx) {
     }
   };
 
-  this.scheduleWorker.postMessage({'message': this.interval});
+  this.scheduleWorker.postMessage({'interval': this.interval});
 };
 
 Sequencer.prototype.scheduler = function() {
-  this.now = this.audioCtx.currentTime;
+  this.now = core.currentTime;
 
   if (this.nextStepTime === 0) {
     this.nextStepTime = this.now;
@@ -120,7 +121,7 @@ Sequencer.prototype.stop = function() {
 Sequencer.prototype.draw = function() {
   // first we'll have to find out, what step was recently played.
   // this is somehow clumsy because the sequencer doesn't keep track of that.
-  var lookAheadDelta = this.nextStepTime - this.audioCtx.currentTime;
+  var lookAheadDelta = this.nextStepTime - core.currentTime;
   var stepsAhead = Math.floor(lookAheadDelta / this.timePerStep) + 1;
   this.lastPlayedStep = this.nextStep - stepsAhead;
 
@@ -151,11 +152,11 @@ Sequencer.prototype.setTimePerStep = function(bpm, resolution) {
 };
 
 /**
- * copyArray: Makes a copy of a flat array.
- * 						Uses a pre-allocated while-loop
- * 						which seems to be the fasted way
- * 						(by far) of doing this:
- * 						http://jsperf.com/new-array-vs-splice-vs-slice/113
+ * Makes a copy of a flat array.
+ * Uses a pre-allocated while-loop
+ * which seems to be the fasted way
+ * (by far) of doing this:
+ * http://jsperf.com/new-array-vs-splice-vs-slice/113
  * @param  {Array} sourceArray Array that should be copied.
  * @return {Array}             Copy of the source array.
  */
