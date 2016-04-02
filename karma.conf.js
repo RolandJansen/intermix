@@ -24,8 +24,7 @@ module.exports = function(config) {
     // list of files to exclude
     exclude: [
       'tests/specs/skeletonSpec.js',
-      'tests/specs/SoundWaveAsyncSpec.js',
-      'tests/specs/SequencerSpec.js'
+      'tests/specs/SoundWaveAsyncSpec.js'
     ],
 
 

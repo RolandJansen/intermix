@@ -4,7 +4,9 @@ var core = require('./core.js');
 var work = require('webworkify');
 
 /**
- * Sequencer
+ * The main class of the sequencer. It does the queuing of
+ * parts and events and runs the schedulers that fire events
+ * and draws to the screen.
  *
  * Scheduling inspired by "A Tale of Two Clocks" by Chris Wilson:
  * http://www.html5rocks.com/en/tutorials/audio/scheduling/
@@ -19,7 +21,7 @@ var Sequencer = function() {
   this.lookahead = 0.3;       //time in seconds the scheduler looks ahead.
                               //should be longer than interval.
   this.queue = [];            //List with all parts of the score
-  this.runQueue = [];         //list with parts that are playing or will be played shortly
+  this.runqueue = [];         //list with parts that are playing or will be played shortly
 
   this.now;                    //timestamp from audiocontext when the scheduler is invoked.
   this.timePerStep;           //period of time between two steps
@@ -50,74 +52,121 @@ var Sequencer = function() {
   this.scheduleWorker.postMessage({'interval': this.interval});
 };
 
+/**
+ * Reads events from the master queue and fires them.
+ * It gets called at a constant rate, looks ahead in
+ * the queue and fires all events in the near future
+ * with a delay computed from the current bpm value.
+ * @return {Void}
+ */
 Sequencer.prototype.scheduler = function() {
   this.now = core.currentTime;
 
+  // if invoked for the first time or previously stopped
   if (this.nextStepTime === 0) {
     this.nextStepTime = this.now;
   }
 
   while (this.nextStepTime < this.now + this.lookahead) {
-    if (this.queue[this.nextStep]) {
-      this.queue[this.nextStep].forEach(function(part) {
-        this.runQueue.push({
-          'instrument': part.instrument,
-          'pattern': this.copyArray(part.pattern)
-        });
-      }, this);
-    }
-
-    this.runQueue.forEach(function(part, index) {
-      var seqEvents = part.pattern.shift();  //return first element and remove it from part
-      if (seqEvents) {
-        //var instrument = part.instrument;
-        seqEvents.forEach(function(seqEvent) {
-          if (seqEvent.note) {
-            //TODO: should be extended to play real notes
-            part.instrument.play(this.nextStepTime);
-          } else if (seqEvent.controller) {
-            // process controller event;
-          }
-
-          //remove part from runQueue if empty
-          if (part.pattern.length === 0) {
-            this.runQueue.splice(index, 1);
-          }
-        }, this);
-      }
-
-    }, this);
+    this.addPartsToRunqueue();
+    this.fireEvents();
 
     this.nextStepTime += this.timePerStep;
 
-    // set pointer to the next step in the queue that should be played.
-    // If we're playing in loop mode, jump back to loopstart when
-    // end of loop is reached.
-    if (this.loop) {
-      if (this.nextStep >= this.loopEnd) {
-        this.nextStep = this.loopStart;
-        this.runQueue = [];
-      } else {
-        this.nextStep++;
-      }
-    } else {
-      this.nextStep++;
-    }
+    this.setQueuePointer();
   }
 };
 
+/**
+ * Looks in the master queue for parts and adds
+ * copies of them to the runqueue.
+ * @private
+ * @return {Void}
+ */
+Sequencer.prototype.addPartsToRunqueue = function() {
+  if (this.queue[this.nextStep]) {
+    this.queue[this.nextStep].forEach(function(part) {
+      this.runqueue.push(this.copyArray(part.pattern));
+    }, this);
+  }
+};
+
+/**
+ * Fires all events for the upcomming step.
+ * @private
+ * @return {Void}
+ */
+Sequencer.prototype.fireEvents = function() {
+  this.runqueue.forEach(function(pattern, index) {
+    var seqEvents = pattern.shift();  //return first element and remove it
+    if (seqEvents) {
+      //var instrument = part.instrument;
+      seqEvents.forEach(function(seqEvent) {
+        if (seqEvent.note) {
+          //TODO: should be extended to play real notes
+          part.instrument.play(this.nextStepTime);
+        } else if (seqEvent.controller) {
+          // process controller event;
+        }
+
+        //remove part from runQueue if empty
+        if (pattern.length === 0) {
+          this.runqueue.splice(index, 1);
+        }
+      }, this);
+    }
+  }, this);
+};
+
+/**
+ * Sets the pointer to the next step that should be played
+ * in the master queue. If we're playing in loop mode,
+ * jump back to loopstart when end of loop is reached.
+ * @private
+ * @return {Void}
+ */
+Sequencer.prototype.setQueuePointer = function() {
+  if (this.loop) {
+    if (this.nextStep >= this.loopEnd) {
+      this.nextStep = this.loopStart;
+      this.runQueue = [];
+    } else {
+      this.nextStep++;
+    }
+  } else {
+    this.nextStep++;
+  }
+};
+
+/**
+ * Starts the sequencer
+ * @return {Void}
+ */
 Sequencer.prototype.start = function() {
   this.scheduleWorker.postMessage('start');
   this.isRunning = true;
   window.requestAnimationFrame(this.draw);
 };
 
+/**
+ * Stops the sequencer (halts at the current position)
+ * @return {Void}
+ */
 Sequencer.prototype.stop = function() {
   this.scheduleWorker.postMessage('stop');
   this.runQueue = [];
+  this.nextStepTime = 0;
   this.isRunning = false;
 };
 
+/**
+ * Scheduler that runs a drawing function every time
+ * the screen refreshes. The function Sequencer.animationFrame()
+ * has to be overridden by the application with stuff to be drawn on the screen.
+ * It calls itself recursively on every frame as long as the sequencer is running.
+ * @private
+ * @return {Void}
+ */
 Sequencer.prototype.draw = function() {
   // first we'll have to find out, what step was recently played.
   // this is somehow clumsy because the sequencer doesn't keep track of that.
@@ -125,7 +174,6 @@ Sequencer.prototype.draw = function() {
   var stepsAhead = Math.floor(lookAheadDelta / this.timePerStep) + 1;
   this.lastPlayedStep = this.nextStep - stepsAhead;
 
-  //should be overridden by the application
   this.animationFrame(this.lastPlayedStep);
 
   if (this.isRunning) {
@@ -133,11 +181,37 @@ Sequencer.prototype.draw = function() {
   }
 };
 
+/**
+ * Adds a part to the master queue.
+ * @param  {Object} part      An instance of Part
+ * @param  {Int}    position  Position in the master queue
+ * @return {Void}
+ */
 Sequencer.prototype.addPart = function(part, position) {
-  if (!this.queue[position]) {
-    this.queue[position] = [];
+  if (part.length && part.pattern) {
+    if (!this.queue[position]) {
+      this.queue[position] = [];
+    }
+    this.queue[position].push(part);
+  } else {
+    throw new Error('Given parameter doesn\' seem to be a part object');
   }
-  this.queue[position].push(part);
+};
+
+/**
+ * Removes a part object from the master queue
+ * @param  {Object} part     Part instance to be removed
+ * @param  {Int}    position Position in the master queue
+ * @return {Void}
+ */
+Sequencer.prototype.removePart = function(part, position) {
+  if (this.queue[position] instanceof Array &&
+    this.queue[position].length > 0) {
+    var index = this.queue[position].indexOf(part);
+    this.queue[position].splice(index, 1);
+  } else {
+    throw new Error('Part not found at position ' + position + '.');
+  }
 };
 
 Sequencer.prototype.createNoteEvent = function(note, length) {
@@ -147,6 +221,14 @@ Sequencer.prototype.createNoteEvent = function(note, length) {
   };
 };
 
+/**
+ * Computes the time in seconds as float value
+ * between one shortest posssible note
+ * (64th by default) and the next.
+ * @param  {float}  bpm        beats per minute
+ * @param  {Int}    resolution shortest possible note value
+ * @return {float}             time in seconds
+ */
 Sequencer.prototype.setTimePerStep = function(bpm, resolution) {
   return (60 * 4) / (bpm * resolution);
 };
@@ -157,6 +239,7 @@ Sequencer.prototype.setTimePerStep = function(bpm, resolution) {
  * which seems to be the fasted way
  * (by far) of doing this:
  * http://jsperf.com/new-array-vs-splice-vs-slice/113
+ * @private
  * @param  {Array} sourceArray Array that should be copied.
  * @return {Array}             Copy of the source array.
  */

@@ -30,8 +30,9 @@ describe('A Sound', function() {
     sound, wave = null;
   });
 
-  it('should ensure that we\'re testing against the WebAudioTestAPI', function() {
-    expect(global.AudioContext.WEB_AUDIO_TEST_API_VERSION).toBeDefined();
+  it('ensure that we\'re testing against the WebAudioTestAPI', function() {
+    expect(global.AudioContext.WEB_AUDIO_TEST_API_VERSION).toBeDefined(); //is the api mock there?
+    expect(sound.ac.$name).toBeDefined();                                 //are we testing against it?
   });
 
   it('should be defined when instanciated', function() {
