@@ -8,7 +8,7 @@
  * Every class can have several types and a type consists of one or
  * more properties.
  * @example <caption>Create a note event for an audio object</caption>
- * var note = intermix.events.createAudioNote()
+ * var note = intermix.events.createAudioNote('c3', 65, 128, aSoundObject);
  */
 
 /**

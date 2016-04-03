@@ -111,6 +111,17 @@ describe('An Event Object', function() {
       expect(an).toEqual(testEvt);
     });
 
+    it('should be created with a h tone (converted to b)', function() {
+      testEvt.props = {
+        'instrument': instrument,
+        'tone': 23,
+        'velocity': 65,
+        'duration': 128
+      };
+      var an = events.createAudioNote('h1', 65, 128, instrument);
+      expect(an).toEqual(testEvt);
+    });
+
     it('should throw an error with a false formatted string (not c1 or d#1)', function() {
       expect(function() { events.createAudioNote('brzz', 65, 128, instrument); })
         .toThrowError('Unvalid string. Has to be like [a-h]<#>[0-9]');
