@@ -7,8 +7,14 @@
  * The class defines which subsystem is invoked to process the event.
  * Every class can have several types and a type consists of one or
  * more properties.
+ * @example <caption>Create a note event for an audio object</caption>
+ * var note = intermix.events.createAudioNote()
  */
 
+/**
+ * All valid event properties in one handy array.
+ * @type {Array}
+ */
 var evProp = [
   'instrument', // the event receiver
   'tone',       // Int between 0 and 127 beginning at c0
@@ -19,14 +25,23 @@ var evProp = [
   'pan'
 ];
 
+/**
+ * All valid event types and the properties assotiated with them.
+ * Type are valid with one, several or all of its properties.
+ * @type {Object}
+ */
 var evType = {
   'note': [ evProp[0], evProp[1], evProp[2], evProp[3] ],
   'control': [ evProp[4], evProp[5], evProp[6] ]
 };
 
+/**
+ * All valid event classes and the types assotiated with them.
+ * @type {Object}
+ */
 var evClass = {
   'audio': [evType.note, evType.control],
-  'synth': [],
+  'synth': [evType.note, evType.control],
   'fx': [],
   'midi': [],
   'osc': []
@@ -124,6 +139,29 @@ var validateProps = function(eProps, eType) {
 };
 
 /**
+ * Takes a string of the form c3 or d#4 and
+ * returns the corresponding number.
+ * @param  {String} tone String representing a note
+ * @return {Int}         Number representing a note
+ */
+var convertTone = function(tone) {
+  var notes = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b'];
+  var str = tone.toLowerCase();
+
+  if (str.match(/^[a-h]#?[0-9]$/)) {
+    var note = str.substring(0, str.length - 1);
+    var oct = str.slice(-1);
+
+    if (note === 'h') {
+      note = 'b';
+    }
+    return notes.indexOf(note) + oct * 12;
+  } else {
+    throw new Error('Unvalid string. Has to be like [a-h]<#>[0-9]');
+  }
+};
+
+/**
  * Creates a sequencer event.
  * @private
  * @param  {String} eClass Event class
@@ -147,17 +185,15 @@ var createEvent = function(eClass, eType, eProps) {
 
 /**
  * Creates an audio note event
- * @param  {Int} tone     Tone between 0 and 127
- * @param  {Int} velocity Velocity between 0 and 127
- * @param  {Int} duration Duration in 64th notes
- * @return {Object}       All properties in one object
+ * @param  {Int|String} tone     Tone between 0 and 127 or string (c3, d#4)
+ * @param  {Int}        velocity Velocity between 0 and 127
+ * @param  {Int}        duration Duration in 64th notes
+ * @return {Object}              All properties in one object
  */
 var createAudioNote = function(tone, velocity, duration, instr) {
   var props = {};
-  if (instr && validatePropInstrument(instr)) {
-    props.instrument = instr;
-  } else {
-    throw new Error('A sequencer event must have an instrument as property');
+  if (typeof tone === 'string') {
+    tone = convertTone(tone);
   }
   if (tone && validatePropToneVelo(tone)) {
     props.tone = tone;
@@ -167,6 +203,11 @@ var createAudioNote = function(tone, velocity, duration, instr) {
   }
   if (duration && validatePropDuration(duration)) {
     props.duration = duration;
+  }
+  if (instr && validatePropInstrument(instr)) {
+    props.instrument = instr;
+  } else {
+    throw new Error('A sequencer event must have an instrument as property');
   }
   return createEvent('audio', 'note', props);
 };

@@ -2,7 +2,6 @@
 
 var work = require('webworkify');
 var core = require('./core.js');
-var events = require('./events.js');
 
 /**
  * The main class of the sequencer. It does the queuing of
@@ -121,13 +120,11 @@ Sequencer.prototype.fireEvents = function() {
 Sequencer.prototype.processSeqEvent = function(seqEvent) {
   switch (seqEvent.class) {
     case 'audio':
-      // invoke audio subsystem
+      seqEvent.props.instrument.processSeqEvent(seqEvent);
       return true;
-      break;
     case 'synth':
       // invoke the synth subsystem
       return true;
-      break;
     default:
       return false;
   }
@@ -227,13 +224,6 @@ Sequencer.prototype.removePart = function(part, position) {
   } else {
     throw new Error('Part not found at position ' + position + '.');
   }
-};
-
-Sequencer.prototype.createNoteEvent = function(note, length) {
-  return {
-    'note': note,
-    'length': length
-  };
 };
 
 /**

@@ -1,10 +1,11 @@
 'use strict';
 
-//Intermix = require('./core.js');
-var Intermix = require('./core.js') || {};
-Intermix.SoundWave = require('./SoundWave.js');
-Intermix.Sound = require('./Sound.js');
-Intermix.Sequencer = require('./Sequencer.js');
-Intermix.Part = require('./Part.js');
+//intermix = require('./core.js');
+var intermix = require('./core.js') || {};
+intermix.events = require('./events.js');
+intermix.SoundWave = require('./SoundWave.js');
+intermix.Sound = require('./Sound.js');
+intermix.Sequencer = require('./Sequencer.js');
+intermix.Part = require('./Part.js');
 
-module.exports = Intermix;
+module.exports = intermix;
