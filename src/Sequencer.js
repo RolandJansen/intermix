@@ -1,7 +1,8 @@
 'use strict';
 
-var core = require('./core.js');
 var work = require('webworkify');
+var core = require('./core.js');
+var events = require('./events.js');
 
 /**
  * The main class of the sequencer. It does the queuing of
@@ -100,15 +101,8 @@ Sequencer.prototype.fireEvents = function() {
   this.runqueue.forEach(function(pattern, index) {
     var seqEvents = pattern.shift();  //return first element and remove it
     if (seqEvents) {
-      //var instrument = part.instrument;
       seqEvents.forEach(function(seqEvent) {
-        if (seqEvent.note) {
-          //TODO: should be extended to play real notes
-          part.instrument.play(this.nextStepTime);
-        } else if (seqEvent.controller) {
-          // process controller event;
-        }
-
+        this.processSeqEvent(seqEvent);
         //remove part from runQueue if empty
         if (pattern.length === 0) {
           this.runqueue.splice(index, 1);
@@ -116,6 +110,27 @@ Sequencer.prototype.fireEvents = function() {
       }, this);
     }
   }, this);
+};
+
+/**
+ * Invokes the appropriate subsystem to process the event
+ * @private
+ * @param  {Object} seqEvent  The event to process
+ * @return {boolean}          true if success, false if not
+ */
+Sequencer.prototype.processSeqEvent = function(seqEvent) {
+  switch (seqEvent.class) {
+    case 'audio':
+      // invoke audio subsystem
+      return true;
+      break;
+    case 'synth':
+      // invoke the synth subsystem
+      return true;
+      break;
+    default:
+      return false;
+  }
 };
 
 /**

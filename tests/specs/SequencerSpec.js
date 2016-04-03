@@ -1,5 +1,3 @@
-//something completely different
-
 'use strict';
 
 var WebAudioTestAPI = require('web-audio-test-api');
