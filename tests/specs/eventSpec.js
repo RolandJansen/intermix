@@ -4,8 +4,6 @@ var events = require('../../src/events.js');
 
 describe('An Event Object', function() {
 
-  var instrument = { 'name': 'fake instrument' };
-
   it('should be defined', function() {
     expect(events).toBeDefined();
   });
@@ -29,33 +27,70 @@ describe('An Event Object', function() {
     expect(events.property).toContain('pan');
   });
 
-  it('should create an audio note event', function() {
-    var test = {
-      'class': 'audio',
-      'type': 'note',
-      'props': {
-        'instrument': instrument,
-        'tone': 12,
-        'velocity': 65,
-        'duration': 128
-      }
-    };
-    var an = events.createAudioNote(12, 65, 128, instrument);
-    expect(an).toEqual(test);
-  });
+  describe('An audio note event', function() {
 
-  it('should fail silently if properties are out of bounds', function() {
-    var test = {
-      'class': 'audio',
-      'type': 'note',
-      'props': { 'instrument': instrument }
-    };
-    var an = events.createAudioNote(129, 'foo', -1, instrument);
-    expect(an).toEqual(test);
-  });
+    var instrument = { 'name': 'fake instrument' };
 
-  it('should throw an error if the instrument is missing', function() {
-    expect(function() { events.createAudioNote(12, 65, 128); }).toThrowError('A sequencer event must have an instrument as property');
+    it('should be created with right parameters', function() {
+      var test = {
+        'class': 'audio',
+        'type': 'note',
+        'props': {
+          'instrument': instrument,
+          'tone': 12,
+          'velocity': 65,
+          'duration': 128
+        }
+      };
+      var an = events.createAudioNote(12, 65, 128, instrument);
+      expect(an).toEqual(test);
+    });
+
+    it('should fail silently if tone is out of bounds', function() {
+      var test = {
+        'class': 'audio',
+        'type': 'note',
+        'props': {
+          'instrument': instrument,
+          'velocity': 65,
+          'duration': 128
+        }
+      };
+      var an = events.createAudioNote(129, 65, 128, instrument);
+      expect(an).toEqual(test);
+    });
+
+    it('should fail silently if velocity is a string', function() {
+      var test = {
+        'class': 'audio',
+        'type': 'note',
+        'props': {
+          'instrument': instrument,
+          'tone': 12,
+          'duration': 128
+        }
+      };
+      var an = events.createAudioNote(12, 'foo', 128, instrument);
+      expect(an).toEqual(test);
+    });
+
+    it('should fail silently if duration is negative', function() {
+      var test = {
+        'class': 'audio',
+        'type': 'note',
+        'props': {
+          'instrument': instrument,
+          'tone': 12,
+          'velocity': 65
+        }
+      };
+      var an = events.createAudioNote(12, 65, -1, instrument);
+      expect(an).toEqual(test);
+    });
+
+    it('should throw an error if an instrument is missing', function() {
+      expect(function() { events.createAudioNote(12, 65, 128); }).toThrowError('A sequencer event must have an instrument as property');
+    });
   });
 
 });

@@ -8,6 +8,7 @@
  * Every class can have several types and a type consists of one or
  * more properties.
  */
+
 var evProp = [
   'instrument', // the event receiver
   'tone',       // Int between 0 and 127 beginning at c0
