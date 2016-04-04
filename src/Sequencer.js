@@ -1,8 +1,8 @@
 'use strict';
 
-var work = require('webworkify');
+var work = require('webworkify');   //prepares the worker for browserify
 var core = require('./core.js');
-
+var worker = require('./scheduleWorker.js');
 /**
  * The main class of the sequencer. It does the queuing of
  * parts and events and runs the schedulers that fire events
@@ -23,7 +23,7 @@ var Sequencer = function() {
   this.queue = [];            //List with all parts of the score
   this.runqueue = [];         //list with parts that are playing or will be played shortly
 
-  this.now;                    //timestamp from audiocontext when the scheduler is invoked.
+  this.now = 0;                    //timestamp from audiocontext when the scheduler is invoked.
   this.timePerStep;           //period of time between two steps
   this.nextStepTime = 0;      //time in seconds when the next step will be triggered
   this.nextStep = 0;          //position in the queue that will get triggered next
@@ -39,7 +39,7 @@ var Sequencer = function() {
   this.timePerStep = this.setTimePerStep(this.beatsPerMinute, this.resolution);
 
   // Initialize the scheduler-timer
-  this.scheduleWorker = work(require('./scheduleWorker.js'));
+  this.scheduleWorker = work(worker);
 
   /*eslint-enable */
 
@@ -70,7 +70,6 @@ Sequencer.prototype.scheduler = function() {
   while (this.nextStepTime < this.now + this.lookahead) {
     this.addPartsToRunqueue();
     this.fireEvents();
-
     this.nextStepTime += this.timePerStep;
 
     this.setQueuePointer();
@@ -98,15 +97,16 @@ Sequencer.prototype.addPartsToRunqueue = function() {
  */
 Sequencer.prototype.fireEvents = function() {
   this.runqueue.forEach(function(pattern, index) {
-    var seqEvents = pattern.shift();  //return first element and remove it
-    if (seqEvents) {
-      seqEvents.forEach(function(seqEvent) {
-        this.processSeqEvent(seqEvent);
-        //remove part from runQueue if empty
-        if (pattern.length === 0) {
-          this.runqueue.splice(index, 1);
-        }
-      }, this);
+    if (pattern.length === 0) {
+      //remove empty parts from runQueue
+      this.runqueue.splice(index, 1);
+    } else {
+      var seqEvents = pattern.shift();  //return first element and remove it
+      if (seqEvents) {
+        seqEvents.forEach(function(seqEvent) {
+          this.processSeqEvent(seqEvent, this.nextStepTime);
+        }, this);
+      }
     }
   }, this);
 };
@@ -115,19 +115,14 @@ Sequencer.prototype.fireEvents = function() {
  * Invokes the appropriate subsystem to process the event
  * @private
  * @param  {Object} seqEvent  The event to process
- * @return {boolean}          true if success, false if not
+ * @param  {float}  delay     time in seconds when the event should start
+ * @return {Void}
  */
-Sequencer.prototype.processSeqEvent = function(seqEvent) {
-  switch (seqEvent.class) {
-    case 'audio':
-      seqEvent.props.instrument.processSeqEvent(seqEvent);
-      return true;
-    case 'synth':
-      // invoke the synth subsystem
-      return true;
-    default:
-      return false;
+Sequencer.prototype.processSeqEvent = function(seqEvent, delay) {
+  if (delay) {
+    seqEvent.props['delay'] = delay;
   }
+  seqEvent.props.instrument.processSeqEvent(seqEvent);
 };
 
 /**
@@ -135,9 +130,10 @@ Sequencer.prototype.processSeqEvent = function(seqEvent) {
  * in the master queue. If we're playing in loop mode,
  * jump back to loopstart when end of loop is reached.
  * @private
- * @return {Void}
+ * @param   {Int}   position  New position in the master queue
+ * @return  {Void}
  */
-Sequencer.prototype.setQueuePointer = function() {
+Sequencer.prototype.setQueuePointer = function(position) {
   if (this.loop) {
     if (this.nextStep >= this.loopEnd) {
       this.nextStep = this.loopStart;
@@ -145,6 +141,8 @@ Sequencer.prototype.setQueuePointer = function() {
     } else {
       this.nextStep++;
     }
+  } else if (position) {
+    this.nextStep = position;
   } else {
     this.nextStep++;
   }
@@ -166,7 +164,7 @@ Sequencer.prototype.start = function() {
  */
 Sequencer.prototype.stop = function() {
   this.scheduleWorker.postMessage('stop');
-  this.runQueue = [];
+  //this.runQueue = [];
   this.nextStepTime = 0;
   this.isRunning = false;
 };

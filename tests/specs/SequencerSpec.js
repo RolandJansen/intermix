@@ -10,10 +10,13 @@ WebAudioTestAPI.setState({});
 // Inject the mocked audioContext into the module under test,
 // @noCallThru prevents calls to the real api if something is
 // not found on the stub.
-var Sequencer = proxyquire('../../src/Sequencer.js', { 'core': ac, '@noCallThru': true});
+var Sequencer = proxyquire('../../src/Sequencer.js', {
+  'core': ac,
+  '@noCallThru': true
+});
 
 describe('A Sequencer', function() {
-  var sequencer, part;
+  var sequencer, pattern1, pattern2, part1, part2, seqEvent, instrument;
 
   function createArray(length) {
     var arr = [];
@@ -24,16 +27,27 @@ describe('A Sequencer', function() {
   }
 
   beforeEach(function() {
-    part = {
-      length: 1,
-      name: 'part',
-      pattern: []
+    instrument = jasmine.createSpyObj('instrument', [ 'processSeqEvent' ]);
+    pattern1 = [];
+    pattern2 = [];
+    for (var i = 0; i <= 3; i++) {
+      pattern1[i] = createArray(4);
+      pattern2[i] = createArray(3);
+    }
+    part1 = { 'pattern': pattern1, 'length': 1 };
+    part2 = { 'pattern': pattern2, 'length': 1 };
+    seqEvent = {
+      'class': 'audio',
+      'props': { 'instrument': instrument }
     };
+    window.requestAnimationFrame = jasmine.createSpy('requestAnimationFrame');
     sequencer = new Sequencer();
+    // couldn't get this to work with proxyquire, so:
+    sequencer.scheduleWorker = jasmine.createSpyObj('scheduleWorker', [ 'postMessage', 'onmessage' ]);
   });
 
   afterEach(function() {
-    sequencer = part = null;
+    sequencer = pattern1 = pattern2 = part1 = part2 = seqEvent, instrument = null;
   });
 
   it('ensure that we\'re testing against the WebAudioTestAPI', function() {
@@ -45,18 +59,137 @@ describe('A Sequencer', function() {
     expect(sequencer).toBeDefined();
   });
 
+  describe('A scheduler', function() {
+
+    beforeEach(function() {
+      sequencer.addPartsToRunqueue = jasmine.createSpy('addPartsToRunqueue');
+      sequencer.fireEvents = jasmine.createSpy('fireEvents');
+      sequencer.setQueuePointer = jasmine.createSpy('setQueuePointer');
+    });
+
+    afterEach(function() {
+      sequencer.ac.$processTo('00:00.000');
+    });
+
+    it('sets nextStepTime to now if called the first time', function() {
+      sequencer.ac.$processTo('00:00.500');
+      sequencer.scheduler();
+      expect(sequencer.now).toEqual(0.5);
+    });
+
+    it('should run until the lookahead limit is reached', function() {
+      sequencer.ac.$processTo('00:01.000');
+      sequencer.scheduler();
+      expect(sequencer.addPartsToRunqueue).toHaveBeenCalledTimes(10);
+      expect(sequencer.fireEvents).toHaveBeenCalledTimes(10);
+      expect(sequencer.setQueuePointer).toHaveBeenCalledTimes(10);
+      expect(sequencer.nextStepTime).toBeGreaterThan(1.3);
+      expect(sequencer.nextStepTime).toBeLessThan(1.4);
+    });
+  });
+
+  it('should copy parts from the master queue to the runqueue', function() {
+    sequencer.addPart(part1, 3);
+    sequencer.addPart(part2, 3);
+    sequencer.nextStep = 3;
+    sequencer.addPartsToRunqueue();
+    expect(sequencer.runqueue).toContain(pattern1);
+    expect(sequencer.runqueue).toContain(pattern2);
+  });
+
+  it('should fire events from the runqueue', function() {
+    sequencer.processSeqEvent = jasmine.createSpy('processSeqEvent');
+    sequencer.runqueue.push(pattern1, pattern2);
+    sequencer.fireEvents();
+    expect(sequencer.processSeqEvent).toHaveBeenCalledTimes(7);
+    expect(sequencer.processSeqEvent.calls.allArgs())
+      .toEqual([[1, 0], [2, 0], [3, 0], [4, 0], [1, 0], [2, 0], [3, 0]]);
+  });
+
+  it('should delete fired events from the runqueue', function() {
+    var res1 = pattern1.length - 1;
+    var res2 = pattern2.length - 1;
+    var res3 = pattern1[1];
+    var res4 = pattern2[1];
+    sequencer.processSeqEvent = jasmine.createSpy('processSeqEvent');
+    sequencer.runqueue.push(pattern1, pattern2);
+    sequencer.fireEvents();
+    expect(sequencer.runqueue[0].length).toEqual(res1);
+    expect(sequencer.runqueue[1].length).toEqual(res2);
+    expect(sequencer.runqueue[0][0]).toEqual(res3);
+    expect(sequencer.runqueue[1][0]).toEqual(res4);
+  });
+
+  it('should delete empty patterns from runqueue', function() {
+    var pattern3 = [];
+    var pattern4 = [ ['a'] ];
+    sequencer.processSeqEvent = jasmine.createSpy('processSeqEvent');
+    sequencer.runqueue.push(pattern1, pattern3, pattern2, pattern4);
+    sequencer.fireEvents();
+    expect(sequencer.runqueue.length).toEqual(3);
+    sequencer.fireEvents();
+    expect(sequencer.runqueue.length).toEqual(2);
+  });
+
+  it('should process an event', function() {
+    sequencer.processSeqEvent(seqEvent);
+    expect(instrument.processSeqEvent).toHaveBeenCalledWith(seqEvent);
+  });
+
+  it('should process an event with delay', function() {
+    sequencer.processSeqEvent(seqEvent, 0.2342);
+    expect(seqEvent.props.delay).toEqual(0.2342);
+  });
+
+  it('should set the queue pointer one step forward', function() {
+    sequencer.setQueuePointer();
+    expect(sequencer.nextStep).toEqual(1);
+    sequencer.setQueuePointer();
+    expect(sequencer.nextStep).toEqual(2);
+  });
+
+  it('should set the pointer back to start when end of loop is reached', function() {
+    sequencer.loopStart = 5;
+    sequencer.loopEnd = 23;
+    sequencer.loop = true;
+    sequencer.nextStep = 22;
+    sequencer.setQueuePointer();
+    expect(sequencer.nextStep).toEqual(23);
+    sequencer.setQueuePointer();
+    expect(sequencer.nextStep).toEqual(5);
+  });
+
+  it('should set the pointer to a given position', function() {
+    sequencer.setQueuePointer(42);
+    expect(sequencer.nextStep).toEqual(42);
+  });
+
+  it('should start', function() {
+    sequencer.start();
+    expect(sequencer.isRunning).toBeTruthy();
+    expect(sequencer.scheduleWorker.postMessage).toHaveBeenCalledWith('start');
+    expect(window.requestAnimationFrame).toHaveBeenCalled();
+  });
+
+  it('should stop', function() {
+    sequencer.stop();
+    expect(sequencer.isRunning).toBeFalsy();
+    expect(sequencer.nextStepTime).toBe(0);
+    expect(sequencer.scheduleWorker.postMessage).toHaveBeenCalledWith('stop');
+  });
+
   it('should add a part to the master queue', function() {
-    sequencer.addPart(part, 5);
-    expect(sequencer.queue[5][0]).toBe(part);
+    sequencer.addPart(part1, 5);
+    expect(sequencer.queue[5][0]).toBe(part1);
     expect(function() { sequencer.addPart('brzz', 6); }).toThrowError('Given parameter doesn\' seem to be a part object');
   });
 
   it('should remove a part from the master queue', function() {
-    sequencer.addPart(part, 5);
-    expect(sequencer.queue[5][0]).toBe(part);
-    sequencer.removePart(part, 5);
+    sequencer.addPart(part1, 5);
+    expect(sequencer.queue[5][0]).toBe(part1);
+    sequencer.removePart(part1, 5);
     expect(sequencer.queue[5][0]).toBeUndefined();
-    expect(function() { sequencer.removePart(part, 5); }).toThrowError('Part not found at position 5.');
+    expect(function() { sequencer.removePart(part1, 5); }).toThrowError('Part not found at position 5.');
   });
 
   it('should compute the time between two shortest possible notes', function() {
