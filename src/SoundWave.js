@@ -19,13 +19,13 @@ var core = require('./core.js');
  * </p>
  *
  * @example <caption>Play a sound from an audio file:</caption>
- * var soundWave = new Intermix.SoundWave('file.wav');
- * var sound = new Intermix.Sound(soundWave);
+ * var soundWave = new intermix.SoundWave('file.wav');
+ * var sound = new intermix.Sound(soundWave);
  * sound.play;
- * @example <caption>Concatenate multiple source files into one buffer<br>
+ * @example <caption><b>This is broken in v0.1! Don't use it!</b> Concatenate multiple source files into one buffer<br>
  * in the given order and play them:</caption>
- * var soundWave = new Intermix.SoundWave('file1.wav,file2.wav,file3.wav');
- * var sound = new Intermix.Sound(soundWave);
+ * var soundWave = new intermix.SoundWave('file1.wav,file2.wav,file3.wav');
+ * var sound = new intermix.Sound(soundWave);
  * sound.play;
  * @example <caption>
  * Using ArrayBuffers instead of filenames will come in handy if you want<br>
@@ -41,17 +41,18 @@ var core = require('./core.js');
  * function handleComplete() {
  *     var binData1 = queue.getResult('src1');
  *     var binData2 = queue.getResult('src2');
- *     var wave1 = new Intermix.SoundWave(binData1);
- *     var wave2 = new Intermix.SoundWave(binData2);
- *     var concatWave = new Intermix.SoundWave([binData1, binData2]);
+ *     var wave1 = new intermix.SoundWave(binData1);
+ *     var wave2 = new intermix.SoundWave(binData2);
+ *     var concatWave = new intermix.SoundWave([binData1, binData2]);
  * };
  * @constructor
  * @param  {(Object|Object[]|string)} audioSrc   One or more ArrayBuffers or filenames
  */
 var SoundWave = function(audioSrc) {
 
-  this.buffer = null;             //AudioBuffer
-  this.metaData = [];                //start-/endpoints and length of single waves
+  this.buffer = null;   //AudioBuffer
+  this.metaData = [];   //start-/endpoints and length of single waves
+  var self = this;
 
   if (audioSrc) {
     if (audioSrc instanceof ArrayBuffer) {
@@ -62,11 +63,9 @@ var SoundWave = function(audioSrc) {
       this.concatBinariesToAudioBuffer(audioSrc);
     } else if (typeof audioSrc === 'string' && audioSrc.indexOf(',') === -1) {
       //one file to load/decode
-      var binBuffer;
       this.loadFile(audioSrc, function(response) {
-        binBuffer = response;
+        self.buffer = self.decodeAudioData(response);
       });
-      this.buffer = this.decodeAudioData(binBuffer);
     } else if (typeof audioSrc === 'string' && audioSrc.indexOf(',') > -1) {
       //multiple files to load/decode and cancatinate
       var binBuffers = this.loadFiles(audioSrc);
@@ -90,7 +89,6 @@ var SoundWave = function(audioSrc) {
  */
 SoundWave.prototype.decodeAudioData = function(rawAudioSrc, func) {
   var self = this;
-
   //new promise based syntax currently not available in Chrome <49, IE, Safari
   //TODO: monkeypatch with call
   this.buffer = core.decodeAudioData(rawAudioSrc).then(function(decoded) {
@@ -156,6 +154,7 @@ SoundWave.prototype.addWaveMetaData = function(existingBuffer, newBuffer) {
 /**
  * Loads a binary file and calls a function with the
  * returned ArrayBuffer as its argument when done.
+ * @todo    Test in synchronous mode or remove it completely
  * @param  {string}   filename       The file to be loaded
  * @param  {function} onloadCallback The function to be called
  * @param  {boolean}  [async=true]   Asynchronous loading
@@ -166,8 +165,14 @@ SoundWave.prototype.addWaveMetaData = function(existingBuffer, newBuffer) {
  * });
  */
 SoundWave.prototype.loadFile = function(filename, onloadCallback, async) {
+  var self = this;
   var asynchronously = true;
   var request = new window.XMLHttpRequest();
+
+  request.addEventListener('progress', self.updateProgress);
+  request.addEventListener('load', self.transferComplete);
+  request.addEventListener('error', self.transferFailed);
+  request.addEventListener('abort', self.transferCanceled);
 
   if (async) {
     asynchronously = async;
@@ -182,6 +187,16 @@ SoundWave.prototype.loadFile = function(filename, onloadCallback, async) {
 
   request.send();
 };
+
+SoundWave.prototype.updateProgress = function() {};
+
+SoundWave.prototype.transferComplete = function(evt) {
+
+};
+
+SoundWave.prototype.transferFailed = function() {};
+
+SoundWave.prototype.transferCanceled = function() {};
 
 /**
  * Loads multiple binary files and returns an array
@@ -202,6 +217,14 @@ SoundWave.prototype.loadFiles = function(filenames) {
   return this.sortBinBuffers(names, binBuffers);
 };
 
+/**
+ * Sort ArrayBuffers the same order, like the filename
+ * parameters.
+ * @private
+ * @param  {Array}  filenames  Array with filenames
+ * @param  {Array}  binBuffers Array with ArrayBuffer
+ * @return {Array}             Array with sorted ArrayBuffers
+ */
 SoundWave.prototype.sortBinBuffers = function(filenames, binBuffers) {
   return filenames.map(function(el) {
     return binBuffers[el];

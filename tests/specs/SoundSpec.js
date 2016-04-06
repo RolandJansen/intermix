@@ -2,22 +2,18 @@
 
 var WebAudioTestAPI = require('web-audio-test-api');
 var proxyquire =  require('proxyquire'); //fake require in the module under test
-var ac = new WebAudioTestAPI.AudioContext();
 
 // All 'new' features of the api have to be enabled here
 WebAudioTestAPI.setState({
   'AudioContext#createStereoPanner': 'enabled',
 });
 
-// Inject the mocked audioContext into the module under test,
-// @noCallThru prevents calls to the real api if something is
-// not found on the stub.
-var Sound = proxyquire('../../src/Sound.js', { 'core': ac, '@noCallThru': true});
-
 describe('A Sound', function() {
-  var sound, wave;
+  var Sound, sound, ac, wave;
 
   beforeEach(function() {
+    ac = new WebAudioTestAPI.AudioContext();
+    Sound = proxyquire('../../src/Sound.js', { 'core': ac, '@noCallThru': true});
     wave = {
       buffer: ac.createBuffer(2, 22050, 44100)  //create a buffer of 0.5s length
     };
@@ -27,7 +23,7 @@ describe('A Sound', function() {
   });
 
   afterEach(function() {
-    sound, wave = null;
+    Sound, sound, ac, wave = null;
   });
 
   it('ensure that we\'re testing against the WebAudioTestAPI', function() {
@@ -56,19 +52,19 @@ describe('A Sound', function() {
   });
 
   it('should add a BufferSourceNode to the queue when started', function() {
-    sound.start(0, false);
+    sound.start();
     expect(sound.queue.length).toBe(1);
   });
 
   it('should delete a BufferSourceNode from the queue when stopped', function() {
-    sound.start(0, false);
+    sound.start();
     expect(sound.queue.length).toBe(1);
     sound.stop();
     expect(sound.queue.length).toBe(0);
   });
 
   it('should start a BufferSourceNode at a given time', function() {
-    sound.start(0.100, false);
+    sound.start(false, 0.100);
     expect(sound.queue[0].$stateAtTime('00:00.000')).toBe('SCHEDULED');
     expect(sound.queue[0].$stateAtTime('00:00.099')).toBe('SCHEDULED');
     expect(sound.queue[0].$stateAtTime('00:00.100')).toBe('PLAYING');
@@ -77,30 +73,30 @@ describe('A Sound', function() {
   });
 
   it('should stop a BufferSourceNode immediateley', function() {
-    sound.start(0, false);
+    sound.start();
     expect(sound.queue[0].$stateAtTime('00:00.000')).toBe('PLAYING');
-    ac.$processTo('00:00.100');
+    sound.ac.$processTo('00:00.100');
     expect(sound.queue[0].$stateAtTime('00:00.100')).toBe('PLAYING');
     sound.stop();
     expect(sound.queue[0]).not.toBeDefined();
   });
 
   it('should stop a BufferSourceNode even if it\'s just scheduled.', function() {
-    sound.start(2, false);
+    sound.start(false, 2);
     expect(sound.queue[0].$stateAtTime('00:00.100')).toBe('SCHEDULED');
     sound.stop();
     expect(sound.queue[0]).not.toBeDefined();
   });
 
   it('should store the stop time of the BufferSourceNode when paused', function() {
-    sound.start(0, false);
+    sound.start();
     sound.ac.$processTo('00:00.100');
     sound.pause();
-    expect(sound.startOffset).toBe(0.1);
+    expect(sound.startOffsets[0]).toBe(0.1);
   });
 
   xit('should start the BufferSourceNode with the offset where it was paused', function() {
-    sound.start(0, false);
+    sound.start();
     sound.ac.$processTo('00:00.100');
     sound.pause();
     expect(sound.queue[0]).not.toBeDefined(); // node should be destroyed after 'pausing'
@@ -118,7 +114,7 @@ describe('A Sound', function() {
   });
 
   it('should be played looped', function() {
-    sound.start(0, true);
+    sound.start(true);
     expect(sound.queue[0].$stateAtTime('00:00.500')).toBe('PLAYING');
     expect(sound.queue[0].$stateAtTime('00:01.000')).toBe('PLAYING');
     expect(sound.queue[0].$stateAtTime('00:03.000')).toBe('PLAYING');
@@ -126,53 +122,87 @@ describe('A Sound', function() {
   });
 
   it('should set the offset correctly when a looped sound is paused', function() {
-    sound.start(0, true);
+    sound.ac.$processTo('00:00.000');
+    sound.start(true);
     sound.ac.$processTo('00:00.600');
     sound.pause();
-    expect(sound.startOffset).toBeCloseTo(0.0999, 3);  //should be 0.1 but floats have rounding errors
+    expect(sound.startOffsets[0]).toBeCloseTo(0.0999, 3);  //should be 0.1 but floats have rounding errors
   });
 
   xit('should set the offset correctly when a loop doesn\'t start at 0 and the sound is paused', function() {
     //not possible at the moment
   });
 
-  it('should set the loop start point', function() {
+  it('should set the loop start point before a node starts', function() {
     sound.setLoopStart(0.1);
-    sound.start(0, true);
-    expect(sound.queue[0].loopStart).toBe(0.1);
+    sound.start(true);
+    expect(sound.queue[0].loopStart).toEqual(0.1);
   });
 
-  it('should set the loop end point', function() {
+  it('sound set the loop start point while nodes are running', function() {
+    sound.start(true);
+    sound.start(true);
+    sound.setLoopStart(0.2);
+    expect(sound.queue[0].loopStart).toEqual(0.2);
+    expect(sound.queue[1].loopStart).toEqual(0.2);
+  });
+
+  it('should set the loop end point before a node starts', function() {
     sound.setLoopEnd(0.3);
-    sound.start(0, true);
-    expect(sound.queue[0].loopEnd).toBe(0.3);
+    sound.start(true);
+    expect(sound.queue[0].loopEnd).toEqual(0.3);
+  });
+
+  it('should set the loop end point while nodes are running', function() {
+    sound.start(true);
+    sound.start(true);
+    sound.setLoopEnd(0.3);
+    expect(sound.queue[0].loopEnd).toEqual(0.3);
+    expect(sound.queue[1].loopEnd).toEqual(0.3);
+  });
+
+  it('should release the loop on running nodes', function() {
+    sound.start(true);
+    sound.start(true);
+    sound.releaseLoop();
+    expect(sound.queue[0].loop).toBeFalsy();
+    expect(sound.queue[1].loop).toBeFalsy();
   });
 
   it('should reset the loop start/end to start/end of the sound', function() {
     sound.setLoopStart(0.1);
     sound.setLoopEnd(0.3);
-    expect(sound.loopStart).toBe(0.1);
-    expect(sound.loopEnd).toBe(0.3);
+    expect(sound.loopStart).toEqual(0.1);
+    expect(sound.loopEnd).toEqual(0.3);
     sound.resetLoop();
-    expect(sound.loopStart).toBe(0);
-    expect(sound.loopEnd).toBe(0.5);
+    expect(sound.loopStart).toEqual(0);
+    expect(sound.loopEnd).toEqual(0.5);
   });
 
-  it('should set the frequency (playback rate) of the sound', function() {
+  it('should set the playback rate (freq) of the sound', function() {
     sound.setPlaybackRate(1.25);
-    sound.start(0, false);
-    expect(sound.queue[0].playbackRate.value).toBe(1.25);
+    sound.start(false);
+    expect(sound.queue[0].playbackRate.value).toEqual(1.25);
+  });
+
+  it('should set the playback rate while nodes are running', function() {
+    sound.start();
+    sound.start();
+    sound.setPlaybackRate(0.8);
+    expect(sound.queue[0].playbackRate.value).toEqual(0.8);
+    expect(sound.queue[1].playbackRate.value).toEqual(0.8);
   });
 
   it('should set the tone between two octaves', function() {
     sound.setTone(5);
     sound.start(0, false);
-    expect(sound.queue[0].detune.value).toBe(500);
+    expect(sound.queue[0].detune.value).toEqual(500);
   });
 
   it('should detune the sound in cents within a range of +/- 1200 (two octaves)', function() {
     sound.setDetune(-500);
     sound.start(0, false);
-    expect(sound.queue[0].detune.value).toBe(-500);
+    expect(sound.queue[0].detune.value).toEqual(-500);
   });
+
 });

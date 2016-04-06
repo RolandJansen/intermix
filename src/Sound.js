@@ -25,7 +25,8 @@ var Sound = function(soundWave) {
   this.pannerNode = null;
 
   this.soundLength = 0;
-  this.startOffset = 0;     //the offset within the waveform
+  this.startOffset = 0;
+  this.startOffsets = [];   //holds start offsets if paused
   this.startTime = 0;       //when the sound starts to play
   this.loopStart = 0;
   this.loopEnd = null;
@@ -90,14 +91,36 @@ Sound.prototype.destroyBufferSource = function(bsNode) {
 };
 
 /**
+ * This is a wrapper for the actual start function startNode().
+ * It ensures that all sounds start with the correct offset
+ * in case they were paused.
+ * @param  {Boolean} playLooped Whether the sound should be looped or not
+ * @param  {float}   delay      Time in seconds the sound pauses before the stream starts
+ * @param  {float}   duration   Time preriod after the stream should end
+ * @return {Void}
+ */
+Sound.prototype.start = function(playLooped, delay, duration) {
+  if (this.startOffsets.length === 0) {
+    this.startNode(playLooped, delay, duration);
+  } else {
+    this.startOffsets.forEach(function(offset) {
+      this.startOffset = offset;
+      this.startNode(this.loop);
+    }, this);
+    this.startOffsets = [];
+  }
+};
+
+/**
  * Starts a sound (AudioBufferSourceNode) and stores a references
  * in a queue. This enables you to play multiple sounds at once
  * and even stop them all at a given time.
- * @param  {float}   delay      Time in seconds the sound pauses before the stream starts
  * @param  {Boolean} playLooped Whether the sound should be looped or not
+ * @param  {float}   delay      Time in seconds the sound pauses before the stream starts
+ * @param  {float}   duration   Time preriod after the stream should end
  * @return {Void}
  */
-Sound.prototype.start = function(delay, playLooped, duration) {
+Sound.prototype.startNode = function(playLooped, delay, duration) {
   var startTime = 0;
 
   if (delay) {
@@ -115,19 +138,9 @@ Sound.prototype.start = function(delay, playLooped, duration) {
 
   bs.playbackRate.value = this.playbackRate;
   bs.detune.value = this.detune;
+  bs.startTime = startTime;   // extend node with a starttime property
 
-  // if (playLooped) {
-  //   bs.loopStart = this.loopStart;
-  //   bs.loopEnd = this.loopEnd;
-  // }
-
-  // if (this.startOffset === 0 || this.startOffset >= this.buffer.duration) {
-  //   console.log('resetting starttime');
-  //   this.startTime = core.currentTime;
-  // }
   this.queue.push(bs);
-  //bs.start(startTime, this.startOffset);
-
   if (duration) {
     bs.start(startTime, this.startOffset, duration);
   } else {
@@ -164,7 +177,11 @@ Sound.prototype.stop = function() {
  * @return  {Void}
  */
 Sound.prototype.pause = function() {
-  this.startOffset = (core.currentTime - this.startTime) % this.soundLength;
+  //this.startOffset = (core.currentTime - this.startTime) % this.soundLength;
+  this.queue.forEach(function(node) {
+    this.startOffsets.push((core.currentTime - node.startTime) % this.soundLength);
+    this.loop = node.loop;
+  }, this);
   this.stop();
 };
 
@@ -174,8 +191,10 @@ Sound.prototype.pause = function() {
  * @return {Void}
  */
 Sound.prototype.setLoopStart = function(value) {
-  //this.loopStart = value * this.soundLength;
   this.loopStart = value;
+  this.queue.forEach(function(node) {
+    node.loopStart = value;
+  });
 };
 
 /**
@@ -185,6 +204,20 @@ Sound.prototype.setLoopStart = function(value) {
  */
 Sound.prototype.setLoopEnd = function(value) {
   this.loopEnd = value;
+  this.queue.forEach(function(node) {
+    node.loopEnd = value;
+  });
+};
+
+/**
+ * Releases the loop of all running nodes,
+ * Nodes will run until end and stop.
+ * @return {Void}
+ */
+Sound.prototype.releaseLoop = function() {
+  this.queue.forEach(function(node) {
+    node.loop = false;
+  });
 };
 
 /**
@@ -199,11 +232,14 @@ Sound.prototype.resetLoop = function() {
 /**
  * Set the playback rate of the sound in percentage
  * (1 = 100%, 2 = 200%)
- * @param  {float}   rate Rate in percentage
+ * @param  {float}  value   Rate in percentage
  * @return {Void}
  */
-Sound.prototype.setPlaybackRate = function(rate) {
-  this.playbackRate = rate;
+Sound.prototype.setPlaybackRate = function(value) {
+  this.playbackRate = value;
+  this.queue.forEach(function(node) {
+    node.playbackRate.value = value;
+  });
 };
 
 /**
@@ -239,14 +275,14 @@ Sound.prototype.getTone = function() {
 
 /**
  * Detune the sound oscillation in cents (+/- 1200)
- * @param  {Integer}  detune  detune in cents
+ * @param  {Integer}  value  detune in cents
  * @return {Void}
  */
-Sound.prototype.setDetune = function(detune) {
-  if (detune >= -1200 && detune <= 1200) {
-    this.detune = detune;
+Sound.prototype.setDetune = function(value) {
+  if (value >= -1200 && value <= 1200) {
+    this.detune = value;
   } else {
-    throw new Error('Detune parameter is ' + detune + '. Must be between +/-1200.');
+    throw new Error('Detune parameter is ' + value + '. Must be between +/-1200.');
   }
 };
 

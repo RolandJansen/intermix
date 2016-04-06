@@ -28,7 +28,8 @@
         <h1>Audio Playback</h1>
         <div class="panel panel-primary">
           <div class="panel-heading">
-            This demo plays a sound that can be looped. Volume and panning is adjustable.
+            This demo plays a sound that can be looped. Hit the start button multiple times
+            to have multiple sounds played. Volume and panning is adjustable.
           </div>
           <div class="panel-body">
             <form>
@@ -38,7 +39,8 @@
               <br><br>
               <div class="checkbox">
                 <label>
-                  <input type="checkbox" id="loop" value="">loop
+                  <input type="checkbox" id="loop" value="" onclick="releaseLoop(this)">
+                  loop (uncheck while playing releases loop)
                 </label>
               </div><br>
               Loop Range:<br>
@@ -72,8 +74,8 @@
               <input id="freq"
               data-slider-id='freqSlider'
               type="text"
-              data-slider-min="0.1"
-              data-slider-max="3"
+              data-slider-min="0"
+              data-slider-max="2"
               data-slider-step="0.1"
               data-slider-value="1"
               >
@@ -112,12 +114,15 @@
                     }
       });
 
-      var audioCtx = Intermix.audioCtx;
       var sound;
+      var soundWave = new intermix.SoundWave('assets/samples/554__bebeto__ambient-loop.mp3')
+      setTimeout(function() {
+        sound = new intermix.Sound(soundWave);
+      }, 500);
 
       function play() {
         var loop = document.getElementById('loop').checked;
-        sound.play(loop);
+        sound.start(loop);
       }
 
       function stop() {
@@ -126,6 +131,12 @@
 
       function pause() {
         sound.pause();
+      }
+
+      function releaseLoop(cbox) {
+        if (!cbox.checked) {
+          sound.releaseLoop();
+        }
       }
 
       // change gain
@@ -138,29 +149,30 @@
       });
 
       loopSlider.on('slide', function(e) {
-        sound.setLoopStart(e[0]);
-        sound.setLoopEnd(e[1]);
+        sound.setLoopStart(e[0] * sound.soundLength);
+        sound.setLoopEnd(e[1] * sound.soundLength);
       });
 
       freqSlider.on('slide', function(e) {
-        sound.setFrequency(e);
+        sound.setPlaybackRate(e);
       });
 
-      function handleFileComplete(e) {
-        var audioFile = e.result;
-        var soundWave = new Intermix.SoundWave(audioFile);
-        // this is crap and needs to be fixed asap!
-        setTimeout(function() {
-          console.log(soundWave);
-          sound = new Intermix.Sound(audioCtx, soundWave.buffer);
-        }, 500);
-      };
 
-      (function() {
-        var queue = new createjs.LoadQueue();
-        queue.addEventListener('fileload', handleFileComplete);
-        queue.loadFile({src:'assets/samples/554__bebeto__ambient-loop.mp3', type:createjs.AbstractLoader.BINARY});
-      })();
+      // function handleFileComplete(e) {
+      //   var audioFile = e.result;
+      //   var soundWave = new Intermix.SoundWave(audioFile);
+      //   // this is crap and needs to be fixed asap!
+      //   setTimeout(function() {
+      //     console.log(soundWave);
+      //     sound = new Intermix.Sound(audioCtx, soundWave.buffer);
+      //   }, 500);
+      // };
+      //
+      // (function() {
+      //   var queue = new createjs.LoadQueue();
+      //   queue.addEventListener('fileload', handleFileComplete);
+      //   queue.loadFile({src:'assets/samples/554__bebeto__ambient-loop.mp3', type:createjs.AbstractLoader.BINARY});
+      // })();
     </script>
   </body>
 </html>

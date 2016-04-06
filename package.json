@@ -14,11 +14,11 @@
     "test": "karma start",
     "test:cmd": "start cmd /k npm run test",
     "clean": "rimraf dist/*",
-    "build:js": "browserify src/main.js -o dist/intermix.js -v -p browserify-derequire -s Intermix",
+    "build:js": "browserify src/main.js -o dist/intermix.js -v -p browserify-derequire -s intermix",
     "build:minijs": "browserify src/main.js -o dist/intermix.min.js -d -v -p browserify-derequire -p [minifyify --map dist/intermix.map.json --output dist/intermix.map.json]",
     "prebuild:js": "npm run clean && npm run lint",
     "watch:jscmd": "start cmd /k npm run watch:js",
-    "watch:js": "watchify src/main.js -o dist/intermix.js -v -d -p browserify-derequire -s Intermix",
+    "watch:js": "watchify src/main.js -o dist/intermix.js -v -d -p browserify-derequire -s intermix",
     "docgen": "jsdoc src/SoundWave.js README.md"
   },
   "repository": {
