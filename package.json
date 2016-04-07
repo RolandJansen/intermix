@@ -1,6 +1,6 @@
 {
   "name": "intermix.js",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Javascript library for sound/audio-processing",
   "main": "index.js",
   "directories": {
