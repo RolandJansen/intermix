@@ -19,7 +19,7 @@ var Part = function(length) {
 
   this.resolution = 16; // (resolution * multiply) should alwasy be 64
   this.multiply = 4;    // resolution multiplier
-  this.length = 1;      // 1 = one bar (4 beats = 1 bar)
+  this.length = 64;     // length of the pattern in 64th notes
   this.name = 'Part';   // name of this part
   this.pattern = [];    // the actual pattern with notes etc.
 
@@ -38,7 +38,7 @@ var Part = function(length) {
  */
 Part.prototype.initPattern = function(length) {
   var pattern = [];
-  for (var i = 0; i < (length * 64); i++) {
+  for (var i = 0; i < (length); i++) {
     pattern[i] = [];
   }
   return pattern;
@@ -98,7 +98,7 @@ Part.prototype.getNotePositions = function() {
 
 /**
  * Extends a part at the top/start.
- * @param  {float}  extLength Length in bars (4 beats = 1 bar)
+ * @param  {float}  extLength Length in 64th notes
  * @return {Void}
  */
 Part.prototype.extendOnTop = function(extLength) {
@@ -108,7 +108,7 @@ Part.prototype.extendOnTop = function(extLength) {
 
 /**
  * Extends a part at the end
- * @param  {float}  extLength Length in bars (4 beats = 1 bar)
+ * @param  {float}  extLength Length in 64th notes
  * @return {Void}
  */
 Part.prototype.extendOnEnd = function(extLength) {

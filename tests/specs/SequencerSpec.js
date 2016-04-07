@@ -2,21 +2,12 @@
 
 var WebAudioTestAPI = require('web-audio-test-api');
 var proxyquire =  require('proxyquire'); //fake require in the module under test
-var ac = new WebAudioTestAPI.AudioContext();
 
 // All 'new' features of the api have to be enabled here
 WebAudioTestAPI.setState({});
 
-// Inject the mocked audioContext into the module under test,
-// @noCallThru prevents calls to the real api if something is
-// not found on the stub.
-var Sequencer = proxyquire('../../src/Sequencer.js', {
-  'core': ac,
-  '@noCallThru': true
-});
-
 describe('A Sequencer', function() {
-  var sequencer, pattern1, pattern2, part1, part2, seqEvent, instrument;
+  var ac, Sequencer, sequencer, pattern1, pattern2, part1, part2, seqEvent, instrument;
 
   function createArray(length) {
     var arr = [];
@@ -27,6 +18,11 @@ describe('A Sequencer', function() {
   }
 
   beforeEach(function() {
+    ac = new WebAudioTestAPI.AudioContext();
+    Sequencer = proxyquire('../../src/Sequencer.js', {
+      'core': ac,
+      '@noCallThru': true
+    });
     instrument = jasmine.createSpyObj('instrument', [ 'processSeqEvent' ]);
     pattern1 = [];
     pattern2 = [];
@@ -34,8 +30,8 @@ describe('A Sequencer', function() {
       pattern1[i] = createArray(4);
       pattern2[i] = createArray(3);
     }
-    part1 = { 'pattern': pattern1, 'length': 1 };
-    part2 = { 'pattern': pattern2, 'length': 1 };
+    part1 = { 'pattern': pattern1, 'length': 64 };
+    part2 = { 'pattern': pattern2, 'length': 64 };
     seqEvent = {
       'class': 'audio',
       'props': { 'instrument': instrument }
@@ -47,7 +43,7 @@ describe('A Sequencer', function() {
   });
 
   afterEach(function() {
-    sequencer = pattern1 = pattern2 = part1 = part2 = seqEvent, instrument = null;
+    ac = Sequencer = sequencer = pattern1 = pattern2 = part1 = part2 = seqEvent, instrument = null;
   });
 
   it('ensure that we\'re testing against the WebAudioTestAPI', function() {
@@ -59,7 +55,7 @@ describe('A Sequencer', function() {
     expect(sequencer).toBeDefined();
   });
 
-  describe('A scheduler', function() {
+  describe('scheduler', function() {
 
     beforeEach(function() {
       sequencer.addPartsToRunqueue = jasmine.createSpy('addPartsToRunqueue');
@@ -69,12 +65,6 @@ describe('A Sequencer', function() {
 
     afterEach(function() {
       sequencer.ac.$processTo('00:00.000');
-    });
-
-    it('sets nextStepTime to now if called the first time', function() {
-      sequencer.ac.$processTo('00:00.500');
-      sequencer.scheduler();
-      expect(sequencer.now).toEqual(0.5);
     });
 
     it('should run until the lookahead limit is reached', function() {
@@ -93,42 +83,42 @@ describe('A Sequencer', function() {
     sequencer.addPart(part2, 3);
     sequencer.nextStep = 3;
     sequencer.addPartsToRunqueue();
-    expect(sequencer.runqueue).toContain(pattern1);
-    expect(sequencer.runqueue).toContain(pattern2);
+    expect(sequencer.runqueue).toContain(part1);
+    expect(sequencer.runqueue).toContain(part2);
+  });
+
+  it('should add a pointer to the part when copied to the runqueue', function() {
+    sequencer.addPart(part1, 3);
+    sequencer.addPart(part2, 3);
+    sequencer.nextStep = 3;
+    sequencer.addPartsToRunqueue();
+    expect(sequencer.runqueue[0].pointer).toEqual(0);
+    expect(sequencer.runqueue[1].pointer).toEqual(0);
   });
 
   it('should fire events from the runqueue', function() {
     sequencer.processSeqEvent = jasmine.createSpy('processSeqEvent');
-    sequencer.runqueue.push(pattern1, pattern2);
+    part1.pointer = part2.pointer = 0;
+    sequencer.runqueue.push(part1, part2);
     sequencer.fireEvents();
     expect(sequencer.processSeqEvent).toHaveBeenCalledTimes(7);
     expect(sequencer.processSeqEvent.calls.allArgs())
       .toEqual([[1, 0], [2, 0], [3, 0], [4, 0], [1, 0], [2, 0], [3, 0]]);
   });
 
-  it('should delete fired events from the runqueue', function() {
-    var res1 = pattern1.length - 1;
-    var res2 = pattern2.length - 1;
-    var res3 = pattern1[1];
-    var res4 = pattern2[1];
-    sequencer.processSeqEvent = jasmine.createSpy('processSeqEvent');
-    sequencer.runqueue.push(pattern1, pattern2);
-    sequencer.fireEvents();
-    expect(sequencer.runqueue[0].length).toEqual(res1);
-    expect(sequencer.runqueue[1].length).toEqual(res2);
-    expect(sequencer.runqueue[0][0]).toEqual(res3);
-    expect(sequencer.runqueue[1][0]).toEqual(res4);
+  it('should delete parts from runqueue', function() {
+    part1.pointer = part2.pointer = 64;
+    sequencer.runqueue.push(part1, part2);
+    sequencer.deletePartsFromRunqueue([1, 0]);
+    expect(sequencer.runqueue.length).toEqual(0);
   });
 
-  it('should delete empty patterns from runqueue', function() {
-    var pattern3 = [];
-    var pattern4 = [ ['a'] ];
-    sequencer.processSeqEvent = jasmine.createSpy('processSeqEvent');
-    sequencer.runqueue.push(pattern1, pattern3, pattern2, pattern4);
-    sequencer.fireEvents();
-    expect(sequencer.runqueue.length).toEqual(3);
-    sequencer.fireEvents();
-    expect(sequencer.runqueue.length).toEqual(2);
+  it('should delete the pointer from removed parts', function() {
+    part1.pointer = part2.pointer = 64;
+    sequencer.runqueue.push(part1, part2);
+    sequencer.deletePartsFromRunqueue([1, 0]);
+    expect(part1.pointer).not.toBeDefined();
+    expect(part2.pointer).not.toBeDefined();
   });
 
   it('should process an event', function() {

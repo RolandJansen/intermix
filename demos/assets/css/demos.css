@@ -16,3 +16,11 @@
 	background-color: #f0f0f0;
 	text-align: center;
 }
+
+.bsHeading {
+	margin-top: 2em;
+}
+
+.spinner {
+	width: 3em !important;
+}

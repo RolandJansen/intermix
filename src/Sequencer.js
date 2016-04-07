@@ -23,7 +23,6 @@ var Sequencer = function() {
   this.queue = [];            //List with all parts of the score
   this.runqueue = [];         //list with parts that are playing or will be played shortly
 
-  this.now = 0;               //timestamp from audiocontext when the scheduler is invoked.
   this.timePerStep;           //period of time between two steps
   this.nextStepTime = 0;      //time in seconds when the next step will be triggered
   this.nextStep = 0;          //position in the queue that will get triggered next
@@ -60,14 +59,13 @@ var Sequencer = function() {
  * @return {Void}
  */
 Sequencer.prototype.scheduler = function() {
-  this.now = core.currentTime;
-
+  var limit = core.currentTime + this.lookahead;
   // if invoked for the first time or previously stopped
   if (this.nextStepTime === 0) {
-    this.nextStepTime = this.now;
+    this.nextStepTime = core.currentTime;
   }
 
-  while (this.nextStepTime < this.now + this.lookahead) {
+  while (this.nextStepTime < limit) {
     this.addPartsToRunqueue();
     this.fireEvents();
     this.nextStepTime += this.timePerStep;
@@ -84,8 +82,31 @@ Sequencer.prototype.scheduler = function() {
  */
 Sequencer.prototype.addPartsToRunqueue = function() {
   if (this.queue[this.nextStep]) {
-    this.queue[this.nextStep].forEach(function(part) {
-      this.runqueue.push(this.copyArray(part.pattern));
+    if (this.queue[this.nextStep].length === 1) {
+      var part = this.queue[this.nextStep][0];
+      part.pointer = 0;
+      this.runqueue.push(part);
+    } else {
+      this.queue[this.nextStep].forEach(function(part) {
+        part.pointer = 0;
+        this.runqueue.push(part);
+      }, this);
+    }
+  }
+};
+
+/**
+ * Deletes parts from runqueue. It is important, that the indices
+ * of the parts are sorted from max to min. Otherwise the forEach
+ * loop won't work.
+ * @param  {Array} indices  Indices of the parts in the runqueue
+ * @return {Void}
+ */
+Sequencer.prototype.deletePartsFromRunqueue = function(indices) {
+  if (indices.length > 0) {
+    indices.forEach(function(id) {
+      delete this.runqueue[id].pointer;
+      this.runqueue.splice(id, 1);
     }, this);
   }
 };
@@ -96,19 +117,23 @@ Sequencer.prototype.addPartsToRunqueue = function() {
  * @return {Void}
  */
 Sequencer.prototype.fireEvents = function() {
-  this.runqueue.forEach(function(pattern, index) {
-    if (pattern.length === 0) {
-      //remove empty parts from runQueue
-      this.runqueue.splice(index, 1);
+  var markForDelete = [];
+  this.runqueue.forEach(function(part, index) {
+    if (part.pointer === part.length - 1) {
+      markForDelete.unshift(index);
     } else {
-      var seqEvents = pattern.shift();  //return first element and remove it
-      if (seqEvents) {
+      var seqEvents = part.pattern[part.pointer];
+      if (seqEvents && seqEvents.length > 1) {
         seqEvents.forEach(function(seqEvent) {
           this.processSeqEvent(seqEvent, this.nextStepTime);
         }, this);
+      } else if (seqEvents && seqEvents.length === 1) {
+        this.processSeqEvent(seqEvents[0], this.nextStepTime);
       }
     }
+    part.pointer++;
   }, this);
+  this.deletePartsFromRunqueue(markForDelete);
 };
 
 /**
@@ -146,6 +171,7 @@ Sequencer.prototype.setQueuePointer = function(position) {
   } else {
     this.nextStep++;
   }
+  // console.log('next step: ' + this.nextStep);
 };
 
 /**
@@ -153,9 +179,11 @@ Sequencer.prototype.setQueuePointer = function(position) {
  * @return {Void}
  */
 Sequencer.prototype.start = function() {
-  this.scheduleWorker.postMessage('start');
-  this.isRunning = true;
-  //window.requestAnimationFrame(this.draw);
+  if (!this.isRunning) {
+    this.scheduleWorker.postMessage('start');
+    this.isRunning = true;
+    window.requestAnimationFrame(this.draw.bind(this));
+  }
 };
 
 /**
@@ -178,17 +206,30 @@ Sequencer.prototype.stop = function() {
  * @return {Void}
  */
 Sequencer.prototype.draw = function() {
-  // first we'll have to find out, what step was recently played.
+  // first we'll have to find out, what step was played recently.
   // this is somehow clumsy because the sequencer doesn't keep track of that.
   var lookAheadDelta = this.nextStepTime - core.currentTime;
-  var stepsAhead = Math.floor(lookAheadDelta / this.timePerStep) + 1;
-  this.lastPlayedStep = this.nextStep - stepsAhead;
+  if (lookAheadDelta >= 0) {
+    var stepsAhead = Math.round(lookAheadDelta / this.timePerStep);
+    // console.log('steps ahead: ' + stepsAhead);
 
-  this.animationFrame(this.lastPlayedStep);
+    if (this.nextStep < stepsAhead) {
+      // we just jumped to the start of a loop
+      this.lastPlayedStep = this.loopEnd + this.nextStep - stepsAhead;
+    } else {
+      this.lastPlayedStep = this.nextStep - stepsAhead;
+    }
+
+    this.updateFrame(this.lastPlayedStep);
+  }
 
   if (this.isRunning) {
-    window.requestAnimationFrame(this.draw);
+    window.requestAnimationFrame(this.draw.bind(this));
   }
+};
+
+Sequencer.prototype.updateFrame = function(lastPlayedStep) {
+  console.log(lastPlayedStep);
 };
 
 /**
@@ -244,6 +285,10 @@ Sequencer.prototype.setBpm = function(bpm) {
  */
 Sequencer.prototype.setTimePerStep = function(bpm, resolution) {
   return (60 * 4) / (bpm * resolution);
+};
+
+Sequencer.prototype.getLastPlayedStep = function() {
+
 };
 
 /**

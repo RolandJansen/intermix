@@ -24,7 +24,7 @@ describe('A part', function() {
   });
 
   it('should get initialized with a given pattern-length', function() {
-    var otherPart = new Part(3.5);
+    var otherPart = new Part(224);
     expect(otherPart.getLength()).toEqual(224);
   });
 
@@ -46,14 +46,14 @@ describe('A part', function() {
 
   it('should extend the pattern on top', function() {
     part.addEvent(evt1, 0);
-    part.extendOnTop(0.5);
+    part.extendOnTop(32);
     expect(part.getLength()).toEqual(96);
     expect(part.pattern[32][0]).toBe(evt1);
   });
 
   it('should extend the pattern on end', function() {
     part.addEvent(evt1, 0);
-    part.extendOnEnd(0.5);
+    part.extendOnEnd(32);
     expect(part.getLength()).toEqual(96);
     expect(part.pattern[0][0]).toBe(evt1);
   });
