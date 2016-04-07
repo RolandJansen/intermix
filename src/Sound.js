@@ -25,6 +25,7 @@ var Sound = function(soundWave) {
   this.pannerNode = null;
 
   this.soundLength = 0;
+  this.isPaused = false;
   this.startOffset = 0;
   this.startOffsets = [];   //holds start offsets if paused
   this.startTime = 0;       //when the sound starts to play
@@ -99,17 +100,19 @@ Sound.prototype.destroyBufferSource = function(bsNode) {
  * @param  {float}   duration   Time preriod after the stream should end
  * @return {Void}
  */
-Sound.prototype.start = function(playLooped, delay, duration) {
-  if (this.startOffsets.length === 0) {
-    this.startNode(playLooped, delay, duration);
-  } else {
-    this.startOffsets.forEach(function(offset) {
-      this.startOffset = offset;
-      this.startNode(this.loop);
-    }, this);
-    this.startOffsets = [];
-  }
-};
+// Sound.prototype.start = function(playLooped, delay, duration) {
+//   if (!this.isPaused) {
+//     console.log('not paused');
+//     this.startNode(playLooped, delay, duration);
+//   } else {
+//     this.startOffsets.forEach(function(offset) {
+//       this.startOffset = offset;
+//       console.log(offset);
+//       this.startNode(this.loop);
+//     }, this);
+//     this.isPaused = false;
+//   }
+// };
 
 /**
  * Starts a sound (AudioBufferSourceNode) and stores a references
@@ -120,34 +123,43 @@ Sound.prototype.start = function(playLooped, delay, duration) {
  * @param  {float}   duration   Time preriod after the stream should end
  * @return {Void}
  */
-Sound.prototype.startNode = function(playLooped, delay, duration) {
-  var startTime = 0;
-
-  if (delay) {
-    startTime = delay;
+Sound.prototype.start = function(playLooped, delay, duration) {
+  if (this.isPaused && this.queue.length > 0) {
+    this.queue.forEach(function(node) {
+      node.playbackRate.value = node.tmpPlaybackRate;
+      delete node.tmpPlaybackRate;
+    });
+    this.isPaused = false;
   } else {
-    startTime = core.currentTime;
+    var startTime = 0;
+
+    if (delay) {
+      startTime = delay;
+    } else {
+      startTime = core.currentTime;
+    }
+    var bs = this.createBufferSource();
+
+    if (playLooped) {
+      bs.loop = playLooped;
+      bs.loopStart = this.loopStart;
+      bs.loopEnd = this.loopEnd;
+    }
+
+    bs.playbackRate.value = this.playbackRate;
+    bs.detune.value = this.detune;
+    bs.startTime = startTime;   // extend node with a starttime property
+
+    this.queue.push(bs);
+    if (duration) {
+      bs.start(startTime, this.startOffset, duration);
+    } else {
+      bs.start(startTime, this.startOffset);
+    }
+
+    this.startOffset = 0;
   }
-  var bs = this.createBufferSource();
 
-  if (playLooped) {
-    bs.loop = playLooped;
-    bs.loopStart = this.loopStart;
-    bs.loopEnd = this.loopEnd;
-  }
-
-  bs.playbackRate.value = this.playbackRate;
-  bs.detune.value = this.detune;
-  bs.startTime = startTime;   // extend node with a starttime property
-
-  this.queue.push(bs);
-  if (duration) {
-    bs.start(startTime, this.startOffset, duration);
-  } else {
-    bs.start(startTime, this.startOffset);
-  }
-
-  this.startOffset = 0;
 };
 
 /**
@@ -156,33 +168,55 @@ Sound.prototype.startNode = function(playLooped, delay, duration) {
  * @return {Void}
  */
 Sound.prototype.stop = function() {
-  if (this.queue.length > 0) {
-    this.queue.forEach(function(node) {
-      node.stop();
-      node.disconnect();
-    });
-    this.queue = [];  //release all references
-  } else {
-    //fail silently
-  }
+  // if (this.queue.length > 0) {
+  //   this.queue.forEach(function(node) {
+  //     node.stop();
+  //     node.disconnect();
+  //   });
+  //   this.queue = [];  //release all references
+  // }
+  // if (this.startOffsets.length > 0 && !this.isPaused) {
+  //   console.log('sdf');
+  //   this.startOffsets = [];
+  // }
+
+  this.queue.forEach(function(node) {
+    node.stop();
+    node.disconnect();
+  });
+  this.queue = [];  //release all references
 };
 
 /**
- * Stops the audio stream and store the current positions
- * as an offset for when the sound get restarted.
- * Remember that this doesn't work with loops that are shorter
- * than the buffer itself. If you want a global, accurate pause function
+ * Stops the audio stream and stores the current positions
+ * as an offset for when the sound get restarted. It even works
+ * with loops.
+ * This just pauses the streams from the correspondend sound.
+ * If you want a global, accurate pause function
  * use suspend/resume from the core module.
- * @todo    Needs to be rewritten since there could be multiple start times.
  * @return  {Void}
  */
 Sound.prototype.pause = function() {
-  //this.startOffset = (core.currentTime - this.startTime) % this.soundLength;
-  this.queue.forEach(function(node) {
-    this.startOffsets.push((core.currentTime - node.startTime) % this.soundLength);
-    this.loop = node.loop;
-  }, this);
-  this.stop();
+  // this.isPaused = true;
+  // if (this.startOffsets.length > 0) {
+  //   this.queue.forEach(function(node, index) {
+  //     this.startOffsets[index] = (this.startOffsets[index] + core.currentTime - node.startTime) % this.soundLength;
+  //     this.loop = node.loop;
+  //   }, this);
+  // } else {
+  //   this.queue.forEach(function(node) {
+  //     this.startOffsets.push((core.currentTime - node.startTime) % this.soundLength);
+  //     this.loop = node.loop;
+  //   }, this);
+  // }
+  // this.stop();
+  if (!this.isPaused) {
+    this.queue.forEach(function(node) {
+      node.tmpPlaybackRate = node.playbackRate.value;
+      node.playbackRate.value = 0.0;
+    });
+    this.isPaused = true;
+  }
 };
 
 /**
