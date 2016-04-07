@@ -88,26 +88,33 @@ describe('A Sound', function() {
     expect(sound.queue[0]).not.toBeDefined();
   });
 
-  it('should store the stop time of the BufferSourceNode when paused', function() {
+  it('should stop the streams of all nodes when paused', function() {
     sound.start();
-    sound.ac.$processTo('00:00.100');
+    sound.playbackRate = 1.25;
+    sound.start();
+    var pbRate1 = sound.queue[0].playbackRate.value;
+    var pbRate2 = sound.queue[1].playbackRate.value;
     sound.pause();
-    expect(sound.startOffsets[0]).toBe(0.1);
+    expect(sound.queue[0].playbackRate.value).toEqual(0);
+    expect(sound.queue[1].playbackRate.value).toEqual(0);
+    expect(sound.queue[0].tmpPlaybackRate).toEqual(pbRate1);
+    expect(sound.queue[1].tmpPlaybackRate).toEqual(pbRate2);
   });
 
-  xit('should start the BufferSourceNode with the offset where it was paused', function() {
+  it('should resume the streams of all nodes when resumed', function() {
     sound.start();
-    sound.ac.$processTo('00:00.100');
+    sound.playbackRate = 1.25;
+    sound.start();
     sound.pause();
-    expect(sound.queue[0]).not.toBeDefined(); // node should be destroyed after 'pausing'
-    // this seems to be not directly testable with the web-audio-test-api
-    // sound.ac.$processTo('00:01.000');
-    // sound.start(0, false);
-    // expect(sound.queue[0].$stateAtTime('00:01.400')).toBe('FINISHED');
+    var pbRate1 = sound.queue[0].tmpPlaybackRate;
+    var pbRate2 = sound.queue[1].tmpPlaybackRate;
+    sound.resume();
+    expect(sound.queue[0].playbackRate.value).toEqual(pbRate1);
+    expect(sound.queue[1].playbackRate.value).toEqual(pbRate2);
   });
 
   xit('should stop the sound after a given duration', function() {
-    // this doesn't work either
+    // this doesn't work
     // sound.start(0, false, 0.1);
     // expect(sound.queue[0].$stateAtTime('00:00.200')).toBe('PLAYING');
     // expect(sound.queue[0].$stateAtTime('00:00.501')).toBe('FINISHED');
@@ -119,18 +126,6 @@ describe('A Sound', function() {
     expect(sound.queue[0].$stateAtTime('00:01.000')).toBe('PLAYING');
     expect(sound.queue[0].$stateAtTime('00:03.000')).toBe('PLAYING');
     sound.stop();
-  });
-
-  it('should set the offset correctly when a looped sound is paused', function() {
-    sound.ac.$processTo('00:00.000');
-    sound.start(true);
-    sound.ac.$processTo('00:00.600');
-    sound.pause();
-    expect(sound.startOffsets[0]).toBeCloseTo(0.0999, 3);  //should be 0.1 but floats have rounding errors
-  });
-
-  xit('should set the offset correctly when a loop doesn\'t start at 0 and the sound is paused', function() {
-    //not possible at the moment
   });
 
   it('should set the loop start point before a node starts', function() {

@@ -92,29 +92,6 @@ Sound.prototype.destroyBufferSource = function(bsNode) {
 };
 
 /**
- * This is a wrapper for the actual start function startNode().
- * It ensures that all sounds start with the correct offset
- * in case they were paused.
- * @param  {Boolean} playLooped Whether the sound should be looped or not
- * @param  {float}   delay      Time in seconds the sound pauses before the stream starts
- * @param  {float}   duration   Time preriod after the stream should end
- * @return {Void}
- */
-// Sound.prototype.start = function(playLooped, delay, duration) {
-//   if (!this.isPaused) {
-//     console.log('not paused');
-//     this.startNode(playLooped, delay, duration);
-//   } else {
-//     this.startOffsets.forEach(function(offset) {
-//       this.startOffset = offset;
-//       console.log(offset);
-//       this.startNode(this.loop);
-//     }, this);
-//     this.isPaused = false;
-//   }
-// };
-
-/**
  * Starts a sound (AudioBufferSourceNode) and stores a references
  * in a queue. This enables you to play multiple sounds at once
  * and even stop them all at a given time.
@@ -125,11 +102,7 @@ Sound.prototype.destroyBufferSource = function(bsNode) {
  */
 Sound.prototype.start = function(playLooped, delay, duration) {
   if (this.isPaused && this.queue.length > 0) {
-    this.queue.forEach(function(node) {
-      node.playbackRate.value = node.tmpPlaybackRate;
-      delete node.tmpPlaybackRate;
-    });
-    this.isPaused = false;
+    this.resume();
   } else {
     var startTime = 0;
 
@@ -146,7 +119,7 @@ Sound.prototype.start = function(playLooped, delay, duration) {
       bs.loopEnd = this.loopEnd;
     }
 
-    bs.playbackRate.value = this.playbackRate;
+    bs.playbackRate.value = bs.tmpPlaybackRate = this.playbackRate;
     bs.detune.value = this.detune;
     bs.startTime = startTime;   // extend node with a starttime property
 
@@ -159,7 +132,6 @@ Sound.prototype.start = function(playLooped, delay, duration) {
 
     this.startOffset = 0;
   }
-
 };
 
 /**
@@ -168,18 +140,6 @@ Sound.prototype.start = function(playLooped, delay, duration) {
  * @return {Void}
  */
 Sound.prototype.stop = function() {
-  // if (this.queue.length > 0) {
-  //   this.queue.forEach(function(node) {
-  //     node.stop();
-  //     node.disconnect();
-  //   });
-  //   this.queue = [];  //release all references
-  // }
-  // if (this.startOffsets.length > 0 && !this.isPaused) {
-  //   console.log('sdf');
-  //   this.startOffsets = [];
-  // }
-
   this.queue.forEach(function(node) {
     node.stop();
     node.disconnect();
@@ -188,28 +148,12 @@ Sound.prototype.stop = function() {
 };
 
 /**
- * Stops the audio stream and stores the current positions
- * as an offset for when the sound get restarted. It even works
- * with loops.
- * This just pauses the streams from the correspondend sound.
+ * Stops all audio streams of this sound temporarily.
  * If you want a global, accurate pause function
  * use suspend/resume from the core module.
  * @return  {Void}
  */
 Sound.prototype.pause = function() {
-  // this.isPaused = true;
-  // if (this.startOffsets.length > 0) {
-  //   this.queue.forEach(function(node, index) {
-  //     this.startOffsets[index] = (this.startOffsets[index] + core.currentTime - node.startTime) % this.soundLength;
-  //     this.loop = node.loop;
-  //   }, this);
-  // } else {
-  //   this.queue.forEach(function(node) {
-  //     this.startOffsets.push((core.currentTime - node.startTime) % this.soundLength);
-  //     this.loop = node.loop;
-  //   }, this);
-  // }
-  // this.stop();
   if (!this.isPaused) {
     this.queue.forEach(function(node) {
       node.tmpPlaybackRate = node.playbackRate.value;
@@ -217,6 +161,18 @@ Sound.prototype.pause = function() {
     });
     this.isPaused = true;
   }
+};
+
+/**
+ * Resumes all streams if they were paused.
+ * @return {Void}
+ */
+Sound.prototype.resume = function() {
+  this.queue.forEach(function(node) {
+    node.playbackRate.value = node.tmpPlaybackRate;
+    delete node.tmpPlaybackRate;
+  });
+  this.isPaused = false;
 };
 
 /**
