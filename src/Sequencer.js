@@ -15,7 +15,7 @@ var Sequencer = function() {
 
   var self = this;
   this.ac = core;             //currently just used for tests
-  this.beatsPerMinute = 120;  //beats per minute
+  this.bpm = 120;             //beats per minute
   this.resolution = 64;       //shortest possible note. You normally don't want to touch this.
   this.interval = 100;        //the interval in miliseconds the scheduler gets invoked.
   this.lookahead = 0.3;       //time in seconds the scheduler looks ahead.
@@ -23,7 +23,7 @@ var Sequencer = function() {
   this.queue = [];            //List with all parts of the score
   this.runqueue = [];         //list with parts that are playing or will be played shortly
 
-  this.now = 0;                    //timestamp from audiocontext when the scheduler is invoked.
+  this.now = 0;               //timestamp from audiocontext when the scheduler is invoked.
   this.timePerStep;           //period of time between two steps
   this.nextStepTime = 0;      //time in seconds when the next step will be triggered
   this.nextStep = 0;          //position in the queue that will get triggered next
@@ -36,7 +36,7 @@ var Sequencer = function() {
                               //draw function with the lastPlayedStep int as parameter.
 
   // set time per setTimePerStep
-  this.timePerStep = this.setTimePerStep(this.beatsPerMinute, this.resolution);
+  this.timePerStep = this.setTimePerStep(this.bpm, this.resolution);
 
   // Initialize the scheduler-timer
   this.scheduleWorker = work(worker);
@@ -155,7 +155,7 @@ Sequencer.prototype.setQueuePointer = function(position) {
 Sequencer.prototype.start = function() {
   this.scheduleWorker.postMessage('start');
   this.isRunning = true;
-  window.requestAnimationFrame(this.draw);
+  //window.requestAnimationFrame(this.draw);
 };
 
 /**
@@ -222,6 +222,16 @@ Sequencer.prototype.removePart = function(part, position) {
   } else {
     throw new Error('Part not found at position ' + position + '.');
   }
+};
+
+/**
+ * Set beats per minute
+ * @param  {Int}   bpm beats per minute
+ * @return {Void}
+ */
+Sequencer.prototype.setBpm = function(bpm) {
+  this.bpm = bpm;
+  this.timePerStep = this.setTimePerStep(bpm, this.resolution);
 };
 
 /**

@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Intermix Demo</title>
+    <title>intermix Demo</title>
     <link rel="stylesheet"
     href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
     integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"
@@ -25,9 +25,6 @@
         </ul>
       </div>
       <div class="demo col-md-8">
-        <p id="binary">
-
-        </p>
         <h1>Stepsequencer</h1>
         <div class="panel panel-primary">
           <div class="panel-heading">
@@ -36,7 +33,7 @@
           <div class="panel-body">
             <input class="btn btn-default" type="button" value="Start" onclick="start()">
             <input class="btn btn-default" type="button" value="Stop" onclick="stop()">
-            BPM: <input id="bpm" type="text" name="name" value="120">
+            BPM: <input id="bpm" type="text" name="name" value="120" onchange="setBpm(this)">
             <br><br>
             <table id="sequencer" class="table-bordered">
               <tr id="seqStepLabel" class="seqRow">
@@ -148,29 +145,32 @@
 
       var bdSound, sdSound, hhSound, bassSound;
       var bdPart, sdPart, hhPart;
+      var bdNote, sdNote, hhNote;
       var queue = new createjs.LoadQueue();
-      var audioCtx = Intermix.audioCtx;
       var binaryKick;
 
-      var seq = new Intermix.Sequencer(audioCtx);
+      var seq = new intermix.Sequencer();
       seq.loop = true;
       seq.loopStart = 0;
       seq.loopEnd = 63;   //this should be set in resolution steps (15 with 16th notes)
 
       function initParts() {
-        bdPart = new Intermix.Part(audioCtx, bdSound);
-        sdPart = new Intermix.Part(audioCtx, sdSound);
-        hhPart = new Intermix.Part(audioCtx, hhSound);
+        bdPart = new intermix.Part();
+        sdPart = new intermix.Part();
+        hhPart = new intermix.Part();
 
-        var seqEvent = seq.createNoteEvent(34, 1);  // create note a-3 with length of 1 (16th note)
+        // create note events for the drumset
+        bdNote = intermix.events.createAudioNote('a3', 1, 0, bdSound);
+        sdNote = intermix.events.createAudioNote('a3', 1, 0, sdSound);
+        hhNote = intermix.events.createAudioNote('a3', 1, 0, hhSound);
 
-        bdPart.addEvent(seqEvent, 1);
-        bdPart.addEvent(seqEvent, 9);
-        sdPart.addEvent(seqEvent, 5);
-        sdPart.addEvent(seqEvent, 13);
+        bdPart.addEvent(bdNote, 0);
+        bdPart.addEvent(bdNote, 8);
+        sdPart.addEvent(sdNote, 4);
+        sdPart.addEvent(sdNote, 12);
 
         for (i = 0; i < 16; i++) {
-          hhPart.addEvent(seqEvent, i + 1);
+          hhPart.addEvent(hhNote, i);
         }
 
         seq.addPart(bdPart, 0);
@@ -186,10 +186,14 @@
         seq.stop();
       };
 
+      function setBpm(bpm) {
+        seq.setBpm(bpm.value);
+      };
+
       function drawActiveSteps() {
-        var bdSteps = bdPart.getNotePositions();
-        var sdSteps = sdPart.getNotePositions();
-        var hhSteps = hhPart.getNotePositions();
+        bdSteps = bdPart.getNotePositions();
+        sdSteps = sdPart.getNotePositions();
+        hhSteps = hhPart.getNotePositions();
 
         bdSteps.forEach(function(pos) {
           document.getElementById('bd' + pos).style.backgroundColor = 'red';
@@ -205,27 +209,26 @@
       function changeStep(elId, part) {
         var el = document.getElementById(elId);
         var pos = elId.match(/\d+/)[0];
-        var prefix = elId.replace(/\D/g,'');
+        var prefix = elId.replace(/\d+/g,'');
         console.log('pos: ' + pos + ', prefix: ' + prefix);
         console.log(el.style.backgroundColor);
         if (el.style.backgroundColor === 'red') {
           el.style.backgroundColor = 'white';
           if (prefix === 'bd') {
-            bdPart.removeEvent(pos);
+            bdPart.removeEvent(bdNote, pos);
           } else if (prefix === 'sd') {
-            sdPart.removeEvent(pos);
+            sdPart.removeEvent(sdNote, pos);
           } else if (prefix === 'hh') {
-            hhPart.removeEvent(pos);
+            hhPart.removeEvent(hhNote, pos);
           }
         } else {
-          var note = seq.createNoteEvent(34, 1);
           el.style.backgroundColor = 'red';
           if (prefix === 'bd') {
-            bdPart.addEvent(note, pos);
+            bdPart.addEvent(bdNote, pos);
           } else if (prefix === 'sd') {
-            sdPart.addEvent(note, pos);
+            sdPart.addEvent(sdNote, pos);
           } else if (prefix === 'hh') {
-            hhPart.addEvent(note, pos);
+            hhPart.addEvent(hhNote, pos);
           }
         }
 
@@ -268,16 +271,15 @@
         var sdRaw = queue.getResult('snare');
         var hhRaw = queue.getResult('hihat');
         var bassRaw = queue.getResult('bass');
-        writeBinary(_arrayBufferToBase64(hhRaw));
-        var bdBuffer = new Intermix.SoundWave(bdRaw);
-        var sdBuffer = new Intermix.SoundWave(sdRaw);
-        var hhBuffer = new Intermix.SoundWave(hhRaw);
-        var bassBuffer = new Intermix.SoundWave(bassRaw);
+        var bdBuffer = new intermix.SoundWave(bdRaw);
+        var sdBuffer = new intermix.SoundWave(sdRaw);
+        var hhBuffer = new intermix.SoundWave(hhRaw);
+        var bassBuffer = new intermix.SoundWave(bassRaw);
         setTimeout(function() {
-          bdSound = new Intermix.Sound(audioCtx, bdBuffer.buffer);
-          sdSound = new Intermix.Sound(audioCtx, sdBuffer.buffer);
-          hhSound = new Intermix.Sound(audioCtx, hhBuffer.buffer);
-          bassSound = new Intermix.Sound(audioCtx, bassBuffer.buffer);
+          bdSound = new intermix.Sound(bdBuffer);
+          sdSound = new intermix.Sound(sdBuffer);
+          hhSound = new intermix.Sound(hhBuffer);
+          bassSound = new intermix.Sound(bassBuffer);
         }, 500);
 
         setTimeout(function() {
@@ -285,24 +287,6 @@
           drawActiveSteps();
         }, 600);
       }
-
-      function ab2str(buf) {
-        return window.btoa(String.fromCharCode.apply(null, new Uint16Array(buf)));
-      };
-
-      function writeBinary(binStr) {
-        document.getElementById('binary').innerHTML = binStr;
-      };
-
-      function _arrayBufferToBase64( buffer ) {
-        var binary = '';
-        var bytes = new Uint8Array( buffer );
-        var len = bytes.byteLength;
-        for (var i = 0; i < len; i++) {
-          binary += String.fromCharCode( bytes[ i ] );
-        }
-        return window.btoa( binary );
-      };
 
       (function() {
         queue.on('complete', handleComplete, this);

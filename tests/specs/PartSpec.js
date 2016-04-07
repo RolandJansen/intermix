@@ -29,7 +29,7 @@ describe('A part', function() {
   });
 
   it('should add an event at a given position', function() {
-    part.addEvent(evt1, 5);
+    part.addEvent(evt1, 4);
     expect(part.pattern[16][0]).toBe(evt1);
   });
 
@@ -38,21 +38,21 @@ describe('A part', function() {
   });
 
   it('should remove an event from a given position', function() {
-    part.addEvent(evt1, 5);
-    part.addEvent(evt2, 5);
-    part.removeEvent(evt1, 5);
+    part.addEvent(evt1, 4);
+    part.addEvent(evt2, 4);
+    part.removeEvent(evt1, 4);
     expect(part.pattern[16][0]).toBe(evt2);
   });
 
   it('should extend the pattern on top', function() {
-    part.addEvent(evt1, 1);
+    part.addEvent(evt1, 0);
     part.extendOnTop(0.5);
     expect(part.getLength()).toEqual(96);
     expect(part.pattern[32][0]).toBe(evt1);
   });
 
   it('should extend the pattern on end', function() {
-    part.addEvent(evt1, 1);
+    part.addEvent(evt1, 0);
     part.extendOnEnd(0.5);
     expect(part.getLength()).toEqual(96);
     expect(part.pattern[0][0]).toBe(evt1);

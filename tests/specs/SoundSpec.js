@@ -113,6 +113,20 @@ describe('A Sound', function() {
     expect(sound.queue[1].playbackRate.value).toEqual(pbRate2);
   });
 
+  it('should process a sequencer event', function() {
+    var se = {
+      'class': 'audio',
+      'type': 'note',
+      'props': {
+        'instrument': 'foo',
+        'tone': 12,
+        'velocity': 65,
+      }
+    };
+    sound.processSeqEvent(se);
+    expect(sound.queue.length).toEqual(1);
+  });
+
   xit('should stop the sound after a given duration', function() {
     // this doesn't work
     // sound.start(0, false, 0.1);

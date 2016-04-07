@@ -52,7 +52,7 @@ Part.prototype.initPattern = function(length) {
  */
 Part.prototype.addEvent = function(seqEvent, position) {
   if (position <= this.resolution) {
-    var pos = (position - 1) * this.multiply;
+    var pos = (position) * this.multiply;
     this.pattern[pos].push(seqEvent);
   } else {
     throw new Error('Position out of pattern bounds.');
@@ -67,7 +67,7 @@ Part.prototype.addEvent = function(seqEvent, position) {
  * @return {Void}
  */
 Part.prototype.removeEvent = function(seqEvent, position) {
-  var pos = (position - 1) * this.multiply;
+  var pos = (position) * this.multiply;
   var index = this.pattern[pos].indexOf(seqEvent);
   this.pattern[pos].splice(index, 1);
 };

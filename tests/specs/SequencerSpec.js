@@ -192,6 +192,12 @@ describe('A Sequencer', function() {
     expect(function() { sequencer.removePart(part1, 5); }).toThrowError('Part not found at position 5.');
   });
 
+  it('should set the bpm value', function() {
+    sequencer.setBpm(160);
+    expect(sequencer.bpm).toEqual(160);
+    expect(sequencer.timePerStep).toEqual(0.0234375);
+  });
+
   it('should compute the time between two shortest possible notes', function() {
     var t1 = sequencer.setTimePerStep(120, 64);
     var t2 = sequencer.setTimePerStep(160, 24);

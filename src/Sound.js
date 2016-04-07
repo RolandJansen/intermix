@@ -176,6 +176,23 @@ Sound.prototype.resume = function() {
 };
 
 /**
+ * Processes an event fired by the sequencer.
+ * @param  {Object} seqEvent A sequencer event
+ * @return {Void}
+ */
+Sound.prototype.processSeqEvent = function(seqEvent) {
+  //this.setTone(seqEvent.props.tone);
+  if (seqEvent.props.duration) {
+    this.start(false,
+      seqEvent.props.delay,
+      seqEvent.props.duration);
+  } else {
+    this.start(false,
+      seqEvent.props.delay);
+  }
+};
+
+/**
  * Sets the startpoint of the loop
  * @param  {float} value  loop start in seconds
  * @return {Void}
