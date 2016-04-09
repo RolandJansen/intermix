@@ -1,7 +1,7 @@
 {
   "name": "intermix.js",
   "version": "0.1.0",
-  "description": "Javascript library for sound/audio-processing",
+  "description": "Javascript library for building sequencers",
   "main": "index.js",
   "directories": {
     "doc": "docs",
@@ -19,7 +19,7 @@
     "prebuild:js": "npm run clean && npm run lint",
     "watch:jscmd": "start cmd /k npm run watch:js",
     "watch:js": "watchify src/main.js -o dist/intermix.js -v -d -p browserify-derequire -s intermix",
-    "docgen": "jsdoc src/SoundWave.js README.md"
+    "docgen": "jsdoc -c conf.json --verbose"
   },
   "repository": {
     "type": "git",

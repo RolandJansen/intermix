@@ -13,6 +13,7 @@
  * any type of javascript object. A possible usecase would be to trigger
  * screen events with the draw function of the sequencer object.
  * @todo Add at least one usage example
+ * @constructor
  * @param  {float}  length       Length of the part in bars (4 beats)
  */
 var Part = function(length) {

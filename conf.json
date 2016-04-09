@@ -1,0 +1,15 @@
+/**
+ * This is the jsdoc configuration that is used to render the
+ * intermix.js homepage.
+ */
+{
+  "source": {
+    "include": ["src", "README.md", "package.json"]
+  },
+
+  "opts": {
+    "recursive": true,
+    "tutorials": "demos"
+  }
+
+}

@@ -3,6 +3,7 @@
 var work = require('webworkify');   //prepares the worker for browserify
 var core = require('./core.js');
 var worker = require('./scheduleWorker.js');
+
 /**
  * The main class of the sequencer. It does the queuing of
  * parts and events and runs the schedulers that fire events
@@ -10,6 +11,7 @@ var worker = require('./scheduleWorker.js');
  *
  * Scheduling inspired by "A Tale of Two Clocks" by Chris Wilson:
  * http://www.html5rocks.com/en/tutorials/audio/scheduling/
+ * @constructor
  */
 var Sequencer = function() {
 

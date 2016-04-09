@@ -13,6 +13,8 @@ var core = require('./core.js');
  * var soundWave = new Intermix.SoundWave('audiofile.wav');
  * var sound = new Intermix.Sound(soundWave);
  * sound.start();
+ * @tutorial Sound
+ * @constructor
  * @param  {Object} soundWave SoundWave object including the buffer with audio data to be played
  */
 var Sound = function(soundWave) {
