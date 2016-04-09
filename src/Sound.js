@@ -4,14 +4,14 @@ var core = require('./core.js');
 
 /**
  * <p>
- * Plays a sound from a SoundWave object.
- * The sound can be started/stopped/paused.
- * It can also be looped with an adjustable loop range.
+ * Play a sound that can be looped. Pause/Start works sample-accurate
+ * at any rate. Hit the start button multiple times to have multiple
+ * sounds played. All parameters are adjustable in realtime.
  * </p>
  *
  * @example
- * var soundWave = new Intermix.SoundWave('audiofile.wav');
- * var sound = new Intermix.Sound(soundWave);
+ * var soundWave = new intermix.SoundWave('audiofile.wav');
+ * var sound = new intermix.Sound(soundWave);
  * sound.start();
  * @tutorial Sound
  * @constructor
@@ -49,6 +49,8 @@ var Sound = function(soundWave) {
 /**
  * Creates a gain and stereo-panner node, connects them
  * (gain -> panner) and sets gain to 1 (max value).
+ * @private
+ * @return {Void}
  */
 Sound.prototype.setupAudioChain = function() {
   this.gainNode = core.createGain();
@@ -61,6 +63,7 @@ Sound.prototype.setupAudioChain = function() {
 /**
  * Creates and configures a BufferSourceNode
  * that can be played once and then destroys itself.
+ * @private
  * @return {BufferSourceNode} The BufferSourceNode
  */
 Sound.prototype.createBufferSource = function() {
@@ -78,11 +81,9 @@ Sound.prototype.createBufferSource = function() {
 /**
  * Destroyes a given AudioBufferSourceNode and deletes it
  * from the sourceNode queue. This is used in the onended
- * callback of all BufferSourceNodes.
- * This is probably futile since we already delete all node
- * references in the stop method.
- * @todo   Check if this can be removed
- * @param  {AudioBufferSourceNode} bsNode the bufferSource to be destroyed.
+ * callback of all BufferSourceNodes to avoid dead references.
+ * @private
+ * @param  {bsNode} bsNode the bufferSource to be destroyed.
  */
 Sound.prototype.destroyBufferSource = function(bsNode) {
   bsNode.disconnect();
@@ -303,6 +304,10 @@ Sound.prototype.getDetune = function() {
   return this.detune;
 };
 
+/**
+ * This is not in use and can probably be removed
+ * @return {Int} Random number
+ */
 Sound.prototype.getUID = function() {
   return Math.random().toString().substr(2, 8);
 };

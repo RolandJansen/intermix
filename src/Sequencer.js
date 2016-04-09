@@ -8,9 +8,12 @@ var worker = require('./scheduleWorker.js');
  * The main class of the sequencer. It does the queuing of
  * parts and events and runs the schedulers that fire events
  * and draws to the screen.
- *
- * Scheduling inspired by "A Tale of Two Clocks" by Chris Wilson:
- * http://www.html5rocks.com/en/tutorials/audio/scheduling/
+ * @example
+ * var part = new intermix.Part();
+ * var seq = new intermix.Sequencer();
+ * part.addEvent(someNote, 0);
+ * seq.addPart(part, 0);
+ * seq.start();
  * @constructor
  */
 var Sequencer = function() {
@@ -58,6 +61,7 @@ var Sequencer = function() {
  * It gets called at a constant rate, looks ahead in
  * the queue and fires all events in the near future
  * with a delay computed from the current bpm value.
+ * @private
  * @return {Void}
  */
 Sequencer.prototype.scheduler = function() {
@@ -101,6 +105,7 @@ Sequencer.prototype.addPartsToRunqueue = function() {
  * Deletes parts from runqueue. It is important, that the indices
  * of the parts are sorted from max to min. Otherwise the forEach
  * loop won't work.
+ * @private
  * @param  {Array} indices  Indices of the parts in the runqueue
  * @return {Void}
  */
@@ -213,7 +218,6 @@ Sequencer.prototype.draw = function() {
   var lookAheadDelta = this.nextStepTime - core.currentTime;
   if (lookAheadDelta >= 0) {
     var stepsAhead = Math.round(lookAheadDelta / this.timePerStep);
-    // console.log('steps ahead: ' + stepsAhead);
 
     if (this.nextStep < stepsAhead) {
       // we just jumped to the start of a loop
@@ -230,6 +234,12 @@ Sequencer.prototype.draw = function() {
   }
 };
 
+/**
+ * Runs between screen refresh. Has to be overridden by the
+ * app to render to the screen.
+ * @param  {Int}  lastPlayedStep  The 64th step that was played recently
+ * @return {Void}
+ */
 Sequencer.prototype.updateFrame = function(lastPlayedStep) {
   console.log(lastPlayedStep);
 };
@@ -281,6 +291,7 @@ Sequencer.prototype.setBpm = function(bpm) {
  * Computes the time in seconds as float value
  * between one shortest posssible note
  * (64th by default) and the next.
+ * @private
  * @param  {float}  bpm        beats per minute
  * @param  {Int}    resolution shortest possible note value
  * @return {float}             time in seconds

@@ -12,9 +12,16 @@
  * This means it is not limited to audio, midi, osc or dmx but can hold
  * any type of javascript object. A possible usecase would be to trigger
  * screen events with the draw function of the sequencer object.
- * @todo Add at least one usage example
+ * @example
+ * var sound = new intermix.Sound(soundWaveObject);
+ * var seq = new intermix.Sequencer();
+ * var part = new intermix.Part();
+ * var note = intermix.events.createAudioNote('a3', 1, 0, sound);
+ * part.addEvent(note, 0);
+ * part.addEvent(note, 4);
+ * seq.addPart(part, 0);
  * @constructor
- * @param  {float}  length       Length of the part in bars (4 beats)
+ * @param  {float}  length       Length of the part in 64th notes (default: 64)
  */
 var Part = function(length) {
 
@@ -83,8 +90,12 @@ Part.prototype.getLength = function() {
 
 /**
  * Get all positions that contain at least one event.
- * This is currently unused and will probably deleted
- * in future versions.
+ * Can be handy to draw events on the screen.
+ * @example <caption>from {@tutorial Stepsequencer}</caption>
+ * bdSteps = bdPart.getNotePositions();
+ * bdSteps.forEach(function(pos) {
+ *   document.getElementById('bd' + pos).style.backgroundColor = 'red';
+ * });
  * @return {Array}  List with all non-empty pattern entries
  */
 Part.prototype.getNotePositions = function() {

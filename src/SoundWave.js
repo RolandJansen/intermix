@@ -22,8 +22,8 @@ var core = require('./core.js');
  * var soundWave = new intermix.SoundWave('file.wav');
  * var sound = new intermix.Sound(soundWave);
  * sound.play;
- * @example <caption><b>This is broken in v0.1! Don't use it!</b> Concatenate multiple source files into one buffer<br>
- * in the given order and play them:</caption>
+ * @example <caption>Concatenate multiple source files into one buffer<br>
+ * in the given order and play them (This is broken in v0.1. Don't use it!):</caption>
  * var soundWave = new intermix.SoundWave('file1.wav,file2.wav,file3.wav');
  * var sound = new intermix.Sound(soundWave);
  * sound.play;
@@ -83,6 +83,7 @@ var SoundWave = function(audioSrc) {
  * Takes binary audio data and turns it into an audio buffer object.
  * This is a wrapper for the web-audio-api decodeAudioData function.
  * It uses the new promise syntax so it probably won't work in all browsers by now.
+ * @private
  * @param  {ArrayBuffer}  rawAudioSrc Audio data in raw binary format
  * @param  {function}     [func]      Can be used to run code inside the inner decode function.
  * @return {Promise}                  Promise object that will be replaced with the audio buffer after decoding.
@@ -101,6 +102,7 @@ SoundWave.prototype.decodeAudioData = function(rawAudioSrc, func) {
 
 /**
  * Concatenates one or more ArrayBuffers to an AudioBuffer.
+ * @private
  * @param  {Array} binaryBuffers  Array holding one or more ArrayBuffers
  * @param  {AudioBuffer} audioBuffer   An existing AudioBuffer object
  * @return {AudioBuffer}               The concatenated AudioBuffer
@@ -118,6 +120,7 @@ SoundWave.prototype.concatBinariesToAudioBuffer = function(binaryBuffers, audioB
 /**
  * Appends two audio buffers. Suggested by Chris Wilson:<br>
  * http://stackoverflow.com/questions/14143652/web-audio-api-append-concatenate-different-audiobuffers-and-play-them-as-one-son
+ * @private
  * @param  {AudioBuffer} buffer1 The first audio buffer
  * @param  {AudioBuffer} buffer2 The second audio buffer
  * @return {AudioBuffer}         buffer1 + buffer2
