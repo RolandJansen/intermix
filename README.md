@@ -1,4 +1,4 @@
-[code climate](https://codeclimate.com/github/RolandJansen/intermix.js/badges)
+[![Code Climate](https://codeclimate.com/github/RolandJansen/intermix.js/badges/gpa.svg)](https://codeclimate.com/github/RolandJansen/intermix.js)
 
 Javascript library for building sequencers.
 
