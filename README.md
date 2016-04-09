@@ -1,5 +1,5 @@
-# intermix.js
-Javascript library for sound/audio-processing
+[code climate](https://codeclimate.com/github/RolandJansen/intermix.js/badges)
 
-This should be a robust foundation for browser-based sound applications.
-The main purpose is building audio-sequencers and synthesizers without having to care about low-level apis.
+Javascript library for building sequencers.
+
+This can be used to build browser-based music applications with a focus on sequencing.
