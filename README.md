@@ -11,7 +11,7 @@ First we have to load a sound:
     var wave = new intermix.SoundWave('file.wav');
     var sound = new intermix.Sound(wave);
 
-> Intermix uses two objects for that. A SoundWave just holds the PCM data and the Sound object plays the actual sound. This comes in handy if you want to play different sounds of the same waveform.
+> Intermix uses two objects for that. A SoundWave just holds the PCM data and a Sound plays the actual sound. This comes in handy if you want to play the same waveform in different contexts.
 
 Then we build the sequencer:
 
@@ -28,7 +28,7 @@ Then we build the sequencer:
 
 > This creates a sequencer with one part of one bar length that will be played in a loop. The default resolution of parts is a 16th note so we add sound events on position 0, 4, 8 and 12.
 
-You can also draw something in sync on the screen:
+You can also draw something on the screen in sync:
 
     seq.updateFrame = function(lastPlayedStep) {
       var step = Math.round(lastPlayedStep / 4);
