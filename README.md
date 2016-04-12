@@ -11,7 +11,7 @@ First we have to load a sound:
     var wave = new intermix.SoundWave('file.wav');
     var sound = new intermix.Sound(wave);
 
-> Intermix uses two objects for that. A SoundWave just holds the PCM data and a Sound plays the actual sound. This comes in handy if you want to play the same waveform in different contexts.
+> Intermix uses two objects for that. A SoundWave just holds the PCM data and a Sound plays the actual sound. This comes in handy if you want to play a waveform in different contexts.
 
 Then we build the sequencer:
 
@@ -26,7 +26,7 @@ Then we build the sequencer:
     seq.loop = true;
     seq.start();
 
-> This creates a sequencer with one part of one bar length that will be played in a loop. The default resolution of parts is a 16th note so we add sound events on position 0, 4, 8 and 12.
+> This creates a sequencer with one part of one bar length that will be played in a loop. The default resolution of Part is a 16th note so we add soundevents on position 0, 4, 8 and 12.
 
 You can also draw something on the screen in sync:
 
@@ -36,4 +36,4 @@ You can also draw something on the screen in sync:
       el.style.backgroundColor = (step % 4) === 0 ? 'red' : 'white';
     };
 
-> The sequencer has a callback function called updateFrame(). Its parameter is by default the last played 64th note. It gets called everytime before the screen refreshes (normally 60fpm). In the function above a dom element with a class named "ping" gets a red background everytime a sound gets triggered or a white one if not.
+> The sequencer has a callback function called updateFrame(). Its parameter is by default the last played 64th note. It gets called every time before the screen refreshes (normally 60 times a second). In the example above a dom element with a class named "ping" gets a red background everytime a sound gets triggered and a white one if not. This should be used with caution because expensive things like dom operations can easily lead to performance drops.
