@@ -14,7 +14,7 @@ describe('A Sound', function() {
   beforeEach(function() {
     ac = new WebAudioTestAPI.AudioContext();
 
-    Sound = proxyquire('../../src/Sound.js', { 'core': ac, '@noCallThru': true});
+    Sound = proxyquire('../../src/Sound.js', { './core.js': ac, '@noCallThru': true});
     wave = {
       buffer: ac.createBuffer(2, 22050, 44100)  //create a buffer of 0.5s length
     };
