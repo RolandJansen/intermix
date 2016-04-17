@@ -50,6 +50,7 @@ var core = require('./core.js');
  */
 var SoundWave = function(audioSrc) {
 
+  this.ac = core;       //currently just used for tests
   this.buffer = null;   //AudioBuffer
   this.metaData = [];   //start-/endpoints and length of single waves
   var self = this;
@@ -80,23 +81,19 @@ var SoundWave = function(audioSrc) {
 };
 
 /**
- * Takes binary audio data and turns it into an audio buffer object.
- * This is a wrapper for the web-audio-api decodeAudioData function.
+ * Takes binary audio data, turns it into an audio buffer object and
+ * stores it in this.buffer.
+ * Basically a wrapper for the web-audio-api decodeAudioData function.
  * It uses the new promise syntax so it probably won't work in all browsers by now.
  * @private
  * @param  {ArrayBuffer}  rawAudioSrc Audio data in raw binary format
- * @param  {function}     [func]      Can be used to run code inside the inner decode function.
- * @return {Promise}                  Promise object that will be replaced with the audio buffer after decoding.
+ * @return {Promise}                  Promise that indicates if operation was successfull.
  */
-SoundWave.prototype.decodeAudioData = function(rawAudioSrc, func) {
+SoundWave.prototype.decodeAudioData = function(rawAudioSrc) {
   var self = this;
-  //new promise based syntax currently not available in Chrome <49, IE, Safari
-  //TODO: monkeypatch with call
-  this.buffer = core.decodeAudioData(rawAudioSrc).then(function(decoded) {
+  return core.decodeAudioData(rawAudioSrc).then(function(decoded) {
+    console.log(decoded);
     self.buffer = decoded;
-    if (func) {
-      func();
-    }
   });
 };
 
@@ -193,7 +190,7 @@ SoundWave.prototype.loadFile = function(filename, onloadCallback, async) {
 
 SoundWave.prototype.updateProgress = function() {};
 
-SoundWave.prototype.transferComplete = function(evt) {
+SoundWave.prototype.transferComplete = function() {
 
 };
 

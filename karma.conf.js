@@ -17,22 +17,19 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'src/*.js',
-      'tests/specs/*Spec.js'
+      'test/spec/*Spec.js'
     ],
 
 
     // list of files to exclude
-    exclude: [
-      'tests/specs/skeletonSpec.js',
-      'tests/specs/SoundWaveAsyncSpec.js'
-    ],
+    exclude: [],
 
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
       'src/*.js': [ 'browserify' ],
-      'tests/specs/*Spec.js': [ 'browserify' ]
+      'test/spec/*Spec.js': [ 'browserify' ]
     },
 
 

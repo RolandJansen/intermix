@@ -11,8 +11,9 @@
     "lint": "eslint src/",
     "build": "npm run build:js && npm run build:minijs",
     "watch": "npm run test:cmd && npm run watch:js",
-    "test": "karma start",
-    "test:cmd": "start cmd /k npm run test",
+    "test": "jasmine JASMINE_CONFIG_PATH=test/jasmine.json",
+    "test:karma": "karma start",
+    "test:cmd": "start cmd /k npm run test:karma",
     "clean": "rimraf dist/*",
     "build:js": "browserify src/main.js -o dist/intermix.js -v -p browserify-derequire -s intermix",
     "build:minijs": "browserify src/main.js -o dist/intermix.min.js -d -v -p browserify-derequire -p [minifyify --map dist/intermix.map.json --output dist/intermix.map.json]",
@@ -43,6 +44,7 @@
   },
   "homepage": "https://github.com/RolandJansen/intermix.js#readme",
   "devDependencies": {
+    "atob": "^2.0.3",
     "browserify": "^13.0.0",
     "browserify-derequire": "^0.9.4",
     "eslint": "^1.10.3",
@@ -55,12 +57,15 @@
     "karma-chrome-launcher": "^0.2.2",
     "karma-jasmine": "^0.3.6",
     "minifyify": "^7.1.0",
+    "mock-promises": "^0.6.0",
     "proxyquire": "^1.7.4",
     "proxyquire-universal": "^1.0.8",
     "proxyquireify": "^3.1.1",
     "rimraf": "^2.5.0",
+    "sinon": "^1.17.3",
     "watchify": "^3.7.0",
     "web-audio-test-api": "^0.5.2",
-    "webworkify": "^1.1.0"
+    "webworkify": "^1.1.0",
+    "xmlhttprequest": "^1.8.0"
   }
 }

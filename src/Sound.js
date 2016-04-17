@@ -121,7 +121,6 @@ Sound.prototype.start = function(playLooped, delay, duration) {
       bs.loopStart = this.loopStart;
       bs.loopEnd = this.loopEnd;
     }
-
     bs.playbackRate.value = bs.tmpPlaybackRate = this.playbackRate;
     bs.detune.value = this.detune;
     bs.startTime = startTime;   // extend node with a starttime property
@@ -152,6 +151,7 @@ Sound.prototype.stop = function() {
 
 /**
  * Stops all audio streams of this sound temporarily.
+ * This currently just works in Chrome 49+ only.
  * If you want a global, accurate pause function
  * use suspend/resume from the core module.
  * @return  {Void}

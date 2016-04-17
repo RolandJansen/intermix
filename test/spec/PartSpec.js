@@ -1,8 +1,7 @@
 'use strict';
 
-var Part = require('../../src/Part.js');
-
 describe('A part', function() {
+  var Part = require('../../src/Part.js');
   var part;
   var evt1 = { 'text': 'This is an event' };
   var evt2 = { 'text': 'Another event' };

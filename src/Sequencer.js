@@ -257,7 +257,7 @@ Sequencer.prototype.addPart = function(part, position) {
     }
     this.queue[position].push(part);
   } else {
-    throw new Error('Given parameter doesn\' seem to be a part object');
+    throw new Error('Given parameter doesn\'t seem to be a part object');
   }
 };
 

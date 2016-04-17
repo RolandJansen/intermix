@@ -27,7 +27,7 @@ describe('An Event Object', function() {
     expect(events.property).toContain('pan');
   });
 
-  describe('An audio note event', function() {
+  describe('audio note event', function() {
 
     var instrument, testEvt;
 
