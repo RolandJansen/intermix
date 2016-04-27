@@ -5,3 +5,6 @@
 
 # npm
 /node_modules/
+
+# istanbul reports
+/coverage/
