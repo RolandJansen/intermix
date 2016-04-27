@@ -9,6 +9,7 @@
   },
   "scripts": {
     "lint": "eslint src/",
+    "ist": "istanbul help config",
     "clean": "rimraf dist/*",
     "docgen": "jsdoc -c conf.json --verbose",
     "prebuild": "npm run prebuild:js",
