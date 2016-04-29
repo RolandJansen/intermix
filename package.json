@@ -13,7 +13,7 @@
     "docgen": "jsdoc -c conf.json --verbose",
     "prebuild": "npm run prebuild:js",
     "build": "npm run build:js && npm run build:js:mini",
-    "watch": "npm run test:karma && npm run watch:js",
+    "watch": "npm run test:karma && npm run watch:js &",
     "watch:cmd": "start cmd /k npm run test:karma && npm run watch:js",
     "test": "npm run test:node",
     "test:cmd": "npm run test:node:cmd",
