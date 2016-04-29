@@ -181,6 +181,12 @@ describe('A Sequencer', function() {
     expect(sequencer.nextStep).toEqual(42);
   });
 
+  it('should reset the queue pointer', function() {
+    sequencer.setQueuePointer(23);
+    sequencer.resetQueuePointer();
+    expect(sequencer.nextStep).toEqual(0);
+  });
+
   it('should start', function() {
     sequencer.start();
     expect(sequencer.isRunning).toBeTruthy();

@@ -173,12 +173,20 @@ Sequencer.prototype.setQueuePointer = function(position) {
     } else {
       this.nextStep++;
     }
-  } else if (position) {
+  } else if (typeof position !== 'undefined') {
     this.nextStep = position;
   } else {
     this.nextStep++;
   }
   // console.log('next step: ' + this.nextStep);
+};
+
+/**
+ * Resets the queue pointer (set to position 0).
+ * @return {Void}
+ */
+Sequencer.prototype.resetQueuePointer = function() {
+  this.setQueuePointer(0);
 };
 
 /**
