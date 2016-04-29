@@ -3,7 +3,10 @@
 var WebAudioTestAPI = require('web-audio-test-api');
 
 // All 'new' features of the api have to be enabled here
-WebAudioTestAPI.setState({});
+WebAudioTestAPI.setState({
+  'AudioContext#suspend': 'enabled',
+  'AudioContext#resume': 'enabled'
+});
 
 describe('A Sequencer', function() {
   var ac, Sequencer, sequencer, pattern1
@@ -199,6 +202,42 @@ describe('A Sequencer', function() {
     expect(sequencer.isRunning).toBeFalsy();
     expect(sequencer.nextStepTime).toBe(0);
     expect(sequencer.scheduleWorker.postMessage).toHaveBeenCalledWith('stop');
+  });
+
+  it('should pause', function() {
+    sequencer.start();
+    sequencer.pause();
+    expect(sequencer.ac.state).toMatch('suspended');
+    expect(sequencer.isRunning).toBeFalsy();
+  });
+
+  it('should not pause if sequencer\'s not running', function() {
+    sequencer.pause();
+    expect(sequencer.ac.state).toMatch('running');
+  });
+
+  it('should not pause if AudioContext already suspenden', function() {
+    sequencer.ac.suspend();
+    var paused = sequencer.pause();
+    expect(paused).toBeFalsy();
+  });
+
+  it('should resume when paused', function() {
+    sequencer.ac.suspend();
+    expect(sequencer.ac.state).toMatch('suspended');
+    sequencer.resume();
+    expect(sequencer.ac.state).toMatch('running');
+  });
+
+  it('should not resume if sequencer\'s running already', function() {
+    sequencer.start();
+    var resumed = sequencer.resume();
+    expect(resumed).toBeFalsy();
+  });
+
+  it('should not resume if AudioContext is not suspended', function() {
+    var resumed = sequencer.resume();
+    expect(resumed).toBeFalsy();
   });
 
   it('should add a part to the master queue', function() {

@@ -213,6 +213,38 @@ Sequencer.prototype.stop = function() {
 };
 
 /**
+ * Stops the sequencer and suspends the AudioContext to
+ * globally halt all audio streams. It just halts if
+ * if sequencer and AudioContext both are in running state.
+ * @return {Boolean} true if halted, false if not
+ */
+Sequencer.prototype.pause = function() {
+  if (core.state === 'running' && this.isRunning) {
+    this.stop();
+    core.suspend();
+    return true;
+  } else {
+    return false;
+  }
+};
+
+/**
+ * Resumes the AudioContext and starts the sequencer at its
+ * current position. It just starts if sequencer and AudioContext
+ * both are stopped.
+ * @return {Boolean} true if resumed, false if not
+ */
+Sequencer.prototype.resume = function() {
+  if (core.state === 'suspended' && !this.isRunning) {
+    this.start();
+    core.resume();
+    return true;
+  } else {
+    return false;
+  }
+};
+
+/**
  * Scheduler that runs a drawing function every time
  * the screen refreshes. The function Sequencer.animationFrame()
  * has to be overridden by the application with stuff to be drawn on the screen.
