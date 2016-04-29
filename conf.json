@@ -10,7 +10,7 @@
   "opts": {
     "destination": "./doc/",
     "recursive": true,
-    "tutorials": "demos"
+    "tutorials": "demo"
   }
 
 }

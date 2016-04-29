@@ -9,23 +9,21 @@
   },
   "scripts": {
     "lint": "eslint src/",
-    "ist": "istanbul help config",
     "clean": "rimraf dist/*",
     "docgen": "jsdoc -c conf.json --verbose",
     "prebuild": "npm run prebuild:js",
     "build": "npm run build:js && npm run build:js:mini",
     "watch": "npm run test:karma && npm run watch:js",
-    "watch:cmd": "npm run test:karma:cmd && npm run watch:js",
+    "watch:cmd": "start cmd /k npm run test:karma && npm run watch:js",
     "test": "npm run test:node",
+    "test:cmd": "npm run test:node:cmd",
     "prebuild:js": "npm run clean && npm run lint",
     "build:js": "browserify src/main.js -o dist/intermix.js -v -p browserify-derequire -s intermix",
     "build:js:mini": "browserify src/main.js -o dist/intermix.min.js -d -v -p browserify-derequire -p [minifyify --map dist/intermix.map.json --output dist/intermix.map.json]",
     "watch:js": "watchify src/main.js -o dist/intermix.js -v -d -p browserify-derequire -s intermix",
-    "watch:js:cmd": "start cmd /k npm run watch:js",
     "test:node": "istanbul cover --include-all-sources jasmine JASMINE_CONFIG_PATH=test/jasmine.json",
     "test:node:cmd": "istanbul cover --include-all-sources node_modules/jasmine/bin/jasmine.js JASMINE_CONFIG_PATH=test/jasmine.json",
-    "test:karma": "karma start",
-    "test:karma:cmd": "start cmd /k npm run test:karma"
+    "test:karma": "karma start"
   },
   "repository": {
     "type": "git",

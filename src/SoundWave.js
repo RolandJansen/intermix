@@ -92,7 +92,6 @@ var SoundWave = function(audioSrc) {
 SoundWave.prototype.decodeAudioData = function(rawAudioSrc) {
   var self = this;
   return core.decodeAudioData(rawAudioSrc).then(function(decoded) {
-    console.log(decoded);
     self.buffer = decoded;
   });
 };
