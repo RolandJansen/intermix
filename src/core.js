@@ -32,11 +32,37 @@
 
 var audioCtx = null;
 
+var isMobile = {
+  'Android': function() {
+    return window.navigator.userAgent.match(/Android/i);
+  },
+  'iOS': function() {
+    return window.navigator.userAgent.match(/iPhone|iPad|iPod/i);
+  },
+  'BlackBerry': function() {
+    return window.navigator.userAgent.match(/BlackBerry/i);
+  },
+  'Opera': function() {
+    return window.navigator.userAgent.match(/Opera Mini/i);
+  },
+  Windows: function() {
+    return window.navigator.userAgent.match(/IEMobile/i) ||
+    window.navigator.userAgent.match(/WPDesktop/i);
+  },
+  any: function() {
+    return (isMobile.Android() ||
+    isMobile.iOS() ||
+    isMobile.BlackBerry() ||
+    isMobile.Opera() ||
+    isMobile.Windows());
+  }
+};
+
 (function() {
 
   window.AudioContext = window.AudioContext || window.webkitAudioContext;
 
-  if (window.AudioContext) {
+  if (typeof window.AudioContext === 'function') {
     audioCtx = new window.AudioContext();
   } else {
     throw new Error('Couldn\'t initialize the audio context.');

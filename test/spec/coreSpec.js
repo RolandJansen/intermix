@@ -2,11 +2,8 @@
 
 require('web-audio-test-api');
 
-//there seems to be
-
 describe('The intermix core', function() {
   var core;
-  global.window = { 'AudioContext': global.AudioContext };
 
   beforeEach(function() {
     // mock window object globally if running on node
