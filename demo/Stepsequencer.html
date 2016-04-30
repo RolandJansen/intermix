@@ -8,12 +8,10 @@
     integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"
     crossorigin="anonymous"
     >
-    <link rel="stylesheet" href="assets/css/bootstrap-slider.css" media="screen" title="no title" charset="utf-8">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-touchspin/3.1.1/jquery.bootstrap-touchspin.css" media="screen" title="no title" charset="utf-8">
     <link rel="stylesheet" href="assets/css/demos.css" media="screen" title="no title" charset="utf-8">
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
     <script type="text/javascript" src="https://code.createjs.com/preloadjs-0.6.2.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/6.0.5/bootstrap-slider.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-touchspin/3.1.1/jquery.bootstrap-touchspin.js"></script>
 
     <script type="text/javascript" src="../dist/intermix.js"></script>
@@ -38,7 +36,10 @@
           <div class="panel-body">
             <input class="btn btn-default" type="button" value="Start" onclick="start()">
             <input class="btn btn-default" type="button" value="Stop" onclick="stop()">
-            BPM: <input id="bpm" type="text" name="name" value="120" onchange="setBpm(this)">
+            <input id="pause-btn" class="btn btn-default" type="button" value="Pause" onclick="pause()">
+            <div class="bpm-wrap">
+              <p class="bpm-label">BPM:&nbsp;</p><input id="bpm" type="text" value="120" onchange="setBpm(this)">
+            </div>
             <br><br>
             <table id="sequencer" class="table-bordered">
               <tr id="seqStepLabel" class="seqRow">
@@ -197,6 +198,7 @@
       var bdNote, sdNote, hhNote, bsNote;
       var queue = new createjs.LoadQueue();
       var binaryKick;
+      var isPaused = false;
 
       var seq = new intermix.Sequencer();
       seq.loop = true;
@@ -224,6 +226,21 @@
       //   console.log(step + ' ' + value);
       //   bassSound.setTone()
       // };
+
+      function initBpmSpinner() {
+        var spinner = $('input#bpm');
+        spinner.TouchSpin({
+          verticalbuttons: true,
+          verticalupclass: 'glyphicon glyphicon-plus',
+          verticaldownclass: 'glyphicon glyphicon-minus',
+          min: 10,
+          max: 240
+        });
+        spinner.on('change', function(e) {
+          // console.log(e);
+          setBpm(e.target.value);
+        })
+      }
 
       function updateColor(color) {
         // console.log(color);
@@ -342,6 +359,18 @@
         seq.stop();
       };
 
+      function pause() {
+        var button = $('#pause-btn');
+        isPaused = !isPaused;
+        if (isPaused) {
+          button.attr('value', 'Pause');
+          seq.pause();
+        } else {
+          button.attr('value', 'Resume');
+          seq.resume();
+        }
+      };
+
       function setBpm(bpm) {
         seq.setBpm(bpm.value);
       };
@@ -414,6 +443,7 @@
 
         setTimeout(function() {
           initParts();
+          initBpmSpinner();
           drawActiveSteps();
         }, 600);
       }

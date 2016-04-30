@@ -1,4 +1,17 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.intermix = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+'use strict';
+
+//intermix = require('./core.js');
+var intermix = _dereq_('./core.js') || {};
+intermix.events = _dereq_('./events.js');
+intermix.SoundWave = _dereq_('./SoundWave.js');
+intermix.Sound = _dereq_('./Sound.js');
+intermix.Sequencer = _dereq_('./Sequencer.js');
+intermix.Part = _dereq_('./Part.js');
+
+module.exports = intermix;
+
+},{"./Part.js":3,"./Sequencer.js":4,"./Sound.js":5,"./SoundWave.js":6,"./core.js":7,"./events.js":8}],2:[function(_dereq_,module,exports){
 var bundleFn = arguments[3];
 var sources = arguments[4];
 var cache = arguments[5];
@@ -65,7 +78,7 @@ module.exports = function (fn) {
     ));
 };
 
-},{}],2:[function(_dereq_,module,exports){
+},{}],3:[function(_dereq_,module,exports){
 'use strict';
 
 /**
@@ -198,7 +211,7 @@ Part.prototype.extendOnEnd = function(extLength) {
 
 module.exports = Part;
 
-},{}],3:[function(_dereq_,module,exports){
+},{}],4:[function(_dereq_,module,exports){
 'use strict';
 
 var work = _dereq_('webworkify');   //prepares the worker for browserify
@@ -374,12 +387,20 @@ Sequencer.prototype.setQueuePointer = function(position) {
     } else {
       this.nextStep++;
     }
-  } else if (position) {
+  } else if (typeof position !== 'undefined') {
     this.nextStep = position;
   } else {
     this.nextStep++;
   }
   // console.log('next step: ' + this.nextStep);
+};
+
+/**
+ * Resets the queue pointer (set to position 0).
+ * @return {Void}
+ */
+Sequencer.prototype.resetQueuePointer = function() {
+  this.setQueuePointer(0);
 };
 
 /**
@@ -403,6 +424,38 @@ Sequencer.prototype.stop = function() {
   //this.runQueue = [];
   this.nextStepTime = 0;
   this.isRunning = false;
+};
+
+/**
+ * Stops the sequencer and suspends the AudioContext to
+ * globally halt all audio streams. It just halts if
+ * if sequencer and AudioContext both are in running state.
+ * @return {Boolean} true if halted, false if not
+ */
+Sequencer.prototype.pause = function() {
+  if (core.state === 'running' && this.isRunning) {
+    this.stop();
+    core.suspend();
+    return true;
+  } else {
+    return false;
+  }
+};
+
+/**
+ * Resumes the AudioContext and starts the sequencer at its
+ * current position. It just starts if sequencer and AudioContext
+ * both are stopped.
+ * @return {Boolean} true if resumed, false if not
+ */
+Sequencer.prototype.resume = function() {
+  if (core.state === 'suspended' && !this.isRunning) {
+    this.start();
+    core.resume();
+    return true;
+  } else {
+    return false;
+  }
 };
 
 /**
@@ -526,7 +579,7 @@ Sequencer.prototype.copyArray = function(sourceArray) {
 
 module.exports = Sequencer;
 
-},{"./core.js":6,"./scheduleWorker.js":9,"webworkify":1}],4:[function(_dereq_,module,exports){
+},{"./core.js":7,"./scheduleWorker.js":9,"webworkify":2}],5:[function(_dereq_,module,exports){
 'use strict';
 
 var core = _dereq_('./core.js');
@@ -843,7 +896,7 @@ Sound.prototype.getUID = function() {
 
 module.exports = Sound;
 
-},{"./core.js":6}],5:[function(_dereq_,module,exports){
+},{"./core.js":7}],6:[function(_dereq_,module,exports){
 'use strict';
 
 var core = _dereq_('./core.js');
@@ -895,7 +948,6 @@ var core = _dereq_('./core.js');
  * @param  {(Object|Object[]|string)} audioSrc   One or more ArrayBuffers or filenames
  */
 var SoundWave = function(audioSrc) {
-
   this.ac = core;       //currently just used for tests
   this.buffer = null;   //AudioBuffer
   this.metaData = [];   //start-/endpoints and length of single waves
@@ -1078,7 +1130,7 @@ SoundWave.prototype.sortBinBuffers = function(filenames, binBuffers) {
 
 module.exports = SoundWave;
 
-},{"./core.js":6}],6:[function(_dereq_,module,exports){
+},{"./core.js":7}],7:[function(_dereq_,module,exports){
 /**
  * This is the foundation of the Intermix library.
  * It simply creates the audio context objects
@@ -1113,11 +1165,37 @@ module.exports = SoundWave;
 
 var audioCtx = null;
 
+var isMobile = {
+  'Android': function() {
+    return window.navigator.userAgent.match(/Android/i);
+  },
+  'iOS': function() {
+    return window.navigator.userAgent.match(/iPhone|iPad|iPod/i);
+  },
+  'BlackBerry': function() {
+    return window.navigator.userAgent.match(/BlackBerry/i);
+  },
+  'Opera': function() {
+    return window.navigator.userAgent.match(/Opera Mini/i);
+  },
+  Windows: function() {
+    return window.navigator.userAgent.match(/IEMobile/i) ||
+    window.navigator.userAgent.match(/WPDesktop/i);
+  },
+  any: function() {
+    return (isMobile.Android() ||
+    isMobile.iOS() ||
+    isMobile.BlackBerry() ||
+    isMobile.Opera() ||
+    isMobile.Windows());
+  }
+};
+
 (function() {
 
   window.AudioContext = window.AudioContext || window.webkitAudioContext;
 
-  if (window.AudioContext) {
+  if (typeof window.AudioContext !== 'undefined') {
     audioCtx = new window.AudioContext();
   } else {
     throw new Error('Couldn\'t initialize the audio context.');
@@ -1127,7 +1205,7 @@ var audioCtx = null;
 
 module.exports = audioCtx;
 
-},{}],7:[function(_dereq_,module,exports){
+},{}],8:[function(_dereq_,module,exports){
 'use strict';
 
 /**
@@ -1349,20 +1427,7 @@ module.exports = {
   createAudioNote: createAudioNote
 };
 
-},{}],8:[function(_dereq_,module,exports){
-'use strict';
-
-//intermix = require('./core.js');
-var intermix = _dereq_('./core.js') || {};
-intermix.events = _dereq_('./events.js');
-intermix.SoundWave = _dereq_('./SoundWave.js');
-intermix.Sound = _dereq_('./Sound.js');
-intermix.Sequencer = _dereq_('./Sequencer.js');
-intermix.Part = _dereq_('./Part.js');
-
-module.exports = intermix;
-
-},{"./Part.js":2,"./Sequencer.js":3,"./Sound.js":4,"./SoundWave.js":5,"./core.js":6,"./events.js":7}],9:[function(_dereq_,module,exports){
+},{}],9:[function(_dereq_,module,exports){
 /**
  * This is a webworker that provides a timer
  * that fires the scheduler for the sequencer.
@@ -1399,5 +1464,5 @@ var worker = function(self) {
 
 module.exports = worker;
 
-},{}]},{},[8])(8)
+},{}]},{},[1])(1)
 });

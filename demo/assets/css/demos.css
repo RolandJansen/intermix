@@ -24,3 +24,17 @@
 .spinner {
 	width: 3em !important;
 }
+
+.bpm-wrap {
+	float:right;
+}
+
+.bpm-wrap .bpm-label {
+	float: left;
+	padding-top: 7px;
+}
+
+.bpm-wrap .bootstrap-touchspin {
+	width: 5em;
+	float: right;
+}
