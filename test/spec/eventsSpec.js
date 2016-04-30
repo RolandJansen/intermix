@@ -1,8 +1,18 @@
 'use strict';
 
-var events = require('../../src/events.js');
+var proxyquire =  require('proxyquire');
 
 describe('An Event Object', function() {
+  var events;
+
+  beforeEach(function() {
+    // proxyquire enshures reloading of events.js
+    events = proxyquire('../../src/events.js', {});
+  });
+
+  afterEach(function() {
+    events = null;
+  });
 
   it('should be defined', function() {
     expect(events).toBeDefined();

@@ -1,17 +1,20 @@
 'use strict';
 
+var proxyquire =  require('proxyquire');
+
 describe('A part', function() {
-  var Part = require('../../src/Part.js');
-  var part;
+  var Part, part;
   var evt1 = { 'text': 'This is an event' };
   var evt2 = { 'text': 'Another event' };
 
   beforeEach(function() {
+    // proxyquire enshures reloading of Part.js
+    Part = proxyquire('../../src/Part.js', {});
     part = new Part();
   });
 
   afterEach(function() {
-    part = null;
+    Part = part = null;
   });
 
   it('should be defined', function() {

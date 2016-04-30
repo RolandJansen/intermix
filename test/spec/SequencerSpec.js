@@ -21,12 +21,13 @@ describe('A Sequencer', function() {
   }
 
   beforeEach(function() {
-    ac = new WebAudioTestAPI.AudioContext();
     var proxyquire = require('proxyquire');
+    ac = new WebAudioTestAPI.AudioContext();
     // mock window object globally if running on node
     if (typeof window === 'undefined') {
       global.window = {
-        requestAnimationFrame: jasmine.createSpy('requestAnimationFrame')
+        requestAnimationFrame: jasmine.createSpy('requestAnimationFrame'),
+        AudioContext: jasmine.createSpy('AudioContext')
       };
       // var loadModule = require('../module-loader.js').loadModule;
       // var mod = loadModule('src/Sequencer.js', {
@@ -39,7 +40,8 @@ describe('A Sequencer', function() {
       Sequencer = proxyquire('../../src/Sequencer.js', {
         'webworkify': function(worker) { return worker; },
         './core.js': ac,
-        './scheduleWorker.js': jasmine.createSpyObj('scheduleWorker', [ 'postMessage', 'onmessage' ])
+        './scheduleWorker.js': jasmine.createSpyObj('scheduleWorker', [ 'postMessage', 'onmessage' ]),
+        '@noCallThru': true
       });
     } else {
       // var proxyquire = require('proxyquire');
@@ -69,7 +71,7 @@ describe('A Sequencer', function() {
   });
 
   afterEach(function() {
-    if (!typeof global.window.document === 'undefined') {
+    if (typeof global.window.document !== 'undefined') {
       delete global.window;
     }
     ac = Sequencer = sequencer = pattern1 =

@@ -10,11 +10,6 @@ var sinon = require('sinon');
 // var WebAudioTestAPI = require('web-audio-test-api');
 var proxyquire =  require('proxyquire'); //fake require in the module under test
 
-// All 'new' features of the api have to be enabled here
-// WebAudioTestAPI.setState({
-//   'AudioContext#decodeAudioData': 'promise'
-// });
-
 describe('A SoundWave', function() {
   var testData, ac, SoundWave;
 
@@ -37,13 +32,13 @@ describe('A SoundWave', function() {
       };
       testData = require('../soundwave-test-data');
       SoundWave = proxyquire('../../src/SoundWave.js', {
-        'core': ac,
+        './core.js': ac,
         '@noCallThru': true
       });
     } else {
       testData = require('../soundwave-test-data.js');
       SoundWave = proxyquire('../../src/SoundWave.js', {
-        'core': ac,
+        './core.js': ac,
         '@noCallThru': true
       });
     }
@@ -51,7 +46,8 @@ describe('A SoundWave', function() {
   });
 
   afterEach(function() {
-    if (!typeof global.window.document === 'undefined') {
+    if (typeof global.window === 'object' &&
+    typeof global.window.document === 'undefined') {
       delete global.window;
     }
     ac = SoundWave = null;

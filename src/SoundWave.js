@@ -49,7 +49,6 @@ var core = require('./core.js');
  * @param  {(Object|Object[]|string)} audioSrc   One or more ArrayBuffers or filenames
  */
 var SoundWave = function(audioSrc) {
-
   this.ac = core;       //currently just used for tests
   this.buffer = null;   //AudioBuffer
   this.metaData = [];   //start-/endpoints and length of single waves

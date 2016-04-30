@@ -1,6 +1,7 @@
 'use strict';
 
-require('web-audio-test-api');
+var WebAudioTestAPI = require('web-audio-test-api');
+var proxyquire =  require('proxyquire');
 
 describe('The intermix core', function() {
   var core;
@@ -8,9 +9,10 @@ describe('The intermix core', function() {
   beforeEach(function() {
     // mock window object globally if running on node
     if (typeof window === 'undefined') {
-      global.window = { 'AudioContext': global.AudioContext };
+      global.window = { 'AudioContext': WebAudioTestAPI.AudioContext };
     }
-    core = require('../../src/core.js');
+    // proxyquire enshures enshures reloading of core.js
+    core = proxyquire('../../src/core.js', {});
   });
 
   afterEach(function() {
@@ -26,6 +28,7 @@ describe('The intermix core', function() {
   });
 
   it('should have an audio output', function() {
+    // console.log(core.destination);
     expect(core.destination).toBeDefined();
   });
 });

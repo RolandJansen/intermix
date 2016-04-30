@@ -62,7 +62,7 @@ var isMobile = {
 
   window.AudioContext = window.AudioContext || window.webkitAudioContext;
 
-  if (typeof window.AudioContext === 'function') {
+  if (typeof window.AudioContext !== 'undefined') {
     audioCtx = new window.AudioContext();
   } else {
     throw new Error('Couldn\'t initialize the audio context.');
