@@ -87,7 +87,7 @@ Sequencer.prototype.scheduler = function() {
  * @return {Void}
  */
 Sequencer.prototype.addPartsToRunqueue = function() {
-  if (this.queue[this.nextStep]) {
+  if (typeof this.queue[this.nextStep] !== 'undefined') {
     if (this.queue[this.nextStep].length === 1) {
       var part = this.queue[this.nextStep][0];
       part.pointer = 0;
@@ -161,24 +161,21 @@ Sequencer.prototype.processSeqEvent = function(seqEvent, delay) {
  * Sets the pointer to the next step that should be played
  * in the master queue. If we're playing in loop mode,
  * jump back to loopstart when end of loop is reached.
+ * If a pointer position is given, jump to it.
  * @private
  * @param   {Int}   position  New position in the master queue
  * @return  {Void}
  */
 Sequencer.prototype.setQueuePointer = function(position) {
-  if (this.loop) {
-    if (this.nextStep >= this.loopEnd) {
-      this.nextStep = this.loopStart;
-      this.runQueue = [];
-    } else {
-      this.nextStep++;
-    }
-  } else if (typeof position !== 'undefined') {
+  if (typeof position !== 'undefined') {
     this.nextStep = position;
+    this.runqueue = [];
+  } else if (this.loop && this.nextStep >= this.loopEnd) {
+    this.nextStep = this.loopStart;
+    this.runqueue = [];
   } else {
     this.nextStep++;
   }
-  // console.log('next step: ' + this.nextStep);
 };
 
 /**
@@ -207,7 +204,6 @@ Sequencer.prototype.start = function() {
  */
 Sequencer.prototype.stop = function() {
   this.scheduleWorker.postMessage('stop');
-  //this.runQueue = [];
   this.nextStepTime = 0;
   this.isRunning = false;
 };

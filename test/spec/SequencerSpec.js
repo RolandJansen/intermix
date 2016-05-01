@@ -181,15 +181,33 @@ describe('A Sequencer', function() {
     expect(sequencer.nextStep).toEqual(5);
   });
 
+  it('should clean the runqueue when end of loop is reached', function() {
+    sequencer.runqueue.push(part1, part2);
+    sequencer.loopStart = 5;
+    sequencer.loopEnd = 23;
+    sequencer.loop = true;
+    sequencer.nextStep = 24;
+    sequencer.setQueuePointer();
+    expect(sequencer.runqueue.length).toEqual(0);
+  });
+
   it('should set the pointer to a given position', function() {
     sequencer.setQueuePointer(42);
     expect(sequencer.nextStep).toEqual(42);
   });
 
+  it('should clean the runqueue when the pointer jumps', function() {
+    sequencer.runqueue.push(part1, part2);
+    sequencer.setQueuePointer(5);
+    expect(sequencer.runqueue.length).toEqual(0);
+  });
+
   it('should reset the queue pointer', function() {
+    sequencer.runqueue.push(part1, part2);
     sequencer.setQueuePointer(23);
     sequencer.resetQueuePointer();
     expect(sequencer.nextStep).toEqual(0);
+    expect(sequencer.runqueue.length).toEqual(0);
   });
 
   it('should start', function() {

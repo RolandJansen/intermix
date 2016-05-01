@@ -37,6 +37,7 @@
             <input class="btn btn-default" type="button" value="Start" onclick="start()">
             <input class="btn btn-default" type="button" value="Stop" onclick="stop()">
             <input id="pause-btn" class="btn btn-default" type="button" value="Pause" onclick="pause()">
+            <input class="btn btn-default" type="button" value="Reset" onclick="reset()">
             <div class="bpm-wrap">
               <p class="bpm-label">BPM:&nbsp;</p><input id="bpm" type="text" value="120" onchange="setBpm(this)">
             </div>
@@ -363,12 +364,18 @@
         var button = $('#pause-btn');
         isPaused = !isPaused;
         if (isPaused) {
-          button.attr('value', 'Pause');
+          button.attr('value', 'Resume');
           seq.pause();
         } else {
-          button.attr('value', 'Resume');
+          clearOldPointer();
+          button.attr('value', 'Pause');
           seq.resume();
         }
+      };
+
+      function reset() {
+        clearOldPointer();
+        seq.resetQueuePointer();
       };
 
       function setBpm(bpm) {
