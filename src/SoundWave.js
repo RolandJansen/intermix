@@ -54,18 +54,25 @@ var SoundWave = function(audioSrc) {
   this.metaData = [];   //start-/endpoints and length of single waves
   var self = this;
 
-  if (audioSrc) {
-    if (audioSrc instanceof ArrayBuffer) {
+  if (typeof audioSrc !== 'undefined') {
+    if (typeof audioSrc === 'string') {
+      //one file to load/decode
+      this.loadFile(audioSrc).then(function(response) {
+        return self.decodeAudioData(response);
+      }, function(error) {
+        throw new Error('Couldn\'t load file: ' + error);
+      });
+    } else if (audioSrc instanceof Array && typeof audioSrc[0] === 'string') {
+      //multiple files to load/decode and cancatinate
+      this.loadFiles(audioSrc).then(function(binBuffers) {
+        this.buffer = this.concatBinariesToAudioBuffer(binBuffers, this.buffer);
+      });
+    } else if (audioSrc instanceof ArrayBuffer) {
       //one audio buffer to decode
       this.decodeAudioData(audioSrc);
     } else if (audioSrc instanceof Array && audioSrc[0] instanceof ArrayBuffer) {
       //multiple audio buffers to decode and concatenate
       this.concatBinariesToAudioBuffer(audioSrc);
-    } else if (typeof audioSrc === 'string' && audioSrc.indexOf(',') === -1) {
-      //one file to load/decode
-      this.loadFile(audioSrc, function(response) {
-        self.buffer = self.decodeAudioData(response);
-      });
     } else if (typeof audioSrc === 'string' && audioSrc.indexOf(',') > -1) {
       //multiple files to load/decode and cancatinate
       var binBuffers = this.loadFiles(audioSrc);
@@ -150,69 +157,42 @@ SoundWave.prototype.addWaveMetaData = function(existingBuffer, newBuffer) {
 };
 
 /**
- * Loads a binary file and calls a function with the
- * returned ArrayBuffer as its argument when done.
- * @todo    Test in synchronous mode or remove it completely
- * @param  {string}   filename       The file to be loaded
- * @param  {function} onloadCallback The function to be called
- * @param  {boolean}  [async=true]   Asynchronous loading
- * @example
- * var arrayBuffer;
- * this.loadFile('file1.wav', function(response) {
- *   arrayBuffer = response;
- * });
+ * Loads a (audio) file and returns its data as ArrayBuffer
+ * when the promise fulfills.
+ * @private
+ * @param  {string}   url            The file to be loaded
+ * @return {Promise}                 A promise representing the xhr response
  */
-SoundWave.prototype.loadFile = function(filename, onloadCallback, async) {
-  var self = this;
-  var asynchronously = true;
-  var request = new window.XMLHttpRequest();
-
-  request.addEventListener('progress', self.updateProgress);
-  request.addEventListener('load', self.transferComplete);
-  request.addEventListener('error', self.transferFailed);
-  request.addEventListener('abort', self.transferCanceled);
-
-  if (async) {
-    asynchronously = async;
-  }
-
-  request.open('GET', filename, asynchronously);
-  request.responseType = 'arraybuffer';
-
-  request.onload = function() {
-    onloadCallback(request.response);
-  };
-
-  request.send();
+SoundWave.prototype.loadFile = function(url) {
+  return window.fetch(url)
+    .then(function(response) {
+      if (response.ok) {
+        return response.arrayBuffer();
+      } else {
+        throw new Error('Network error. Couldn\'t load file: ' + url);
+      }
+    })
+    .then(function(buffer) {
+      return buffer;
+    });
 };
-
-SoundWave.prototype.updateProgress = function() {};
-
-SoundWave.prototype.transferComplete = function() {
-
-};
-
-SoundWave.prototype.transferFailed = function() {};
-
-SoundWave.prototype.transferCanceled = function() {};
 
 /**
- * Loads multiple binary files and returns an array
+ * Loads multiple (audio) files and returns an array
  * with the data from the files in the given order.
+ * @private
  * @param  {Array}  filenames List with filenames
  * @return {Array}            Array of ArrayBuffers
  */
 SoundWave.prototype.loadFiles = function(filenames) {
-  var self = this;
-  var binBuffers = [];
-  var names = filenames.split(',');
-  names.forEach(function(name) {
-    self.loadFile(name, function(response) {
-      binBuffers[name] = response;
-    });
-  });
+  var promises = [];
+  filenames.forEach(function(name) {
+    promises.push(this.loadFile(name));
+  }, this);
 
-  return this.sortBinBuffers(names, binBuffers);
+  return Promise.all(promises).then(function(binBuffers) {
+    return binBuffers;
+  });
 };
 
 /**
@@ -224,6 +204,7 @@ SoundWave.prototype.loadFiles = function(filenames) {
  * @return {Array}             Array with sorted ArrayBuffers
  */
 SoundWave.prototype.sortBinBuffers = function(filenames, binBuffers) {
+  // futile??
   return filenames.map(function(el) {
     return binBuffers[el];
   });

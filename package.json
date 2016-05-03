@@ -66,6 +66,7 @@
     "proxyquireify": "^3.1.1",
     "rimraf": "^2.5.0",
     "sinon": "^1.17.3",
+    "sinon-as-promised": "^4.0.0",
     "watchify": "^3.7.0",
     "web-audio-test-api": "^0.5.2",
     "webworkify": "^1.1.0",

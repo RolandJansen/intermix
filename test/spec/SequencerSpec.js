@@ -29,14 +29,7 @@ describe('A Sequencer', function() {
         requestAnimationFrame: jasmine.createSpy('requestAnimationFrame'),
         AudioContext: jasmine.createSpy('AudioContext')
       };
-      // var loadModule = require('../module-loader.js').loadModule;
-      // var mod = loadModule('src/Sequencer.js', {
-      //   'webworkify': function(worker) { return worker; },
-      //   './core.js': ac,
-      //   './scheduleWorker.js': jasmine.createSpyObj('scheduleWorker', [ 'postMessage', 'onmessage' ])
-      // });
-      // mod.window = global.window;
-      // Sequencer = mod.Sequencer;
+
       Sequencer = proxyquire('../../src/Sequencer.js', {
         'webworkify': function(worker) { return worker; },
         './core.js': ac,
