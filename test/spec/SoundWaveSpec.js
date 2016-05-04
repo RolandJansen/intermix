@@ -3,6 +3,7 @@
 var XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 global.XMLHttpRequest = XMLHttpRequest;
 
+// var Promise = require('es6-promise').Promise;
 var atob = require('atob');
 // see this post: https://blog.pivotal.io/labs/labs/testing-javascript-promises
 // var mockPromises = require('mock-promises');
@@ -27,9 +28,17 @@ describe('SoundWave', function() {
 
     if (typeof window === 'undefined' ||
     typeof window.document === 'undefined') {
+
       global.window = {
         'atob': atob,
-        'XMLHttpRequest': XMLHttpRequest
+        'XMLHttpRequest': XMLHttpRequest,
+        'fetch': function(value) { return value; },
+        'Response': function(value) {
+          return {
+            'ok': true,
+            'arrayBuffer': function() { return value; }
+          };
+        }
       };
     }
 
@@ -107,10 +116,7 @@ describe('SoundWave', function() {
     // promise.then(function(value) {
       // promisedValue = value;
     // });
-    console.log(mockPromises.contracts.all()[1]);
     mockPromises.executeForPromise(promise);
-    console.log(mockPromises.contracts.all());
-    console.log('executed?');
 
     // var syncProm = mockPromises.getMockPromise(prom);
     // console.log(syncProm);
@@ -177,10 +183,14 @@ describe('SoundWave', function() {
           resolve: resolve,
           reject: reject
         };
+        // resolve(response);
+        // reject('error');
       });
       spyOn(window, 'fetch').and.returnValue(fetchPromise);
       soundWave = new SoundWave();
+      // promiseHelper.resolve('sdf');
       filePromise = soundWave.loadFile(url);
+
     });
 
     afterEach(function() {
@@ -208,6 +218,7 @@ describe('SoundWave', function() {
           done();
         });
       });
+
     });
 
     describe('on unsuccessful fetch', function() {
@@ -217,10 +228,27 @@ describe('SoundWave', function() {
         promiseHelper.reject(errorObj);
       });
 
-      it('resolves its promise with an error object', function(done) {
-        filePromise.catch(function(error) {
+      it('resolves its promise with an error', function() {
+        filePromise.then(function(error) {
           expect(error).toEqual(errorObj);
-          done();
+        });
+      });
+    });
+
+    describe('on server error', function() {
+      var errorObj = new Error('Server error. Couldn\'t load file: /path/to/file.wav');
+      var badResponse = {
+        'ok': false,
+        'arrayBuffer': function() { return null; }
+      };
+
+      beforeEach(function() {
+        promiseHelper.resolve(badResponse);
+      });
+
+      it('resolves its promise with an error', function() {
+        filePromise.then(function(value) {
+          expect(value).toEqual(errorObj);
         });
       });
     });
@@ -278,7 +306,7 @@ describe('SoundWave', function() {
       });
     });
 
-    describe('on unsuccessful loading', function() {
+    describe('on unsuccessful loading (one or more requests)', function() {
       var filesPromise;
       var errorObj = { 'msg': 'Loading failed' };
 
@@ -287,8 +315,8 @@ describe('SoundWave', function() {
         filesPromise = soundWave.loadFiles(['/just/one/to/avoid/timeout']);
       });
 
-      it('resolves its promise with an error object', function(done) {
-        filesPromise.catch(function(error) {
+      it('resolves its promise with an error', function(done) {
+        filesPromise.then(function(error) {
           expect(error).toEqual(errorObj);
           done();
         });

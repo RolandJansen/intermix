@@ -169,11 +169,14 @@ SoundWave.prototype.loadFile = function(url) {
       if (response.ok) {
         return response.arrayBuffer();
       } else {
-        throw new Error('Network error. Couldn\'t load file: ' + url);
+        throw new Error('Server error. Couldn\'t load file: ' + url);
       }
     })
     .then(function(buffer) {
       return buffer;
+    })
+    .catch(function(err) {
+      return err;
     });
 };
 
@@ -192,6 +195,9 @@ SoundWave.prototype.loadFiles = function(filenames) {
 
   return Promise.all(promises).then(function(binBuffers) {
     return binBuffers;
+  })
+  .catch(function(err) {
+    return err;
   });
 };
 
