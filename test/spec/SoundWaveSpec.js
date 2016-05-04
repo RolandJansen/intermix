@@ -58,6 +58,8 @@ describe('SoundWave', function() {
     beforeEach(function() {
       spyOn(SoundWave.prototype, 'loadFile').and.returnValue(fakePromise);
       spyOn(SoundWave.prototype, 'loadFiles').and.returnValue(fakePromise);
+      spyOn(SoundWave.prototype, 'decodeAudioData');
+      spyOn(SoundWave.prototype, 'concatBinariesToAudioBuffer');
     });
 
     it('can be created with a filename', function() {
@@ -67,24 +69,21 @@ describe('SoundWave', function() {
     });
 
     it('can be created with multiple filenames', function() {
-      var arg = ['file1.wav', 'file2.wav'];
+      var arg = [ 'file1.wav', 'file2.wav' ];
       var soundWave = new SoundWave(arg);
       expect(soundWave.loadFiles).toHaveBeenCalledWith(arg);
     });
 
     it('can be created with an ArrayBuffer', function() {
-      SoundWave.prototype.decodeAudioData = jasmine.createSpy('decodeAudioData');
       var soundWave = new SoundWave(testData.buffer1.data);
       expect(soundWave.decodeAudioData).toHaveBeenCalledTimes(1);
       expect(soundWave.decodeAudioData).toHaveBeenCalledWith(testData.buffer1.data);
     });
 
     it('can be created with multiple ArrayBuffers', function() {
-      SoundWave.prototype.concatBinariesToAudioBuffer = jasmine.createSpy('concatBinariesToAudioBuffer');
-      var soundWave = new SoundWave([testData.buffer1.data,
-        testData.buffer2.data,
-        testData.buffer3.data]);
-      expect(soundWave.concatBinariesToAudioBuffer).toHaveBeenCalledTimes(1);
+      var arg = [ testData.buffer1.data, testData.buffer2.data ];
+      var soundWave = new SoundWave(arg);
+      expect(soundWave.concatBinariesToAudioBuffer).toHaveBeenCalledWith(arg);
     });
 
     it('can be created without an argument', function() {
