@@ -1,23 +1,12 @@
 'use strict';
 
-var XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
-global.XMLHttpRequest = XMLHttpRequest;
-
-// var Promise = require('es6-promise').Promise;
 var atob = require('atob');
-// see this post: https://blog.pivotal.io/labs/labs/testing-javascript-promises
-// var mockPromises = require('mock-promises');
-var sinon = require('sinon');
-require('sinon-as-promised');
-// var WebAudioTestAPI = require('web-audio-test-api');
 var proxyquire =  require('proxyquire'); //fake require in the module under test
 
 describe('SoundWave', function() {
   var testData, ac, SoundWave;
 
   beforeEach(function() {
-    // mockPromises.reset();
-    // global.Promise = mockPromises.getMockPromise(global.Promise);
 
     var WebAudioTestAPI = require('web-audio-test-api');
     // All 'new' features of the api have to be enabled here
@@ -31,7 +20,6 @@ describe('SoundWave', function() {
 
       global.window = {
         'atob': atob,
-        'XMLHttpRequest': XMLHttpRequest,
         'fetch': function(value) { return value; },
         'Response': function(value) {
           return {
@@ -56,8 +44,6 @@ describe('SoundWave', function() {
       delete global.window;
     }
     ac = SoundWave = null;
-    // global.Promise = mockPromises.getOriginalPromise();
-    // mockPromises.uninstall();
   });
 
   it('ensure that we\'re testing against the WebAudioTestAPI', function() {
@@ -66,45 +52,52 @@ describe('SoundWave', function() {
     expect(soundWave.ac.$name).toBeDefined();                             //are we testing against it?
   });
 
-  it('can be instantiated with a filename', function() {
-    var loadFile = sinon.stub().resolves();
-    SoundWave.prototype.loadFile = loadFile;
-    var soundWave = new SoundWave('file.mp3');
-    expect(soundWave.loadFile.calledOnce).toBeTruthy();
+  describe('instance', function() {
+    var fakePromise = Promise.resolve(true);
+
+    beforeEach(function() {
+      spyOn(SoundWave.prototype, 'loadFile').and.returnValue(fakePromise);
+      spyOn(SoundWave.prototype, 'loadFiles').and.returnValue(fakePromise);
+    });
+
+    it('can be created with a filename', function() {
+      var arg = 'file.mp3';
+      var soundWave = new SoundWave(arg);
+      expect(soundWave.loadFile).toHaveBeenCalledWith(arg);
+    });
+
+    it('can be created with multiple filenames', function() {
+      var arg = ['file1.wav', 'file2.wav'];
+      var soundWave = new SoundWave(arg);
+      expect(soundWave.loadFiles).toHaveBeenCalledWith(arg);
+    });
+
+    it('can be created with an ArrayBuffer', function() {
+      SoundWave.prototype.decodeAudioData = jasmine.createSpy('decodeAudioData');
+      var soundWave = new SoundWave(testData.buffer1.data);
+      expect(soundWave.decodeAudioData).toHaveBeenCalledTimes(1);
+      expect(soundWave.decodeAudioData).toHaveBeenCalledWith(testData.buffer1.data);
+    });
+
+    it('can be created with multiple ArrayBuffers', function() {
+      SoundWave.prototype.concatBinariesToAudioBuffer = jasmine.createSpy('concatBinariesToAudioBuffer');
+      var soundWave = new SoundWave([testData.buffer1.data,
+        testData.buffer2.data,
+        testData.buffer3.data]);
+      expect(soundWave.concatBinariesToAudioBuffer).toHaveBeenCalledTimes(1);
+    });
+
+    it('can be created without an argument', function() {
+      var soundWave = new SoundWave();
+      expect(soundWave).toBeDefined();
+    });
+
+    it('can\'t be created with an unknown parameter type', function() {
+      expect(function() { new SoundWave({'type': 'anObject'}); })
+        .toThrowError('Cannot create SoundWave object: Unsupported data format');
+    });
   });
 
-  it('can be instantiated with multiple filenames', function() {
-    var files = ['file1.wav', 'file2.wav'];
-    var loadFiles = sinon.stub().resolves();
-    SoundWave.prototype.loadFiles = loadFiles;
-    var soundWave = new SoundWave(files);
-    expect(soundWave.loadFiles.calledOnce).toBeTruthy();
-  });
-
-  it('can be instantiated with an ArrayBuffer', function() {
-    SoundWave.prototype.decodeAudioData = jasmine.createSpy('decodeAudioData');
-    var soundWave = new SoundWave(testData.buffer1.data);
-    expect(soundWave.decodeAudioData).toHaveBeenCalledTimes(1);
-    expect(soundWave.decodeAudioData).toHaveBeenCalledWith(testData.buffer1.data);
-  });
-
-  it('can be instantiated with multiple ArrayBuffers', function() {
-    SoundWave.prototype.concatBinariesToAudioBuffer = jasmine.createSpy('concatBinariesToAudioBuffer');
-    var soundWave = new SoundWave([testData.buffer1.data,
-      testData.buffer2.data,
-      testData.buffer3.data]);
-    expect(soundWave.concatBinariesToAudioBuffer).toHaveBeenCalledTimes(1);
-  });
-
-  it('can be instatiated without an argument', function() {
-    var soundWave = new SoundWave();
-    expect(soundWave).toBeDefined();
-  });
-
-  it('can\'t be instantiated with an unknown parameter type', function() {
-    expect(function() { new SoundWave({'type': 'anObject'}); })
-      .toThrowError('Cannot create SoundWave object: Unsupported data format');
-  });
 
   xit('can decode audio data from an ArrayBuffer', function() {
     var promise, promisedValue;
@@ -183,8 +176,6 @@ describe('SoundWave', function() {
           resolve: resolve,
           reject: reject
         };
-        // resolve(response);
-        // reject('error');
       });
       spyOn(window, 'fetch').and.returnValue(fetchPromise);
       soundWave = new SoundWave();

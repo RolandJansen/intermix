@@ -50,7 +50,6 @@
     "atob": "^2.0.3",
     "browserify": "^13.0.0",
     "browserify-derequire": "^0.9.4",
-    "es6-promise": "^3.1.2",
     "eslint": "^1.10.3",
     "eslintify": "^1.1.1",
     "istanbul": "^0.4.3",
@@ -61,17 +60,13 @@
     "karma-chrome-launcher": "^0.2.2",
     "karma-jasmine": "^0.3.6",
     "minifyify": "^7.1.0",
-    "mock-promises": "^0.6.0",
-    "node-fetch": "^1.5.1",
     "proxyquire": "^1.7.4",
     "proxyquire-universal": "^1.0.8",
     "proxyquireify": "^3.1.1",
     "rimraf": "^2.5.0",
     "sinon": "^1.17.3",
-    "sinon-as-promised": "^4.0.0",
     "watchify": "^3.7.0",
     "web-audio-test-api": "^0.5.2",
-    "webworkify": "^1.1.0",
-    "xmlhttprequest": "^1.8.0"
+    "webworkify": "^1.1.0"
   }
 }
