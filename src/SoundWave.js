@@ -71,10 +71,6 @@ var SoundWave = function(audioSrc) {
     } else if (audioSrc instanceof Array && audioSrc[0] instanceof ArrayBuffer) {
       //multiple audio buffers to decode and concatenate
       this.concatBinariesToAudioBuffer(audioSrc);
-    } else if (typeof audioSrc === 'string' && audioSrc.indexOf(',') > -1) {
-      //multiple files to load/decode and cancatinate
-      var binBuffers = this.loadFiles(audioSrc);
-      this.buffer = this.concatBinariesToAudioBuffer(binBuffers, this.buffer);
     } else {
       throw new Error('Cannot create SoundWave object: Unsupported data format');
     }
@@ -99,6 +95,28 @@ SoundWave.prototype.decodeAudioData = function(rawAudioSrc) {
   })
   .catch(function(err) {
     return err;
+  });
+};
+
+/**
+ * Joins an arbitrary number of ArrayBuffers.
+ * @param  {Array}       buffers Array of AudioBuffers
+ * @return {AudioBuffer}         Waveform that includes all given buffers.
+ */
+SoundWave.prototype.joinAudioBuffers = function(buffers) {
+  var self = this;
+  var joinedBuffer = core.createBuffer(1, 0, core.sampleRate);
+
+  return new Promise(function(resolve, reject) {
+    buffers.forEach(function(buffer) {
+      if (buffer instanceof window.AudioBuffer) {
+        joinedBuffer = this.appendAudioBuffer(joinedBuffer, buffer);
+        this.metaData.push(this.createMetaData(joinedBuffer, buffer));
+      } else {
+        reject(new Error('One or more buffers are not of type AudioBuffer.'));
+      }
+    }, self);
+    resolve(joinedBuffer);
   });
 };
 
@@ -142,18 +160,25 @@ SoundWave.prototype.appendAudioBuffer = function(buffer1, buffer2) {
 
 /**
  * Creates a dictionary with start/stop points and length in sample-frames
- * of an appended waveform and adds it to the metaData array.
- * @private
- * @param  {AudioBuffer} existingBuffer The 'old' buffer that gets appended
- * @param  {AudioBuffer} newBuffer      The buffer that gets appended
- * @return {Object}                     Dictionary with start/stop/length data
+ * of a buffer fragment..
+ * @param  {AudioBuffer} buffer      Buffer with the appendable pcm fragment
+ * @param  {AudioBuffer} predecessor Preceding buffer
+ * @return {Object}                  Dictionary with meta data or error msg
  */
-SoundWave.prototype.addWaveMetaData = function(existingBuffer, newBuffer) {
-  return {
-    start: existingBuffer.length + 1,
-    end: existingBuffer.length + newBuffer.length,
-    length: newBuffer.length
-  };
+SoundWave.prototype.getMetaData = function(buffer, predecessor) {
+  if (buffer instanceof window.AudioBuffer &&
+  predecessor instanceof window.AudioBuffer) {
+    var preLength = predecessor.length;
+    var bufLength = buffer.length;
+    return {
+      'start': preLength,
+      'end': preLength + bufLength - 1,
+      'length': bufLength
+    };
+  } else {
+    return { 'errorMsg': 'One or both arguments are not of type AudioBuffer' };
+  }
+
 };
 
 /**

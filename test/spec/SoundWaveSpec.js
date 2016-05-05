@@ -134,6 +134,58 @@ describe('SoundWave', function() {
 
   });
 
+  describe('.joinAudioBuffers', function() {
+
+    beforeEach(function() {
+      var sr = ac.sampleRate;
+      this.monoBuffer = ac.createBuffer(1, sr, sr);
+      this.stereoBuffer = ac.createBuffer(2, sr, sr);
+      this.longStereoBuffer = ac.createBuffer(2, sr * 2, sr);
+
+      this.soundWave = new SoundWave();
+    });
+
+    it('returns a promise', function() {
+      var prm = this.soundWave.joinAudioBuffers([
+        this.stereoBuffer,
+        this.longStereoBuffer
+      ]);
+      expect(prm).toEqual(jasmine.any(Promise));
+    });
+  });
+
+  describe('.getMetaData', function() {
+
+    beforeEach(function() {
+      var sr = ac.sampleRate;
+      var ab = ac.createBuffer(2, sr * 2, sr);
+      var soundWave = new SoundWave();
+      this.metaData = soundWave.getMetaData(ab, ab);
+      this.errorData = soundWave.getMetaData(ab, 23);
+    });
+
+    it('returns an object', function() {
+      expect(this.metaData).toEqual(jasmine.any(Object));
+      expect(this.errorData).toEqual(jasmine.any(Object));
+    });
+
+    it('computes the startpoint of the buffer fragment', function() {
+      expect(this.metaData.start).toEqual(88200);
+    });
+
+    it('computes the endpoint of the buffer fragment', function() {
+      expect(this.metaData.end).toEqual(176399);
+    });
+
+    it('writes the length of the buffer fragment', function() {
+      expect(this.metaData.length).toEqual(88200);
+    });
+
+    it('sets an error message on failure', function() {
+      expect(this.errorData.errorMsg).toBeDefined();
+    });
+  });
+
   // describe('Two AudioBuffers', function() {
   //   var soundWave, buffer1, buffer2;
   //
