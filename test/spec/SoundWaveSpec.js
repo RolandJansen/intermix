@@ -19,6 +19,7 @@ describe('SoundWave', function() {
     typeof window.document === 'undefined') {
 
       global.window = {
+        'AudioBuffer': global.AudioBuffer,
         'atob': atob,
         'fetch': function(value) { return value; },
         'Response': function(value) {
@@ -97,48 +98,42 @@ describe('SoundWave', function() {
     });
   });
 
+  describe('.decodeAudioData', function() {
+    var soundWave, decodePromise;
 
-  xit('can decode audio data from an ArrayBuffer', function() {
-    var promise, promisedValue;
-    var soundWave = new SoundWave();
-    // console.log(mockPromises.contracts.all());
-    promise = soundWave.decodeAudioData(testData.buffer1.data);
-    // var isPromise = prom instanceof Promise;
-    // promise = Promise.resolve('foo');
-    // promise.then(function(value) {
-      // promisedValue = value;
-    // });
-    mockPromises.executeForPromise(promise);
+    beforeEach(function() {
+      soundWave = new SoundWave();
+      spyOn(ac, 'decodeAudioData').and.callThrough();
+      decodePromise = soundWave.decodeAudioData(testData.buffer1.data);
+    });
 
-    // var syncProm = mockPromises.getMockPromise(prom);
-    // console.log(syncProm);
-    // console.log(mockPromises.valueForPromise(prom));
-    // mockPromises.executeForPromise(syncProm);
-    // expect(isPromise).toBeTruthy();
-    // console.log(soundWave.buffer);
-    // var isDecoded = decoded instanceof WebAudioTestAPI.AudioBuffer;
-    // console.log(isDecoded);
-      // expect(isDecoded).toBeTruthy();
+    afterEach(function() {
+      soundWave = decodePromise = null;
+    });
+
+    it('wraps AudioContext.decodeAudioData', function() {
+      expect(ac.decodeAudioData).toHaveBeenCalled();
+    });
+
+    it('returns a promise', function() {
+      expect(decodePromise).toEqual(jasmine.any(Promise));
+    });
+
+    describe('on successfull decoding', function() {
+
+      it('resolves its promise with an AudioBuffer', function(done) {
+        decodePromise.then(function(decoded) {
+          expect(decoded).toEqual(jasmine.any(window.AudioBuffer));
+          done();
+        });
+      });
+    });
+
+    //do we need an unsuccessful test here? Or should we
+    //test rawAudioData in the function?
+
   });
 
-  // describe('An ArrayBuffer', function() {
-  //   var ac, SoundWave, soundWave;
-  //
-  //   beforeEach(function() {
-  //     ac = new WebAudioTestAPI.AudioContext();
-  //     SoundWave = proxyquire('../../src/SoundWave.js', {
-  //       'core': ac,
-  //       '@noCallThru': true
-  //     });
-  //     soundWave = new SoundWave();
-  //     soundWave.decodeAudioData(testData.buffer1.data);
-  //   });
-  //
-  //   it('should be decoded into an AudioBuffer.', function() {
-  //     expect(soundWave.buffer.length).toEqual(testData.buffer1.decodedLength);
-  //   });
-  // });
-  //
   // describe('Two AudioBuffers', function() {
   //   var soundWave, buffer1, buffer2;
   //
@@ -314,63 +309,6 @@ describe('SoundWave', function() {
     });
 
   });
-
-  // describe('XHR loader', function() {
-  //   var server, soundWave;
-  //
-  //   beforeEach(function() {
-  //     server = sinon.fakeServer.create();
-  //
-  //     if (typeof window.document === 'undefined') {
-  //       // sinon attaches the fake XHR object to global.
-  //       // On node.js we have to explicitly copy it to the window obj.
-  //       window.XMLHttpRequest = global.XMLHttpRequest;
-  //     }
-  //     soundWave = new SoundWave();
-  //   });
-  //
-  //   afterEach(function() {
-  //     server.restore();
-  //     if (typeof window.document === 'undefined') {
-  //       // bring back the original XHR obj to window on node.js
-  //       window.XMLHttpRequest = global.XMLHttpRequest;
-  //     }
-  //     soundWave = null;
-  //   });
-  //
-  //   it('sends a GET request to the server.', function() {
-  //     soundWave.loadFile('/fake/url/file1.wav', sinon.spy());
-  //     expect(server.requests[0].url).toMatch('/fake/url/file1.wav');
-  //   });
-  //
-  //   it('receives a response from the server.', function() {
-  //     var callback = sinon.spy();
-  //     soundWave.loadFile('/fake/url/file1.wav', callback);
-  //     server.requests[0].respond(200,
-  //       { 'Content-Type': 'audio/wav' },
-  //       'Normally this would be an array buffer');
-  //
-  //     expect(callback.calledOnce).toBeTruthy();
-  //   });
-  //
-  //   it('sends multiple requests to the server when given multiple filenames', function() {
-  //     soundWave.loadFiles('file1.wav, file2.wav, file3.wav');
-  //     expect(server.requests.length).toEqual(3);
-  //   });
-  //
-  //   xit('receives multiple responses from the server', function() {
-  //     // loadFiles() simply doesn't work and needs to be debugged/refactored
-  //     var responses = soundWave.loadFiles('file1.wav, file2.wav, file3.wav');
-  //     server.requests.forEach(function(req, index) {
-  //       req.respond(200,
-  //         { 'Content-Type': 'audio/wav' },
-  //         'This is request' + index);
-  //     });
-  //     expect(responses.length).toEqual(3);
-  //     // expect(responses[0]).toMatch('file1.wav');
-  //   });
-  //
-  // });
 
   it('should sort an associative array by an array of strings', function() {
     var soundWave = new SoundWave();

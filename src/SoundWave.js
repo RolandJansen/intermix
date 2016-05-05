@@ -57,10 +57,8 @@ var SoundWave = function(audioSrc) {
   if (typeof audioSrc !== 'undefined') {
     if (typeof audioSrc === 'string') {
       //one file to load/decode
-      this.loadFile(audioSrc).then(function(response) {
+      this.buffer = this.loadFile(audioSrc).then(function(response) {
         return self.decodeAudioData(response);
-      }, function(error) {
-        throw new Error('Couldn\'t load file: ' + error);
       });
     } else if (audioSrc instanceof Array && typeof audioSrc[0] === 'string') {
       //multiple files to load/decode and cancatinate
@@ -69,7 +67,7 @@ var SoundWave = function(audioSrc) {
       });
     } else if (audioSrc instanceof ArrayBuffer) {
       //one audio buffer to decode
-      this.decodeAudioData(audioSrc);
+      this.buffer = this.decodeAudioData(audioSrc);
     } else if (audioSrc instanceof Array && audioSrc[0] instanceof ArrayBuffer) {
       //multiple audio buffers to decode and concatenate
       this.concatBinariesToAudioBuffer(audioSrc);
@@ -96,9 +94,11 @@ var SoundWave = function(audioSrc) {
  * @return {Promise}                  Promise that indicates if operation was successfull.
  */
 SoundWave.prototype.decodeAudioData = function(rawAudioSrc) {
-  var self = this;
   return core.decodeAudioData(rawAudioSrc).then(function(decoded) {
-    self.buffer = decoded;
+    return decoded;
+  })
+  .catch(function(err) {
+    return err;
   });
 };
 
