@@ -58,9 +58,9 @@ describe('SoundWave', function() {
 
     beforeEach(function() {
       spyOn(SoundWave.prototype, 'loadFile').and.returnValue(fakePromise);
-      spyOn(SoundWave.prototype, 'loadFiles').and.returnValue(fakePromise);
-      spyOn(SoundWave.prototype, 'decodeAudioData');
-      spyOn(SoundWave.prototype, 'concatBinariesToAudioBuffer');
+      spyOn(SoundWave.prototype, 'loadMultipleFiles').and.returnValue(fakePromise);
+      spyOn(SoundWave.prototype, 'decodeAudioData').and.returnValue(fakePromise);
+      spyOn(SoundWave.prototype, 'decodeAudioSources').and.returnValue(fakePromise);
     });
 
     it('can be created with a filename', function() {
@@ -72,19 +72,18 @@ describe('SoundWave', function() {
     it('can be created with multiple filenames', function() {
       var arg = [ 'file1.wav', 'file2.wav' ];
       var soundWave = new SoundWave(arg);
-      expect(soundWave.loadFiles).toHaveBeenCalledWith(arg);
+      expect(soundWave.loadMultipleFiles).toHaveBeenCalledWith(arg);
     });
 
     it('can be created with an ArrayBuffer', function() {
       var soundWave = new SoundWave(testData.buffer1.data);
-      expect(soundWave.decodeAudioData).toHaveBeenCalledTimes(1);
       expect(soundWave.decodeAudioData).toHaveBeenCalledWith(testData.buffer1.data);
     });
 
     it('can be created with multiple ArrayBuffers', function() {
       var arg = [ testData.buffer1.data, testData.buffer2.data ];
       var soundWave = new SoundWave(arg);
-      expect(soundWave.concatBinariesToAudioBuffer).toHaveBeenCalledWith(arg);
+      expect(soundWave.decodeAudioSources).toHaveBeenCalledWith(arg);
     });
 
     it('can be created without an argument', function() {
@@ -129,8 +128,7 @@ describe('SoundWave', function() {
       });
     });
 
-    //do we need an unsuccessful test here? Or should we
-    //test rawAudioData in the function?
+    //do we need an unsuccessful test here?
 
   });
 
@@ -152,6 +150,53 @@ describe('SoundWave', function() {
       ]);
       expect(prm).toEqual(jasmine.any(Promise));
     });
+
+    xdescribe('on successfull join', function() {
+
+    });
+  });
+
+  describe('.appendAudioBuffer', function() {
+
+    beforeEach(function() {
+      var sr = ac.sampleRate;
+      this.mono = ac.createBuffer(1, sr, sr);
+      this.stereo = ac.createBuffer(2, sr, sr);
+      this.longStereo = ac.createBuffer(2, sr * 2, sr);
+
+      this.soundWave = new SoundWave();
+      this.joined1 = this.soundWave.appendAudioBuffer(this.stereo, this.longStereo);
+      this.joined2 = this.soundWave.appendAudioBuffer(this.mono, this.stereo);
+
+    });
+
+    it('returns an AudioBuffer', function() {
+      expect(this.joined1).toEqual(jasmine.any(window.AudioBuffer));
+    });
+
+    it('appends two AudioBuffers', function() {
+      expect(this.joined1.length).toEqual(this.stereo.length + this.longStereo.length);
+    });
+
+    it('if number of channels are equal, uses all of them', function() {
+      expect(this.joined1.numberOfChannels).toEqual(2);
+    });
+
+    it('if number of channels differ, drops channels', function() {
+      expect(this.joined2.numberOfChannels).toEqual(1);
+    });
+
+    it('if number of channels differ, appends them correctly', function() {
+      expect(this.joined2.length).toEqual(this.mono.length + this.stereo.length);
+    });
+
+    it('throws if one or both buffers are not of type AudioBuffer', function() {
+      var sw = this.soundWave;
+      expect(
+        function() { sw.appendAudioBuffer(); }
+      ).toThrowError('One or both buffers are not of type AudioBuffer.');
+    });
+
   });
 
   describe('.getMetaData', function() {
@@ -177,7 +222,7 @@ describe('SoundWave', function() {
       expect(this.metaData.end).toEqual(176399);
     });
 
-    it('writes the length of the buffer fragment', function() {
+    it('computes the length of the buffer fragment', function() {
       expect(this.metaData.length).toEqual(88200);
     });
 
@@ -185,32 +230,6 @@ describe('SoundWave', function() {
       expect(this.errorData.errorMsg).toBeDefined();
     });
   });
-
-  // describe('Two AudioBuffers', function() {
-  //   var soundWave, buffer1, buffer2;
-  //
-  //   beforeEach(function(done) {
-  //     soundWave = new SoundWave();
-  //     core.decodeAudioData(testData.buffer1.data).then(function(decoded) {
-  //       buffer1 = decoded;
-  //     });
-  //     core.decodeAudioData(testData.buffer2.data).then(function(decoded) {
-  //       buffer2 = decoded;
-  //       done();
-  //     });
-  //   });
-  //
-  //   afterEach(function() {
-  //     soundWave = null;
-  //   });
-  //
-  //   it('should be appended into one.', function() {
-  //     var appended = soundWave.appendAudioBuffer(buffer1, buffer2);
-  //     var length = testData.buffer1.decodedLength + testData.buffer2.decodedLength;
-  //     expect(appended.length).toEqual(length);
-  //   });
-  // });
-  //
 
   describe('.loadFile', function() {
     var soundWave, filePromise, fetchPromise, promiseHelper;

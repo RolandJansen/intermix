@@ -62,15 +62,18 @@ var SoundWave = function(audioSrc) {
       });
     } else if (audioSrc instanceof Array && typeof audioSrc[0] === 'string') {
       //multiple files to load/decode and cancatinate
-      this.loadFiles(audioSrc).then(function(binBuffers) {
-        this.buffer = this.concatBinariesToAudioBuffer(binBuffers, this.buffer);
-      });
+      this.buffer = this.loadMultipleFiles(audioSrc);
     } else if (audioSrc instanceof ArrayBuffer) {
-      //one audio buffer to decode
+      //one ArrayBuffer to decode
       this.buffer = this.decodeAudioData(audioSrc);
     } else if (audioSrc instanceof Array && audioSrc[0] instanceof ArrayBuffer) {
-      //multiple audio buffers to decode and concatenate
-      this.concatBinariesToAudioBuffer(audioSrc);
+      //multiple ArrayBuffers to decode and concatenate
+      this.decodeAudioSources(audioSrc).then(function(audioBuffers) {
+        return this.joinAudioBuffers(audioBuffers);
+      })
+      .then(function(audioBuffer) {
+        this.buffer = audioBuffer;
+      });
     } else {
       throw new Error('Cannot create SoundWave object: Unsupported data format');
     }
@@ -80,14 +83,45 @@ var SoundWave = function(audioSrc) {
 
 };
 
+SoundWave.prototype.loadMultipleFiles = function(filenames) {
+  this.loadFiles(filenames).then(function(binBuffers) {
+    return this.decodeAudioSources(binBuffers);
+  })
+  .then(function(audioBuffers) {
+    return this.joinAudioBuffers(audioBuffers);
+  })
+  .then(function(audioBuffer) {
+    return audioBuffer;
+  });
+};
+
 /**
- * Takes binary audio data, turns it into an audio buffer object and
- * stores it in this.buffer.
- * Basically a wrapper for the web-audio-api decodeAudioData function.
+ * Takes one or more ArrayBuffers and returns an equal number of AudioBuffers.
+ * @param  {Array}    buffers Array with ArrayBuffers
+ * @return {Promise}          Resolves to an array of AudioBuffers or error
+ */
+SoundWave.prototype.decodeAudioSources = function(buffers) {
+  var promises = [];
+  buffers.forEach(function(buffer) {
+    promises.push(this.decodeAudioData(buffer));
+  }, this);
+
+  return Promise.all(promises).then(function(audioBuffers) {
+    return audioBuffers;
+  })
+  .catch(function(err) {
+    return err;
+  });
+};
+
+/**
+ * Takes an ArrayBuffer with binary audio data and
+ * turns it into an audio buffer object.
+ * Just a wrapper for the web-audio-api decodeAudioData function.
  * It uses the new promise syntax so it probably won't work in all browsers by now.
  * @private
  * @param  {ArrayBuffer}  rawAudioSrc Audio data in raw binary format
- * @return {Promise}                  Promise that indicates if operation was successfull.
+ * @return {Promise}                  Resolves to AudioBuffer or error
  */
 SoundWave.prototype.decodeAudioData = function(rawAudioSrc) {
   return core.decodeAudioData(rawAudioSrc).then(function(decoded) {
@@ -100,6 +134,7 @@ SoundWave.prototype.decodeAudioData = function(rawAudioSrc) {
 
 /**
  * Joins an arbitrary number of ArrayBuffers.
+ * @private
  * @param  {Array}       buffers Array of AudioBuffers
  * @return {AudioBuffer}         Waveform that includes all given buffers.
  */
@@ -121,24 +156,11 @@ SoundWave.prototype.joinAudioBuffers = function(buffers) {
 };
 
 /**
- * Concatenates one or more ArrayBuffers to an AudioBuffer.
- * @private
- * @param  {Array} binaryBuffers  Array holding one or more ArrayBuffers
- * @param  {AudioBuffer} audioBuffer   An existing AudioBuffer object
- * @return {AudioBuffer}               The concatenated AudioBuffer
- */
-SoundWave.prototype.concatBinariesToAudioBuffer = function(binaryBuffers, audioBuffer) {
-  binaryBuffers.forEach(function(binBuffer) {
-    var tmpAudioBuffer = this.decodeAudioData(binBuffer);
-    this.metaData.push(this.addWaveMetaData(audioBuffer, tmpAudioBuffer));
-    audioBuffer = this.appendAudioBuffer(audioBuffer, tmpAudioBuffer);
-  }, this);
-
-  return audioBuffer;
-};
-
-/**
- * Appends two audio buffers. Suggested by Chris Wilson:<br>
+ * Appends two audio buffers. Both buffers should have the same amount
+ * of channels. If not, channels will be dropped. For example, if you
+ * append a stereo and a mono buffer, the output will be mono and only
+ * one of the channels of the stereo sample will be used (no merging of channels).
+ * Suggested by Chris Wilson:<br>
  * http://stackoverflow.com/questions/14143652/web-audio-api-append-concatenate-different-audiobuffers-and-play-them-as-one-son
  * @private
  * @param  {AudioBuffer} buffer1 The first audio buffer
@@ -146,16 +168,22 @@ SoundWave.prototype.concatBinariesToAudioBuffer = function(binaryBuffers, audioB
  * @return {AudioBuffer}         buffer1 + buffer2
  */
 SoundWave.prototype.appendAudioBuffer = function(buffer1, buffer2) {
-  var numberOfChannels = Math.min(buffer1.numberOfChannels, buffer2.numberOfChannels);
-  var tmp = core.createBuffer(numberOfChannels,
-    (buffer1.length + buffer2.length),
-    buffer1.sampleRate);
-  for (var i = 0; i < numberOfChannels; i++) {
-    var channel = tmp.getChannelData(i);
-    channel.set( buffer1.getChannelData(i), 0);
-    channel.set( buffer2.getChannelData(i), buffer1.length);
+  if (buffer1 instanceof window.AudioBuffer &&
+  buffer2 instanceof window.AudioBuffer) {
+    var numberOfChannels = Math.min(buffer1.numberOfChannels, buffer2.numberOfChannels);
+    var newBuffer = core.createBuffer(numberOfChannels,
+      (buffer1.length + buffer2.length),
+      buffer1.sampleRate);
+    for (var i = 0; i < numberOfChannels; i++) {
+      var channel = newBuffer.getChannelData(i);
+      channel.set( buffer1.getChannelData(i), 0);
+      channel.set( buffer2.getChannelData(i), buffer1.length);
+    }
+    return newBuffer;
+  } else {
+    // console.log('sedf');
+    throw new Error('One or both buffers are not of type AudioBuffer.');
   }
-  return tmp;
 };
 
 /**
