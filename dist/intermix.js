@@ -997,17 +997,22 @@ var SoundWave = function(audioSrc) {
  * @param  {Array}    filenames Array with filenames to be loaded
  * @return {Promise}            Resolves to AudioBuffer or throws error.
  */
-SoundWave.prototype.loadMultipleFiles = function(filenames) {
+SoundWave.prototype.loadMultipleFiles = function(urls) {
   var self = this;
-  return this.loadFiles(filenames).then(function(binBuffers) {
-    // return binBuffers;
+  var filenames = this.stripFilenames(urls);
+
+  return this.loadFiles(urls).then(function(binBuffers) {
     return self.decodeAudioSources(binBuffers);
   })
   .then(function(audioBuffers) {
-    return self.joinAudioBuffers(audioBuffers);
+    var promises = [];
+    promises.push(self.joinAudioBuffers(audioBuffers),
+      self.storeMetaData(audioBuffers, filenames));
+    return Promise.all(promises);
   })
-  .then(function(audioBuffer) {
-    return audioBuffer;
+  .then(function(bufferAndMeta) {
+    self.metaData = bufferAndMeta[1];
+    return bufferAndMeta[0];
   })
   .catch(function(err) {
     throw err;
@@ -1055,7 +1060,6 @@ SoundWave.prototype.joinAudioBuffers = function(buffers) {
     buffers.forEach(function(buffer) {
       if (buffer instanceof window.AudioBuffer) {
         joinedBuffer = this.appendAudioBuffer(joinedBuffer, buffer);
-        // this.metaData.push(this.getMetaData(joinedBuffer, buffer));
       } else {
         reject(new TypeError('One or more buffers are not of type AudioBuffer.'));
       }
@@ -1095,19 +1099,65 @@ SoundWave.prototype.appendAudioBuffer = function(buffer1, buffer2) {
 };
 
 /**
+ * Stores metaData objects in the metaData array.
+ * @param  {Array} audioBuffers Array of AudioBuffers
+ * @param  {Array} names        Array of names
+ * @return {Promise}            Resolves to a metaData array or error.
+ */
+SoundWave.prototype.storeMetaData = function(audioBuffers, names) {
+  var fnames = [];
+  var metaData = [];
+  var start = 0;
+  var self = this;
+
+  return new Promise(function(resolve, reject) {
+    if (typeof names === 'undefined') {
+      audioBuffers.forEach(function(buffer, index) {
+        fnames.push('fragment' + index);
+      });
+    } else if (names.length === audioBuffers.length) {
+      fnames = names;
+    } else {
+      reject(new Error('audioBuffers and names should be of same length'));
+    }
+    audioBuffers.forEach(function(buffer, index) {
+      metaData.push(this.getMetaData(buffer, names[index], start));
+      start += buffer.length;
+    }, self);
+    resolve(metaData);
+  });
+};
+
+/**
+ * Strips filenames from an array of urls and returns it in an array.
+ * @private
+ * @param  {Array} urls Array of urls
+ * @return {Array}      Array of filenames
+ */
+SoundWave.prototype.stripFilenames = function(urls) {
+  return urls.map(function(url) {
+    return url.split('/').pop();
+  });
+};
+
+/**
  * Creates a dictionary with start/stop points and length in sample-frames
  * of a buffer fragment..
  * @param  {AudioBuffer} buffer      Buffer with the appendable pcm fragment
+ * @param  {String}      name        Name of the fragment
+ * @param  {Int}         start       Startpoint of the fragment
  * @return {Object}                  Dictionary with meta data or error msg
  */
-SoundWave.prototype.getMetaData = function(buffer, name) {
+SoundWave.prototype.getMetaData = function(buffer, name, start) {
   if (buffer instanceof window.AudioBuffer && typeof name === 'string') {
-    var preLength = this.buffer.length;
+    if (typeof start === 'undefined') {
+      start = 0;
+    }
     var bufLength = buffer.length;
     return {
       'name': name,
-      'start': preLength,
-      'end': preLength + bufLength - 1,
+      'start': start,
+      'end': start + bufLength - 1,
       'length': bufLength
     };
   } else {

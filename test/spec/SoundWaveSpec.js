@@ -117,11 +117,12 @@ describe('SoundWave', function() {
         soundWave = new SoundWave(arg);
       });
 
-      it('loads and decodes them into a single buffer', function() {
+      it('loads and decodes them into a single buffer', function(done) {
         fakePromise.resolve(mono);
         fakePromise.promise.then(function(result) {
           expect(soundWave.loadMultipleFiles).toHaveBeenCalledWith(arg);
           expect(result).toEqual(mono);
+          done();
         });
       });
     });
@@ -133,11 +134,12 @@ describe('SoundWave', function() {
         soundWave = new SoundWave(testData.buffer1.data);
       });
 
-      it('decodes an ArrayBuffer', function() {
+      it('decodes an ArrayBuffer', function(done) {
         fakePromise.resolve(mono);
         fakePromise.promise.then(function(result) {
           expect(soundWave.decodeAudioData).toHaveBeenCalledWith(testData.buffer1.data);
           expect(result).toEqual(mono);
+          done();
         });
       });
     });
@@ -152,10 +154,11 @@ describe('SoundWave', function() {
         fakePromise.resolve(mono);
       });
 
-      it('decodes them into a single buffer', function() {
+      it('decodes them into a single buffer', function(done) {
         fakePromise.promise.then(function(result) {
           expect(soundWave.decodeAudioSources).toHaveBeenCalledWith(arg);
           expect(result).toEqual(mono);
+          done();
         });
       });
 
@@ -184,18 +187,20 @@ describe('SoundWave', function() {
   });
 
   describe('.loadMultipleFiles', function() {
-    var self, lf, das, jab;
-    var fnames = ['f1', 'f2', 'f3'];
+    var self, lf, das, jab, smd;
+    var fnames = ['f1', 'f2'];
 
     beforeEach(function() {
       lf = getFakePromise();
       das = getFakePromise();
       jab = getFakePromise();
+      smd = getFakePromise();
 
       this.soundWave = new SoundWave();
       this.soundWave.loadFiles = jasmine.createSpy('loadFiles').and.returnValue(lf.promise);
       this.soundWave.decodeAudioSources = jasmine.createSpy('decodeAudioSources').and.returnValue(das.promise);
       this.soundWave.joinAudioBuffers = jasmine.createSpy('joinAudioBuffers').and.returnValue(jab.promise);
+      this.soundWave.storeMetaData = jasmine.createSpy('storeMetaData').and.returnValue(smd.promise);
       this.prm = this.soundWave.loadMultipleFiles(fnames);
     });
 
@@ -214,9 +219,11 @@ describe('SoundWave', function() {
         this.lfReturn = [ testData.buffer1.data, testData.buffer2.data ];
         this.dasReturn = [ mono, stereo ];
         this.jabReturn = stereo;
+        this.smdReturn = { 'metaObj1': {}, 'metaObj2': {} };
         lf.resolve(this.lfReturn);
         das.resolve(this.dasReturn);
         jab.resolve(this.jabReturn);
+        smd.resolve(this.smdReturn);
       });
 
       it('calls .loadFiles()', function() {
@@ -237,10 +244,23 @@ describe('SoundWave', function() {
         });
       });
 
+      it('calls .storeMetaData()', function(done) {
+        this.prm.then(function() {
+          expect(self.soundWave.storeMetaData).toHaveBeenCalledWith(self.dasReturn, fnames);
+          done();
+        });
+      });
+
       it('resolves to an AudioBuffer', function(done) {
         this.prm.then(function(result) {
           expect(result).toEqual(jasmine.any(window.AudioBuffer));
           done();
+        });
+      });
+
+      it('stores meta data in .metaData[]', function() {
+        this.prm.then(function() {
+          expect(self.soundWave.metaData).toEqual(self.smdReturn);
         });
       });
 
@@ -392,14 +412,6 @@ describe('SoundWave', function() {
         });
       });
 
-      xit('adds metadata to the metadata array', function(done) {
-        var self = this;
-        this.soundWave.metaData = [];
-        this.res.then(function() {
-          expect(self.soundWave.metaData.length).toEqual(3);
-          done();
-        });
-      });
     });
 
     describe('on unsuccessful join', function() {
@@ -477,6 +489,86 @@ describe('SoundWave', function() {
 
   });
 
+  describe('.storeMetaData', function() {
+
+    beforeEach(function() {
+      this.names = [ 'file1', 'file2', 'file3' ];
+      this.buffers = [ mono, stereo, longStereo ];
+
+      this.soundWave = new SoundWave();
+      this.promise = this.soundWave.storeMetaData(this.buffers, this.names);
+    });
+
+    it('returns a promise', function() {
+      expect(this.promise).toEqual(jasmine.any(Promise));
+    });
+
+    describe('on success', function() {
+
+      it('resolves to an array', function(done) {
+        this.promise.then(function(result) {
+          expect(result).toEqual(jasmine.any(Array));
+          done();
+        });
+      });
+
+      it('resolves to an array of length 3', function(done) {
+        this.promise.then(function(result) {
+          expect(result.length).toEqual(3);
+          done();
+        });
+      });
+
+      it('saves metaData in the right order', function(done) {
+        var self = this;
+        this.promise.then(function(result) {
+          result.forEach(function(meta, index) {
+            expect(meta.name).toMatch(this.names[index]);
+            expect(meta.length).toEqual(this.buffers[index].length);
+          }, self);
+          done();
+        });
+      });
+
+    });
+
+    describe('on failure', function() {
+
+      beforeEach(function() {
+        this.buffers.pop();
+        this.rejected = this.soundWave.storeMetaData();
+      });
+
+      it('resolves to error if audioBuffers and names are not of same length', function(done) {
+        this.rejected.then(null, function(result) {
+          expect(result).toEqual(jasmine.any(Error));
+          done();
+        });
+      });
+
+    });
+  });
+
+  describe('.stripFilenames', function() {
+    var urls = [
+      '/this/is/url/one/file1',
+      'this/is/number/two/file2',
+      'file3',
+      'http://www.something.com/file4'
+    ];
+    var files = [ 'file1', 'file2', 'file3', 'file4' ];
+
+    beforeEach(function() {
+      var soundWave = new SoundWave();
+      this.result = soundWave.stripFilenames(urls);
+    });
+
+    it('strips the filenames from urls', function() {
+      expect(this.result).toEqual(files);
+    });
+
+  });
+
   describe('.getMetaData', function() {
     var name = 'Karl-Heinz';
 
@@ -486,21 +578,27 @@ describe('SoundWave', function() {
     });
 
     describe('on success', function() {
+      var start = 23;
 
       beforeEach(function() {
-        this.metaData = this.soundWave.getMetaData(stereo, name);
+        this.metaData = this.soundWave.getMetaData(stereo, name, start);
       });
 
       it('returns an object', function() {
         expect(this.metaData).toEqual(jasmine.any(Object));
       });
 
-      it('computes the startpoint of the buffer fragment', function() {
-        expect(this.metaData.start).toEqual(longStereo.length);
+      it('sets the startpoint of the buffer fragment', function() {
+        expect(this.metaData.start).toEqual(start);
+      });
+
+      it('sets start to 0 if not specified', function() {
+        var meta = this.soundWave.getMetaData(stereo, name);
+        expect(meta.start).toEqual(0);
       });
 
       it('computes the endpoint of the buffer fragment', function() {
-        expect(this.metaData.end).toEqual(longStereo.length + stereo.length - 1);
+        expect(this.metaData.end).toEqual(start + stereo.length - 1);
       });
 
       it('computes the length of the buffer fragment', function() {
@@ -592,9 +690,10 @@ describe('SoundWave', function() {
         this.fetchPromise.resolve(badResponse);
       });
 
-      it('resolves its promise with an error', function() {
+      it('resolves its promise with an error', function(done) {
         this.filePromise.then(null, function(result) {
           expect(result).toEqual(err);
+          done();
         });
       });
     });
