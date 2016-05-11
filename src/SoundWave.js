@@ -49,27 +49,39 @@ var core = require('./core.js');
  * @param  {(Object|Object[]|string)} audioSrc   One or more ArrayBuffers or filenames
  */
 var SoundWave = function(audioSrc) {
-  this.ac = core;       //currently just used for tests
-  this.buffer = null;   //AudioBuffer
-  this.metaData = [];   //start-/endpoints and length of single waves
   var self = this;
+  this.ac = core;       //currently just used for tests
+  this.buffer = core.createBuffer(1, 0, core.sampleRate);   //AudioBuffer
+  this.metaData = [];   //start-/endpoints and length of single waves
 
   if (typeof audioSrc !== 'undefined') {
     if (typeof audioSrc === 'string') {
       //one file to load/decode
       this.buffer = this.loadFile(audioSrc).then(function(response) {
         return self.decodeAudioData(response);
+      })
+      .then(function(decoded) {
+        self.buffer = decoded;
+        return self.buffer;
+      })
+      .catch(function(err) {
+        throw err;
       });
     } else if (audioSrc instanceof Array && typeof audioSrc[0] === 'string') {
       //multiple files to load/decode and cancatinate
-      this.buffer = this.loadMultipleFiles(audioSrc);
+      this.buffer = this.loadMultipleFiles(audioSrc).then(function(decoded) {
+        self.buffer = decoded;
+      })
+      .catch(function(err) {
+        throw err;
+      });
     } else if (audioSrc instanceof ArrayBuffer) {
       //one ArrayBuffer to decode
       this.buffer = this.decodeAudioData(audioSrc);
     } else if (audioSrc instanceof Array && audioSrc[0] instanceof ArrayBuffer) {
       //multiple ArrayBuffers to decode and concatenate
       this.decodeAudioSources(audioSrc).then(function(audioBuffers) {
-        return this.joinAudioBuffers(audioBuffers);
+        return self.joinAudioBuffers(audioBuffers);
       })
       .then(function(audioBuffer) {
         this.buffer = audioBuffer;
@@ -83,15 +95,27 @@ var SoundWave = function(audioSrc) {
 
 };
 
+/**
+ * Takes an array of filenames and returns a promise that resolves
+ * to an AudioBuffer including the PCM data of all files on success.
+ * Returns an error on failure.
+ * @param  {Array}    filenames Array with filenames to be loaded
+ * @return {Promise}            Resolves to AudioBuffer or throws error.
+ */
 SoundWave.prototype.loadMultipleFiles = function(filenames) {
-  this.loadFiles(filenames).then(function(binBuffers) {
-    return this.decodeAudioSources(binBuffers);
+  var self = this;
+  return this.loadFiles(filenames).then(function(binBuffers) {
+    // return binBuffers;
+    return self.decodeAudioSources(binBuffers);
   })
   .then(function(audioBuffers) {
-    return this.joinAudioBuffers(audioBuffers);
+    return self.joinAudioBuffers(audioBuffers);
   })
   .then(function(audioBuffer) {
     return audioBuffer;
+  })
+  .catch(function(err) {
+    throw err;
   });
 };
 
@@ -106,12 +130,7 @@ SoundWave.prototype.decodeAudioSources = function(buffers) {
     promises.push(this.decodeAudioData(buffer));
   }, this);
 
-  return Promise.all(promises).then(function(audioBuffers) {
-    return audioBuffers;
-  })
-  .catch(function(err) {
-    return err;
-  });
+  return Promise.all(promises);
 };
 
 /**
@@ -124,12 +143,7 @@ SoundWave.prototype.decodeAudioSources = function(buffers) {
  * @return {Promise}                  Resolves to AudioBuffer or error
  */
 SoundWave.prototype.decodeAudioData = function(rawAudioSrc) {
-  return core.decodeAudioData(rawAudioSrc).then(function(decoded) {
-    return decoded;
-  })
-  .catch(function(err) {
-    return err;
-  });
+  return core.decodeAudioData(rawAudioSrc);
 };
 
 /**
@@ -146,9 +160,9 @@ SoundWave.prototype.joinAudioBuffers = function(buffers) {
     buffers.forEach(function(buffer) {
       if (buffer instanceof window.AudioBuffer) {
         joinedBuffer = this.appendAudioBuffer(joinedBuffer, buffer);
-        this.metaData.push(this.createMetaData(joinedBuffer, buffer));
+        // this.metaData.push(this.getMetaData(joinedBuffer, buffer));
       } else {
-        reject(new Error('One or more buffers are not of type AudioBuffer.'));
+        reject(new TypeError('One or more buffers are not of type AudioBuffer.'));
       }
     }, self);
     resolve(joinedBuffer);
@@ -181,8 +195,7 @@ SoundWave.prototype.appendAudioBuffer = function(buffer1, buffer2) {
     }
     return newBuffer;
   } else {
-    // console.log('sedf');
-    throw new Error('One or both buffers are not of type AudioBuffer.');
+    throw new TypeError('One or both buffers are not of type AudioBuffer.');
   }
 };
 
@@ -190,23 +203,21 @@ SoundWave.prototype.appendAudioBuffer = function(buffer1, buffer2) {
  * Creates a dictionary with start/stop points and length in sample-frames
  * of a buffer fragment..
  * @param  {AudioBuffer} buffer      Buffer with the appendable pcm fragment
- * @param  {AudioBuffer} predecessor Preceding buffer
  * @return {Object}                  Dictionary with meta data or error msg
  */
-SoundWave.prototype.getMetaData = function(buffer, predecessor) {
-  if (buffer instanceof window.AudioBuffer &&
-  predecessor instanceof window.AudioBuffer) {
-    var preLength = predecessor.length;
+SoundWave.prototype.getMetaData = function(buffer, name) {
+  if (buffer instanceof window.AudioBuffer && typeof name === 'string') {
+    var preLength = this.buffer.length;
     var bufLength = buffer.length;
     return {
+      'name': name,
       'start': preLength,
       'end': preLength + bufLength - 1,
       'length': bufLength
     };
   } else {
-    return { 'errorMsg': 'One or both arguments are not of type AudioBuffer' };
+    throw new TypeError('Arguments should be of type AudioBuffer and String');
   }
-
 };
 
 /**
@@ -224,12 +235,6 @@ SoundWave.prototype.loadFile = function(url) {
       } else {
         throw new Error('Server error. Couldn\'t load file: ' + url);
       }
-    })
-    .then(function(buffer) {
-      return buffer;
-    })
-    .catch(function(err) {
-      return err;
     });
 };
 
@@ -246,12 +251,7 @@ SoundWave.prototype.loadFiles = function(filenames) {
     promises.push(this.loadFile(name));
   }, this);
 
-  return Promise.all(promises).then(function(binBuffers) {
-    return binBuffers;
-  })
-  .catch(function(err) {
-    return err;
-  });
+  return Promise.all(promises);
 };
 
 /**

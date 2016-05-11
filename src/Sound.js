@@ -38,8 +38,7 @@ var Sound = function(soundWave) {
 
   if (soundWave) {
     this.wave = soundWave;
-    this.buffer = soundWave.buffer;
-    this.soundLength = this.loopEnd = this.buffer.duration;
+    this.soundLength = this.loopEnd = this.wave.buffer.duration;
     this.setupAudioChain();
   } else {
     throw new Error('Error initialising Sound object: parameter missing.');
@@ -69,7 +68,8 @@ Sound.prototype.setupAudioChain = function() {
 Sound.prototype.createBufferSource = function() {
   var self = this;
   var bufferSource = core.createBufferSource();
-  bufferSource.buffer = this.buffer;
+  // console.log(this.wave.buffer);
+  bufferSource.buffer = this.wave.buffer;
   bufferSource.connect(this.gainNode);
   bufferSource.onended = function() {
     //console.log('onended fired');

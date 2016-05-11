@@ -3,8 +3,29 @@
 var atob = require('atob');
 var proxyquire =  require('proxyquire'); //fake require in the module under test
 
+/**
+ * This function creates an empty promise and returns
+ * a closure with the promise and references to its
+ * resolve/reject functions. Resolve values can
+ * be injected into the promise later.
+ */
+var getFakePromise = function() {
+  var resolveRef, rejectRef;
+
+  var promise = new Promise(function(resolve, reject) {
+    resolveRef = resolve;
+    rejectRef = reject;
+  });
+
+  return {
+    'promise': promise,
+    'resolve': resolveRef,
+    'reject': rejectRef
+  };
+};
+
 describe('SoundWave', function() {
-  var testData, ac, SoundWave;
+  var testData, ac, sr, SoundWave, mono, stereo, longStereo, err;
 
   beforeEach(function() {
 
@@ -14,6 +35,7 @@ describe('SoundWave', function() {
       'AudioContext#decodeAudioData': 'promise'
     });
     ac = new WebAudioTestAPI.AudioContext();
+    sr = ac.sampleRate;
 
     if (typeof window === 'undefined' ||
     typeof window.document === 'undefined') {
@@ -37,6 +59,10 @@ describe('SoundWave', function() {
       '@noCallThru': true
     });
 
+    mono = ac.createBuffer(1, sr, sr);
+    stereo = ac.createBuffer(2, sr, sr);
+    longStereo = ac.createBuffer(2, sr * 2, sr);
+    err = new Error('It\'s over!');
   });
 
   afterEach(function() {
@@ -44,7 +70,7 @@ describe('SoundWave', function() {
     typeof global.window.document === 'undefined') {
       delete global.window;
     }
-    ac = SoundWave = null;
+    ac = sr = SoundWave = mono = stereo = longStereo = err = null;
   });
 
   it('ensure that we\'re testing against the WebAudioTestAPI', function() {
@@ -54,104 +80,354 @@ describe('SoundWave', function() {
   });
 
   describe('instance', function() {
-    var fakePromise = Promise.resolve(true);
+    var fakePromise, soundWave;
 
     beforeEach(function() {
-      spyOn(SoundWave.prototype, 'loadFile').and.returnValue(fakePromise);
-      spyOn(SoundWave.prototype, 'loadMultipleFiles').and.returnValue(fakePromise);
-      spyOn(SoundWave.prototype, 'decodeAudioData').and.returnValue(fakePromise);
-      spyOn(SoundWave.prototype, 'decodeAudioSources').and.returnValue(fakePromise);
-    });
-
-    it('can be created with a filename', function() {
-      var arg = 'file.mp3';
-      var soundWave = new SoundWave(arg);
-      expect(soundWave.loadFile).toHaveBeenCalledWith(arg);
-    });
-
-    it('can be created with multiple filenames', function() {
-      var arg = [ 'file1.wav', 'file2.wav' ];
-      var soundWave = new SoundWave(arg);
-      expect(soundWave.loadMultipleFiles).toHaveBeenCalledWith(arg);
-    });
-
-    it('can be created with an ArrayBuffer', function() {
-      var soundWave = new SoundWave(testData.buffer1.data);
-      expect(soundWave.decodeAudioData).toHaveBeenCalledWith(testData.buffer1.data);
-    });
-
-    it('can be created with multiple ArrayBuffers', function() {
-      var arg = [ testData.buffer1.data, testData.buffer2.data ];
-      var soundWave = new SoundWave(arg);
-      expect(soundWave.decodeAudioSources).toHaveBeenCalledWith(arg);
-    });
-
-    it('can be created without an argument', function() {
-      var soundWave = new SoundWave();
-      expect(soundWave).toBeDefined();
-    });
-
-    it('can\'t be created with an unknown parameter type', function() {
-      expect(function() { new SoundWave({'type': 'anObject'}); })
-        .toThrowError('Cannot create SoundWave object: Unsupported data format');
-    });
-  });
-
-  describe('.decodeAudioData', function() {
-    var soundWave, decodePromise;
-
-    beforeEach(function() {
-      soundWave = new SoundWave();
-      spyOn(ac, 'decodeAudioData').and.callThrough();
-      decodePromise = soundWave.decodeAudioData(testData.buffer1.data);
+      fakePromise = getFakePromise();
     });
 
     afterEach(function() {
-      soundWave = decodePromise = null;
+      fakePromise = soundWave = null;
     });
 
-    it('wraps AudioContext.decodeAudioData', function() {
-      expect(ac.decodeAudioData).toHaveBeenCalled();
+    describe('when given a filename', function() {
+      var arg = 'file.mp3';
+
+      beforeEach(function() {
+        SoundWave.prototype.loadFile = jasmine.createSpy('loadFile').and.returnValue(fakePromise.promise);
+        SoundWave.prototype.decodeAudioData = jasmine.createSpy('decodeAudioData').and.returnValue(true);
+        soundWave = new SoundWave(arg);
+      });
+
+      it('loads and decodes the file', function(done) {
+        fakePromise.resolve(mono);
+        fakePromise.promise.then(function(result) {
+          expect(soundWave.loadFile).toHaveBeenCalledWith(arg);
+          expect(result).toEqual(mono);
+          done();
+        });
+      });
+    });
+
+    describe('when given an array of filenames', function() {
+      var arg = [ 'f1', 'f2', 'f3' ];
+
+      beforeEach(function() {
+        SoundWave.prototype.loadMultipleFiles = jasmine.createSpy('loadMultipleFiles').and.returnValue(fakePromise.promise);
+        soundWave = new SoundWave(arg);
+      });
+
+      it('loads and decodes them into a single buffer', function() {
+        fakePromise.resolve(mono);
+        fakePromise.promise.then(function(result) {
+          expect(soundWave.loadMultipleFiles).toHaveBeenCalledWith(arg);
+          expect(result).toEqual(mono);
+        });
+      });
+    });
+
+    describe('when given an ArrayBuffer', function() {
+
+      beforeEach(function() {
+        SoundWave.prototype.decodeAudioData = jasmine.createSpy('decodeAudioData').and.returnValue(fakePromise.promise);
+        soundWave = new SoundWave(testData.buffer1.data);
+      });
+
+      it('decodes an ArrayBuffer', function() {
+        fakePromise.resolve(mono);
+        fakePromise.promise.then(function(result) {
+          expect(soundWave.decodeAudioData).toHaveBeenCalledWith(testData.buffer1.data);
+          expect(result).toEqual(mono);
+        });
+      });
+    });
+
+    describe('when given multiple ArrayBuffers', function() {
+      var arg;
+
+      beforeEach(function() {
+        arg = [ testData.buffer1.data, testData.buffer2.data ];
+        SoundWave.prototype.decodeAudioSources = jasmine.createSpy('decodeAudioSources').and.returnValue(fakePromise.promise);
+        soundWave = new SoundWave(arg);
+        fakePromise.resolve(mono);
+      });
+
+      it('decodes them into a single buffer', function() {
+        fakePromise.promise.then(function(result) {
+          expect(soundWave.decodeAudioSources).toHaveBeenCalledWith(arg);
+          expect(result).toEqual(mono);
+        });
+      });
+
+    });
+
+    describe('when given no arguments', function() {
+
+      it('does nothing', function() {
+        var bareBuffer = ac.createBuffer(1, 0, sr);
+        var soundWave = new SoundWave();
+        expect(soundWave).toBeDefined();
+        expect(soundWave.buffer).toEqual(bareBuffer);
+      });
+
+    });
+
+    describe('when given an unknown parameter type', function() {
+
+      it('throws an error', function() {
+        expect(function() { new SoundWave({'type': 'anObject'}); })
+          .toThrowError('Cannot create SoundWave object: Unsupported data format');
+      });
+
+    });
+
+  });
+
+  describe('.loadMultipleFiles', function() {
+    var self, lf, das, jab;
+    var fnames = ['f1', 'f2', 'f3'];
+
+    beforeEach(function() {
+      lf = getFakePromise();
+      das = getFakePromise();
+      jab = getFakePromise();
+
+      this.soundWave = new SoundWave();
+      this.soundWave.loadFiles = jasmine.createSpy('loadFiles').and.returnValue(lf.promise);
+      this.soundWave.decodeAudioSources = jasmine.createSpy('decodeAudioSources').and.returnValue(das.promise);
+      this.soundWave.joinAudioBuffers = jasmine.createSpy('joinAudioBuffers').and.returnValue(jab.promise);
+      this.prm = this.soundWave.loadMultipleFiles(fnames);
+    });
+
+    afterEach(function() {
+      self = lf = das = jab = null;
     });
 
     it('returns a promise', function() {
-      expect(decodePromise).toEqual(jasmine.any(Promise));
+      expect(this.prm).toEqual(jasmine.any(Promise));
     });
 
-    describe('on successfull decoding', function() {
+    describe('on success', function() {
+
+      beforeEach(function() {
+        self = this;
+        this.lfReturn = [ testData.buffer1.data, testData.buffer2.data ];
+        this.dasReturn = [ mono, stereo ];
+        this.jabReturn = stereo;
+        lf.resolve(this.lfReturn);
+        das.resolve(this.dasReturn);
+        jab.resolve(this.jabReturn);
+      });
+
+      it('calls .loadFiles()', function() {
+        expect(this.soundWave.loadFiles).toHaveBeenCalledWith(fnames);
+      });
+
+      it('calls .decodeAudioSources()', function(done) {
+        this.prm.then(function() {
+          expect(self.soundWave.decodeAudioSources).toHaveBeenCalledWith(self.lfReturn);
+          done();
+        });
+      });
+
+      it('calls .joinAudioBuffers()', function(done) {
+        this.prm.then(function() {
+          expect(self.soundWave.joinAudioBuffers).toHaveBeenCalledWith(self.dasReturn);
+          done();
+        });
+      });
+
+      it('resolves to an AudioBuffer', function(done) {
+        this.prm.then(function(result) {
+          expect(result).toEqual(jasmine.any(window.AudioBuffer));
+          done();
+        });
+      });
+
+    });
+
+    describe('on failure', function() {
+
+      beforeEach(function() {
+        das.reject(err);
+        lf.resolve(true);
+        jab.resolve(true);
+      });
+
+      it('resolves to an error', function(done) {
+        this.prm.then(null, function(result) {
+          expect(result).toEqual(err);
+          done();
+        });
+      });
+
+    });
+  });
+
+  describe('.decodeAudioSources', function() {
+    var arg;
+
+    beforeEach(function() {
+      arg = [
+        testData.buffer1.data,
+        testData.buffer2.data,
+        testData.buffer3.data
+      ];
+      this.dad = getFakePromise();
+      this.soundWave = new SoundWave();
+      this.soundWave.decodeAudioData = jasmine.createSpy('decodeAudioData').and.returnValue(this.dad.promise);
+      this.prm = this.soundWave.decodeAudioSources(arg);
+    });
+
+    afterEach(function() {
+      arg = null;
+    });
+
+    it('returns a promise', function() {
+      expect(this.prm).toEqual(jasmine.any(Promise));
+    });
+
+    describe('on success', function() {
+
+      it('calls .decodeAudioData() for every ArrayBuffer', function() {
+        expect(this.soundWave.decodeAudioData).toHaveBeenCalledTimes(arg.length);
+      });
+
+      it('resolves to an array of AudioBuffers', function(done) {
+        this.dad.resolve(stereo);
+        this.prm.then(function(result) {
+          expect(result).toEqual([ stereo, stereo, stereo ]);
+          done();
+        });
+      });
+    });
+
+    describe('on failure', function() {
+
+      it('resolves to an error', function(done) {
+        this.dad.reject(err);
+        this.prm.then(null, function(result) {
+          expect(result).toEqual(err);
+          done();
+        });
+      });
+    });
+
+  });
+
+  describe('.decodeAudioData', function() {
+
+    beforeEach(function() {
+      this.soundWave = new SoundWave();
+      spyOn(ac, 'decodeAudioData').and.callThrough();
+      this.prm = this.soundWave.decodeAudioData(testData.buffer1.data);
+    });
+
+    it('returns a promise', function() {
+      expect(this.prm).toEqual(jasmine.any(Promise));
+    });
+
+    it('wraps AudioContext.decodeAudioData', function() {
+      expect(ac.decodeAudioData).toHaveBeenCalledTimes(1);
+    });
+
+    describe('on success', function() {
 
       it('resolves its promise with an AudioBuffer', function(done) {
-        decodePromise.then(function(decoded) {
+        this.prm.then(function(decoded) {
           expect(decoded).toEqual(jasmine.any(window.AudioBuffer));
           done();
         });
       });
     });
 
-    //do we need an unsuccessful test here?
+    describe('on failure', function() {
+      // The promise implementation of decodeAudioData()
+      // of the web-audio-test-api seems to not resolve
+      // properly on error (throws immediately and doesn't
+      // return a promise). That's why we are faking the fake here.
+      // It probably doesn't match the real behaviour
+      // of the web audio api.
+
+      beforeEach(function() {
+        this.dad = getFakePromise();
+        ac.decodeAudioData = jasmine.createSpy('decodeAudioData').and.returnValue(this.dad.promise);
+        this.rejected = this.soundWave.decodeAudioData('not an ArrayBuffer');
+        this.dad.reject(err);
+      });
+
+      it('resolves its promise with an error', function(done) {
+        this.rejected.then(null, function(result) {
+          expect(result).toEqual(err);
+          done();
+        });
+      });
+    });
 
   });
 
   describe('.joinAudioBuffers', function() {
 
     beforeEach(function() {
-      var sr = ac.sampleRate;
-      this.monoBuffer = ac.createBuffer(1, sr, sr);
-      this.stereoBuffer = ac.createBuffer(2, sr, sr);
-      this.longStereoBuffer = ac.createBuffer(2, sr * 2, sr);
-
       this.soundWave = new SoundWave();
+      this.soundWave.appendAudioBuffer = jasmine.createSpy('appendAudioBuffer').and.returnValue(stereo);
+      this.prm = this.soundWave.joinAudioBuffers([ stereo, stereo ]);
     });
 
     it('returns a promise', function() {
-      var prm = this.soundWave.joinAudioBuffers([
-        this.stereoBuffer,
-        this.longStereoBuffer
-      ]);
-      expect(prm).toEqual(jasmine.any(Promise));
+      expect(this.prm).toEqual(jasmine.any(Promise));
     });
 
-    xdescribe('on successfull join', function() {
+    it('calls appendAudioBuffer() on every input buffer', function() {
+      expect(this.soundWave.appendAudioBuffer).toHaveBeenCalledTimes(2);
+    });
+
+    describe('on successfull join', function() {
+
+      it('resolves to an AudioBuffer', function(done) {
+        var len = stereo.length;  // length of spy return value
+        this.prm.then(function(buffer) {
+          expect(buffer.length).toEqual(len);
+          done();
+        });
+      });
+
+      xit('adds metadata to the metadata array', function(done) {
+        var self = this;
+        this.soundWave.metaData = [];
+        this.res.then(function() {
+          expect(self.soundWave.metaData.length).toEqual(3);
+          done();
+        });
+      });
+    });
+
+    describe('on unsuccessful join', function() {
+      it('when argument is not an array resolves to a type error', function(done) {
+        this.soundWave.joinAudioBuffers('sdf').then(null, function(err) {
+          expect(err).toEqual(jasmine.any(TypeError));
+          done();
+        });
+      });
+
+      it('when buffers are not of type AudioBuffer resolves to a type error', function(done) {
+        this.soundWave.joinAudioBuffers(['a', 'b', 'c']).then(null, function(err) {
+          expect(err).toEqual(jasmine.any(TypeError));
+          done();
+        });
+      });
+
+      it('when appendAudioBuffer() throws an error, catches and resolves to it', function(done) {
+        var err = new Error('One or both buffers are not of type AudioBuffer.');
+        this.soundWave.appendAudioBuffer = function() {
+          throw err;
+        };
+        this.soundWave.joinAudioBuffers([ mono, stereo, longStereo ])
+        .then(null, function(result) {
+          expect(result).toEqual(err);
+          done();
+        });
+      });
 
     });
   });
@@ -159,117 +435,130 @@ describe('SoundWave', function() {
   describe('.appendAudioBuffer', function() {
 
     beforeEach(function() {
-      var sr = ac.sampleRate;
-      this.mono = ac.createBuffer(1, sr, sr);
-      this.stereo = ac.createBuffer(2, sr, sr);
-      this.longStereo = ac.createBuffer(2, sr * 2, sr);
-
       this.soundWave = new SoundWave();
-      this.joined1 = this.soundWave.appendAudioBuffer(this.stereo, this.longStereo);
-      this.joined2 = this.soundWave.appendAudioBuffer(this.mono, this.stereo);
+      this.joined1 = this.soundWave.appendAudioBuffer(stereo, longStereo);
+      this.joined2 = this.soundWave.appendAudioBuffer(mono, stereo);
 
     });
 
-    it('returns an AudioBuffer', function() {
-      expect(this.joined1).toEqual(jasmine.any(window.AudioBuffer));
+    describe('on success', function() {
+
+      it('returns an AudioBuffer', function() {
+        expect(this.joined1).toEqual(jasmine.any(window.AudioBuffer));
+      });
+
+      it('appends two AudioBuffers', function() {
+        expect(this.joined1.length).toEqual(stereo.length + longStereo.length);
+      });
+
+      it('if number of channels are equal, uses all of them', function() {
+        expect(this.joined1.numberOfChannels).toEqual(2);
+      });
+
+      it('if number of channels differ, drops channels', function() {
+        expect(this.joined2.numberOfChannels).toEqual(1);
+      });
+
+      it('if number of channels differ, appends them correctly', function() {
+        expect(this.joined2.length).toEqual(mono.length + stereo.length);
+      });
+
     });
 
-    it('appends two AudioBuffers', function() {
-      expect(this.joined1.length).toEqual(this.stereo.length + this.longStereo.length);
-    });
+    describe('on failure', function() {
 
-    it('if number of channels are equal, uses all of them', function() {
-      expect(this.joined1.numberOfChannels).toEqual(2);
-    });
+      it('throws if one or both buffers are not of type AudioBuffer', function() {
+        var sw = this.soundWave;
+        expect( function() { sw.appendAudioBuffer(); })
+        .toThrowError('One or both buffers are not of type AudioBuffer.');
+      });
 
-    it('if number of channels differ, drops channels', function() {
-      expect(this.joined2.numberOfChannels).toEqual(1);
-    });
-
-    it('if number of channels differ, appends them correctly', function() {
-      expect(this.joined2.length).toEqual(this.mono.length + this.stereo.length);
-    });
-
-    it('throws if one or both buffers are not of type AudioBuffer', function() {
-      var sw = this.soundWave;
-      expect(
-        function() { sw.appendAudioBuffer(); }
-      ).toThrowError('One or both buffers are not of type AudioBuffer.');
     });
 
   });
 
   describe('.getMetaData', function() {
+    var name = 'Karl-Heinz';
 
     beforeEach(function() {
-      var sr = ac.sampleRate;
-      var ab = ac.createBuffer(2, sr * 2, sr);
-      var soundWave = new SoundWave();
-      this.metaData = soundWave.getMetaData(ab, ab);
-      this.errorData = soundWave.getMetaData(ab, 23);
+      this.soundWave = new SoundWave();
+      this.soundWave.buffer = longStereo;
     });
 
-    it('returns an object', function() {
-      expect(this.metaData).toEqual(jasmine.any(Object));
-      expect(this.errorData).toEqual(jasmine.any(Object));
+    describe('on success', function() {
+
+      beforeEach(function() {
+        this.metaData = this.soundWave.getMetaData(stereo, name);
+      });
+
+      it('returns an object', function() {
+        expect(this.metaData).toEqual(jasmine.any(Object));
+      });
+
+      it('computes the startpoint of the buffer fragment', function() {
+        expect(this.metaData.start).toEqual(longStereo.length);
+      });
+
+      it('computes the endpoint of the buffer fragment', function() {
+        expect(this.metaData.end).toEqual(longStereo.length + stereo.length - 1);
+      });
+
+      it('computes the length of the buffer fragment', function() {
+        expect(this.metaData.length).toEqual(stereo.length);
+      });
+
+      it('sets the name of the buffer fragment', function() {
+        expect(this.metaData.name).toMatch(name);
+      });
+
     });
 
-    it('computes the startpoint of the buffer fragment', function() {
-      expect(this.metaData.start).toEqual(88200);
-    });
+    describe('on failure', function() {
 
-    it('computes the endpoint of the buffer fragment', function() {
-      expect(this.metaData.end).toEqual(176399);
-    });
+      it('throws a type error if "buffer" is not an AudioBuffer', function() {
+        var self = this;
+        expect(function() {
+          self.soundWave.getMetaData(23, name);
+        }).toThrowError(TypeError);
+      });
 
-    it('computes the length of the buffer fragment', function() {
-      expect(this.metaData.length).toEqual(88200);
-    });
+      it('throws a type error if "name" is not a String', function() {
+        var self = this;
+        expect(function() {
+          self.soundWave.getMetaData(stereo, 23);
+        }).toThrowError(TypeError);
+      });
 
-    it('sets an error message on failure', function() {
-      expect(this.errorData.errorMsg).toBeDefined();
     });
   });
 
   describe('.loadFile', function() {
-    var soundWave, filePromise, fetchPromise, promiseHelper;
-    var url = '/path/to/file.wav';
 
     beforeEach(function() {
-      fetchPromise = new Promise(function(resolve, reject) {
-        promiseHelper = {
-          resolve: resolve,
-          reject: reject
-        };
-      });
-      spyOn(window, 'fetch').and.returnValue(fetchPromise);
-      soundWave = new SoundWave();
-      // promiseHelper.resolve('sdf');
-      filePromise = soundWave.loadFile(url);
-
-    });
-
-    afterEach(function() {
-      soundWave = filePromise = fetchPromise = promiseHelper = null;
+      this.url = '/path/to/file.wav';
+      this.fetchPromise =  getFakePromise();
+      spyOn(window, 'fetch').and.returnValue(this.fetchPromise.promise);
+      this.soundWave = new SoundWave();
+      this.filePromise = this.soundWave.loadFile(this.url);
     });
 
     it('fetches from the server', function() {
-      expect(window.fetch).toHaveBeenCalledWith(url);
+      expect(window.fetch).toHaveBeenCalledWith(this.url);
     });
 
     it('returns a promise', function() {
-      expect(filePromise).toEqual(jasmine.any(Promise));
+      expect(this.filePromise).toEqual(jasmine.any(Promise));
     });
 
     describe('on successful fetch', function() {
 
       beforeEach(function() {
         var response = new window.Response(testData.buffer1.data);
-        promiseHelper.resolve(response);
+        this.fetchPromise.resolve(response);
       });
 
       it('resolves its promise with an ArrayBuffer', function(done) {
-        filePromise.then(function(value) {
+        this.filePromise.then(function(value) {
           expect(value).toEqual(testData.buffer1.data);
           done();
         });
@@ -278,33 +567,34 @@ describe('SoundWave', function() {
     });
 
     describe('on unsuccessful fetch', function() {
-      var errorObj = { 'msg': 'Loading failed'};
+      var err = new Error('It\'s over!');
 
       beforeEach(function() {
-        promiseHelper.reject(errorObj);
+        this.fetchPromise.reject(err);
       });
 
-      it('resolves its promise with an error', function() {
-        filePromise.then(function(error) {
-          expect(error).toEqual(errorObj);
+      it('resolves its promise with an error', function(done) {
+        this.filePromise.then(null, function(result) {
+          expect(result).toEqual(err);
+          done();
         });
       });
     });
 
     describe('on server error', function() {
-      var errorObj = new Error('Server error. Couldn\'t load file: /path/to/file.wav');
-      var badResponse = {
-        'ok': false,
-        'arrayBuffer': function() { return null; }
-      };
+      var err = new Error('Server error. Couldn\'t load file: /path/to/file.wav');
 
       beforeEach(function() {
-        promiseHelper.resolve(badResponse);
+        var badResponse = {
+          'ok': false,
+          'arrayBuffer': function() { return null; }
+        };
+        this.fetchPromise.resolve(badResponse);
       });
 
       it('resolves its promise with an error', function() {
-        filePromise.then(function(value) {
-          expect(value).toEqual(errorObj);
+        this.filePromise.then(null, function(result) {
+          expect(result).toEqual(err);
         });
       });
     });
@@ -312,51 +602,42 @@ describe('SoundWave', function() {
   });
 
   describe('.loadFiles', function() {
-    var soundWave, urls, fetchPromise, promiseHelper, td;
+    var urls = [
+      '/test/url/file1',
+      '/test/url/file2',
+      '/test/url/file3'
+    ];
 
     beforeEach(function() {
-      td = testData.buffer1.data;
-      fetchPromise = new Promise(function(resolve, reject) {
-        promiseHelper = {
-          resolve: resolve,
-          reject: reject
-        };
-      });
-
-      urls = [
-        '/test/url/file1',
-        '/test/url/file2',
-        '/test/url/file3'
-      ];
-      soundWave = new SoundWave();
-      spyOn(soundWave, 'loadFile').and.returnValue(fetchPromise);
-    });
-
-    afterEach(function() {
-      soundWave = urls = fetchPromise = promiseHelper = td = null;
-    });
-
-    it('calls the file loader once for every url', function() {
-      soundWave.loadFiles(urls);
-      expect(soundWave.loadFile).toHaveBeenCalledTimes(3);
+      this.td = testData.buffer1.data;
+      this.fetchPromise = getFakePromise();
+      this.soundWave = new SoundWave();
+      this.soundWave.loadFile = jasmine.createSpy('loadFile')
+      .and.returnValue(this.fetchPromise.promise);
     });
 
     it('returns a promise', function() {
-      var prm = soundWave.loadFiles(urls);
+      var prm = this.soundWave.loadFiles(urls);
       expect(prm).toEqual(jasmine.any(Promise));
+    });
+
+    it('calls the file loader once for every url', function() {
+      this.soundWave.loadFiles(urls);
+      expect(this.soundWave.loadFile).toHaveBeenCalledTimes(3);
     });
 
     describe('on successful loading', function() {
       var filesPromise;
 
       beforeEach(function() {
-        promiseHelper.resolve(td);
-        filesPromise = soundWave.loadFiles(urls);
+        this.fetchPromise.resolve(this.td);
+        filesPromise = this.soundWave.loadFiles(urls);
       });
 
       it('resolves its promise with an array of ArrayBuffers', function(done) {
-        filesPromise.then(function(value) {
-          expect(value).toEqual([td, td, td]);
+        var self = this;
+        filesPromise.then(function(result) {
+          expect(result).toEqual([ self.td, self.td, self.td ]);
           done();
         });
       });
@@ -364,16 +645,16 @@ describe('SoundWave', function() {
 
     describe('on unsuccessful loading (one or more requests)', function() {
       var filesPromise;
-      var errorObj = { 'msg': 'Loading failed' };
+      var err = new Error('It\'s over!');
 
       beforeEach(function() {
-        promiseHelper.reject(errorObj);
-        filesPromise = soundWave.loadFiles(['/just/one/to/avoid/timeout']);
+        this.fetchPromise.reject(err);
+        filesPromise = this.soundWave.loadFiles(['a', 'b', 'c']);
       });
 
       it('resolves its promise with an error', function(done) {
-        filesPromise.then(function(error) {
-          expect(error).toEqual(errorObj);
+        filesPromise.then(null, function(result) {
+          expect(result).toEqual(err);
           done();
         });
       });
