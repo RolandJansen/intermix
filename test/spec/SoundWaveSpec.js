@@ -157,10 +157,22 @@ describe('SoundWave', function() {
         this.jab.resolve(mono);
       });
 
+      it('calls .decodeAudioSources()', function(done) {
+        this.jab.promise.then(function() {
+          expect(soundWave.decodeAudioSources).toHaveBeenCalledWith(arg);
+          done();
+        });
+      });
+
+      it('calls .joinAudioBuffers()', function(done) {
+        this.jab.promise.then(function() {
+          expect(soundWave.joinAudioBuffers).toHaveBeenCalledWith([ mono, mono ]);
+          done();
+        });
+      });
+
       it('decodes them into a single buffer', function(done) {
         this.jab.promise.then(function(result) {
-          expect(soundWave.decodeAudioSources).toHaveBeenCalledWith(arg);
-          expect(soundWave.joinAudioBuffers).toHaveBeenCalledWith([ mono, mono ]);
           expect(result).toEqual(mono);
           done();
         });
