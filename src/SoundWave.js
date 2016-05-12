@@ -51,7 +51,7 @@ var core = require('./core.js');
 var SoundWave = function(audioSrc) {
   var self = this;
   this.ac = core;       //currently just used for tests
-  this.buffer = core.createBuffer(1, 0, core.sampleRate);   //AudioBuffer
+  this.buffer = core.createBuffer(1, 1, core.sampleRate);   //AudioBuffer
   this.metaData = [];   //start-/endpoints and length of single waves
 
   if (typeof audioSrc !== 'undefined') {
@@ -162,11 +162,19 @@ SoundWave.prototype.decodeAudioData = function(rawAudioSrc) {
  */
 SoundWave.prototype.joinAudioBuffers = function(buffers) {
   var self = this;
-  var joinedBuffer = core.createBuffer(1, 0, core.sampleRate);
+  var joinedBuffer;
 
   return new Promise(function(resolve, reject) {
+    if (Array.isArray(buffers)) {
+      joinedBuffer = buffers[0];
+      buffers = buffers.splice(0, 1);
+    } else {
+      reject(new TypeError('Argument is not of type Array'));
+    }
+
     buffers.forEach(function(buffer) {
-      if (buffer instanceof window.AudioBuffer) {
+      if (buffer instanceof window.AudioBuffer &&
+        joinedBuffer instanceof window.AudioBuffer) {
         joinedBuffer = this.appendAudioBuffer(joinedBuffer, buffer);
       } else {
         reject(new TypeError('One or more buffers are not of type AudioBuffer.'));
@@ -316,7 +324,7 @@ SoundWave.prototype.loadFiles = function(filenames) {
  * @return {AudioBuffer}    AudioBuffer including the fragment
  */
 SoundWave.prototype.getBufferFragment = function(start, end) {
-  if (this.buffer.length === 0) {
+  if (this.buffer.length === 1) {
     throw new Error('Audio buffer empty. Nothing to copy.');
   } else if (typeof start === 'undefined') {
     return this.buffer;

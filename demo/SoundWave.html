@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Intermix Demo</title>
+    <link rel="stylesheet"
+    href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+    integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"
+    crossorigin="anonymous"
+    >
+    <link rel="stylesheet" href="assets/css/demos.css" media="screen" title="no title" charset="utf-8">
+    <script type="text/javascript" src="../dist/intermix.js"></script>
+  </head>
+  <body>
+
+    <div class="container row">
+      <!-- <div class="nav col-md-4">
+        <h3>Demos:</h3>
+        <ul class="nav nav-pills nav-stacked">
+          <li role="presentation" class="active"><a href="#">Sound</a></li>
+          <li role="presentation"><a href="StepSequencer.html">Stepsequencer</a></li>
+        </ul>
+      </div> -->
+      <div class="demo col-md-8">
+        <!-- <h1>Sound</h1> -->
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            Load audio files from different locations,
+            decode their PCM data and store it in a buffer
+            and play it.
+          </div>
+          <div class="panel-body">
+            <form>
+              <input class="btn btn-default" type="button" value="Start" onclick="startSingle()"><br>
+              <input class="btn btn-default" type="button" value="Start" onclick="startMulti()"><br>
+            </form>
+          </div>
+          <div class="panel-footer">
+            Audioloop licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc/3.0/">Creative Commons Attribution-NonCommercial 3.0 Unported License</a>.
+            Copyright by <a href="https://freesound.org/people/bebeto/">bebeto</a>.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+
+      var soundWave1 = new intermix.SoundWave('assets/samples/DX7/dxbass1.ogg');
+      var sound1 = new intermix.Sound(soundWave1);
+
+      var files = [
+        'assets/samples/DX7/dxbass1.ogg',
+        'assets/samples/DX7/dxbass2.ogg',
+        'assets/samples/DX7/dxbass3.ogg'
+      ];
+      var soundWave2 = new intermix.SoundWave(files);
+      var sound2 = new intermix.Sound(soundWave2);
+
+      function startSingle() {
+        sound1.start();
+      }
+
+      function startMulti() {
+        sound2.start();
+      };
+
+
+
+
+      // function handleFileComplete(e) {
+      //   var audioFile = e.result;
+      //   var soundWave = new Intermix.SoundWave(audioFile);
+      //   // this is crap and needs to be fixed asap!
+      //   setTimeout(function() {
+      //     console.log(soundWave);
+      //     sound = new Intermix.Sound(audioCtx, soundWave.buffer);
+      //   }, 500);
+      // };
+      //
+      // (function() {
+      //   var queue = new createjs.LoadQueue();
+      //   queue.addEventListener('fileload', handleFileComplete);
+      //   queue.loadFile({src:'assets/samples/554__bebeto__ambient-loop.mp3', type:createjs.AbstractLoader.BINARY});
+      // })();
+    </script>
+  </body>
+</html>

@@ -415,8 +415,9 @@ describe('SoundWave', function() {
       expect(this.prm).toEqual(jasmine.any(Promise));
     });
 
-    it('calls appendAudioBuffer() on every input buffer', function() {
-      expect(this.soundWave.appendAudioBuffer).toHaveBeenCalledTimes(2);
+    it('calls appendAudioBuffer() on every input buffer (-1)', function() {
+      // appendAudioBuffer needs two arguments so it will be called just once
+      expect(this.soundWave.appendAudioBuffer).toHaveBeenCalledTimes(1);
     });
 
     describe('on successfull join', function() {
