@@ -761,6 +761,85 @@ describe('SoundWave', function() {
 
   });
 
+  describe('.getBufferFragment', function() {
+
+    beforeEach(function() {
+      this.soundWave = new SoundWave();
+      this.soundWave.buffer = stereo;
+    });
+
+    describe('on success', function() {
+
+      beforeEach(function() {
+        this.newBuffer = this.soundWave.getBufferFragment(22000, 24000);
+      });
+
+      it('returns a new AudioBuffer', function() {
+        expect(this.newBuffer).toEqual(jasmine.any(window.AudioBuffer));
+      });
+
+      it('returns a stereo AudioBuffer', function() {
+        expect(this.newBuffer.numberOfChannels).toEqual(2);
+      });
+
+      it('returns an ab of length 2000', function() {
+        expect(this.newBuffer.length).toEqual(2000);
+      });
+
+      it('without arguments returns the whole buffer', function() {
+        var ab = this.soundWave.getBufferFragment();
+        expect(ab).toEqual(this.soundWave.buffer);
+      });
+
+      it('with a negative start value, assumes start=0', function() {
+        var ab = this.soundWave.getBufferFragment(-5, 20);
+        expect(ab.length).toEqual(20);
+      });
+
+      it('without an end argument, assumes end=buffer.length', function() {
+        var ab = this.soundWave.getBufferFragment(22000);
+        expect(ab.length).toEqual(22100);
+      });
+
+      it('with end argument greater than buffer.length assumes end=buffer.length', function() {
+        var ab = this.soundWave.getBufferFragment(22000, 85000);
+        expect(ab.length).toEqual(22100);
+      });
+
+      // this does not test if the actual data was copied successfully
+
+    });
+
+    describe('on failure', function() {
+
+      it('throws when soundWave.buffer is empty', function() {
+        var sw = new SoundWave();
+        expect(function() {
+          sw.getBufferFragment();
+        })
+        .toThrow();
+      });
+
+      it('throws when start is greater than buffer.length', function() {
+        var self = this;
+        expect(function() {
+          self.soundWave.getBufferFragment(44200);
+        })
+        .toThrow();
+      });
+
+      it('throws when start is greater than end', function() {
+        var self = this;
+        expect(function() {
+          self.soundWave.getBufferFragment(5, -5);
+        })
+        .toThrow();
+      });
+
+    });
+
+  });
+
   it('should sort an associative array by an array of strings', function() {
     var soundWave = new SoundWave();
     var filenames = ['file1', 'file2', 'file3'];

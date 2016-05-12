@@ -304,6 +304,47 @@ SoundWave.prototype.loadFiles = function(filenames) {
   return Promise.all(promises);
 };
 
+
+/**
+ * Get an AudioBuffer with a fragment of the AudioBuffer
+ * of this object.
+ * @param  {Int}    start   Startpoint of the fragment in samples
+ * @param  {Int}    end     Endpoint of the fragment in samples
+ * @return {AudioBuffer}    AudioBuffer including the fragment
+ */
+SoundWave.prototype.getBufferFragment = function(start, end) {
+  if (this.buffer.length === 0) {
+    throw new Error('Audio buffer empty. Nothing to copy.');
+  } else if (typeof start === 'undefined') {
+    return this.buffer;
+  } else if (start < 0) {
+    start = 0;
+  }
+
+  if (typeof end === 'undefined' || end > this.buffer.length) {
+    end = this.buffer.length;
+  }
+
+  if (start >= end) {
+    throw new Error('Arguments out of bounds.');
+  }
+
+  var chnCount = this.buffer.numberOfChannels;
+  var frameCount = end - start;
+  var newBuffer = core.createBuffer(chnCount, frameCount, core.sampleRate);
+
+  for (var chn = 0; chn < chnCount; chn++) {
+    var newChannel = newBuffer.getChannelData(chn);
+    var oldChannel = this.buffer.getChannelData(chn);
+
+    for (var i = 0; i < frameCount; i++) {
+      newChannel[i] = oldChannel[start + i];
+    }
+  }
+
+  return newBuffer;
+};
+
 /**
  * Sort ArrayBuffers the same order, like the filename
  * parameters.
