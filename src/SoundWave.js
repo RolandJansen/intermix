@@ -84,7 +84,10 @@ var SoundWave = function(audioSrc) {
         return self.joinAudioBuffers(audioBuffers);
       })
       .then(function(audioBuffer) {
-        this.buffer = audioBuffer;
+        self.buffer = audioBuffer;
+      })
+      .catch(function(err) {
+        throw err;
       });
     } else {
       throw new Error('Cannot create SoundWave object: Unsupported data format');

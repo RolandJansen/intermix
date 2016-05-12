@@ -149,14 +149,18 @@ describe('SoundWave', function() {
 
       beforeEach(function() {
         arg = [ testData.buffer1.data, testData.buffer2.data ];
+        this.jab = getFakePromise();
+        SoundWave.prototype.joinAudioBuffers = jasmine.createSpy('joinAudioBuffers').and.returnValue(this.jab.promise);
         SoundWave.prototype.decodeAudioSources = jasmine.createSpy('decodeAudioSources').and.returnValue(fakePromise.promise);
         soundWave = new SoundWave(arg);
-        fakePromise.resolve(mono);
+        fakePromise.resolve([ mono, mono ]);
+        this.jab.resolve(mono);
       });
 
       it('decodes them into a single buffer', function(done) {
-        fakePromise.promise.then(function(result) {
+        this.jab.promise.then(function(result) {
           expect(soundWave.decodeAudioSources).toHaveBeenCalledWith(arg);
+          expect(soundWave.joinAudioBuffers).toHaveBeenCalledWith([ mono, mono ]);
           expect(result).toEqual(mono);
           done();
         });
@@ -258,9 +262,10 @@ describe('SoundWave', function() {
         });
       });
 
-      it('stores meta data in .metaData[]', function() {
+      it('stores meta data in .metaData[]', function(done) {
         this.prm.then(function() {
           expect(self.soundWave.metaData).toEqual(self.smdReturn);
+          done();
         });
       });
 
