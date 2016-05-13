@@ -180,6 +180,40 @@ describe('SoundWave', function() {
 
     });
 
+    describe('when given an AudioBuffer', function() {
+
+      beforeEach(function() {
+        this.soundWave = new SoundWave(mono);
+      });
+
+      it('stores it in its buffer', function() {
+        expect(this.soundWave.buffer).toEqual(mono);
+      });
+
+    });
+
+    describe('when given multiple AudioBuffers', function() {
+
+      beforeEach(function() {
+        this.jab = getFakePromise();
+        SoundWave.prototype.joinAudioBuffers = jasmine.createSpy('joinAudioBuffers').and.returnValue(this.jab.promise);
+        this.soundWave = new SoundWave([ mono, stereo ]);
+        this.jab.resolve(mono);
+      });
+
+      it('calls .joinAudioBuffers', function() {
+        expect(this.soundWave.joinAudioBuffers).toHaveBeenCalledWith([ mono, stereo ]);
+      });
+
+      it('sets the buffer', function(done) {
+        var self = this;
+        this.jab.promise.then(function() {
+          expect(self.soundWave.buffer).toEqual(mono);
+          done();
+        });
+      });
+    });
+
     describe('when given no arguments', function() {
 
       it('does nothing', function() {
@@ -854,6 +888,34 @@ describe('SoundWave', function() {
         .toThrow();
       });
 
+    });
+
+  });
+
+  describe('.useWave', function() {
+
+    beforeEach(function() {
+      this.soundWave = new SoundWave();
+      this.soundWave.wave = null;
+      this.soundWave.fragments = [ 'a', 'b' ];
+    });
+
+    it('if called with 0, sets wave to buffer', function() {
+      this.soundWave.useWave(0);
+      expect(this.soundWave.wave).toEqual(this.soundWave.buffer);
+    });
+
+    it('if called with 1, sets wave to first fragment', function() {
+      this.soundWave.useWave(1);
+      expect(this.soundWave.wave).toEqual(this.soundWave.fragments[0]);
+    });
+
+    it('if called with arg != integer, throws a type error', function() {
+      var self = this;
+      expect(function() {
+        self.soundWave.useWave('sdf');
+      })
+      .toThrowError(TypeError);
     });
 
   });

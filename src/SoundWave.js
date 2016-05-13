@@ -373,6 +373,12 @@ SoundWave.prototype.getBufferFragment = function(start, end) {
   return newBuffer;
 };
 
+
+/**
+ * Specifies which internal buffer to expose to the public.
+ * @param  {Integer} waveSource Number of the buffer (0=buffer, 1-n=fragment)
+ * @return {Void}
+ */
 SoundWave.prototype.useWave = function(waveSource) {
   if (Number.isInteger(waveSource)) {
     if (waveSource === 0) {

@@ -148,14 +148,14 @@
       };
 
       /****************************
-       * Loading local files
+       * Loading local file
        */
       var soundWave3, sound3;
 
       function handleFiles(files) {
         var file = files[0];
+        var fileReader = new FileReader();
         if (typeof file !== 'undefined') {
-          var fileReader = new FileReader();
           fileReader.onload = handleFileContent;
           fileReader.fname = file.name;
           fileReader.readAsArrayBuffer(file);

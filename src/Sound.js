@@ -68,7 +68,6 @@ Sound.prototype.setupAudioChain = function() {
 Sound.prototype.createBufferSource = function() {
   var self = this;
   var bufferSource = core.createBufferSource();
-  // console.log(this.sw.wave);
   bufferSource.buffer = this.sw.wave;
   bufferSource.connect(this.gainNode);
   bufferSource.onended = function() {
