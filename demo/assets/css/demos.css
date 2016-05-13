@@ -38,3 +38,11 @@
 	width: 5em;
 	float: right;
 }
+
+.btn-frag {
+	margin-left: 2em;
+}
+
+#fragment1Range .slider-selection {
+	background: red;
+}

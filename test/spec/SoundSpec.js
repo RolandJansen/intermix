@@ -16,7 +16,7 @@ describe('A Sound', function() {
 
     Sound = proxyquire('../../src/Sound.js', { './core.js': ac, '@noCallThru': true});
     wave = {
-      buffer: ac.createBuffer(2, 22050, 44100)  //create a buffer of 0.5s length
+      wave: ac.createBuffer(2, 22050, 44100)  //create a buffer of 0.5s length
     };
     sound = new Sound(wave);
     // remember that ac != sound.ac

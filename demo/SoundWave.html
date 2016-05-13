@@ -9,6 +9,8 @@
     crossorigin="anonymous"
     >
     <link rel="stylesheet" href="assets/css/demos.css" media="screen" title="no title" charset="utf-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.0.0/css/bootstrap-slider.css" media="screen" title="no title" charset="utf-8">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.0.0/bootstrap-slider.js"></script>
     <script type="text/javascript" src="../dist/intermix.js"></script>
   </head>
   <body>
@@ -25,19 +27,82 @@
         <!-- <h1>Sound</h1> -->
         <div class="panel panel-primary">
           <div class="panel-heading">
-            Load audio files from different locations,
-            decode their PCM data and store it in a buffer
-            and play it.
+            The SoundWave object can load PCM data from audio files
+            (.wav, .mp3, .ogg). It can also handle data from ArrayBuffer
+            or AudioBuffer objects which gives you the freedom to load PCM data
+            from virtually any source.<br>
+            Multiple sources can be concatenated into one buffer.
+            SoundWave objects can export any part of its buffer which
+            makes it possible to slice buffers and reassemble them.
           </div>
           <div class="panel-body">
             <form>
-              <input class="btn btn-default" type="button" value="Start" onclick="startSingle()"><br>
-              <input class="btn btn-default" type="button" value="Start" onclick="startMulti()"><br>
+              <p>
+
+                You can load files from the server using the buildin loader:
+              </p>
+              <p>
+                One file ('dxbass1.ogg'):
+              </p>
+              <input class="btn btn-default" type="button" value="Play" onclick="startSingle()"><br>
+              <p>
+                Three files ([ dxbass1.ogg', 'dxbass2.ogg', 'dxbass3.ogg' ]):
+              </p>
+              <input class="btn btn-default" type="button" value="Whole" onclick="startMulti()">
+              <input class="btn btn-default" type="button" value="Fragment1" onclick="startMultiFrag(1)">
+              <input class="btn btn-default" type="button" value="Fragment2" onclick="startMultiFrag(2)">
+              <input class="btn btn-default" type="button" value="Fragment3" onclick="startMultiFrag(3)"><br>
             </form>
+            <form class="" action="index.html" method="post">
+              <p>
+                You can load files from the filesystem:
+              </p>
+              <!-- <input type="file" id="file-input" accept=".touchosc" multiple style="display:none"></input> -->
+              <input type="file" id="file-input">
+            </form>
+            <p>
+              Working with fragments:
+            </p>
+            <form class="">
+              <span>Another Soundwave with 4 fragments:</span>
+              <input class="btn btn-default" type="button" value="Play" onclick="startSource()">
+              <p>
+                Create custom fragments ...
+              </p>
+              <input id="fragment1Range"
+              data-slider-id="frag1Slider"
+              type="text"
+              data-slider-tooltip="hide"
+              >
+              <input class="btn btn-default btn-frag" type="button" value="Play" onclick="startCustomFrag(1)"><br>
+              <input id="fragment2Range"
+              data-slider-id="frag2Slider"
+              type="text"
+              data-slider-tooltip="hide"
+              >
+              <input class="btn btn-default btn-frag" type="button" value="Play" onclick="startCustomFrag(2)"><br>
+              <input id="fragment3Range"
+              data-slider-id="frag3Slider"
+              type="text"
+              data-slider-tooltip="hide"
+              >
+              <input class="btn btn-default btn-frag" type="button" value="Play" onclick="startCustomFrag(3)"><br>
+              <input id="fragment4Range"
+              data-slider-id="frag4Slider"
+              type="text"
+              data-slider-tooltip="hide"
+              >
+              <input class="btn btn-default btn-frag" type="button" value="Play" onclick="startCustomFrag(4)">
+              <p>
+                ... and reassemble them:
+              </p>
+              <input class="btn btn-default" type="button" value="Build new wave" onclick="buildCustomWave()">
+              <input class="btn btn-default" type="button" value="Play" onclick="startCustomWave()">
+            </form>
+
           </div>
           <div class="panel-footer">
-            Audioloop licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc/3.0/">Creative Commons Attribution-NonCommercial 3.0 Unported License</a>.
-            Copyright by <a href="https://freesound.org/people/bebeto/">bebeto</a>.
+            All sounds sampled from a <a target="_blank" href="http://www.vintagesynth.com/yamaha/dx7.php">Yamaha DX7</a>.
           </div>
         </div>
       </div>
@@ -45,9 +110,21 @@
 
     <script type="text/javascript">
 
+      var frag1Slider, frag2Slider, frag3Slider, frag4Slider;
+
+      /********************************
+       * Loading one file from server
+       */
       var soundWave1 = new intermix.SoundWave('assets/samples/DX7/dxbass1.ogg');
       var sound1 = new intermix.Sound(soundWave1);
 
+      function startSingle() {
+        sound1.start();
+      }
+
+      /**************************************
+       * Loading multiple files from server
+       */
       var files = [
         'assets/samples/DX7/dxbass1.ogg',
         'assets/samples/DX7/dxbass2.ogg',
@@ -56,32 +133,119 @@
       var soundWave2 = new intermix.SoundWave(files);
       var sound2 = new intermix.Sound(soundWave2);
 
-      function startSingle() {
-        sound1.start();
-      }
-
       function startMulti() {
+        soundWave2.useWave(0);
         sound2.start();
       };
 
+      function startMultiFrag(num) {
+        soundWave2.useWave(num);
+        sound2.start();
+      };
+
+      /********************************
+       * Working with fragments
+       */
+      var files2 = [
+        'assets/samples/DX7/thunder.ogg',
+        'assets/samples/DX7/robot.ogg',
+        'assets/samples/DX7/syngliss.ogg',
+        'assets/samples/DX7/image.ogg'
+      ];
+      var soundWave3 = new intermix.SoundWave(files2);
+      var sound3 = new intermix.Sound(soundWave3);
+      var frags  = [
+        { 'start': 0, 'end': 0 },
+        { 'start': 0, 'end': 0 },
+        { 'start': 0, 'end': 0 },
+        { 'start': 0, 'end': 0 }
+      ];
+      var soundWave4, sound4;
+      // var blength3;
+
+      setTimeout(function() {
+        var blength = soundWave3.buffer.length;
+        frags = getFrags(soundWave3.metaData);
+
+        frag1Slider = new Slider('#fragment1Range', {
+          'min': 0,
+          'max': blength,
+          'step': 1,
+          'value': [ frags[0].start, frags[0].end ]
+        })
+        .on('slide', function(e) {
+          frags[0].start = Math.round(e[0]);
+          frags[0].end = Math.round(e[1]);
+        });
+        frag2Slider = new Slider('#fragment2Range', {
+          'min': 0,
+          'max': blength,
+          'step': 1,
+          'value': [ frags[1].start, frags[1].end ]
+        })
+        .on('slide', function(e) {
+          frags[1].start = Math.round(e[0]);
+          frags[1].end = Math.round(e[1]);
+        });
+        frag3Slider = new Slider('#fragment3Range', {
+          'min': 0,
+          'max': blength,
+          'step': 1,
+          'value': [ frags[2].start, frags[2].end ]
+        })
+        .on('slide', function(e) {
+          frags[2].start = Math.round(e[0]);
+          frags[2].end = Math.round(e[1]);
+        });
+        frag4Slider = new Slider('#fragment4Range', {
+          'min': 0,
+          'max': blength,
+          'step': 1,
+          'value': [ frags[3].start, frags[3].end ]
+        })
+        .on('slide', function(e) {
+          frags[3].start = Math.round(e[0]);
+          frags[3].end = Math.round(e[1]);
+        });
+      }, 250);
+
+      function getFrags(metaData) {
+        var frags = [];
+        metaData.forEach(function(meta) {
+          frags.push({
+            'start': meta.start,
+            'end': meta.end
+          });
+        });
+        return frags;
+      };
+
+      function startSource() {
+        sound3.start();
+      };
+
+      function startCustomFrag(num) {
+        var frag = soundWave3.getBufferFragment(frags[num - 1].start, frags[num - 1].end);
+        var swTemp = new intermix.SoundWave(frag);
+        var sTemp = new intermix.Sound(swTemp);
+        sTemp.start();
+      };
+
+      function buildCustomWave() {
+        var fragments = [];
+        frags.forEach(function(frag) {
+          var f = soundWave3.getBufferFragment(frag.start, frag.end);
+          fragments.push(f);
+        });
+        soundWave4 = new intermix.SoundWave(fragments);
+        sound4 = new intermix.Sound(soundWave4);
+      };
+
+      function startCustomWave() {
+        sound4.start();
+      };
 
 
-
-      // function handleFileComplete(e) {
-      //   var audioFile = e.result;
-      //   var soundWave = new Intermix.SoundWave(audioFile);
-      //   // this is crap and needs to be fixed asap!
-      //   setTimeout(function() {
-      //     console.log(soundWave);
-      //     sound = new Intermix.Sound(audioCtx, soundWave.buffer);
-      //   }, 500);
-      // };
-      //
-      // (function() {
-      //   var queue = new createjs.LoadQueue();
-      //   queue.addEventListener('fileload', handleFileComplete);
-      //   queue.loadFile({src:'assets/samples/554__bebeto__ambient-loop.mp3', type:createjs.AbstractLoader.BINARY});
-      // })();
     </script>
   </body>
 </html>

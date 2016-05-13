@@ -19,7 +19,7 @@ var core = require('./core.js');
  */
 var Sound = function(soundWave) {
 
-  this.wave = null;
+  this.sw = null;           //pointer to the soundWave object
   this.ac = core;           //currently just used for tests
   this.queue = [];          //all currently active streams
   this.loop = false;
@@ -37,8 +37,8 @@ var Sound = function(soundWave) {
   this.detune = 0;
 
   if (soundWave) {
-    this.wave = soundWave;
-    this.soundLength = this.loopEnd = this.wave.buffer.duration;
+    this.sw = soundWave;
+    this.soundLength = this.loopEnd = this.sw.wave.duration;
     this.setupAudioChain();
   } else {
     throw new Error('Error initialising Sound object: parameter missing.');
@@ -68,8 +68,8 @@ Sound.prototype.setupAudioChain = function() {
 Sound.prototype.createBufferSource = function() {
   var self = this;
   var bufferSource = core.createBufferSource();
-  // console.log(this.wave.buffer);
-  bufferSource.buffer = this.wave.buffer;
+  // console.log(this.sw.wave);
+  bufferSource.buffer = this.sw.wave;
   bufferSource.connect(this.gainNode);
   bufferSource.onended = function() {
     //console.log('onended fired');

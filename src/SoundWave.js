@@ -24,7 +24,7 @@ var core = require('./core.js');
  * sound.play;
  * @example <caption>Concatenate multiple source files into one buffer<br>
  * in the given order and play them (This is broken in v0.1. Don't use it!):</caption>
- * var soundWave = new intermix.SoundWave('file1.wav,file2.wav,file3.wav');
+ * var soundWave = new intermix.SoundWave(['file1.wav,file2.wav,file3.wav']);
  * var sound = new intermix.Sound(soundWave);
  * sound.play;
  * @example <caption>
@@ -52,6 +52,8 @@ var SoundWave = function(audioSrc) {
   var self = this;
   this.ac = core;       //currently just used for tests
   this.buffer = core.createBuffer(1, 1, core.sampleRate);   //AudioBuffer
+  this.fragments = [];  //AudioBuffers from multiple PCM sources
+  this.wave = this.buffer;  //Interface to the internal buffers
   this.metaData = [];   //start-/endpoints and length of single waves
 
   if (typeof audioSrc !== 'undefined') {
@@ -62,6 +64,7 @@ var SoundWave = function(audioSrc) {
       })
       .then(function(decoded) {
         self.buffer = decoded;
+        self.useWave(0);
         return self.buffer;
       })
       .catch(function(err) {
@@ -71,6 +74,7 @@ var SoundWave = function(audioSrc) {
       //multiple files to load/decode and cancatinate
       this.buffer = this.loadMultipleFiles(audioSrc).then(function(decoded) {
         self.buffer = decoded;
+        self.useWave(0);
       })
       .catch(function(err) {
         throw err;
@@ -81,6 +85,7 @@ var SoundWave = function(audioSrc) {
     } else if (audioSrc instanceof Array && audioSrc[0] instanceof ArrayBuffer) {
       //multiple ArrayBuffers to decode and concatenate
       this.decodeAudioSources(audioSrc).then(function(audioBuffers) {
+        self.fragments = audioBuffers;
         return self.joinAudioBuffers(audioBuffers);
       })
       .then(function(audioBuffer) {
@@ -89,13 +94,20 @@ var SoundWave = function(audioSrc) {
       .catch(function(err) {
         throw err;
       });
+    } else if (audioSrc instanceof window.AudioBuffer) {
+      this.buffer = audioSrc;
+      this.useWave(0);
+    } else if (audioSrc instanceof Array && audioSrc[0] instanceof window.AudioBuffer) {
+      this.buffer = this.joinAudioBuffers(audioSrc).then(function(audioBuffer) {
+        self.buffer = audioBuffer;
+        self.useWave(0);
+      });
     } else {
       throw new Error('Cannot create SoundWave object: Unsupported data format');
     }
   } else {
     //start the object with empty buffer. Usefull for testing and advanced usage.
   }
-
 };
 
 /**
@@ -114,6 +126,7 @@ SoundWave.prototype.loadMultipleFiles = function(urls) {
   })
   .then(function(audioBuffers) {
     var promises = [];
+    self.fragments = audioBuffers;
     promises.push(self.joinAudioBuffers(audioBuffers),
       self.storeMetaData(audioBuffers, filenames));
     return Promise.all(promises);
@@ -162,17 +175,17 @@ SoundWave.prototype.decodeAudioData = function(rawAudioSrc) {
  */
 SoundWave.prototype.joinAudioBuffers = function(buffers) {
   var self = this;
-  var joinedBuffer;
+  var input, joinedBuffer;
 
   return new Promise(function(resolve, reject) {
     if (Array.isArray(buffers)) {
       joinedBuffer = buffers[0];
-      buffers = buffers.splice(0, 1);
+      input = buffers.slice(1);
     } else {
       reject(new TypeError('Argument is not of type Array'));
     }
 
-    buffers.forEach(function(buffer) {
+    input.forEach(function(buffer) {
       if (buffer instanceof window.AudioBuffer &&
         joinedBuffer instanceof window.AudioBuffer) {
         joinedBuffer = this.appendAudioBuffer(joinedBuffer, buffer);
@@ -354,6 +367,18 @@ SoundWave.prototype.getBufferFragment = function(start, end) {
   }
 
   return newBuffer;
+};
+
+SoundWave.prototype.useWave = function(waveSource) {
+  if (Number.isInteger(waveSource)) {
+    if (waveSource === 0) {
+      this.wave = this.buffer;
+    } else {
+      this.wave = this.fragments[waveSource - 1];
+    }
+  } else {
+    throw new TypeError('Argument not of type Integer');
+  }
 };
 
 /**
