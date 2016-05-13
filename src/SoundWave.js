@@ -81,7 +81,10 @@ var SoundWave = function(audioSrc) {
       });
     } else if (audioSrc instanceof ArrayBuffer) {
       //one ArrayBuffer to decode
-      this.buffer = this.decodeAudioData(audioSrc);
+      this.buffer = this.decodeAudioData(audioSrc).then(function(decoded) {
+        self.buffer = decoded;
+        self.useWave(0);
+      });
     } else if (audioSrc instanceof Array && audioSrc[0] instanceof ArrayBuffer) {
       //multiple ArrayBuffers to decode and concatenate
       this.decodeAudioSources(audioSrc).then(function(audioBuffers) {
@@ -90,6 +93,7 @@ var SoundWave = function(audioSrc) {
       })
       .then(function(audioBuffer) {
         self.buffer = audioBuffer;
+        self.useWave(0);
       })
       .catch(function(err) {
         throw err;

@@ -39,7 +39,7 @@
             <form>
               <p>
 
-                You can load files from the server using the buildin loader:
+                You can load files from a webserver using the buildin loader:
               </p>
               <p>
                 One file ('dxbass1.ogg'):
@@ -52,13 +52,17 @@
               <input class="btn btn-default" type="button" value="Fragment1" onclick="startMultiFrag(1)">
               <input class="btn btn-default" type="button" value="Fragment2" onclick="startMultiFrag(2)">
               <input class="btn btn-default" type="button" value="Fragment3" onclick="startMultiFrag(3)"><br>
+              <p>
+                If you want to use a custom loader, see the API docs for an example.
+              </p>
             </form>
             <form class="" action="index.html" method="post">
               <p>
-                You can load files from the filesystem:
+                You can load files from the filesystem (just one file to keep it simple):
               </p>
               <!-- <input type="file" id="file-input" accept=".touchosc" multiple style="display:none"></input> -->
-              <input type="file" id="file-input">
+              <input type="file" id="file-input" accept="audio/*" onchange="handleFiles(this.files)">
+              <div id="sound3"></div>
             </form>
             <p>
               Working with fragments:
@@ -143,6 +147,44 @@
         sound2.start();
       };
 
+      /****************************
+       * Loading local files
+       */
+      var soundWave3, sound3;
+
+      function handleFiles(files) {
+        var file = files[0];
+        if (typeof file !== 'undefined') {
+          var fileReader = new FileReader();
+          fileReader.onload = handleFileContent;
+          fileReader.fname = file.name;
+          fileReader.readAsArrayBuffer(file);
+        }
+      };
+
+      function handleFileContent(evt) {
+        var audio = evt.target.result;
+        var fname = evt.target.fname;
+        soundWave3 = new intermix.SoundWave(audio);
+        sound3 = new intermix.Sound(soundWave3);
+        createButton(fname);
+      };
+
+      function createButton(fname) {
+        var buttons = '<input class="btn btn-default" type="button" value="Play: ' + fname + '" onclick="startSingle2()">';
+        buttons += '<input class="btn btn-default" type="button" value="Stop: ' + fname + '" onclick="stopSingle2()">'
+        var el = document.getElementById('sound3');
+        el.innerHTML = buttons;
+      };
+
+      function startSingle2() {
+        sound3.start();
+      };
+
+      function stopSingle2() {
+        sound3.stop();
+      };
+
       /********************************
        * Working with fragments
        */
@@ -152,20 +194,19 @@
         'assets/samples/DX7/syngliss.ogg',
         'assets/samples/DX7/image.ogg'
       ];
-      var soundWave3 = new intermix.SoundWave(files2);
-      var sound3 = new intermix.Sound(soundWave3);
+      var soundWave4 = new intermix.SoundWave(files2);
+      var sound4 = new intermix.Sound(soundWave4);
       var frags  = [
         { 'start': 0, 'end': 0 },
         { 'start': 0, 'end': 0 },
         { 'start': 0, 'end': 0 },
         { 'start': 0, 'end': 0 }
       ];
-      var soundWave4, sound4;
-      // var blength3;
+      var soundWave5, sound5;
 
       setTimeout(function() {
-        var blength = soundWave3.buffer.length;
-        frags = getFrags(soundWave3.metaData);
+        var blength = soundWave4.buffer.length;
+        frags = getFrags(soundWave4.metaData);
 
         frag1Slider = new Slider('#fragment1Range', {
           'min': 0,
@@ -221,11 +262,11 @@
       };
 
       function startSource() {
-        sound3.start();
+        sound4.start();
       };
 
       function startCustomFrag(num) {
-        var frag = soundWave3.getBufferFragment(frags[num - 1].start, frags[num - 1].end);
+        var frag = soundWave4.getBufferFragment(frags[num - 1].start, frags[num - 1].end);
         var swTemp = new intermix.SoundWave(frag);
         var sTemp = new intermix.Sound(swTemp);
         sTemp.start();
@@ -234,17 +275,16 @@
       function buildCustomWave() {
         var fragments = [];
         frags.forEach(function(frag) {
-          var f = soundWave3.getBufferFragment(frag.start, frag.end);
+          var f = soundWave4.getBufferFragment(frag.start, frag.end);
           fragments.push(f);
         });
-        soundWave4 = new intermix.SoundWave(fragments);
-        sound4 = new intermix.Sound(soundWave4);
+        soundWave5 = new intermix.SoundWave(fragments);
+        sound5 = new intermix.Sound(soundWave5);
       };
 
       function startCustomWave() {
-        sound4.start();
+        sound5.start();
       };
-
 
     </script>
   </body>
