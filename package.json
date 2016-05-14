@@ -2,11 +2,7 @@
   "name": "intermix.js",
   "version": "0.1.0",
   "description": "Javascript library for building sequencers",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs",
-    "test": "tests"
-  },
+  "main": "dist/intermix.min.js",
   "scripts": {
     "lint": "eslint src/",
     "clean": "rimraf dist/*",
@@ -31,13 +27,13 @@
   },
   "keywords": [
     "intermix.js",
-    "WebAudio",
+    "sound",
+    "audio",
+    "web audio",
     "sequencer",
     "sequencing",
     "synthesizer",
     "synthesis",
-    "sound",
-    "audio",
     "music"
   ],
   "author": "Roland Jansen",
