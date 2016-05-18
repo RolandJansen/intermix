@@ -38,4 +38,4 @@ You can also draw something on the screen in sync:
       el.style.backgroundColor = (step % 4) === 0 ? 'red' : 'white';
     };
 
-> The sequencer has a callback function called updateFrame(). Its parameter is the last played 64th note by default. It gets called every time before the screen refreshes (usually 60 times a second). In the example above a dom element with a class named "ping" gets a red background on every 4th note and a white one otherwise. This should be used with caution because expensive things like dom operations can easily lead to performance drops.
+> The sequencer has a callback function named updateFrame(). Its parameter is the last played 64th note by default. It gets called every time before the screen refreshes (usually 60 times a second). In the example above a dom element with a class named "ping" gets a red background on every 4th note and a white one otherwise. This should be used with caution because expensive things like dom operations can easily lead to performance drops.
