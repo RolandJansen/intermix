@@ -56,13 +56,9 @@ var EventBus = function() {
 EventBus.prototype.addRelayEndpoint = function(relay, data, context) {
   var uid = this.getUID();
 
-  if (typeof this.relays[relay] === 'undefined') {
-    throw new TypeError('Unvalid relay type: ' + relay);
-  } else if (!this.isPlainObject(data)) {
-    throw new TypeError('Argument "data" is not a plain object');
-  } else if (typeof context === 'undefined') {
-    throw new Error('Missing argument "context"');
-  } else {
+  if (typeof this.relays[relay] !== 'undefined' &&
+  this.isPlainObject(data) &&
+  typeof context !== 'undefined') {
     this.relays[relay][uid] = {
       'context': context,
       'data': data,
@@ -73,6 +69,8 @@ EventBus.prototype.addRelayEndpoint = function(relay, data, context) {
     this.sendMessage('onRelayAdd', relay, uid);
 
     return uid;
+  } else {
+    throw new TypeError('One or more unvalid arguments');
   }
 
 };
@@ -157,6 +155,14 @@ EventBus.prototype.sendMessage = function(msg, data) {
   for (var i = 0; i < length; i++) {
     subscribers[i].fn.call(subscribers[i].context, data);
   }
+};
+
+EventBus.prototype.getAllMessageTypes = function() {
+  var types = [];
+  for (var type in this.messages) {
+    types.push(type);
+  }
+  return types;
 };
 
 /**

@@ -93,21 +93,21 @@ describe('EventBus', function() {
         var self = this;
         expect(function() {
           self.eb.addRelayEndpoint('foo', dataDef, self);
-        }).toThrowError('Unvalid relay type: foo');
+        }).toThrowError(TypeError);
       });
 
       it('throws a TypeError if data is not a plain object', function() {
         var self = this;
         expect(function() {
           self.eb.addRelayEndpoint('instrument', 'foo', self);
-        }).toThrowError('Argument "data" is not a plain object');
+        }).toThrowError(TypeError);
       });
 
       it('throws an error if context is missing', function() {
         var self = this;
         expect(function() {
           self.eb.addRelayEndpoint('instrument', {});
-        }).toThrowError('Missing argument "context"');
+        }).toThrowError(TypeError);
       });
 
     });
@@ -428,7 +428,18 @@ describe('EventBus', function() {
 
   });
 
-  describe('.notifyAttendees', function() {
+  describe('.getAllMessageTypes', function() {
+
+    beforeEach(function() {
+      this.eb = new EventBus();
+      this.types = this.eb.getAllMessageTypes();
+    });
+
+    it('returns all property names of the messages array', function() {
+      expect(this.types.length).toEqual(2);
+      expect(this.types).toContain('onRelayAdd');
+      expect(this.types).toContain('onRelayRemove');
+    });
 
   });
 
