@@ -1,0 +1,30 @@
+{
+  "name": "test_intermix-npm",
+  "version": "1.0.0",
+  "description": "Test if intermix npm package works",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run build && npm run startserver",
+    "prestart": "npm uninstall intermix && npm install && npm run bower:install",
+    "start": "npm run build && http-server",
+    "build": "browserify main.js -o index.js -s Test",
+    "bower:install": "npm run bower:clean && npm run bower:requirejs && npm run bower:intermix",
+    "bower:clean": "rimraf bower_components/intermix",
+    "bower:requirejs": "bower install requirejs",
+    "bower:intermix": "bower install ./../../#master",
+    "uninstall:intermix": "npm uninstall intermix",
+    "startserver": "http-server"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "intermix": "file:./../../"
+  },
+  "devDependencies": {
+    "bower": "^1.7.9",
+    "browserify": "^13.0.1",
+    "http-server": "^0.9.0",
+    "rimraf": "^2.5.2"
+  }
+}
