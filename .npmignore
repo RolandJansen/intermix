@@ -5,6 +5,7 @@ conf.json
 karma.conf.js
 demo/
 node_modules/
+test/distTest/
 
 # local stuff
 .tmp
