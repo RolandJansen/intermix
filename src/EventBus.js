@@ -101,17 +101,18 @@ EventBus.prototype.getAllRelayEndpointSpecs = function(relay) {
 };
 
 EventBus.prototype.sendToRelay = function(relay, msg) {
-  for (var uid in this.relays[relay]) {
-    this.sendToRelayEndpoint(uid, msg);
+  if (this.relays.hasOwnProperty(relay)) {
+    for (var uid in this.relays[relay]) {
+      this.sendToRelayEndpoint(uid, msg);
+    }
+  } else {
+    throw new TypeError('Argument relay invalid or missing');
   }
 };
 
 EventBus.prototype.sendToRelayEndpoint = function(uid, msg) {
-  if (typeof this.lookup[uid] !== 'undefined') {
-    var endpoint = this.lookup[uid].context;
-    endpoint.handleRelayData.call(endpoint, msg);
-  }
-  //fails silently if uid is wrong or undefined
+  var endpoint = this.lookup[uid].context;
+  endpoint.handleRelayData.call(endpoint, msg);
 };
 
 EventBus.prototype.getRelayNames = function() {

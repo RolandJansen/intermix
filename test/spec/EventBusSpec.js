@@ -219,24 +219,17 @@ describe('EventBus', function() {
       expect(this.handleRelayData).toHaveBeenCalledWith(msg);
     });
 
-    it('fails silently with wrong uid', function() {
+    it('throws a TypeError with unvalid relay', function() {
       var self = this;
       expect(function() {
         self.eb.sendToRelay('foo', msg);
-      }).not.toThrow();
+      }).toThrowError(TypeError);
     });
 
     it('fails silently without a msg', function() {
       var self = this;
       expect(function() {
-        self.eb.sendToRelay('foo');
-      }).not.toThrow();
-    });
-
-    it('fails silently without any arguments', function() {
-      var self = this;
-      expect(function() {
-        self.eb.sendToRelay();
+        self.eb.sendToRelay('instrument');
       }).not.toThrow();
     });
 
@@ -257,24 +250,17 @@ describe('EventBus', function() {
       expect(this.handleRelayData).toHaveBeenCalledTimes(1);
     });
 
-    it('fails silently with wrong uid', function() {
+    it('throws a TypeError with unvalid uid', function() {
       var self = this;
       expect(function() {
         self.eb.sendToRelayEndpoint('foo', msg);
-      }).not.toThrow();
+      }).toThrowError(TypeError);
     });
 
     it('fails silently without a message', function() {
       var self = this;
       expect(function() {
-        self.eb.sendToRelayEndpoint('foo');
-      }).not.toThrow();
-    });
-
-    it('fails silently without any argument', function() {
-      var self = this;
-      expect(function() {
-        self.eb.sendToRelayEndpoint();
+        self.eb.sendToRelayEndpoint(self.uid1);
       }).not.toThrow();
     });
 
