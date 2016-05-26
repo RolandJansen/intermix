@@ -1,2 +1,12 @@
-# demos are useless on npm
-/demo/
+# things that are useless in the npm package
+*.yml
+bower.json
+conf.json
+karma.conf.js
+demo/
+node_modules/
+
+# local stuff
+.tmp
+doc/
+coverage/

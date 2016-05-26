@@ -1,7 +1,7 @@
 {
   "name": "intermix",
   "description": "Javascript library for building sequencers",
-  "main": "dist/intermix.min.js",
+  "main": "dist/intermix.js",
   "authors": [
     "Roland Jansen"
   ],
@@ -31,6 +31,9 @@
     "test",
     "demo",
     "doc",
-    "coverage"
+    "coverage",
+    "conf.json",
+    "karma.conf.js",
+    "package.json"
   ]
 }
