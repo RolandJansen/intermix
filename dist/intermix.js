@@ -595,7 +595,7 @@ var core = _dereq_('./core.js');
  * @constructor
  * @param  {Object} soundWave SoundWave object including the buffer with audio data to be played
  */
-var Sound = function(soundWave) {
+var Sound = function(soundWave, eventBus) {
 
   this.sw = null;           //pointer to the soundWave object
   this.ac = core;           //currently just used for tests
@@ -614,12 +614,25 @@ var Sound = function(soundWave) {
   this.playbackRate = 1;
   this.detune = 0;
 
-  if (soundWave) {
+  this.eventBus = null;
+  this.uid = 0;             //unique id if connected to an event bus
+  this.controls = {
+    'note': [0, 127],
+    'volume': [0, 127],
+    'pan': [-63, 64]
+  };
+
+  if (typeof soundWave !== 'undefined') {
     this.sw = soundWave;
     this.soundLength = this.loopEnd = this.sw.wave.duration;
     this.setupAudioChain();
   } else {
-    throw new Error('Error initialising Sound object: parameter missing.');
+    throw new TypeError('Error initialising Sound object: parameter wrong or missing.');
+  }
+
+  if (typeof eventBus !== 'undefined') {
+    this.eventBus = eventBus;
+    this.registerToRelay('instrument');
   }
 };
 
@@ -755,6 +768,35 @@ Sound.prototype.resume = function() {
   this.isPaused = false;
 };
 
+Sound.prototype.registerToRelay = function(relay) {
+  this.uid = this.EventBus.addRelayEndpoint(relay, this.controls, this);
+};
+
+Sound.prototype.handleRelayData = function(msg) {
+  for (var key in this.controls) {
+    if (msg.hasOwnProperty(key)) {
+      this[key + 'MsgHandler'](msg[key]);
+    }
+  }
+  //fail silently for unknown keys
+};
+
+// Sound.prototype.noteMsgHandler = function(value) {
+//
+// };
+
+Sound.prototype.volumeMsgHandler = function(value) {
+  if (value >= 0 && value <= 127) {
+    this.gainNode.gain.value = value / 127;
+  }
+};
+
+Sound.prototype.panMsgHandler = function(value) {
+  if (value >= -63 && value <= 64) {
+    this.pannerNode.pan.value = value / 64;
+  }
+};
+
 /**
  * Processes an event fired by the sequencer.
  * @param  {Object} seqEvent A sequencer event
@@ -879,14 +921,6 @@ Sound.prototype.setDetune = function(value) {
  */
 Sound.prototype.getDetune = function() {
   return this.detune;
-};
-
-/**
- * This is not in use and can probably be removed
- * @return {Int} Random number
- */
-Sound.prototype.getUID = function() {
-  return Math.random().toString().substr(2, 8);
 };
 
 module.exports = Sound;
