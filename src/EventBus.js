@@ -42,6 +42,7 @@ var EventBus = function() {
 
   this.lookup = {};
   this.relays = {
+    'sequencer': {},
     'instrument': {},
     'fx': {}
   };
@@ -53,6 +54,15 @@ var EventBus = function() {
 
 };
 
+/**
+ * Adds an endpoint (sequencer, instrument, etc) to a
+ * relay and returns a unique id that serves as a
+ * key to identify this endpoint from now on.
+ * @param  {String} relay   The relay to register to
+ * @param  {Object} data    Custom controller definition, can be an empty object if the endpoint doesn't use custom controllers.
+ * @param  {Object} context The endpoint object itself (this)
+ * @return {String}         A binary-like string ([0-f]*) that serves as a uid
+ */
 EventBus.prototype.addRelayEndpoint = function(relay, data, context) {
   var uid = this.getUID();
 
@@ -75,6 +85,12 @@ EventBus.prototype.addRelayEndpoint = function(relay, data, context) {
 
 };
 
+/**
+ * Deletes an endpoint (sequencer, instrument, etc) from a relay.
+ * @param  {String} relay The relay to be removed from
+ * @param  {String} uid   Unique identifier of the endpoint
+ * @return {Void}
+ */
 EventBus.prototype.removeRelayEndpoint = function(relay, uid) {
   if (this.relays[relay].hasOwnProperty(uid)) {
     delete this.relays[relay][uid];
@@ -84,15 +100,25 @@ EventBus.prototype.removeRelayEndpoint = function(relay, uid) {
   }
 };
 
+/**
+ * Get an object of controller definitions of a specific relay endpoint.
+ * @param  {String} uid Unique idenifier of the endpoint
+ * @return {Object}     Controller definitions
+ */
 EventBus.prototype.getEndpointSpec = function(uid) {
   return this.lookup[uid].data;
 };
 
+/**
+ * Get all endpoint specifications for a specific relay.
+ * @param  {String} relay The relay of interest
+ * @return {Object}       Dictionary of endpoint ids and controller definitions
+ */
 EventBus.prototype.getAllRelayEndpointSpecs = function(relay) {
   if (typeof this.relays[relay] !== 'undefined') {
-    var specs = [];
+    var specs = {};
     for (var uid in this.relays[relay]) {
-      specs.push(this.relays[relay][uid].data);
+      specs[uid] = this.relays[relay][uid].data;
     }
     return specs;
   } else {
@@ -100,6 +126,12 @@ EventBus.prototype.getAllRelayEndpointSpecs = function(relay) {
   }
 };
 
+/**
+ * Sends a message to all endpoints of a relay (e.g. all instruments)
+ * @param  {String} relay Relay to send the message to
+ * @param  {Object} msg   The message
+ * @return {Void}
+ */
 EventBus.prototype.sendToRelay = function(relay, msg) {
   if (this.relays.hasOwnProperty(relay)) {
     for (var uid in this.relays[relay]) {
@@ -110,11 +142,21 @@ EventBus.prototype.sendToRelay = function(relay, msg) {
   }
 };
 
+/**
+ * Sends a message to a specific endpoint of a relay.
+ * @param  {String} uid Unique id of the relay endpoint
+ * @param  {Object} msg The message
+ * @return {Void}
+ */
 EventBus.prototype.sendToRelayEndpoint = function(uid, msg) {
   var endpoint = this.lookup[uid].context;
   endpoint.handleRelayData.call(endpoint, msg);
 };
 
+/**
+ * Get a list with the names of all relays
+ * @return {Array} List with relay names
+ */
 EventBus.prototype.getRelayNames = function() {
   var names = [];
   for (var name in this.relays) {
@@ -123,6 +165,25 @@ EventBus.prototype.getRelayNames = function() {
   return names;
 };
 
+/**
+ * Get a list with the names of all currently available message types
+ * @return {Array} List with message types
+ */
+EventBus.prototype.getAllMessageTypes = function() {
+  var types = [];
+  for (var type in this.messages) {
+    types.push(type);
+  }
+  return types;
+};
+
+/**
+ * Subscribe to a message type
+ * @param  {String}   msg     The message type to subscribe to
+ * @param  {Function} fn      Callback function
+ * @param  {Object}   context The subscriber context (this)
+ * @return {Void}
+ */
 EventBus.prototype.subscribe = function(msg, fn, context) {
   if (typeof msg === 'string' &&
   typeof fn === 'function' &&
@@ -131,12 +192,17 @@ EventBus.prototype.subscribe = function(msg, fn, context) {
       this.messages[msg] = [];
     }
     this.messages[msg].push({ 'context': context, 'fn': fn });
-    return true;
   } else {
     throw new TypeError('One or more arguments of wrong type or missing');
   }
 };
 
+/**
+ * Unsubscribe to a message type
+ * @param  {String} msg     The message type to unsubscribe to
+ * @param  {Object} context The (un)subscriber context (this)
+ * @return {Void}
+ */
 EventBus.prototype.unsubscribe = function(msg, context) {
   if (typeof context !== 'undefined') {
     var message = this.messages[msg];
@@ -150,20 +216,18 @@ EventBus.prototype.unsubscribe = function(msg, context) {
   }
 };
 
+/**
+ * Send a message to the bus
+ * @param  {String} msg  The message type
+ * @param  {Object|Array|String|Number|Boolean|ArrayBuffer} data A message of any format
+ * @return {Void}
+ */
 EventBus.prototype.sendMessage = function(msg, data) {
   var subscribers = this.messages[msg];
   var length = subscribers.length;
   for (var i = 0; i < length; i++) {
     subscribers[i].fn.call(subscribers[i].context, data);
   }
-};
-
-EventBus.prototype.getAllMessageTypes = function() {
-  var types = [];
-  for (var type in this.messages) {
-    types.push(type);
-  }
-  return types;
 };
 
 /**
