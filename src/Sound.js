@@ -17,7 +17,7 @@ var core = require('./core.js');
  * @constructor
  * @param  {Object} soundWave SoundWave object including the buffer with audio data to be played
  */
-var Sound = function(soundWave) {
+var Sound = function(soundWave, eventBus) {
 
   this.sw = null;           //pointer to the soundWave object
   this.ac = core;           //currently just used for tests
@@ -36,13 +36,35 @@ var Sound = function(soundWave) {
   this.playbackRate = 1;
   this.detune = 0;
 
-  if (soundWave) {
+  this.eventBus = null;
+  this.uid = 0;             //unique id if connected to an event bus
+  this.controls = {
+    'volume': [0, 127],
+    'pan': [-63, 64],
+    'note': {
+      'value': [0, 127],
+      'delay': Number,
+      'duration': Number,
+      'detune': [-1200, 1200]
+    },
+  };
+
+  if (typeof soundWave !== 'undefined') {
     this.sw = soundWave;
     this.soundLength = this.loopEnd = this.sw.wave.duration;
     this.setupAudioChain();
   } else {
-    throw new Error('Error initialising Sound object: parameter missing.');
+    throw new TypeError('Error initialising Sound object: parameter wrong or missing.');
   }
+
+  if (typeof eventBus !== 'undefined') {
+    this.eventBus = eventBus;
+    this.registerToRelay('instrument');
+  }
+};
+
+Sound.prototype.registerToRelay = function(relay) {
+  this.uid = this.eventBus.addRelayEndpoint(relay, this.controls, this);
 };
 
 /**
@@ -102,7 +124,7 @@ Sound.prototype.destroyBufferSource = function(bsNode) {
  * @param  {float}   duration   Time preriod after the stream should end
  * @return {Void}
  */
-Sound.prototype.start = function(playLooped, delay, duration) {
+Sound.prototype.start = function(playLooped, delay, pbRate, duration) {
   if (this.isPaused && this.queue.length > 0) {
     this.resume();
   } else {
@@ -120,7 +142,13 @@ Sound.prototype.start = function(playLooped, delay, duration) {
       bs.loopStart = this.loopStart;
       bs.loopEnd = this.loopEnd;
     }
-    bs.playbackRate.value = bs.tmpPlaybackRate = this.playbackRate;
+
+    if (typeof pbRate !== 'undefined') {
+      bs.playbackRate.value = bs.tmpPlaybackRate = pbRate;
+    } else {
+      bs.playbackRate.value = bs.tmpPlaybackRate = this.playbackRate;
+    }
+
     bs.detune.value = this.detune;
     bs.startTime = startTime;   // extend node with a starttime property
 
@@ -175,6 +203,48 @@ Sound.prototype.resume = function() {
     delete node.tmpPlaybackRate;
   });
   this.isPaused = false;
+};
+
+Sound.prototype.handleRelayData = function(msg) {
+  // for (var key in this.controls) {
+  //   if (msg.hasOwnProperty(key)) {
+  //     this[key + 'MsgHandler'](msg[key]);
+  //   }
+  // }
+  //looping would work but it's important to set controllers before firering a note
+  if (msg.hasOwnProperty('volume')) {
+    this.volumeMsgHandler(msg.volume);
+  }
+  if (msg.hasOwnProperty('pan')) {
+    this.panMsgHandler(msg.pan);
+  }
+  if (msg.hasOwnProperty('note')) {
+    this.noteMsgHandler(msg.note, msg.delay);
+  }
+};
+
+// Sound.prototype.noteMsgHandler = function(value) {
+//
+// };
+
+Sound.prototype.volumeMsgHandler = function(value) {
+  if (value >= 0 && value <= 127) {
+    this.gainNode.gain.value = value / 127;
+  }
+};
+
+Sound.prototype.panMsgHandler = function(value) {
+  if (value >= -63 && value <= 64) {
+    this.pannerNode.pan.value = value / 64;
+  }
+};
+
+Sound.prototype.noteMsgHandler = function(note, delay) {
+  if (note.value >= 0 && note.value <= 127) {
+    var pbRate = this.getSemiTonePlaybackRate(note.value);
+    // this.start(this.loop, note.delay, pbRate, note.duration);
+    this.start(this.loop, delay, pbRate, note.duration);
+  }
 };
 
 /**
@@ -239,12 +309,12 @@ Sound.prototype.resetLoop = function() {
 };
 
 /**
- * Set the playback rate of the sound in percentage
+ * Set the playback rate for all nodes in percentage
  * (1 = 100%, 2 = 200%)
  * @param  {float}  value   Rate in percentage
  * @return {Void}
  */
-Sound.prototype.setPlaybackRate = function(value) {
+Sound.prototype.setGlobalPlaybackRate = function(value) {
   this.playbackRate = value;
   this.queue.forEach(function(node) {
     node.playbackRate.value = value;
@@ -260,16 +330,12 @@ Sound.prototype.getPlaybackRate = function() {
 };
 
 /**
- * Set the tone within two octave (+/-12 tones)
- * @param  {Integer}  semi tone
- * @return {Void}
+ * Sets the note frequency/playback rate for a note
+ * @param  {Integer}  note value between 0 and 127
+ * @return {Float}    PlaybackRate for the given note
  */
-Sound.prototype.setTone = function(semiTone) {
-  if (semiTone >= -12 && semiTone <= 12) {
-    this.detune = semiTone * 100;
-  } else {
-    throw new Error('Semi tone is ' + semiTone + '. Must be between +/-12.');
-  }
+Sound.prototype.getSemiTonePlaybackRate = function(note) {
+  return (note - 60) / 12 + 1;
 };
 
 /**
@@ -301,14 +367,6 @@ Sound.prototype.setDetune = function(value) {
  */
 Sound.prototype.getDetune = function() {
   return this.detune;
-};
-
-/**
- * This is not in use and can probably be removed
- * @return {Int} Random number
- */
-Sound.prototype.getUID = function() {
-  return Math.random().toString().substr(2, 8);
 };
 
 module.exports = Sound;

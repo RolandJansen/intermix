@@ -190,7 +190,7 @@ describe('A Sound', function() {
   });
 
   it('should set the playback rate (freq) of the sound', function() {
-    sound.setPlaybackRate(1.25);
+    sound.setGlobalPlaybackRate(1.25);
     sound.start(false);
     expect(sound.queue[0].playbackRate.value).toEqual(1.25);
   });
@@ -198,15 +198,15 @@ describe('A Sound', function() {
   it('should set the playback rate while nodes are running', function() {
     sound.start();
     sound.start();
-    sound.setPlaybackRate(0.8);
+    sound.setGlobalPlaybackRate(0.8);
     expect(sound.queue[0].playbackRate.value).toEqual(0.8);
     expect(sound.queue[1].playbackRate.value).toEqual(0.8);
   });
 
-  it('should set the tone between two octaves', function() {
-    sound.setTone(5);
-    sound.start(0, false);
-    expect(sound.queue[0].detune.value).toEqual(500);
+  it('should compute the playbackRate for a note value', function() {
+    var pbr = sound.getSemiTonePlaybackRate(72);
+    sound.start(0, false, pbr);
+    expect(sound.queue[0].playbackRate.value).toEqual(2);
   });
 
   it('should detune the sound in cents within a range of +/- 1200 (two octaves)', function() {

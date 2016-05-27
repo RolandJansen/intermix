@@ -4,6 +4,7 @@
 //intermix = require('./core.js');
 var intermix = _dereq_('./core.js') || {};
 intermix.events = _dereq_('./events.js');
+intermix.EventBus = _dereq_('./EventBus.js');
 intermix.SoundWave = _dereq_('./SoundWave.js');
 intermix.Sound = _dereq_('./Sound.js');
 intermix.Sequencer = _dereq_('./Sequencer.js');
@@ -11,7 +12,7 @@ intermix.Part = _dereq_('./Part.js');
 
 module.exports = intermix;
 
-},{"./Part.js":3,"./Sequencer.js":4,"./Sound.js":5,"./SoundWave.js":6,"./core.js":7,"./events.js":8}],2:[function(_dereq_,module,exports){
+},{"./EventBus.js":3,"./Part.js":4,"./Sequencer.js":5,"./Sound.js":6,"./SoundWave.js":7,"./core.js":8,"./events.js":9}],2:[function(_dereq_,module,exports){
 var bundleFn = arguments[3];
 var sources = arguments[4];
 var cache = arguments[5];
@@ -79,6 +80,276 @@ module.exports = function (fn) {
 };
 
 },{}],3:[function(_dereq_,module,exports){
+'use strict';
+
+/**
+ * This is an event bus that can be used to connect
+ * intermix (and other) components.
+ * It has the usual message events that you can
+ * subscribe/unsubscribe to like in Backbone, jquery etc.
+ * The more interesting part is a relay
+ * system that can be used to share control data between
+ * relay attendees.
+ * An attendee has to add itself to a relay to become
+ * a relay endpoint. Now, all other bus attendees can
+ * read out its controllers and send/receive data to/from it.
+ * The event bus has two buildin relays 'instrument' and 'fx',
+ * others can be added.
+ * Sounds complex? Here are some examples:
+ * @example <caption>Registering to a relay<caption>
+ * var myNewInstrument = function(eventBus) {
+ *
+ *   this.ctrlSpec = {
+ *     'title': String,
+ *     'volume': [0, 127],
+ *     'pan': [-63, 64],
+ *   };
+ *
+ *   this.uid = eventBus.addRelayEndpoint('instrument', ctrlSpec, this);
+ *   ...
+ * @example <caption>Sending data to the relay is easy</caption>
+ *   ...
+ *   eventBus.fireEvent({'volume': 23}, uid);
+ *   ...
+ * @example <caption>To receive events you have to implement 'handleRelayData'</caption>
+ *   ...
+ *   this.handleRelayData = function(data) {
+ *     // do something with the data
+ *   };
+ * };
+ * @constructor
+ * @return {Void}
+ */
+var EventBus = function() {
+
+  this.lookup = {};
+  this.relays = {
+    'controller': {},
+    'instrument': {},
+    'fx': {}
+  };
+
+  this.messages = {
+    'onRelayAdd': [],
+    'onRelayRemove': []
+  };
+
+};
+
+/**
+ * Adds an endpoint (sequencer, instrument, etc) to a
+ * relay and returns a unique id that serves as a
+ * key to identify this endpoint from now on.
+ * @param  {String} relay   The relay to register to
+ * @param  {Object} data    Custom controller definition, can be an empty object if the endpoint doesn't use custom controllers.
+ * @param  {Object} context The endpoint object itself (this)
+ * @return {String}         A binary-like string ([0-f]*) that serves as a uid
+ */
+EventBus.prototype.addRelayEndpoint = function(relay, data, context) {
+  var uid = this.getUID();
+
+  if (typeof this.relays[relay] !== 'undefined' &&
+  this.isPlainObject(data) &&
+  typeof context !== 'undefined') {
+    this.relays[relay][uid] = {
+      'context': context,
+      'data': data,
+      'relay': relay,
+      'subscribers': []
+    };
+    this.lookup[uid] = this.relays[relay][uid];
+    this.sendMessage('onRelayAdd', relay, uid);
+
+    return uid;
+  } else {
+    throw new TypeError('One or more unvalid arguments');
+  }
+
+};
+
+/**
+ * Deletes an endpoint (sequencer, instrument, etc) from a relay.
+ * @param  {String} relay The relay to be removed from
+ * @param  {String} uid   Unique identifier of the endpoint
+ * @return {Void}
+ */
+EventBus.prototype.removeRelayEndpoint = function(relay, uid) {
+  if (this.relays[relay].hasOwnProperty(uid)) {
+    delete this.relays[relay][uid];
+    delete this.lookup[uid];
+  } else {
+    throw new Error('uid not found in relay ' + relay);
+  }
+};
+
+/**
+ * Get an object of controller definitions of a specific relay endpoint.
+ * @param  {String} uid Unique idenifier of the endpoint
+ * @return {Object}     Controller definitions
+ */
+EventBus.prototype.getEndpointSpec = function(uid) {
+  return this.lookup[uid].data;
+};
+
+/**
+ * Get all endpoint specifications for a specific relay.
+ * @param  {String} relay The relay of interest
+ * @return {Object}       Dictionary of endpoint ids and controller definitions
+ */
+EventBus.prototype.getAllRelayEndpointSpecs = function(relay) {
+  if (typeof this.relays[relay] !== 'undefined') {
+    var specs = {};
+    for (var uid in this.relays[relay]) {
+      specs[uid] = this.relays[relay][uid].data;
+    }
+    return specs;
+  } else {
+    throw new TypeError('Relay: ' + relay + ' not found');
+  }
+};
+
+/**
+ * Sends a message to all endpoints of a relay (e.g. all instruments)
+ * @param  {String} relay Relay to send the message to
+ * @param  {Object} msg   The message
+ * @return {Void}
+ */
+EventBus.prototype.sendToRelay = function(relay, msg) {
+  if (this.relays.hasOwnProperty(relay)) {
+    for (var uid in this.relays[relay]) {
+      this.sendToRelayEndpoint(uid, msg);
+    }
+  } else {
+    throw new TypeError('Argument relay invalid or missing');
+  }
+};
+
+/**
+ * Sends a message to a specific endpoint of a relay.
+ * @param  {String} uid Unique id of the relay endpoint
+ * @param  {Object} msg The message
+ * @return {Void}
+ */
+EventBus.prototype.sendToRelayEndpoint = function(uid, msg) {
+  var endpoint = this.lookup[uid].context;
+  endpoint.handleRelayData.call(endpoint, msg);
+};
+
+/**
+ * Get a list with the names of all relays
+ * @return {Array} List with relay names
+ */
+EventBus.prototype.getRelayNames = function() {
+  var names = [];
+  for (var name in this.relays) {
+    names.push(name);
+  }
+  return names;
+};
+
+/**
+ * Get a list with the names of all currently available message types
+ * @return {Array} List with message types
+ */
+EventBus.prototype.getAllMessageTypes = function() {
+  var types = [];
+  for (var type in this.messages) {
+    types.push(type);
+  }
+  return types;
+};
+
+/**
+ * Subscribe to a message type
+ * @param  {String}   msg     The message type to subscribe to
+ * @param  {Function} fn      Callback function
+ * @param  {Object}   context The subscriber context (this)
+ * @return {Void}
+ */
+EventBus.prototype.subscribe = function(msg, fn, context) {
+  if (typeof msg === 'string' &&
+  typeof fn === 'function' &&
+  typeof context !== 'undefined') {
+    if (typeof this.messages[msg] === 'undefined') {
+      this.messages[msg] = [];
+    }
+    this.messages[msg].push({ 'context': context, 'fn': fn });
+  } else {
+    throw new TypeError('One or more arguments of wrong type or missing');
+  }
+};
+
+/**
+ * Unsubscribe to a message type
+ * @param  {String} msg     The message type to unsubscribe to
+ * @param  {Object} context The (un)subscriber context (this)
+ * @return {Void}
+ */
+EventBus.prototype.unsubscribe = function(msg, context) {
+  if (typeof context !== 'undefined') {
+    var message = this.messages[msg];
+    message.forEach(function(subscriber, index) {
+      if (subscriber.context === context) {
+        message.splice(index, 1);
+      }
+    });
+  } else {
+    throw new TypeError('context is undefined');
+  }
+};
+
+/**
+ * Send a message to the bus
+ * @param  {String} msg  The message type
+ * @param  {Object|Array|String|Number|Boolean|ArrayBuffer} data A message of any format
+ * @return {Void}
+ */
+EventBus.prototype.sendMessage = function(msg, data) {
+  var subscribers = this.messages[msg];
+  var length = subscribers.length;
+  for (var i = 0; i < length; i++) {
+    subscribers[i].fn.call(subscribers[i].context, data);
+  }
+};
+
+/**
+ * Creates 16 bytes random data represented as a string
+ * @return {String} Random, binary-like UID
+ */
+EventBus.prototype.getUID = function() {
+  var uid = '';
+  var i = 32;
+  var lookup = ['0', '1', '2', '3', '4', '5', '6', '7', '8',
+                '9', 'a', 'b', 'c', 'd', 'e', 'f'];
+
+  while (i--) {
+    var nibble = Math.random() * 16 | 0;
+    uid += lookup[nibble];
+  }
+
+  return uid;
+};
+
+
+/**
+ * Tests if an object is a plain javascript object (object literal)
+ * and not a constructor, instance, null or anything else.
+ * as suggested by RobG:
+ * http://stackoverflow.com/questions/5876332/how-can-i-differentiate-between-an-object-literal-other-javascript-objects
+ * @param  {Object} obj Any javascript object
+ * @return {Boolean}    True if plain js object, false if not
+ */
+EventBus.prototype.isPlainObject = function(obj) {
+  if (typeof obj === 'object' && obj !== null) {
+    var proto = Object.getPrototypeOf(obj);
+    return proto === Object.prototype || proto === null;
+  }
+  return false;
+};
+
+module.exports = EventBus;
+
+},{}],4:[function(_dereq_,module,exports){
 'use strict';
 
 /**
@@ -161,6 +432,11 @@ Part.prototype.removeEvent = function(seqEvent, position) {
   this.pattern[pos].splice(index, 1);
 };
 
+Part.prototype.removeEvents = function(position) {
+  var pos = (position) * this.multiply;
+  this.pattern[pos] = [];
+};
+
 /**
  * Get the length of the pattern in 64th notes
  * @return {Int}    Length of the pattern
@@ -211,7 +487,7 @@ Part.prototype.extendOnEnd = function(extLength) {
 
 module.exports = Part;
 
-},{}],4:[function(_dereq_,module,exports){
+},{}],5:[function(_dereq_,module,exports){
 'use strict';
 
 var work = _dereq_('webworkify');   //prepares the worker for browserify
@@ -230,7 +506,7 @@ var worker = _dereq_('./scheduleWorker.js');
  * seq.start();
  * @constructor
  */
-var Sequencer = function() {
+var Sequencer = function(eventBus) {
 
   var self = this;
   this.ac = core;             //currently just used for tests
@@ -252,6 +528,8 @@ var Sequencer = function() {
   this.isRunning = false;     //true if sequencer is running, otherwise false
   this.animationFrame;        //has to be overridden with a function. Will be called in the
                               //draw function with the lastPlayedStep int as parameter.
+  this.eventBus = null;
+  this.uid = 0;             //unique id if connected to an event bus
 
   // set time per setTimePerStep
   this.timePerStep = this.setTimePerStep(this.bpm, this.resolution);
@@ -261,6 +539,11 @@ var Sequencer = function() {
 
   /*eslint-enable */
 
+  if (typeof eventBus !== 'undefined') {
+    this.eventBus = eventBus;
+    this.registerToRelay('controller');
+  }
+
   this.scheduleWorker.onmessage = function(e) {
     if (e.data === 'tick') {
       self.scheduler();
@@ -268,6 +551,10 @@ var Sequencer = function() {
   };
 
   this.scheduleWorker.postMessage({'interval': this.interval});
+};
+
+Sequencer.prototype.registerToRelay = function(relay) {
+  this.uid = this.eventBus.addRelayEndpoint(relay, {}, this);
 };
 
 /**
@@ -358,17 +645,17 @@ Sequencer.prototype.fireEvents = function() {
 };
 
 /**
- * Invokes the appropriate subsystem to process the event
+ * Sends an event to a relay endpoint. If there is no event bus,
+ * this function has to be overridden.
  * @private
  * @param  {Object} seqEvent  The event to process
  * @param  {float}  delay     time in seconds when the event should start
  * @return {Void}
  */
 Sequencer.prototype.processSeqEvent = function(seqEvent, delay) {
-  if (delay) {
-    seqEvent.props['delay'] = delay;
-  }
-  seqEvent.props.instrument.processSeqEvent(seqEvent);
+  seqEvent['delay'] = delay;
+  // seqEvent.props.instrument.processSeqEvent(seqEvent);
+  this.eventBus.sendToRelayEndpoint(seqEvent.uid, seqEvent);
 };
 
 /**
@@ -575,7 +862,7 @@ Sequencer.prototype.copyArray = function(sourceArray) {
 
 module.exports = Sequencer;
 
-},{"./core.js":7,"./scheduleWorker.js":9,"webworkify":2}],5:[function(_dereq_,module,exports){
+},{"./core.js":8,"./scheduleWorker.js":10,"webworkify":2}],6:[function(_dereq_,module,exports){
 'use strict';
 
 var core = _dereq_('./core.js');
@@ -617,9 +904,14 @@ var Sound = function(soundWave, eventBus) {
   this.eventBus = null;
   this.uid = 0;             //unique id if connected to an event bus
   this.controls = {
-    'note': [0, 127],
     'volume': [0, 127],
-    'pan': [-63, 64]
+    'pan': [-63, 64],
+    'note': {
+      'value': [0, 127],
+      'delay': Number,
+      'duration': Number,
+      'detune': [-1200, 1200]
+    },
   };
 
   if (typeof soundWave !== 'undefined') {
@@ -634,6 +926,10 @@ var Sound = function(soundWave, eventBus) {
     this.eventBus = eventBus;
     this.registerToRelay('instrument');
   }
+};
+
+Sound.prototype.registerToRelay = function(relay) {
+  this.uid = this.eventBus.addRelayEndpoint(relay, this.controls, this);
 };
 
 /**
@@ -693,7 +989,7 @@ Sound.prototype.destroyBufferSource = function(bsNode) {
  * @param  {float}   duration   Time preriod after the stream should end
  * @return {Void}
  */
-Sound.prototype.start = function(playLooped, delay, duration) {
+Sound.prototype.start = function(playLooped, delay, pbRate, duration) {
   if (this.isPaused && this.queue.length > 0) {
     this.resume();
   } else {
@@ -711,7 +1007,13 @@ Sound.prototype.start = function(playLooped, delay, duration) {
       bs.loopStart = this.loopStart;
       bs.loopEnd = this.loopEnd;
     }
-    bs.playbackRate.value = bs.tmpPlaybackRate = this.playbackRate;
+
+    if (typeof pbRate !== 'undefined') {
+      bs.playbackRate.value = bs.tmpPlaybackRate = pbRate;
+    } else {
+      bs.playbackRate.value = bs.tmpPlaybackRate = this.playbackRate;
+    }
+
     bs.detune.value = this.detune;
     bs.startTime = startTime;   // extend node with a starttime property
 
@@ -768,17 +1070,22 @@ Sound.prototype.resume = function() {
   this.isPaused = false;
 };
 
-Sound.prototype.registerToRelay = function(relay) {
-  this.uid = this.EventBus.addRelayEndpoint(relay, this.controls, this);
-};
-
 Sound.prototype.handleRelayData = function(msg) {
-  for (var key in this.controls) {
-    if (msg.hasOwnProperty(key)) {
-      this[key + 'MsgHandler'](msg[key]);
-    }
+  // for (var key in this.controls) {
+  //   if (msg.hasOwnProperty(key)) {
+  //     this[key + 'MsgHandler'](msg[key]);
+  //   }
+  // }
+  //looping would work but it's important to set controllers before firering a note
+  if (msg.hasOwnProperty('volume')) {
+    this.volumeMsgHandler(msg.volume);
   }
-  //fail silently for unknown keys
+  if (msg.hasOwnProperty('pan')) {
+    this.panMsgHandler(msg.pan);
+  }
+  if (msg.hasOwnProperty('note')) {
+    this.noteMsgHandler(msg.note, msg.delay);
+  }
 };
 
 // Sound.prototype.noteMsgHandler = function(value) {
@@ -794,6 +1101,14 @@ Sound.prototype.volumeMsgHandler = function(value) {
 Sound.prototype.panMsgHandler = function(value) {
   if (value >= -63 && value <= 64) {
     this.pannerNode.pan.value = value / 64;
+  }
+};
+
+Sound.prototype.noteMsgHandler = function(note, delay) {
+  if (note.value >= 0 && note.value <= 127) {
+    var pbRate = this.getSemiTonePlaybackRate(note.value);
+    // this.start(this.loop, note.delay, pbRate, note.duration);
+    this.start(this.loop, delay, pbRate, note.duration);
   }
 };
 
@@ -859,12 +1174,12 @@ Sound.prototype.resetLoop = function() {
 };
 
 /**
- * Set the playback rate of the sound in percentage
+ * Set the playback rate for all nodes in percentage
  * (1 = 100%, 2 = 200%)
  * @param  {float}  value   Rate in percentage
  * @return {Void}
  */
-Sound.prototype.setPlaybackRate = function(value) {
+Sound.prototype.setGlobalPlaybackRate = function(value) {
   this.playbackRate = value;
   this.queue.forEach(function(node) {
     node.playbackRate.value = value;
@@ -880,16 +1195,12 @@ Sound.prototype.getPlaybackRate = function() {
 };
 
 /**
- * Set the tone within two octave (+/-12 tones)
- * @param  {Integer}  semi tone
- * @return {Void}
+ * Sets the note frequency/playback rate for a note
+ * @param  {Integer}  note value between 0 and 127
+ * @return {Float}    PlaybackRate for the given note
  */
-Sound.prototype.setTone = function(semiTone) {
-  if (semiTone >= -12 && semiTone <= 12) {
-    this.detune = semiTone * 100;
-  } else {
-    throw new Error('Semi tone is ' + semiTone + '. Must be between +/-12.');
-  }
+Sound.prototype.getSemiTonePlaybackRate = function(note) {
+  return (note - 60) / 12 + 1;
 };
 
 /**
@@ -925,7 +1236,7 @@ Sound.prototype.getDetune = function() {
 
 module.exports = Sound;
 
-},{"./core.js":7}],6:[function(_dereq_,module,exports){
+},{"./core.js":8}],7:[function(_dereq_,module,exports){
 'use strict';
 
 var core = _dereq_('./core.js');
@@ -1336,7 +1647,7 @@ SoundWave.prototype.sortBinBuffers = function(filenames, binBuffers) {
 
 module.exports = SoundWave;
 
-},{"./core.js":7}],7:[function(_dereq_,module,exports){
+},{"./core.js":8}],8:[function(_dereq_,module,exports){
 /**
  * This is the foundation of the Intermix library.
  * It simply creates the audio context objects
@@ -1411,7 +1722,7 @@ var isMobile = {
 
 module.exports = audioCtx;
 
-},{}],8:[function(_dereq_,module,exports){
+},{}],9:[function(_dereq_,module,exports){
 'use strict';
 
 /**
@@ -1633,7 +1944,7 @@ module.exports = {
   createAudioNote: createAudioNote
 };
 
-},{}],9:[function(_dereq_,module,exports){
+},{}],10:[function(_dereq_,module,exports){
 /**
  * This is a webworker that provides a timer
  * that fires the scheduler for the sequencer.

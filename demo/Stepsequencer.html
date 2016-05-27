@@ -139,7 +139,7 @@
                 <td id="bs15" class="seqStep" onclick="changeStep('bs15')"></td>
               </tr>
             </table>
-            <!-- <h4 class="bsHeading">Note values for the bass sequence in semi-tones:</h4>
+            <h4 class="bsHeading">Note values for the bass sequence in semi-tones:</h4>
             <table class="table-bordered">
               <tr>
                 <td id="stepLabel00" class="seqStepLabel">01</td>
@@ -181,7 +181,7 @@
                 <td id="stepLabel14" class="seqStepLabel">15</td>
                 <td id="stepLabel15" class="seqStepLabel">16</td>
               </tr>
-            </table> -->
+            </table>
           </div>
           <div class="panel-footer">
             Drumsounds sampled from a <a target="_blank" href="http://www.vintagesynth.com/casio/sk1.php">Casio SK-1</a>.
@@ -194,39 +194,47 @@
     <script type="text/javascript">
 
 
-      var bdSound, sdSound, hhSound, bassSound;
+      var bdSound, sdSound, hhSound, bsSound;
       var bdPart, sdPart, hhPart, bsPart;
       var bdNote, sdNote, hhNote, bsNote;
       var queue = new createjs.LoadQueue();
       var binaryKick;
       var isPaused = false;
+      var bassNotes = [];
 
-      var seq = new intermix.Sequencer();
+      var eventBus = new intermix.EventBus();
+      var seq = new intermix.Sequencer(eventBus);
       seq.loop = true;
       seq.loopStart = 0;
       seq.loopEnd = 63;   //this should be set in resolution steps (15 with 16th notes)
 
-      // function initSpinners() {
-      //   for (var i = 0; i < 16; i++) {
-      //     var spinner = $('input#bsStep' + i);
-      //     spinner.TouchSpin({
-      //       verticalbuttons: true,
-      //       min: -12,
-      //       max: 12
-      //     });
-      //     spinner.on('change', function(e) {
-      //       var step = e.target.id.match(/\d+/)[0];
-      //       changeTone(step, e.target.value);
-      //     })
-      //   }
-      // };
-      //
-      // initSpinners();
-      //
-      // function changeTone(step, value) {
-      //   console.log(step + ' ' + value);
-      //   bassSound.setTone()
-      // };
+      function initSpinners() {
+        for (var i = 0; i < 16; i++) {
+          var spinner = $('input#bsStep' + i);
+          spinner.TouchSpin({
+            verticalbuttons: true,
+            min: -12,
+            max: 12
+          });
+          spinner.on('change', function(e) {
+            var step = e.target.id.match(/\d+/)[0];
+            var val = parseInt(e.target.value);
+            changeTone(step, val);
+            bassNotes[step] = val;
+          })
+        }
+      };
+
+      initSpinners();
+
+      function changeTone(step, value) {
+        if (bsPart.pattern[step * 4].length > 0) {  //this is bollocks, should be a function in Part.js
+          var note = { 'note': { 'value': 60 + value, 'velocity': 1 }, 'uid': bsSound.uid };
+          bsPart.removeEvents(step);
+          bsPart.addEvent(note, step);
+        }
+
+      };
 
       function initBpmSpinner() {
         var spinner = $('input#bpm');
@@ -322,10 +330,16 @@
         bsPart = new intermix.Part();
 
         // create note events for the drumset
-        bdNote = intermix.events.createAudioNote('a3', 1, 0, bdSound);
-        sdNote = intermix.events.createAudioNote('a3', 1, 0, sdSound);
-        hhNote = intermix.events.createAudioNote('a3', 1, 0, hhSound);
-        bsNote = intermix.events.createAudioNote('a3', 1, 0, bsSound);
+        // bdNote = intermix.events.createAudioNote('c5', 1, 0, bdSound.uid);
+        // sdNote = intermix.events.createAudioNote('c5', 1, 0, sdSound.uid);
+        // hhNote = intermix.events.createAudioNote('c5', 1, 0, hhSound.uid);
+        // bsNote = intermix.events.createAudioNote('c5', 1, 0, bsSound.uid);
+
+        bdNote = { 'note': { 'value': 60, 'velocity': 1 }, 'uid': bdSound.uid };
+        sdNote = { 'note': { 'value': 60, 'velocity': 1 }, 'uid': sdSound.uid };
+        hhNote = { 'note': { 'value': 60, 'velocity': 1 }, 'uid': hhSound.uid };
+        bsNote = { 'note': { 'value': 60, 'velocity': 1 }, 'uid': bsSound.uid };
+
 
         bdPart.addEvent(bdNote, 0);
         bdPart.addEvent(bdNote, 8);
@@ -409,13 +423,13 @@
         if (el.style.backgroundColor === 'red') {
           el.style.backgroundColor = 'white';
           if (prefix === 'bd') {
-            bdPart.removeEvent(bdNote, pos);
+            bdPart.removeEvents(pos);
           } else if (prefix === 'sd') {
-            sdPart.removeEvent(sdNote, pos);
+            sdPart.removeEvents(pos);
           } else if (prefix === 'hh') {
-            hhPart.removeEvent(hhNote, pos);
+            hhPart.removeEvents(pos);
           } else if (prefix === 'bs') {
-            bsPart.removeEvent(bsNote, pos);
+            bsPart.removeEvents(pos);
           }
         } else {
           el.style.backgroundColor = 'red';
@@ -426,7 +440,12 @@
           } else if (prefix === 'hh') {
             hhPart.addEvent(hhNote, pos);
           } else if (prefix === 'bs') {
-            bsPart.addEvent(bsNote, pos);
+            var semiTone = 0;
+            if (typeof bassNotes[pos] !== 'undefined') {
+              semiTone = bassNotes[pos];
+            }
+            var note = { 'note': { 'value': 60 + semiTone, 'velocity': 1 }, 'uid': bsSound.uid };
+            bsPart.addEvent(note, pos);
           }
         }
 
@@ -442,10 +461,10 @@
         var hhBuffer = new intermix.SoundWave(hhRaw);
         var bassBuffer = new intermix.SoundWave(bassRaw);
         setTimeout(function() {
-          bdSound = new intermix.Sound(bdBuffer);
-          sdSound = new intermix.Sound(sdBuffer);
-          hhSound = new intermix.Sound(hhBuffer);
-          bsSound = new intermix.Sound(bassBuffer);
+          bdSound = new intermix.Sound(bdBuffer, eventBus);
+          sdSound = new intermix.Sound(sdBuffer, eventBus);
+          hhSound = new intermix.Sound(hhBuffer, eventBus);
+          bsSound = new intermix.Sound(bassBuffer, eventBus);
         }, 500);
 
         setTimeout(function() {

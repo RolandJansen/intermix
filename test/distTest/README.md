@@ -30,10 +30,7 @@ server (in the terminal window hit ctrl-c).
 
 The Bower build uses the head commit in the local master branch while npm
 uses the files on disk. This means that local changes are not available in
-all tests until you commit them. If you want to try out sth. that you don't want
-to publish, do a commit and then "git reset --hard HEAD~".
-
-Bower build can take some time, even on fast machines.
+all tests until you commit them. The build can take some time, even on fast machines.
 
 Test suite is verified to run on Windows and Linux with Chrome and Firefox.
 Other configurations may work.

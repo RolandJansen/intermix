@@ -42,7 +42,7 @@ var EventBus = function() {
 
   this.lookup = {};
   this.relays = {
-    'sequencer': {},
+    'controller': {},
     'instrument': {},
     'fx': {}
   };

@@ -16,6 +16,10 @@ describe('EventBus', function() {
       this.eb = new EventBus();
     });
 
+    it('has a property "controller" of type plain object', function() {
+      expect(this.eb.isPlainObject(this.eb.relays.controller)).toBeTruthy();
+    });
+
     it('has a property "instrument" of type plain object', function() {
       expect(this.eb.isPlainObject(this.eb.relays.instrument)).toBeTruthy();
     });
@@ -189,9 +193,9 @@ describe('EventBus', function() {
 
     it('on success returns an array with all endpoint specs', function() {
       var specs = this.eb.getAllRelayEndpointSpecs('instrument');
-      expect(specs.length).toEqual(2);
-      expect(specs).toContain(dataDef);
-      expect(specs).toContain(def2);
+      expect(Object.keys(specs).length).toEqual(2);
+      expect(specs[this.uid1]).toEqual(dataDef);
+      expect(specs[this.uid2]).toEqual(def2);
     });
 
     it('on failure returns a TypeError', function() {
@@ -274,7 +278,7 @@ describe('EventBus', function() {
     });
 
     it('returns an array with all relay names', function() {
-      expect(this.names.length).toEqual(2);
+      expect(this.names.length).toEqual(Object.keys(this.eb.relays).length);
       expect(this.names).toContain('instrument');
       expect(this.names).toContain('fx');
     });

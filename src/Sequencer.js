@@ -16,7 +16,7 @@ var worker = require('./scheduleWorker.js');
  * seq.start();
  * @constructor
  */
-var Sequencer = function() {
+var Sequencer = function(eventBus) {
 
   var self = this;
   this.ac = core;             //currently just used for tests
@@ -38,6 +38,8 @@ var Sequencer = function() {
   this.isRunning = false;     //true if sequencer is running, otherwise false
   this.animationFrame;        //has to be overridden with a function. Will be called in the
                               //draw function with the lastPlayedStep int as parameter.
+  this.eventBus = null;
+  this.uid = 0;             //unique id if connected to an event bus
 
   // set time per setTimePerStep
   this.timePerStep = this.setTimePerStep(this.bpm, this.resolution);
@@ -47,6 +49,11 @@ var Sequencer = function() {
 
   /*eslint-enable */
 
+  if (typeof eventBus !== 'undefined') {
+    this.eventBus = eventBus;
+    this.registerToRelay('controller');
+  }
+
   this.scheduleWorker.onmessage = function(e) {
     if (e.data === 'tick') {
       self.scheduler();
@@ -54,6 +61,10 @@ var Sequencer = function() {
   };
 
   this.scheduleWorker.postMessage({'interval': this.interval});
+};
+
+Sequencer.prototype.registerToRelay = function(relay) {
+  this.uid = this.eventBus.addRelayEndpoint(relay, {}, this);
 };
 
 /**
@@ -144,17 +155,17 @@ Sequencer.prototype.fireEvents = function() {
 };
 
 /**
- * Invokes the appropriate subsystem to process the event
+ * Sends an event to a relay endpoint. If there is no event bus,
+ * this function has to be overridden.
  * @private
  * @param  {Object} seqEvent  The event to process
  * @param  {float}  delay     time in seconds when the event should start
  * @return {Void}
  */
 Sequencer.prototype.processSeqEvent = function(seqEvent, delay) {
-  if (delay) {
-    seqEvent.props['delay'] = delay;
-  }
-  seqEvent.props.instrument.processSeqEvent(seqEvent);
+  seqEvent['delay'] = delay;
+  // seqEvent.props.instrument.processSeqEvent(seqEvent);
+  this.eventBus.sendToRelayEndpoint(seqEvent.uid, seqEvent);
 };
 
 /**

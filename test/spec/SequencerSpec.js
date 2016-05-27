@@ -8,9 +8,9 @@ WebAudioTestAPI.setState({
   'AudioContext#resume': 'enabled'
 });
 
-describe('A Sequencer', function() {
+describe('Sequencer', function() {
   var ac, Sequencer, sequencer, pattern1
-    , pattern2, part1, part2, seqEvent, instrument;
+    , pattern2, part1, part2, seqEvent, instrument, eventBus;
 
   function createArray(length) {
     var arr = [];
@@ -46,7 +46,6 @@ describe('A Sequencer', function() {
       });
     }
 
-    instrument = jasmine.createSpyObj('instrument', [ 'processSeqEvent' ]);
     pattern1 = [];
     pattern2 = [];
     for (var i = 0; i <= 3; i++) {
@@ -56,11 +55,14 @@ describe('A Sequencer', function() {
     part1 = { 'pattern': pattern1, 'length': 64 };
     part2 = { 'pattern': pattern2, 'length': 64 };
     seqEvent = {
-      'class': 'audio',
-      'props': { 'instrument': instrument }
+      'uid': '1a',
+      'note': { 'value': 60, 'velocity': 1 }
     };
 
-    sequencer = new Sequencer();
+    eventBus = jasmine.createSpyObj('eventBus',
+      ['addRelayEndpoint', 'sendToRelayEndpoint']);
+
+    sequencer = new Sequencer(eventBus);
   });
 
   afterEach(function() {
@@ -68,7 +70,7 @@ describe('A Sequencer', function() {
       delete global.window;
     }
     ac = Sequencer = sequencer = pattern1 =
-      pattern2 = part1 = part2 = seqEvent = instrument = null;
+      pattern2 = part1 = part2 = seqEvent = instrument = eventBus = null;
   });
 
   it('ensure that we\'re testing against the WebAudioTestAPI', function() {
@@ -78,6 +80,11 @@ describe('A Sequencer', function() {
 
   it('should be defined', function() {
     expect(sequencer).toBeDefined();
+  });
+
+  it('if eventBus arg, should register to the controller relay', function() {
+    // should be more nicely rewritten as a 'registerToRelay' test
+    expect(eventBus.addRelayEndpoint).toHaveBeenCalledWith('controller', {}, sequencer);
   });
 
   describe('scheduler', function() {
@@ -148,12 +155,12 @@ describe('A Sequencer', function() {
 
   it('should process an event', function() {
     sequencer.processSeqEvent(seqEvent);
-    expect(instrument.processSeqEvent).toHaveBeenCalledWith(seqEvent);
+    expect(eventBus.sendToRelayEndpoint).toHaveBeenCalledWith(seqEvent.uid, seqEvent);
   });
 
   it('should process an event with delay', function() {
     sequencer.processSeqEvent(seqEvent, 0.2342);
-    expect(seqEvent.props.delay).toEqual(0.2342);
+    expect(seqEvent.delay).toEqual(0.2342);
   });
 
   it('should set the queue pointer one step forward', function() {

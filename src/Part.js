@@ -80,6 +80,11 @@ Part.prototype.removeEvent = function(seqEvent, position) {
   this.pattern[pos].splice(index, 1);
 };
 
+Part.prototype.removeEvents = function(position) {
+  var pos = (position) * this.multiply;
+  this.pattern[pos] = [];
+};
+
 /**
  * Get the length of the pattern in 64th notes
  * @return {Int}    Length of the pattern
