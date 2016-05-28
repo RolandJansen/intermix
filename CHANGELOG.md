@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- Improved README.md
+
 ## [0.3.0] - 2016-05-27
 ### Fixed
 - Minified build broken.
@@ -24,18 +29,20 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Stepsequencer Demo: reset button.
 - Project Description in README.md.
 
-## 0.1.0 - 2016-04-08
+## [0.1.0] - 2016-04-08
 ### Added
 - SoundWave class
 - Sound class
 - Sequencer class
 - Part class
-- core Module
-- event Module
-- main Module Entrypoint
-- schedule-worker Module
+- core module
+- event module
+- schedule-worker module
+- main module (entrypoint)
 - Sound Demo App
 - Stepsequencer Demo App
 
+[Unreleased]: https://github.com/RolandJansen/intermix.js/compare/v0.3.0...HEAD
 [0.3.0]: https://github.com/RolandJansen/intermix.js/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/RolandJansen/intermix.js/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/RolandJansen/intermix.js/compare/ae47095652376e5c541b674bc064bddb64e7162b...5d4c9e61b8d74a285e1404588d50bed970e7713c
