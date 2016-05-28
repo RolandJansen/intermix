@@ -15,7 +15,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - EventBus class with relays for controllers, instruments and fx.
 - Distribution Test Suite for testing packages previous to release.
-- Stepsequencer Demo: adjustable note values for bass track
+- Stepsequencer demo: adjustable note values for bass track
 - CHANGELOG.md
 
 ## [0.2.0] - 2016-05-14
@@ -25,8 +25,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - SoundWave: multiple files/buffers can be loaded into one SoundWave object.
 - Sequencer: sample-accurate pause/resume (experimental).
-- SoundWave Demo App.
-- Stepsequencer Demo: reset button.
+- SoundWave demo.
+- Stepsequencer demo: reset button.
 - Project Description in README.md.
 
 ## [0.1.0] - 2016-04-08
@@ -39,8 +39,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - event module
 - schedule-worker module
 - main module (entrypoint)
-- Sound Demo App
-- Stepsequencer Demo App
+- Sound demo
+- Stepsequencer demo
 
 [Unreleased]: https://github.com/RolandJansen/intermix.js/compare/v0.3.0...HEAD
 [0.3.0]: https://github.com/RolandJansen/intermix.js/compare/v0.2.0...v0.3.0
