@@ -56,7 +56,7 @@ Part.prototype.initPattern = function(length) {
  * Adds an event to the pattern at a given position
  * @param  {Object} seqEvent  The event (note, controller, whatever)
  * @param  {Int}    position  Position in the pattern
- * @return {Object} The current context to make the function chainable.
+ * @return {Object} The part object to make the function chainable.
  */
 Part.prototype.addEvent = function(seqEvent, position) {
   if (position <= this.resolution) {
@@ -69,20 +69,29 @@ Part.prototype.addEvent = function(seqEvent, position) {
 };
 
 /**
- * Removes an event at a given position
+ * Removes one event at a given position
  * @param  {Object} seqEvent  The event (note, controller, whatever)
  * @param  {Int}    position  Position in the pattern
- * @return {Void}
+ * @return {Object}           The part object to make the function chainable
  */
 Part.prototype.removeEvent = function(seqEvent, position) {
   var pos = (position) * this.multiply;
   var index = this.pattern[pos].indexOf(seqEvent);
-  this.pattern[pos].splice(index, 1);
+  if (index >= 0) {
+    this.pattern[pos].splice(index, 1);
+  }
+  return this;
 };
 
+/**
+ * Removes all events at a given position
+ * @param  {Int}    position Position in the pattern
+ * @return {Object}          The part object to make the function chainable
+ */
 Part.prototype.removeEvents = function(position) {
   var pos = (position) * this.multiply;
   this.pattern[pos] = [];
+  return this;
 };
 
 /**
@@ -105,9 +114,13 @@ Part.prototype.getLength = function() {
  */
 Part.prototype.getNotePositions = function() {
   var positions = [];
-  this.pattern.forEach(function(el, index) {
-    if (el.length > 0) {
-      positions.push(index / this.multiply);
+  this.pattern.forEach(function(events, index) {
+    if (events.length > 0) {
+      events.forEach(function(evt) {
+        if (typeof evt.note !== 'undefined') {
+          positions.push(index / this.multiply);
+        }
+      }, this);
     }
   }, this);
   return positions;

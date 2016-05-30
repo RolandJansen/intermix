@@ -4,8 +4,8 @@ var proxyquire =  require('proxyquire');
 
 describe('A part', function() {
   var Part, part;
-  var evt1 = { 'text': 'This is an event' };
-  var evt2 = { 'text': 'Another event' };
+  var evt1 = { 'note': 'This is an event' };
+  var evt2 = { 'other': 'Another event' };
 
   beforeEach(function() {
     // proxyquire enshures reloading of Part.js
@@ -30,34 +30,98 @@ describe('A part', function() {
     expect(otherPart.getLength()).toEqual(224);
   });
 
-  it('should add an event at a given position', function() {
-    part.addEvent(evt1, 4);
-    expect(part.pattern[16][0]).toBe(evt1);
+  describe('.addEvent', function() {
+
+    it('is chainable', function() {
+      var ctx = part.addEvent(evt1, 2);
+      expect(ctx).toEqual(part);
+    });
+
+    it('on success adds an event at a given position', function() {
+      part.addEvent(evt1, 4);
+      expect(part.pattern[16][0]).toBe(evt1);
+    });
+
+    it('on failure throws an error if position is out of pattern bounds', function() {
+      expect(function() { part.addEvent(17); }).toThrowError('Position out of pattern bounds.');
+    });
+
   });
 
-  it('should throw an error if position is not within the pattern', function() {
-    expect(function() { part.addEvent(17); }).toThrowError('Position out of pattern bounds.');
+  describe('.removeEvent', function() {
+
+    beforeEach(function() {
+      part.addEvent(evt1, 4);
+      part.addEvent(evt2, 4);
+    });
+
+    afterEach(function() {
+      part.pattern[16] = [];
+    });
+
+    it('is chainable', function() {
+      var ctx = part.removeEvent(evt1, 4);
+      expect(ctx).toEqual(part);
+    });
+
+    it('removes an event from a given position', function() {
+      part.removeEvent(evt1, 4);
+      expect(part.pattern[16][0]).toBe(evt2);
+    });
+
+    it('does nothing if event is not found at position', function() {
+      part.removeEvent(evt1, 3);
+    });
+
+    it('does nothing if a wrong event is passed in', function() {
+      var evt = {};
+      part.removeEvent(evt, 4);
+      expect(part.pattern[16].length).toEqual(2);
+    });
+
   });
 
-  it('should remove an event from a given position', function() {
-    part.addEvent(evt1, 4);
-    part.addEvent(evt2, 4);
-    part.removeEvent(evt1, 4);
-    expect(part.pattern[16][0]).toBe(evt2);
+  describe('.getLength', function() {
+
+    it('returns the length of the pattern in 64th notes', function() {
+      expect(part.getLength()).toEqual(part.pattern.length);
+    });
+
   });
 
-  it('should extend the pattern on top', function() {
-    part.addEvent(evt1, 0);
-    part.extendOnTop(32);
-    expect(part.getLength()).toEqual(96);
-    expect(part.pattern[32][0]).toBe(evt1);
+  describe('.getNotePositions', function() {
+
+    it('returns an array with all positions where note events are found', function() {
+      part.addEvent(evt1, 2)
+      .addEvent(evt2, 4)
+      .addEvent(evt2, 6)
+      .addEvent(evt1, 6);
+
+      expect(part.getNotePositions()).toEqual([2, 6]);
+    });
+
   });
 
-  it('should extend the pattern on end', function() {
-    part.addEvent(evt1, 0);
-    part.extendOnEnd(32);
-    expect(part.getLength()).toEqual(96);
-    expect(part.pattern[0][0]).toBe(evt1);
+  describe('.extendOnTop', function() {
+
+    it('extends the pattern on top', function() {
+      part.addEvent(evt1, 0);
+      part.extendOnTop(32);
+      expect(part.getLength()).toEqual(96);
+      expect(part.pattern[32][0]).toBe(evt1);
+    });
+
+  });
+
+  describe('.extendOnEnd', function() {
+
+    it('extends the pattern on end', function() {
+      part.addEvent(evt1, 0);
+      part.extendOnEnd(32);
+      expect(part.getLength()).toEqual(96);
+      expect(part.pattern[0][0]).toBe(evt1);
+    });
+
   });
 
 });
