@@ -303,8 +303,9 @@ Sequencer.prototype.addPart = function(part, position) {
       this.queue[position] = [];
     }
     this.queue[position].push(part);
+    return this;
   } else {
-    throw new Error('Given parameter doesn\'t seem to be a part object');
+    throw new TypeError('Given parameter doesn\'t seem to be a part object');
   }
 };
 
@@ -315,12 +316,17 @@ Sequencer.prototype.addPart = function(part, position) {
  * @return {Void}
  */
 Sequencer.prototype.removePart = function(part, position) {
-  if (this.queue[position] instanceof Array &&
-    this.queue[position].length > 0) {
-    var index = this.queue[position].indexOf(part);
-    this.queue[position].splice(index, 1);
+  if (part.length && part.pattern) {
+    if (this.queue[position] instanceof Array &&
+      this.queue[position].length > 0) {
+      var index = this.queue[position].indexOf(part);
+      if (index >= 0) {
+        this.queue[position].splice(index, 1);
+      }
+    }
+    return this;
   } else {
-    throw new Error('Part not found at position ' + position + '.');
+    throw new TypeError('Given parameter doesn\'t seem to be a part object');
   }
 };
 

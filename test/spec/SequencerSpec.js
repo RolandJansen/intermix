@@ -260,18 +260,48 @@ describe('Sequencer', function() {
     expect(resumed).toBeFalsy();
   });
 
-  it('should add a part to the master queue', function() {
-    sequencer.addPart(part1, 5);
-    expect(sequencer.queue[5][0]).toBe(part1);
-    expect(function() { sequencer.addPart('brzz', 6); }).toThrow();
+  describe('.addPart', function() {
+
+    it('is chainable', function() {
+      var ctx = sequencer.addPart(part1, 4);
+      expect(ctx).toEqual(sequencer);
+    });
+
+    it('adds a part to the master queue', function() {
+      sequencer.addPart(part1, 5);
+      expect(sequencer.queue[5][0]).toBe(part1);
+    });
+
+    it('throws if parameter is not a part object', function() {
+      expect(function() { sequencer.addPart('brzz', 6); }).toThrowError(TypeError);
+    });
+
   });
 
-  it('should remove a part from the master queue', function() {
-    sequencer.addPart(part1, 5);
-    expect(sequencer.queue[5][0]).toBe(part1);
-    sequencer.removePart(part1, 5);
-    expect(sequencer.queue[5][0]).toBeUndefined();
-    expect(function() { sequencer.removePart(part1, 5); }).toThrow();
+  describe('.removePart', function() {
+
+    beforeEach(function() {
+      sequencer.addPart(part1, 5);
+    });
+
+    it('is chainable', function() {
+      var ctx = sequencer.removePart(part1, 5);
+      expect(ctx).toEqual(sequencer);
+    });
+
+    it('removes a part from the master queue', function() {
+      sequencer.removePart(part1, 5);
+      expect(sequencer.queue[5][0]).toBeUndefined();
+    });
+
+    it('throws if parameter is not a part object', function() {
+      expect(function() { sequencer.removePart({}, 5); }).toThrowError(TypeError);
+    });
+
+    it('fails silently if part not found on given position', function() {
+      expect(function() { sequencer.removePart(part1, 6); }).not.toThrow();
+    });
+
   });
 
   it('should set the bpm value', function() {
