@@ -249,6 +249,7 @@ Sound.prototype.noteMsgHandler = function(note, delay) {
 
 /**
  * Processes an event fired by the sequencer.
+ * This is no longer in use and will be removed at some point.
  * @param  {Object} seqEvent A sequencer event
  * @return {Void}
  */

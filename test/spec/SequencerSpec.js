@@ -10,7 +10,7 @@ WebAudioTestAPI.setState({
 
 describe('Sequencer', function() {
   var ac, Sequencer, sequencer, pattern1
-    , pattern2, part1, part2, seqEvent, instrument, eventBus;
+    , pattern2, part1, part2, seqEvent;
 
   function createArray(length) {
     var arr = [];
@@ -23,9 +23,14 @@ describe('Sequencer', function() {
   beforeEach(function() {
     var proxyquire = require('proxyquire');
     ac = new WebAudioTestAPI.AudioContext();
+    global.intermix = {
+      eventBus: jasmine.createSpyObj('eventBus',
+        ['addRelayEndpoint', 'sendToRelayEndpoint'])
+    };
     // mock window object globally if running on node
     if (typeof window === 'undefined') {
       global.window = {
+        intermix: global.intermix,
         requestAnimationFrame: jasmine.createSpy('requestAnimationFrame'),
         AudioContext: jasmine.createSpy('AudioContext')
       };
@@ -59,10 +64,7 @@ describe('Sequencer', function() {
       'note': { 'value': 60, 'velocity': 1 }
     };
 
-    eventBus = jasmine.createSpyObj('eventBus',
-      ['addRelayEndpoint', 'sendToRelayEndpoint']);
-
-    sequencer = new Sequencer(eventBus);
+    sequencer = new Sequencer();
   });
 
   afterEach(function() {
@@ -70,7 +72,7 @@ describe('Sequencer', function() {
       delete global.window;
     }
     ac = Sequencer = sequencer = pattern1 =
-      pattern2 = part1 = part2 = seqEvent = instrument = eventBus = null;
+      pattern2 = part1 = part2 = seqEvent = null;
   });
 
   it('ensure that we\'re testing against the WebAudioTestAPI', function() {
@@ -82,9 +84,9 @@ describe('Sequencer', function() {
     expect(sequencer).toBeDefined();
   });
 
-  it('if eventBus arg, should register to the controller relay', function() {
+  it('registers to the controller relay of eventBus', function() {
     // should be more nicely rewritten as a 'registerToRelay' test
-    expect(eventBus.addRelayEndpoint).toHaveBeenCalledWith('controller', {}, sequencer);
+    expect(window.intermix.eventBus.addRelayEndpoint).toHaveBeenCalledWith('controller', {}, sequencer);
   });
 
   describe('scheduler', function() {
@@ -99,7 +101,7 @@ describe('Sequencer', function() {
       sequencer.ac.$processTo('00:00.000');
     });
 
-    it('should run until the lookahead limit is reached', function() {
+    it('runs until the lookahead limit is reached', function() {
       sequencer.ac.$processTo('00:01.000');
       sequencer.scheduler();
       expect(sequencer.addPartsToRunqueue).toHaveBeenCalledTimes(10);
@@ -110,154 +112,223 @@ describe('Sequencer', function() {
     });
   });
 
-  it('should copy parts from the master queue to the runqueue', function() {
-    sequencer.addPart(part1, 3);
-    sequencer.addPart(part2, 3);
-    sequencer.nextStep = 3;
-    sequencer.addPartsToRunqueue();
-    expect(sequencer.runqueue).toContain(part1);
-    expect(sequencer.runqueue).toContain(part2);
+  describe('.addPartsToRunqueue', function() {
+
+    beforeEach(function() {
+      sequencer.addPart(part1, 3);
+      sequencer.addPart(part2, 3);
+      sequencer.nextStep = 3;
+      sequencer.addPartsToRunqueue();
+    });
+
+    it('copys parts from the master queue to the runqueue', function() {
+      expect(sequencer.runqueue).toContain(part1);
+      expect(sequencer.runqueue).toContain(part2);
+    });
+
+    it('should add a pointer to the part when copied to the runqueue', function() {
+      expect(sequencer.runqueue[0].pointer).toEqual(0);
+      expect(sequencer.runqueue[1].pointer).toEqual(0);
+    });
+
   });
 
-  it('should add a pointer to the part when copied to the runqueue', function() {
-    sequencer.addPart(part1, 3);
-    sequencer.addPart(part2, 3);
-    sequencer.nextStep = 3;
-    sequencer.addPartsToRunqueue();
-    expect(sequencer.runqueue[0].pointer).toEqual(0);
-    expect(sequencer.runqueue[1].pointer).toEqual(0);
+  describe('.deletePartsFromRunqueue', function() {
+
+    beforeEach(function() {
+      part1.pointer = part2.pointer = 64;
+      sequencer.runqueue.push(part1, part2);
+      sequencer.deletePartsFromRunqueue([1, 0]);
+    });
+
+    it('should remove parts from runqueue', function() {
+      expect(sequencer.runqueue.length).toEqual(0);
+    });
+
+    it('should delete the pointer from removed parts', function() {
+      expect(part1.pointer).not.toBeDefined();
+      expect(part2.pointer).not.toBeDefined();
+    });
+
   });
 
-  it('should fire events from the runqueue', function() {
-    sequencer.processSeqEvent = jasmine.createSpy('processSeqEvent');
-    part1.pointer = part2.pointer = 0;
-    sequencer.runqueue.push(part1, part2);
-    sequencer.fireEvents();
-    expect(sequencer.processSeqEvent).toHaveBeenCalledTimes(7);
-    expect(sequencer.processSeqEvent.calls.allArgs())
-      .toEqual([[1, 0], [2, 0], [3, 0], [4, 0], [1, 0], [2, 0], [3, 0]]);
+  describe('.fireEvents', function() {
+
+    beforeEach(function() {
+      sequencer.processSeqEvent = jasmine.createSpy('processSeqEvent');
+      part1.pointer = part2.pointer = 0;
+      sequencer.runqueue.push(part1, part2);
+      sequencer.fireEvents();
+    });
+
+    it('calls .processSeqEvent for every processed event', function() {
+      expect(sequencer.processSeqEvent).toHaveBeenCalledTimes(7);
+    });
+
+    it('calls .processSeqEvent with the current event as parameter', function() {
+      expect(sequencer.processSeqEvent.calls.allArgs())
+        .toEqual([[1, 0], [2, 0], [3, 0], [4, 0], [1, 0], [2, 0], [3, 0]]);
+    });
+
   });
 
-  it('should delete parts from runqueue', function() {
-    part1.pointer = part2.pointer = 64;
-    sequencer.runqueue.push(part1, part2);
-    sequencer.deletePartsFromRunqueue([1, 0]);
-    expect(sequencer.runqueue.length).toEqual(0);
+  describe('.processSeqEvent', function() {
+
+    it('sends an event to an eventBus relay endpoint', function() {
+      sequencer.processSeqEvent(seqEvent);
+      expect(window.intermix.eventBus.sendToRelayEndpoint)
+      .toHaveBeenCalledWith(seqEvent.uid, seqEvent);
+    });
+
+    it('adds a delay parameter to the event if given', function() {
+      sequencer.processSeqEvent(seqEvent, 0.2342);
+      expect(seqEvent.delay).toEqual(0.2342);
+    });
+
+    it('adds an "undefined" delay parameter if no delay given', function() {
+      sequencer.processSeqEvent(seqEvent);
+      expect(seqEvent.delay).toBeUndefined();
+    });
+
   });
 
-  it('should delete the pointer from removed parts', function() {
-    part1.pointer = part2.pointer = 64;
-    sequencer.runqueue.push(part1, part2);
-    sequencer.deletePartsFromRunqueue([1, 0]);
-    expect(part1.pointer).not.toBeDefined();
-    expect(part2.pointer).not.toBeDefined();
+  describe('.setQueuePointer', function() {
+
+    it('sets the queue pointer one step forward', function() {
+      sequencer.setQueuePointer();
+      expect(sequencer.nextStep).toEqual(1);
+      sequencer.setQueuePointer();
+      expect(sequencer.nextStep).toEqual(2);
+    });
+
+    it('sets the pointer back to start when end of loop is reached', function() {
+      sequencer.loopStart = 5;
+      sequencer.loopEnd = 23;
+      sequencer.loop = true;
+      sequencer.nextStep = 22;
+      sequencer.setQueuePointer();
+      expect(sequencer.nextStep).toEqual(23);
+      sequencer.setQueuePointer();
+      expect(sequencer.nextStep).toEqual(5);
+    });
+
+    it('should clean the runqueue when end of loop is reached', function() {
+      sequencer.runqueue.push(part1, part2);
+      sequencer.loopStart = 5;
+      sequencer.loopEnd = 23;
+      sequencer.loop = true;
+      sequencer.nextStep = 24;
+      sequencer.setQueuePointer();
+      expect(sequencer.runqueue.length).toEqual(0);
+    });
+
+    it('should set the pointer to a given position', function() {
+      sequencer.setQueuePointer(42);
+      expect(sequencer.nextStep).toEqual(42);
+    });
+
+    it('should clean the runqueue when the pointer jumps', function() {
+      sequencer.runqueue.push(part1, part2);
+      sequencer.setQueuePointer(5);
+      expect(sequencer.runqueue.length).toEqual(0);
+    });
+
   });
 
-  it('should process an event', function() {
-    sequencer.processSeqEvent(seqEvent);
-    expect(eventBus.sendToRelayEndpoint).toHaveBeenCalledWith(seqEvent.uid, seqEvent);
+  describe('.resetQueuePointer', function() {
+
+    it('resets the queue pointer', function() {
+      sequencer.runqueue.push(part1, part2);
+      sequencer.setQueuePointer(23);
+      sequencer.resetQueuePointer();
+      expect(sequencer.nextStep).toEqual(0);
+      expect(sequencer.runqueue.length).toEqual(0);
+    });
+
   });
 
-  it('should process an event with delay', function() {
-    sequencer.processSeqEvent(seqEvent, 0.2342);
-    expect(seqEvent.delay).toEqual(0.2342);
+  describe('.start', function() {
+
+    beforeEach(function() {
+      sequencer.start();
+    });
+
+    it('sets isRunning to true', function() {
+      expect(sequencer.isRunning).toBeTruthy();
+    });
+
+    it('starts the scheduleWorker', function() {
+      expect(sequencer.scheduleWorker.postMessage).toHaveBeenCalledWith('start');
+    });
+
+    it('calls window.requestAnimationFrame', function() {
+      expect(window.requestAnimationFrame).toHaveBeenCalled();
+    });
+
   });
 
-  it('should set the queue pointer one step forward', function() {
-    sequencer.setQueuePointer();
-    expect(sequencer.nextStep).toEqual(1);
-    sequencer.setQueuePointer();
-    expect(sequencer.nextStep).toEqual(2);
+  describe('.stop', function() {
+
+    beforeEach(function() {
+      sequencer.stop();
+    });
+
+    it('sets isRunning to false', function() {
+      expect(sequencer.isRunning).toBeFalsy();
+    });
+
+    it('sets nextStepTime to 0 (will be set in the scheduler on start)', function() {
+      expect(sequencer.nextStepTime).toBe(0);
+    });
+
+    it('halts the scheduleWorker', function() {
+      expect(sequencer.scheduleWorker.postMessage).toHaveBeenCalledWith('stop');
+    });
+
   });
 
-  it('should set the pointer back to start when end of loop is reached', function() {
-    sequencer.loopStart = 5;
-    sequencer.loopEnd = 23;
-    sequencer.loop = true;
-    sequencer.nextStep = 22;
-    sequencer.setQueuePointer();
-    expect(sequencer.nextStep).toEqual(23);
-    sequencer.setQueuePointer();
-    expect(sequencer.nextStep).toEqual(5);
+  describe('.pause', function() {
+
+    it('should pause', function() {
+      sequencer.start();
+      sequencer.pause();
+      expect(sequencer.ac.state).toMatch('suspended');
+      expect(sequencer.isRunning).toBeFalsy();
+    });
+
+    it('should not pause if sequencer\'s not running', function() {
+      sequencer.pause();
+      expect(sequencer.ac.state).toMatch('running');
+    });
+
+    it('should not pause if AudioContext already suspenden', function() {
+      sequencer.ac.suspend();
+      var paused = sequencer.pause();
+      expect(paused).toBeFalsy();
+    });
+
   });
 
-  it('should clean the runqueue when end of loop is reached', function() {
-    sequencer.runqueue.push(part1, part2);
-    sequencer.loopStart = 5;
-    sequencer.loopEnd = 23;
-    sequencer.loop = true;
-    sequencer.nextStep = 24;
-    sequencer.setQueuePointer();
-    expect(sequencer.runqueue.length).toEqual(0);
-  });
+  describe('.resume', function() {
 
-  it('should set the pointer to a given position', function() {
-    sequencer.setQueuePointer(42);
-    expect(sequencer.nextStep).toEqual(42);
-  });
+    it('resumes when paused', function() {
+      sequencer.ac.suspend();
+      expect(sequencer.ac.state).toMatch('suspended');
+      sequencer.resume();
+      expect(sequencer.ac.state).toMatch('running');
+    });
 
-  it('should clean the runqueue when the pointer jumps', function() {
-    sequencer.runqueue.push(part1, part2);
-    sequencer.setQueuePointer(5);
-    expect(sequencer.runqueue.length).toEqual(0);
-  });
+    it('doesn\'t resume if sequencer\'s running already', function() {
+      sequencer.start();
+      var resumed = sequencer.resume();
+      expect(resumed).toBeFalsy();
+    });
 
-  it('should reset the queue pointer', function() {
-    sequencer.runqueue.push(part1, part2);
-    sequencer.setQueuePointer(23);
-    sequencer.resetQueuePointer();
-    expect(sequencer.nextStep).toEqual(0);
-    expect(sequencer.runqueue.length).toEqual(0);
-  });
+    it('doesn\'t resume if AudioContext is not suspended', function() {
+      var resumed = sequencer.resume();
+      expect(resumed).toBeFalsy();
+    });
 
-  it('should start', function() {
-    sequencer.start();
-    expect(sequencer.isRunning).toBeTruthy();
-    expect(sequencer.scheduleWorker.postMessage).toHaveBeenCalledWith('start');
-    expect(window.requestAnimationFrame).toHaveBeenCalled();
-  });
-
-  it('should stop', function() {
-    sequencer.stop();
-    expect(sequencer.isRunning).toBeFalsy();
-    expect(sequencer.nextStepTime).toBe(0);
-    expect(sequencer.scheduleWorker.postMessage).toHaveBeenCalledWith('stop');
-  });
-
-  it('should pause', function() {
-    sequencer.start();
-    sequencer.pause();
-    expect(sequencer.ac.state).toMatch('suspended');
-    expect(sequencer.isRunning).toBeFalsy();
-  });
-
-  it('should not pause if sequencer\'s not running', function() {
-    sequencer.pause();
-    expect(sequencer.ac.state).toMatch('running');
-  });
-
-  it('should not pause if AudioContext already suspenden', function() {
-    sequencer.ac.suspend();
-    var paused = sequencer.pause();
-    expect(paused).toBeFalsy();
-  });
-
-  it('should resume when paused', function() {
-    sequencer.ac.suspend();
-    expect(sequencer.ac.state).toMatch('suspended');
-    sequencer.resume();
-    expect(sequencer.ac.state).toMatch('running');
-  });
-
-  it('should not resume if sequencer\'s running already', function() {
-    sequencer.start();
-    var resumed = sequencer.resume();
-    expect(resumed).toBeFalsy();
-  });
-
-  it('should not resume if AudioContext is not suspended', function() {
-    var resumed = sequencer.resume();
-    expect(resumed).toBeFalsy();
   });
 
   describe('.addPart', function() {
@@ -304,17 +375,25 @@ describe('Sequencer', function() {
 
   });
 
-  it('should set the bpm value', function() {
-    sequencer.setBpm(160);
-    expect(sequencer.bpm).toEqual(160);
-    expect(sequencer.timePerStep).toEqual(0.0234375);
+  describe('.setBpm', function() {
+
+    it('should set the bpm value', function() {
+      sequencer.setBpm(160);
+      expect(sequencer.bpm).toEqual(160);
+      expect(sequencer.timePerStep).toEqual(0.0234375);
+    });
+
   });
 
-  it('should compute the time between two shortest possible notes', function() {
-    var t1 = sequencer.setTimePerStep(120, 64);
-    var t2 = sequencer.setTimePerStep(160, 24);
-    expect(t1).toEqual(0.03125);
-    expect(t2).toEqual(0.0625);
+  describe('.setTimePerStep', function() {
+
+    it('should compute the time between two shortest possible notes', function() {
+      var t1 = sequencer.setTimePerStep(120, 64);
+      var t2 = sequencer.setTimePerStep(160, 24);
+      expect(t1).toEqual(0.03125);
+      expect(t2).toEqual(0.0625);
+    });
+
   });
 
   it('should copy an array by value', function() {

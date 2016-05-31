@@ -3,12 +3,14 @@
 
 //intermix = require('./core.js');
 var intermix = _dereq_('./core.js') || {};
-intermix.events = _dereq_('./events.js');
 intermix.EventBus = _dereq_('./EventBus.js');
 intermix.SoundWave = _dereq_('./SoundWave.js');
 intermix.Sound = _dereq_('./Sound.js');
 intermix.Sequencer = _dereq_('./Sequencer.js');
 intermix.Part = _dereq_('./Part.js');
+
+intermix.events = _dereq_('./events.js');
+intermix.eventBus = new intermix.EventBus();
 
 module.exports = intermix;
 
@@ -408,7 +410,7 @@ Part.prototype.initPattern = function(length) {
  * Adds an event to the pattern at a given position
  * @param  {Object} seqEvent  The event (note, controller, whatever)
  * @param  {Int}    position  Position in the pattern
- * @return {Object} The current context to make the function chainable.
+ * @return {Object} The part object to make the function chainable.
  */
 Part.prototype.addEvent = function(seqEvent, position) {
   if (position <= this.resolution) {
@@ -421,20 +423,29 @@ Part.prototype.addEvent = function(seqEvent, position) {
 };
 
 /**
- * Removes an event at a given position
+ * Removes one event at a given position
  * @param  {Object} seqEvent  The event (note, controller, whatever)
  * @param  {Int}    position  Position in the pattern
- * @return {Void}
+ * @return {Object}           The part object to make the function chainable
  */
 Part.prototype.removeEvent = function(seqEvent, position) {
   var pos = (position) * this.multiply;
   var index = this.pattern[pos].indexOf(seqEvent);
-  this.pattern[pos].splice(index, 1);
+  if (index >= 0) {
+    this.pattern[pos].splice(index, 1);
+  }
+  return this;
 };
 
+/**
+ * Removes all events at a given position
+ * @param  {Int}    position Position in the pattern
+ * @return {Object}          The part object to make the function chainable
+ */
 Part.prototype.removeEvents = function(position) {
   var pos = (position) * this.multiply;
   this.pattern[pos] = [];
+  return this;
 };
 
 /**
@@ -457,9 +468,13 @@ Part.prototype.getLength = function() {
  */
 Part.prototype.getNotePositions = function() {
   var positions = [];
-  this.pattern.forEach(function(el, index) {
-    if (el.length > 0) {
-      positions.push(index / this.multiply);
+  this.pattern.forEach(function(events, index) {
+    if (events.length > 0) {
+      events.forEach(function(evt) {
+        if (typeof evt.note !== 'undefined') {
+          positions.push(index / this.multiply);
+        }
+      }, this);
     }
   }, this);
   return positions;
@@ -793,8 +808,9 @@ Sequencer.prototype.addPart = function(part, position) {
       this.queue[position] = [];
     }
     this.queue[position].push(part);
+    return this;
   } else {
-    throw new Error('Given parameter doesn\'t seem to be a part object');
+    throw new TypeError('Given parameter doesn\'t seem to be a part object');
   }
 };
 
@@ -805,12 +821,17 @@ Sequencer.prototype.addPart = function(part, position) {
  * @return {Void}
  */
 Sequencer.prototype.removePart = function(part, position) {
-  if (this.queue[position] instanceof Array &&
-    this.queue[position].length > 0) {
-    var index = this.queue[position].indexOf(part);
-    this.queue[position].splice(index, 1);
+  if (part.length && part.pattern) {
+    if (this.queue[position] instanceof Array &&
+      this.queue[position].length > 0) {
+      var index = this.queue[position].indexOf(part);
+      if (index >= 0) {
+        this.queue[position].splice(index, 1);
+      }
+    }
+    return this;
   } else {
-    throw new Error('Part not found at position ' + position + '.');
+    throw new TypeError('Given parameter doesn\'t seem to be a part object');
   }
 };
 
@@ -1114,6 +1135,7 @@ Sound.prototype.noteMsgHandler = function(note, delay) {
 
 /**
  * Processes an event fired by the sequencer.
+ * This is no longer in use and will be removed at some point.
  * @param  {Object} seqEvent A sequencer event
  * @return {Void}
  */

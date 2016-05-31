@@ -16,7 +16,7 @@ var worker = require('./scheduleWorker.js');
  * seq.start();
  * @constructor
  */
-var Sequencer = function(eventBus) {
+var Sequencer = function() {
 
   var self = this;
   this.ac = core;             //currently just used for tests
@@ -38,7 +38,6 @@ var Sequencer = function(eventBus) {
   this.isRunning = false;     //true if sequencer is running, otherwise false
   this.animationFrame;        //has to be overridden with a function. Will be called in the
                               //draw function with the lastPlayedStep int as parameter.
-  this.eventBus = null;
   this.uid = 0;             //unique id if connected to an event bus
 
   // set time per setTimePerStep
@@ -49,10 +48,7 @@ var Sequencer = function(eventBus) {
 
   /*eslint-enable */
 
-  if (typeof eventBus !== 'undefined') {
-    this.eventBus = eventBus;
-    this.registerToRelay('controller');
-  }
+  this.registerToRelay('controller');
 
   this.scheduleWorker.onmessage = function(e) {
     if (e.data === 'tick') {
@@ -64,7 +60,7 @@ var Sequencer = function(eventBus) {
 };
 
 Sequencer.prototype.registerToRelay = function(relay) {
-  this.uid = this.eventBus.addRelayEndpoint(relay, {}, this);
+  this.uid = window.intermix.eventBus.addRelayEndpoint(relay, {}, this);
 };
 
 /**
@@ -164,8 +160,7 @@ Sequencer.prototype.fireEvents = function() {
  */
 Sequencer.prototype.processSeqEvent = function(seqEvent, delay) {
   seqEvent['delay'] = delay;
-  // seqEvent.props.instrument.processSeqEvent(seqEvent);
-  this.eventBus.sendToRelayEndpoint(seqEvent.uid, seqEvent);
+  window.intermix.eventBus.sendToRelayEndpoint(seqEvent.uid, seqEvent);
 };
 
 /**
