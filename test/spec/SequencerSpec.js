@@ -80,10 +80,6 @@ describe('Sequencer', function() {
     // expect(sequencer.ac.$name).toBeDefined();                             //are we testing against it?
   });
 
-  it('should be defined', function() {
-    expect(sequencer).toBeDefined();
-  });
-
   it('registers to the controller relay of eventBus', function() {
     // should be more nicely rewritten as a 'registerToRelay' test
     expect(window.intermix.eventBus.addRelayEndpoint).toHaveBeenCalledWith('controller', {}, sequencer);
@@ -94,7 +90,7 @@ describe('Sequencer', function() {
     beforeEach(function() {
       sequencer.addPartsToRunqueue = jasmine.createSpy('addPartsToRunqueue');
       sequencer.fireEvents = jasmine.createSpy('fireEvents');
-      sequencer.setQueuePointer = jasmine.createSpy('setQueuePointer');
+      sequencer.increaseQueuePointer = jasmine.createSpy('setQueuePointer');
     });
 
     afterEach(function() {
@@ -106,7 +102,7 @@ describe('Sequencer', function() {
       sequencer.scheduler();
       expect(sequencer.addPartsToRunqueue).toHaveBeenCalledTimes(10);
       expect(sequencer.fireEvents).toHaveBeenCalledTimes(10);
-      expect(sequencer.setQueuePointer).toHaveBeenCalledTimes(10);
+      expect(sequencer.increaseQueuePointer).toHaveBeenCalledTimes(10);
       expect(sequencer.nextStepTime).toBeGreaterThan(1.3);
       expect(sequencer.nextStepTime).toBeLessThan(1.4);
     });
@@ -126,7 +122,7 @@ describe('Sequencer', function() {
       expect(sequencer.runqueue).toContain(part2);
     });
 
-    it('should add a pointer to the part when copied to the runqueue', function() {
+    it('adds a pointer to the part when copied to the runqueue', function() {
       expect(sequencer.runqueue[0].pointer).toEqual(0);
       expect(sequencer.runqueue[1].pointer).toEqual(0);
     });
@@ -192,42 +188,50 @@ describe('Sequencer', function() {
 
   });
 
-  describe('.setQueuePointer', function() {
+  describe('.increaseQueuePointer', function() {
 
     it('sets the queue pointer one step forward', function() {
-      sequencer.setQueuePointer();
+      sequencer.increaseQueuePointer();
       expect(sequencer.nextStep).toEqual(1);
-      sequencer.setQueuePointer();
+      sequencer.increaseQueuePointer();
       expect(sequencer.nextStep).toEqual(2);
     });
 
-    it('sets the pointer back to start when end of loop is reached', function() {
-      sequencer.loopStart = 5;
-      sequencer.loopEnd = 23;
-      sequencer.loop = true;
-      sequencer.nextStep = 22;
-      sequencer.setQueuePointer();
-      expect(sequencer.nextStep).toEqual(23);
-      sequencer.setQueuePointer();
-      expect(sequencer.nextStep).toEqual(5);
+    describe('in loop mode', function() {
+
+      beforeEach(function() {
+        sequencer.loopStart = 5;
+        sequencer.loopEnd = 23;
+        sequencer.loop = true;
+        sequencer.nextStep = 22;
+      });
+
+      it('sets the pointer back to start when end of loop is reached', function() {
+        sequencer.increaseQueuePointer();
+        expect(sequencer.nextStep).toEqual(23);
+        sequencer.increaseQueuePointer();
+        expect(sequencer.nextStep).toEqual(5);
+      });
+
+      it('cleans the runqueue when the pointer jumps', function() {
+        sequencer.runqueue.push(part1, part2);
+        sequencer.increaseQueuePointer();
+        sequencer.increaseQueuePointer();
+        expect(sequencer.runqueue.length).toEqual(0);
+      });
+
     });
 
-    it('should clean the runqueue when end of loop is reached', function() {
-      sequencer.runqueue.push(part1, part2);
-      sequencer.loopStart = 5;
-      sequencer.loopEnd = 23;
-      sequencer.loop = true;
-      sequencer.nextStep = 24;
-      sequencer.setQueuePointer();
-      expect(sequencer.runqueue.length).toEqual(0);
-    });
+  });
 
-    it('should set the pointer to a given position', function() {
+  describe('.setQueuePointer', function() {
+
+    it('sets the pointer to a given position', function() {
       sequencer.setQueuePointer(42);
       expect(sequencer.nextStep).toEqual(42);
     });
 
-    it('should clean the runqueue when the pointer jumps', function() {
+    it('cleans the runqueue when the pointer jumps', function() {
       sequencer.runqueue.push(part1, part2);
       sequencer.setQueuePointer(5);
       expect(sequencer.runqueue.length).toEqual(0);
@@ -328,6 +332,22 @@ describe('Sequencer', function() {
       var resumed = sequencer.resume();
       expect(resumed).toBeFalsy();
     });
+
+  });
+
+  describe('.draw', function() {
+
+  });
+
+  describe('.updateFrame', function() {
+
+    it('is a function', function() {
+      expect(typeof sequencer.updateFrame).toBe('function');
+    });
+
+  });
+
+  describe('.getLastPlayedStep', function() {
 
   });
 

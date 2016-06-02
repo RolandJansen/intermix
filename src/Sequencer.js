@@ -46,8 +46,6 @@ var Sequencer = function() {
   // Initialize the scheduler-timer
   this.scheduleWorker = work(worker);
 
-  /*eslint-enable */
-
   this.registerToRelay('controller');
 
   this.scheduleWorker.onmessage = function(e) {
@@ -83,7 +81,7 @@ Sequencer.prototype.scheduler = function() {
     this.fireEvents();
     this.nextStepTime += this.timePerStep;
 
-    this.setQueuePointer();
+    this.increaseQueuePointer();
   }
 };
 
@@ -167,21 +165,26 @@ Sequencer.prototype.processSeqEvent = function(seqEvent, delay) {
  * Sets the pointer to the next step that should be played
  * in the master queue. If we're playing in loop mode,
  * jump back to loopstart when end of loop is reached.
- * If a pointer position is given, jump to it.
  * @private
- * @param   {Int}   position  New position in the master queue
- * @return  {Void}
+ * @return {Void}
  */
-Sequencer.prototype.setQueuePointer = function(position) {
-  if (typeof position !== 'undefined') {
-    this.nextStep = position;
-    this.runqueue = [];
-  } else if (this.loop && this.nextStep >= this.loopEnd) {
+Sequencer.prototype.increaseQueuePointer = function() {
+  if (this.loop && this.nextStep >= this.loopEnd) {
     this.nextStep = this.loopStart;
     this.runqueue = [];
   } else {
     this.nextStep++;
   }
+};
+
+/**
+ * Jump to a specific point in the queue.
+ * @param   {Int}   position  New position in the master queue
+ * @return  {Void}
+ */
+Sequencer.prototype.setQueuePointer = function(position) {
+  this.nextStep = position;
+  this.runqueue = [];
 };
 
 /**
@@ -255,19 +258,9 @@ Sequencer.prototype.resume = function() {
  * @return {Void}
  */
 Sequencer.prototype.draw = function() {
-  // first we'll have to find out, what step was played recently.
-  // this is somehow clumsy because the sequencer doesn't keep track of that.
   var lookAheadDelta = this.nextStepTime - core.currentTime;
   if (lookAheadDelta >= 0) {
-    var stepsAhead = Math.round(lookAheadDelta / this.timePerStep);
-
-    if (this.nextStep < stepsAhead) {
-      // we just jumped to the start of a loop
-      this.lastPlayedStep = this.loopEnd + this.nextStep - stepsAhead;
-    } else {
-      this.lastPlayedStep = this.nextStep - stepsAhead;
-    }
-
+    this.lastPlayedStep = this.getLastPlayedStep(lookAheadDelta);
     this.updateFrame(this.lastPlayedStep);
   }
 
@@ -276,14 +269,31 @@ Sequencer.prototype.draw = function() {
   }
 };
 
+/*eslint-disable */
 /**
  * Runs between screen refresh. Has to be overridden by the
  * app to render to the screen.
  * @param  {Int}  lastPlayedStep  The 64th step that was played recently
  * @return {Void}
  */
-Sequencer.prototype.updateFrame = function(lastPlayedStep) {
-  console.log(lastPlayedStep);
+Sequencer.prototype.updateFrame = function(lastPlayedStep) {};
+/*eslint-enable */
+
+/**
+ * Finds out, what step was played recently.
+ * This is somehow clumsy because the sequencer doesn't keep track of that.
+ * @param  {Float} lookAheadDelta  Time in seconds of the next step that will be processed by the scheduler
+ * @return {Int}                   The next 64th note that will be 'played' (not processed)
+ */
+Sequencer.prototype.getLastPlayedStep = function(lookAheadDelta) {
+  var stepsAhead = Math.round(lookAheadDelta / this.timePerStep);
+
+  if (this.nextStep < stepsAhead) {
+    // we just jumped to the start of a loop
+    return this.loopEnd + this.nextStep - stepsAhead;
+  } else {
+    return this.nextStep - stepsAhead;
+  }
 };
 
 /**
@@ -346,10 +356,6 @@ Sequencer.prototype.setBpm = function(bpm) {
  */
 Sequencer.prototype.setTimePerStep = function(bpm, resolution) {
   return (60 * 4) / (bpm * resolution);
-};
-
-Sequencer.prototype.getLastPlayedStep = function() {
-
 };
 
 /**
