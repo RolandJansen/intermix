@@ -28,6 +28,10 @@ describe('EventBus', function() {
       expect(this.eb.isPlainObject(this.eb.relays.fx)).toBeTruthy();
     });
 
+    it('has a property "relay" of type plain object', function() {
+      expect(this.eb.isPlainObject(this.eb.relays.relay)).toBeTruthy();
+    });
+
   });
 
   describe('messages object', function() {
@@ -42,6 +46,36 @@ describe('EventBus', function() {
 
     it('has a property "onRelayRemove" of type Array', function() {
       expect(this.eb.messages.onRelayRemove).toEqual(jasmine.any(Array));
+    });
+
+  });
+
+  describe('.addRelaysToMetaRelay', function() {
+
+    beforeEach(function() {
+      this.eb = new EventBus();
+    });
+    //
+    // afterEach(function() {
+    //   EventBus.prototype.addRelaysToMetaRelay.calls.reset();
+    // });
+
+    it('gets called on object initialization', function() {
+      spyOn(EventBus.prototype, 'addRelaysToMetaRelay');
+      new EventBus();
+      expect(EventBus.prototype.addRelaysToMetaRelay).toHaveBeenCalled();
+      EventBus.prototype.addRelaysToMetaRelay.calls.reset();
+    });
+
+    it('adds all relays to meta relay (except meta relay itself)', function() {
+      expect(Object.keys(this.eb.relays.relay).length).toEqual(3);
+      expect(this.eb.relays.relay.controller).toBeDefined();
+      expect(this.eb.relays.relay.instrument).toBeDefined();
+      expect(this.eb.relays.relay.fx).toBeDefined();
+    });
+
+    it('adds relays to lookup table', function() {
+      expect(Object.keys(this.eb.lookup).length).toEqual(3);
     });
 
   });
@@ -136,7 +170,7 @@ describe('EventBus', function() {
       });
 
       it('removes the endpoint from the lookup table', function() {
-        expect(Object.keys(this.eb.lookup).length).toEqual(0);
+        expect(Object.keys(this.eb.lookup).length).toEqual(3); // 3 relays in lookup table
       });
 
     });
