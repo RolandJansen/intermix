@@ -9,9 +9,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Sequencer.js: Frame animation stall/resume when user switches browser tab.
 
 ### Changed
-- Sequencer.js: New algorithm for frame animation that runs at least 5.5 times
-  faster (@120bpm without stall/resume). In reality, speed improvement should be even higher.
-- Sequencer.js: Some minor speed optimizations.
+- Sequencer.js: New algorithm for frame animation that runs
+  at least 6 times faster (@120bpm without stall/resume).
+  In reality, speed improvement should be even higher.
+- Sequencer.js: Minor speed optimizations.
 - README.md improved.
 - Changelog.md improved.
 

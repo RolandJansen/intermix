@@ -288,6 +288,10 @@ describe('Sequencer', function() {
       expect(sequencer.scheduleWorker.postMessage).toHaveBeenCalledWith('start');
     });
 
+    it('adds an entry to the steplist as a start delay for .draw ', function() {
+      expect(sequencer.stepList[0].time).toEqual(sequencer.ac.currentTime + 0.1);
+    });
+
     it('calls window.requestAnimationFrame', function() {
       expect(window.requestAnimationFrame).toHaveBeenCalled();
     });
@@ -360,6 +364,74 @@ describe('Sequencer', function() {
 
   describe('.draw', function() {
 
+    beforeEach(function() {
+      spyOn(sequencer, 'updateFrame');
+    });
+
+    describe('if sequencer is running', function() {
+
+      beforeEach(function() {
+        var step = sequencer.getStepMetaData(0, sequencer.ac.currentTime + 0.1);
+        sequencer.isRunning = true;
+        sequencer.stepList.push(step);
+        // sequencer.ac.$processTo('00:00.050');
+      });
+
+      describe('but is within start delay', function() {
+
+        beforeEach(function() {
+          sequencer.draw();
+        });
+
+        it('doesn\'t call .updateFrame', function() {
+          expect(sequencer.updateFrame).not.toHaveBeenCalled();
+        });
+
+        it('doesn\'t call window.requestAnimationFrame', function() {
+          expect(window.requestAnimationFrame).not.toHaveBeenCalled();
+        });
+
+      });
+
+      describe('and has passed start delay', function() {
+
+        beforeEach(function() {
+          sequencer.ac.$processTo('00:00.200');
+          sequencer.draw();
+        });
+
+        it('calls window.requestAnimationFrame', function() {
+          expect(window.requestAnimationFrame).toHaveBeenCalledTimes(1);
+        });
+
+        it('calls .updateFrame', function() {
+          expect(sequencer.updateFrame).toHaveBeenCalledWith(0);
+        });
+
+        it('removes first element in stepList', function() {
+          expect(sequencer.stepList.length).toEqual(0);
+        });
+
+      });
+
+    });
+
+    describe('if sequencer is not running', function() {
+
+      it('doesn\'t call .updateFrame', function() {
+        expect(sequencer.updateFrame).not.toHaveBeenCalled();
+      });
+
+      it('doesn\'t call window.requestAnimationFrame', function() {
+        expect(window.requestAnimationFrame).not.toHaveBeenCalled();
+      });
+
+    });
+
+    it('throws if stepList is empty', function() {
+      expect(sequencer.draw).toThrow();
+    });
+
   });
 
   describe('.updateFrame', function() {
@@ -367,10 +439,6 @@ describe('Sequencer', function() {
     it('is a function', function() {
       expect(typeof sequencer.updateFrame).toBe('function');
     });
-
-  });
-
-  describe('.getLastPlayedStep', function() {
 
   });
 

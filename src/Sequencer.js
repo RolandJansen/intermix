@@ -261,25 +261,18 @@ Sequencer.prototype.resume = function() {
 };
 
 /**
- * Scheduler that runs a drawing function every time
- * the screen refreshes. The function Sequencer.animationFrame()
- * has to be overridden by the application with stuff to be drawn on the screen.
- * It calls itself recursively on every frame as long as the sequencer is running.
+ * Scheduler that runs a drawing function on screen refresh.
+ * It calls itself recursively but only if something
+ * happend in the sequencer and as long as the sequencer is running.
+ * The function Sequencer.animationFrame() has to be
+ * overridden by the application with stuff to be drawn on the screen.
  * @private
  * @return {Void}
  */
 Sequencer.prototype.draw = function() {
-  // var lookAheadDelta = this.nextStepTime - core.currentTime;
-  // if (lookAheadDelta >= 0) {
-  //   this.lastPlayedStep = this.getLastPlayedStep(lookAheadDelta);
-  //   this.updateFrame(this.lastPlayedStep);
-  // }
-  if (this.stepList[0].time <= core.currentTime) {
+  if (this.isRunning && this.stepList[0].time <= core.currentTime) {
     this.updateFrame(this.stepList[0].position);
     this.stepList.shift();
-  }
-
-  if (this.isRunning) {
     window.requestAnimationFrame(this.draw.bind(this));
   }
 };
@@ -293,24 +286,6 @@ Sequencer.prototype.draw = function() {
  */
 Sequencer.prototype.updateFrame = function(lastPlayedStep) {};
 /*eslint-enable */
-
-/**
- * Legacy! To be removed. New algorithm 6+ times faster.
- * Finds out, what step was played recently.
- * This is somehow clumsy because the sequencer doesn't keep track of that.
- * @param  {Float} lookAheadDelta  Time in seconds of the next step that will be processed by the scheduler
- * @return {Int}                   The next 64th note that will be 'played' (not processed)
- */
-Sequencer.prototype.getLastPlayedStep = function(lookAheadDelta) {
-  var stepsAhead = Math.round(lookAheadDelta / this.timePerStep);
-
-  if (this.nextStep < stepsAhead) {
-    // we just jumped to the start of a loop
-    return this.loopEnd + this.nextStep - stepsAhead;
-  } else {
-    return this.nextStep - stepsAhead;
-  }
-};
 
 /**
  * Adds a part to the master queue.

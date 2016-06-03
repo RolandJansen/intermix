@@ -4,11 +4,10 @@
 
 Intermix is a javascript library that can be used to build browser-based music applications with a focus on sequencing. It doesn't aim to be a fully fledged audio library. All its audio functionality is designed to fit together well with the sequencer.
 
-## Status
 Intermix is in a very early stage and the API may change from one release to another. It uses some of the latest stuff in web technology so it currently runs perfectly in Chrome 49+ only. Firefox works except sample accurate pause/resume of sounds.
 
 ## Dependencies
-No dependencies, just Javascript.
+No dependencies, just Javascript (ECMAScript 2015, 6th Edition, ECMA-262).
 
 ## Installation
 ### npm
