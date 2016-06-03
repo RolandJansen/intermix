@@ -78,10 +78,10 @@ are integers between [0, 127] with 60 defined as C-5 (like MIDI note-on).
 ... and add it at different points in a part:
 
     var part = new intermix.Part();
-    part.addEvent(note, 0);
-    part.addEvent(note, 4);
-    part.addEvent(note, 8);
-    part.addEvent(note, 12);
+    part.addEvent(note, 0)
+    .addEvent(note, 4)
+    .addEvent(note, 8)
+    .addEvent(note, 12);
 
 > The default resolution of Part is a 16th note. To play a sound on every 4th note we add note events at position 0, 4, 8 and 12.
 

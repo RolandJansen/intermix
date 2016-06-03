@@ -6,15 +6,15 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - An event bus instance is now available by default at "window.intermix.eventBus".
-- Sequencer.js: Frame animation stall/resume when user switches browser tab.
+- Sequencer: Frame animation stall/resume when user switches browser tab.
 
 ### Changed
-- Sequencer.js: New algorithm for frame animation that runs
+- Sequencer: New algorithm for frame animation that runs
   at least 6 times faster (@120bpm without stall/resume).
   In reality, speed improvement should be even higher.
-- Sequencer.js: Minor speed optimizations.
+- Sequencer: Minor speed optimizations.
 - README.md improved.
-- Changelog.md improved.
+- CHANGELOG.md improved.
 
 ## [0.3.0] - 2016-05-27
 ### Fixed
