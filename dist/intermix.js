@@ -521,7 +521,7 @@ var worker = _dereq_('./scheduleWorker.js');
  * seq.start();
  * @constructor
  */
-var Sequencer = function(eventBus) {
+var Sequencer = function() {
 
   var self = this;
   this.ac = core;             //currently just used for tests
@@ -536,6 +536,7 @@ var Sequencer = function(eventBus) {
   this.timePerStep;           //period of time between two steps
   this.nextStepTime = 0;      //time in seconds when the next step will be triggered
   this.nextStep = 0;          //position in the queue that will get triggered next
+  this.stepList = [];         //list of steps that were triggered and are still ahead of time
   this.lastPlayedStep = 0;    //step in queue that was played (not triggered) recently (used for drawing).
   this.loop = false;          //play a section of the queue in a loop
   this.loopStart;             //first step of the loop
@@ -543,7 +544,6 @@ var Sequencer = function(eventBus) {
   this.isRunning = false;     //true if sequencer is running, otherwise false
   this.animationFrame;        //has to be overridden with a function. Will be called in the
                               //draw function with the lastPlayedStep int as parameter.
-  this.eventBus = null;
   this.uid = 0;             //unique id if connected to an event bus
 
   // set time per setTimePerStep
@@ -552,12 +552,7 @@ var Sequencer = function(eventBus) {
   // Initialize the scheduler-timer
   this.scheduleWorker = work(worker);
 
-  /*eslint-enable */
-
-  if (typeof eventBus !== 'undefined') {
-    this.eventBus = eventBus;
-    this.registerToRelay('controller');
-  }
+  this.registerToRelay('controller');
 
   this.scheduleWorker.onmessage = function(e) {
     if (e.data === 'tick') {
@@ -569,7 +564,7 @@ var Sequencer = function(eventBus) {
 };
 
 Sequencer.prototype.registerToRelay = function(relay) {
-  this.uid = this.eventBus.addRelayEndpoint(relay, {}, this);
+  this.uid = window.intermix.eventBus.addRelayEndpoint(relay, {}, this);
 };
 
 /**
@@ -581,18 +576,20 @@ Sequencer.prototype.registerToRelay = function(relay) {
  * @return {Void}
  */
 Sequencer.prototype.scheduler = function() {
-  var limit = core.currentTime + this.lookahead;
+  var timestamp = core.currentTime;
+  var limit = timestamp + this.lookahead;
   // if invoked for the first time or previously stopped
   if (this.nextStepTime === 0) {
-    this.nextStepTime = core.currentTime;
+    this.nextStepTime = timestamp;
   }
 
   while (this.nextStepTime < limit) {
     this.addPartsToRunqueue();
     this.fireEvents();
+    this.stepList.push(this.getStepMetaData(this.nextStep, this.nextStepTime));
     this.nextStepTime += this.timePerStep;
 
-    this.setQueuePointer();
+    this.increaseQueuePointer();
   }
 };
 
@@ -669,29 +666,33 @@ Sequencer.prototype.fireEvents = function() {
  */
 Sequencer.prototype.processSeqEvent = function(seqEvent, delay) {
   seqEvent['delay'] = delay;
-  // seqEvent.props.instrument.processSeqEvent(seqEvent);
-  this.eventBus.sendToRelayEndpoint(seqEvent.uid, seqEvent);
+  window.intermix.eventBus.sendToRelayEndpoint(seqEvent.uid, seqEvent);
 };
 
 /**
  * Sets the pointer to the next step that should be played
  * in the master queue. If we're playing in loop mode,
  * jump back to loopstart when end of loop is reached.
- * If a pointer position is given, jump to it.
  * @private
- * @param   {Int}   position  New position in the master queue
- * @return  {Void}
+ * @return {Void}
  */
-Sequencer.prototype.setQueuePointer = function(position) {
-  if (typeof position !== 'undefined') {
-    this.nextStep = position;
-    this.runqueue = [];
-  } else if (this.loop && this.nextStep >= this.loopEnd) {
+Sequencer.prototype.increaseQueuePointer = function() {
+  if (this.loop && this.nextStep >= this.loopEnd) {
     this.nextStep = this.loopStart;
     this.runqueue = [];
   } else {
     this.nextStep++;
   }
+};
+
+/**
+ * Jump to a specific point in the queue.
+ * @param   {Int}   position  New position in the master queue
+ * @return  {Void}
+ */
+Sequencer.prototype.setQueuePointer = function(position) {
+  this.nextStep = position;
+  this.runqueue = [];
 };
 
 /**
@@ -702,6 +703,13 @@ Sequencer.prototype.resetQueuePointer = function() {
   this.setQueuePointer(0);
 };
 
+Sequencer.prototype.getStepMetaData = function(step, timestamp) {
+  return {
+    'position': step,
+    'time': timestamp
+  };
+};
+
 /**
  * Starts the sequencer
  * @return {Void}
@@ -710,6 +718,7 @@ Sequencer.prototype.start = function() {
   if (!this.isRunning) {
     this.scheduleWorker.postMessage('start');
     this.isRunning = true;
+    this.stepList.push(this.getStepMetaData(0, core.currentTime + 0.1));
     window.requestAnimationFrame(this.draw.bind(this));
   }
 };
@@ -765,20 +774,14 @@ Sequencer.prototype.resume = function() {
  * @return {Void}
  */
 Sequencer.prototype.draw = function() {
-  // first we'll have to find out, what step was played recently.
-  // this is somehow clumsy because the sequencer doesn't keep track of that.
-  var lookAheadDelta = this.nextStepTime - core.currentTime;
-  if (lookAheadDelta >= 0) {
-    var stepsAhead = Math.round(lookAheadDelta / this.timePerStep);
-
-    if (this.nextStep < stepsAhead) {
-      // we just jumped to the start of a loop
-      this.lastPlayedStep = this.loopEnd + this.nextStep - stepsAhead;
-    } else {
-      this.lastPlayedStep = this.nextStep - stepsAhead;
-    }
-
-    this.updateFrame(this.lastPlayedStep);
+  // var lookAheadDelta = this.nextStepTime - core.currentTime;
+  // if (lookAheadDelta >= 0) {
+  //   this.lastPlayedStep = this.getLastPlayedStep(lookAheadDelta);
+  //   this.updateFrame(this.lastPlayedStep);
+  // }
+  if (this.stepList[0].time <= core.currentTime) {
+    this.updateFrame(this.stepList[0].position);
+    this.stepList.shift();
   }
 
   if (this.isRunning) {
@@ -786,14 +789,32 @@ Sequencer.prototype.draw = function() {
   }
 };
 
+/*eslint-disable */
 /**
  * Runs between screen refresh. Has to be overridden by the
  * app to render to the screen.
  * @param  {Int}  lastPlayedStep  The 64th step that was played recently
  * @return {Void}
  */
-Sequencer.prototype.updateFrame = function(lastPlayedStep) {
-  console.log(lastPlayedStep);
+Sequencer.prototype.updateFrame = function(lastPlayedStep) {};
+/*eslint-enable */
+
+/**
+ * Legacy! To be removed. New algorithm 6+ times faster.
+ * Finds out, what step was played recently.
+ * This is somehow clumsy because the sequencer doesn't keep track of that.
+ * @param  {Float} lookAheadDelta  Time in seconds of the next step that will be processed by the scheduler
+ * @return {Int}                   The next 64th note that will be 'played' (not processed)
+ */
+Sequencer.prototype.getLastPlayedStep = function(lookAheadDelta) {
+  var stepsAhead = Math.round(lookAheadDelta / this.timePerStep);
+
+  if (this.nextStep < stepsAhead) {
+    // we just jumped to the start of a loop
+    return this.loopEnd + this.nextStep - stepsAhead;
+  } else {
+    return this.nextStep - stepsAhead;
+  }
 };
 
 /**
@@ -858,10 +879,6 @@ Sequencer.prototype.setTimePerStep = function(bpm, resolution) {
   return (60 * 4) / (bpm * resolution);
 };
 
-Sequencer.prototype.getLastPlayedStep = function() {
-
-};
-
 /**
  * Makes a copy of a flat array.
  * Uses a pre-allocated while-loop
@@ -903,7 +920,7 @@ var core = _dereq_('./core.js');
  * @constructor
  * @param  {Object} soundWave SoundWave object including the buffer with audio data to be played
  */
-var Sound = function(soundWave, eventBus) {
+var Sound = function(soundWave) {
 
   this.sw = null;           //pointer to the soundWave object
   this.ac = core;           //currently just used for tests
@@ -943,14 +960,16 @@ var Sound = function(soundWave, eventBus) {
     throw new TypeError('Error initialising Sound object: parameter wrong or missing.');
   }
 
-  if (typeof eventBus !== 'undefined') {
-    this.eventBus = eventBus;
-    this.registerToRelay('instrument');
-  }
+  this.registerToRelay('instrument');
+
+  // if (typeof eventBus !== 'undefined') {
+  //   this.eventBus = eventBus;
+  //   this.registerToRelay('instrument');
+  // }
 };
 
 Sound.prototype.registerToRelay = function(relay) {
-  this.uid = this.eventBus.addRelayEndpoint(relay, this.controls, this);
+  this.uid = window.intermix.eventBus.addRelayEndpoint(relay, this.controls, this);
 };
 
 /**

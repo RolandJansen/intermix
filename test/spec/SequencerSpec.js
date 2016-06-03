@@ -91,6 +91,7 @@ describe('Sequencer', function() {
       sequencer.addPartsToRunqueue = jasmine.createSpy('addPartsToRunqueue');
       sequencer.fireEvents = jasmine.createSpy('fireEvents');
       sequencer.increaseQueuePointer = jasmine.createSpy('setQueuePointer');
+      sequencer.getStepMetaData = jasmine.createSpy('getStepMetaData');
     });
 
     afterEach(function() {
@@ -98,11 +99,13 @@ describe('Sequencer', function() {
     });
 
     it('runs until the lookahead limit is reached', function() {
+      // should be splitted into separate tests
       sequencer.ac.$processTo('00:01.000');
       sequencer.scheduler();
       expect(sequencer.addPartsToRunqueue).toHaveBeenCalledTimes(10);
       expect(sequencer.fireEvents).toHaveBeenCalledTimes(10);
       expect(sequencer.increaseQueuePointer).toHaveBeenCalledTimes(10);
+      expect(sequencer.getStepMetaData).toHaveBeenCalledTimes(10);
       expect(sequencer.nextStepTime).toBeGreaterThan(1.3);
       expect(sequencer.nextStepTime).toBeLessThan(1.4);
     });
@@ -247,6 +250,26 @@ describe('Sequencer', function() {
       sequencer.resetQueuePointer();
       expect(sequencer.nextStep).toEqual(0);
       expect(sequencer.runqueue.length).toEqual(0);
+    });
+
+  });
+
+  describe('.getStepMetaData', function() {
+
+    beforeEach(function() {
+      this.step = sequencer.getStepMetaData(5, 23.5);
+    });
+
+    it('returns an object', function() {
+      expect(typeof this.step).toBe('object');
+    });
+
+    it('sets the position to the value of its 1st parameter', function() {
+      expect(this.step.position).toEqual(5);
+    });
+
+    it('sets the time to the value of its 2nd parameter', function() {
+      expect(this.step.time).toEqual(23.5);
     });
 
   });

@@ -17,7 +17,7 @@ var core = require('./core.js');
  * @constructor
  * @param  {Object} soundWave SoundWave object including the buffer with audio data to be played
  */
-var Sound = function(soundWave, eventBus) {
+var Sound = function(soundWave) {
 
   this.sw = null;           //pointer to the soundWave object
   this.ac = core;           //currently just used for tests
@@ -57,14 +57,16 @@ var Sound = function(soundWave, eventBus) {
     throw new TypeError('Error initialising Sound object: parameter wrong or missing.');
   }
 
-  if (typeof eventBus !== 'undefined') {
-    this.eventBus = eventBus;
-    this.registerToRelay('instrument');
-  }
+  this.registerToRelay('instrument');
+
+  // if (typeof eventBus !== 'undefined') {
+  //   this.eventBus = eventBus;
+  //   this.registerToRelay('instrument');
+  // }
 };
 
 Sound.prototype.registerToRelay = function(relay) {
-  this.uid = this.eventBus.addRelayEndpoint(relay, this.controls, this);
+  this.uid = window.intermix.eventBus.addRelayEndpoint(relay, this.controls, this);
 };
 
 /**

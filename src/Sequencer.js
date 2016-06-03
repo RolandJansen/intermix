@@ -31,6 +31,7 @@ var Sequencer = function() {
   this.timePerStep;           //period of time between two steps
   this.nextStepTime = 0;      //time in seconds when the next step will be triggered
   this.nextStep = 0;          //position in the queue that will get triggered next
+  this.stepList = [];         //list of steps that were triggered and are still ahead of time
   this.lastPlayedStep = 0;    //step in queue that was played (not triggered) recently (used for drawing).
   this.loop = false;          //play a section of the queue in a loop
   this.loopStart;             //first step of the loop
@@ -70,15 +71,17 @@ Sequencer.prototype.registerToRelay = function(relay) {
  * @return {Void}
  */
 Sequencer.prototype.scheduler = function() {
-  var limit = core.currentTime + this.lookahead;
+  var timestamp = core.currentTime;
+  var limit = timestamp + this.lookahead;
   // if invoked for the first time or previously stopped
   if (this.nextStepTime === 0) {
-    this.nextStepTime = core.currentTime;
+    this.nextStepTime = timestamp;
   }
 
   while (this.nextStepTime < limit) {
     this.addPartsToRunqueue();
     this.fireEvents();
+    this.stepList.push(this.getStepMetaData(this.nextStep, this.nextStepTime));
     this.nextStepTime += this.timePerStep;
 
     this.increaseQueuePointer();
@@ -195,6 +198,13 @@ Sequencer.prototype.resetQueuePointer = function() {
   this.setQueuePointer(0);
 };
 
+Sequencer.prototype.getStepMetaData = function(step, timestamp) {
+  return {
+    'position': step,
+    'time': timestamp
+  };
+};
+
 /**
  * Starts the sequencer
  * @return {Void}
@@ -203,6 +213,7 @@ Sequencer.prototype.start = function() {
   if (!this.isRunning) {
     this.scheduleWorker.postMessage('start');
     this.isRunning = true;
+    this.stepList.push(this.getStepMetaData(0, core.currentTime + 0.1));
     window.requestAnimationFrame(this.draw.bind(this));
   }
 };
@@ -258,10 +269,14 @@ Sequencer.prototype.resume = function() {
  * @return {Void}
  */
 Sequencer.prototype.draw = function() {
-  var lookAheadDelta = this.nextStepTime - core.currentTime;
-  if (lookAheadDelta >= 0) {
-    this.lastPlayedStep = this.getLastPlayedStep(lookAheadDelta);
-    this.updateFrame(this.lastPlayedStep);
+  // var lookAheadDelta = this.nextStepTime - core.currentTime;
+  // if (lookAheadDelta >= 0) {
+  //   this.lastPlayedStep = this.getLastPlayedStep(lookAheadDelta);
+  //   this.updateFrame(this.lastPlayedStep);
+  // }
+  if (this.stepList[0].time <= core.currentTime) {
+    this.updateFrame(this.stepList[0].position);
+    this.stepList.shift();
   }
 
   if (this.isRunning) {
@@ -280,6 +295,7 @@ Sequencer.prototype.updateFrame = function(lastPlayedStep) {};
 /*eslint-enable */
 
 /**
+ * Legacy! To be removed. New algorithm 6+ times faster.
  * Finds out, what step was played recently.
  * This is somehow clumsy because the sequencer doesn't keep track of that.
  * @param  {Float} lookAheadDelta  Time in seconds of the next step that will be processed by the scheduler
