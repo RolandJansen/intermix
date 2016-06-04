@@ -129,7 +129,6 @@ var EventBus = function() {
     'controller': {},
     'instrument': {},
     'fx': {},
-    'relay': {}
   };
 
   this.messages = {
@@ -137,23 +136,6 @@ var EventBus = function() {
     'onRelayRemove': []
   };
 
-  this.addRelaysToMetaRelay();
-};
-
-/**
- * Adds relays to a meta relay (except the meta relay itself).
- * Gets called on object initialization.
- * @private
- * @return {Void}
- */
-EventBus.prototype.addRelaysToMetaRelay = function() {
-  for (var relay in this.relays) {
-    if (relay !== 'relay') {
-      var uid = this.getUID();
-      this.relays.relay[relay] = uid;
-      this.lookup[uid] = this.relays[relay];
-    }
-  }
 };
 
 /**
