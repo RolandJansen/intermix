@@ -272,7 +272,6 @@ Sequencer.prototype.resume = function() {
  * @return {Void}
  */
 Sequencer.prototype.draw = function() {
-  console.log(this.stepList.length);
   if (this.isRunning) {
     if (this.stepList[0].time <= core.currentTime) {
       this.updateFrame(this.stepList[0].position);
