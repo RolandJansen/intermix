@@ -46,7 +46,12 @@ var Sound = function(soundWave) {
       'delay': Number,
       'duration': Number,
       'detune': [-1200, 1200]
-    },
+    }
+  };
+  this.eventLookup = {
+    note: this.noteMsgHandler,
+    volume: this.volumeMsgHandler,
+    pan: this.panMsgHandler
   };
 
   if (typeof soundWave !== 'undefined') {
@@ -207,45 +212,28 @@ Sound.prototype.resume = function() {
   this.isPaused = false;
 };
 
-Sound.prototype.handleRelayData = function(msg) {
-  // for (var key in this.controls) {
-  //   if (msg.hasOwnProperty(key)) {
-  //     this[key + 'MsgHandler'](msg[key]);
-  //   }
-  // }
-  //looping would work but it's important to set controllers before firering a note
-  if (msg.hasOwnProperty('volume')) {
-    this.volumeMsgHandler(msg.volume);
-  }
-  if (msg.hasOwnProperty('pan')) {
-    this.panMsgHandler(msg.pan);
-  }
-  if (msg.hasOwnProperty('note')) {
-    this.noteMsgHandler(msg.note, msg.delay);
+Sound.prototype.handleRelayData = function(evt) {
+  var msg = evt.msg;
+  this.eventLookup[msg.type].call(this, msg);
+};
+
+Sound.prototype.volumeMsgHandler = function(msg) {
+  if (msg.value >= 0 && msg.value <= 127) {
+    this.gainNode.gain.value = msg.value / 127;
   }
 };
 
-// Sound.prototype.noteMsgHandler = function(value) {
-//
-// };
-
-Sound.prototype.volumeMsgHandler = function(value) {
-  if (value >= 0 && value <= 127) {
-    this.gainNode.gain.value = value / 127;
+Sound.prototype.panMsgHandler = function(msg) {
+  if (msg.value >= -63 && msg.value <= 64) {
+    this.pannerNode.pan.value = msg.value / 64;
   }
 };
 
-Sound.prototype.panMsgHandler = function(value) {
-  if (value >= -63 && value <= 64) {
-    this.pannerNode.pan.value = value / 64;
-  }
-};
-
-Sound.prototype.noteMsgHandler = function(note, delay) {
-  if (note.value >= 0 && note.value <= 127) {
-    var pbRate = this.getSemiTonePlaybackRate(note.value);
+Sound.prototype.noteMsgHandler = function(msg) {
+  if (msg.value >= 0 && msg.value <= 127) {
+    var pbRate = this.getSemiTonePlaybackRate(msg.value);
     // this.start(this.loop, note.delay, pbRate, note.duration);
-    this.start(this.loop, delay, pbRate, note.duration);
+    this.start(this.loop, msg.delay, pbRate, msg.duration);
   }
 };
 

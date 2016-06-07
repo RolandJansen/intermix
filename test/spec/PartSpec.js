@@ -4,8 +4,8 @@ var proxyquire =  require('proxyquire');
 
 describe('A part', function() {
   var Part, part;
-  var evt1 = { 'note': 'This is an event' };
-  var evt2 = { 'other': 'Another event' };
+  var evt1 = { 'uid': '123', 'msg': { 'type': 'note', 'value': 60, 'velocity': 1 } };
+  var evt2 = { 'uid': '456', 'msg': { 'type': 'volume', 'value': 72 } };
 
   beforeEach(function() {
     // proxyquire enshures reloading of Part.js

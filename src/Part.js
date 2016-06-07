@@ -117,7 +117,7 @@ Part.prototype.getNotePositions = function() {
   this.pattern.forEach(function(events, index) {
     if (events.length > 0) {
       events.forEach(function(evt) {
-        if (typeof evt.note !== 'undefined') {
+        if (evt.msg.type === 'note') {
           positions.push(index / this.multiply);
         }
       }, this);

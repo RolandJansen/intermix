@@ -61,7 +61,7 @@ describe('Sequencer', function() {
     part2 = { 'pattern': pattern2, 'length': 64 };
     seqEvent = {
       'uid': '1a',
-      'note': { 'value': 60, 'velocity': 1 }
+      'msg': { 'type': 'note', 'value': 60, 'velocity': 1 }
     };
 
     sequencer = new Sequencer();
@@ -91,7 +91,7 @@ describe('Sequencer', function() {
       sequencer.addPartsToRunqueue = jasmine.createSpy('addPartsToRunqueue');
       sequencer.fireEvents = jasmine.createSpy('fireEvents');
       sequencer.increaseQueuePointer = jasmine.createSpy('setQueuePointer');
-      sequencer.getStepMetaData = jasmine.createSpy('getStepMetaData');
+      sequencer.getMasterQueuePosition = jasmine.createSpy('getMasterQueuePosition');
     });
 
     afterEach(function() {
@@ -105,7 +105,7 @@ describe('Sequencer', function() {
       expect(sequencer.addPartsToRunqueue).toHaveBeenCalledTimes(10);
       expect(sequencer.fireEvents).toHaveBeenCalledTimes(10);
       expect(sequencer.increaseQueuePointer).toHaveBeenCalledTimes(10);
-      expect(sequencer.getStepMetaData).toHaveBeenCalledTimes(10);
+      expect(sequencer.getMasterQueuePosition).toHaveBeenCalledTimes(10);
       expect(sequencer.nextStepTime).toBeGreaterThan(1.3);
       expect(sequencer.nextStepTime).toBeLessThan(1.4);
     });
@@ -179,14 +179,14 @@ describe('Sequencer', function() {
       .toHaveBeenCalledWith(seqEvent.uid, seqEvent);
     });
 
-    it('adds a delay parameter to the event if given', function() {
+    it('adds a delay parameter to the event msg if given', function() {
       sequencer.processSeqEvent(seqEvent, 0.2342);
-      expect(seqEvent.delay).toEqual(0.2342);
+      expect(seqEvent.msg.delay).toEqual(0.2342);
     });
 
     it('adds an "undefined" delay parameter if no delay given', function() {
       sequencer.processSeqEvent(seqEvent);
-      expect(seqEvent.delay).toBeUndefined();
+      expect(seqEvent.msg.delay).toBeUndefined();
     });
 
   });
@@ -254,10 +254,10 @@ describe('Sequencer', function() {
 
   });
 
-  describe('.getStepMetaData', function() {
+  describe('.getMasterQueuePosition', function() {
 
     beforeEach(function() {
-      this.step = sequencer.getStepMetaData(5, 23.5);
+      this.step = sequencer.getMasterQueuePosition(5, 23.5);
     });
 
     it('returns an object', function() {
@@ -275,6 +275,9 @@ describe('Sequencer', function() {
   });
 
   describe('.start', function() {
+    // has to be refactored (probably 2 new describe blocks):
+    // it should do nothing if !isRunning
+    // it shouldn't add to stepList if stepList is not empty
 
     beforeEach(function() {
       sequencer.start();
@@ -288,7 +291,7 @@ describe('Sequencer', function() {
       expect(sequencer.scheduleWorker.postMessage).toHaveBeenCalledWith('start');
     });
 
-    it('adds an entry to the steplist as a start delay for .draw ', function() {
+    it('adds an entry to the stepList as a start delay for .draw ', function() {
       expect(sequencer.stepList[0].time).toEqual(sequencer.ac.currentTime + 0.1);
     });
 
@@ -371,7 +374,7 @@ describe('Sequencer', function() {
     describe('if sequencer is running', function() {
 
       beforeEach(function() {
-        var step = sequencer.getStepMetaData(0, sequencer.ac.currentTime + 0.1);
+        var step = sequencer.getMasterQueuePosition(0, sequencer.ac.currentTime + 0.1);
         sequencer.isRunning = true;
         sequencer.stepList.push(step);
         // sequencer.ac.$processTo('00:00.050');
@@ -383,12 +386,12 @@ describe('Sequencer', function() {
           sequencer.draw();
         });
 
-        it('doesn\'t call .updateFrame', function() {
-          expect(sequencer.updateFrame).not.toHaveBeenCalled();
+        it('calls window.requestAnimationFrame', function() {
+          expect(window.requestAnimationFrame).toHaveBeenCalled();
         });
 
-        it('doesn\'t call window.requestAnimationFrame', function() {
-          expect(window.requestAnimationFrame).not.toHaveBeenCalled();
+        it('doesn\'t call .updateFrame', function() {
+          expect(sequencer.updateFrame).not.toHaveBeenCalled();
         });
 
       });
@@ -417,6 +420,10 @@ describe('Sequencer', function() {
     });
 
     describe('if sequencer is not running', function() {
+
+      beforeEach(function() {
+        sequencer.isRunning = false;
+      });
 
       it('doesn\'t call .updateFrame', function() {
         expect(sequencer.updateFrame).not.toHaveBeenCalled();

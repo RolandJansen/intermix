@@ -15,6 +15,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-touchspin/3.1.1/jquery.bootstrap-touchspin.js"></script>
 
     <script type="text/javascript" src="../dist/intermix.js"></script>
+    <!-- <script type="text/javascript" src="synth_plugin_demo.js"></script> -->
   </head>
   <body>
 
@@ -192,7 +193,7 @@
     </div>
 
     <script type="text/javascript">
-
+      // var synth = new SimpleSynth();
 
       var bdSound, sdSound, hhSound, bsSound;
       var bdPart, sdPart, hhPart, bsPart;
@@ -229,7 +230,14 @@
 
       function changeTone(step, value) {
         if (bsPart.pattern[step * 4].length > 0) {  //this is bollocks, should be a function in Part.js
-          var note = { 'note': { 'value': 60 + value, 'velocity': 1 }, 'uid': bsSound.uid };
+          var note = {
+            uid: bsSound.uid,
+            msg: {
+              type: 'note',
+              value: 60 + value,
+              velocity: 1
+            }
+          };
           bsPart.removeEvents(step);
           bsPart.addEvent(note, step);
         }
@@ -269,6 +277,7 @@
       }
 
       seq.updateFrame = function(lastPlayedStep) {
+        // console.log('update frame gets executed with lastPlayedStep: ' + lastPlayedStep);
         var pos = Math.round(lastPlayedStep / 4);
 
         var bdPos = document.getElementById('bd' + pos);
@@ -335,34 +344,21 @@
         // hhNote = intermix.events.createAudioNote('c5', 1, 0, hhSound.uid);
         // bsNote = intermix.events.createAudioNote('c5', 1, 0, bsSound.uid);
 
-        bdNote = { 'note': { 'value': 60, 'velocity': 1 }, 'uid': bdSound.uid };
-        sdNote = { 'note': { 'value': 60, 'velocity': 1 }, 'uid': sdSound.uid };
-        hhNote = { 'note': { 'value': 60, 'velocity': 1 }, 'uid': hhSound.uid };
-        bsNote = { 'note': { 'value': 60, 'velocity': 1 }, 'uid': bsSound.uid };
+        bdNote = { 'uid': bdSound.uid, 'msg': { 'type': 'note', 'value': 60, 'velocity': 1 } };
+        sdNote = { 'uid': sdSound.uid, 'msg': { 'type': 'note', 'value': 60, 'velocity': 1 } };
+        hhNote = { 'uid': hhSound.uid, 'msg': { 'type': 'note', 'value': 60, 'velocity': 1 } };
+        bsNote = { 'uid': bsSound.uid, 'msg': { 'type': 'note', 'value': 60, 'velocity': 1 } };
 
 
-        bdPart.addEvent(bdNote, 0);
-        bdPart.addEvent(bdNote, 8);
-        sdPart.addEvent(sdNote, 4);
-        sdPart.addEvent(sdNote, 12);
-        bsPart.addEvent(bsNote, 0);
-        bsPart.addEvent(bsNote, 3);
-        bsPart.addEvent(bsNote, 6);
-        bsPart.addEvent(bsNote, 9);
-        bsPart.addEvent(bsNote, 12);
-        bsPart.addEvent(bsNote, 15);
+        bdPart.addEvent(bdNote, 0).addEvent(bdNote, 8);
+        sdPart.addEvent(sdNote, 4).addEvent(sdNote, 12);
+        bsPart.addEvent(bsNote, 0).addEvent(bsNote, 3).addEvent(bsNote, 6)
+        .addEvent(bsNote, 9).addEvent(bsNote, 12).addEvent(bsNote, 15);
 
         for (i = 0; i < 16; i++) {
           hhPart.addEvent(hhNote, i);
         }
-
-        //Here we have the timing problem:
-        //the first part added to the sequencer
-        //will trigger too late after the first loop.
-        seq.addPart(bdPart, 0);
-        seq.addPart(sdPart, 0);
-        seq.addPart(hhPart, 0);
-        seq.addPart(bsPart, 0);
+        seq.addPart(bdPart, 0).addPart(sdPart, 0).addPart(hhPart, 0).addPart(bsPart, 0);
        };
 
       function start() {

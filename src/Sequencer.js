@@ -81,7 +81,7 @@ Sequencer.prototype.scheduler = function() {
   while (this.nextStepTime < limit) {
     this.addPartsToRunqueue();
     this.fireEvents();
-    this.stepList.push(this.getStepMetaData(this.nextStep, this.nextStepTime));
+    this.stepList.push(this.getMasterQueuePosition(this.nextStep, this.nextStepTime));
     this.nextStepTime += this.timePerStep;
 
     this.increaseQueuePointer();
@@ -160,7 +160,7 @@ Sequencer.prototype.fireEvents = function() {
  * @return {Void}
  */
 Sequencer.prototype.processSeqEvent = function(seqEvent, delay) {
-  seqEvent['delay'] = delay;
+  seqEvent.msg['delay'] = delay;
   window.intermix.eventBus.sendToRelayEndpoint(seqEvent.uid, seqEvent);
 };
 
@@ -198,7 +198,7 @@ Sequencer.prototype.resetQueuePointer = function() {
   this.setQueuePointer(0);
 };
 
-Sequencer.prototype.getStepMetaData = function(step, timestamp) {
+Sequencer.prototype.getMasterQueuePosition = function(step, timestamp) {
   return {
     'position': step,
     'time': timestamp
@@ -211,9 +211,11 @@ Sequencer.prototype.getStepMetaData = function(step, timestamp) {
  */
 Sequencer.prototype.start = function() {
   if (!this.isRunning) {
+    if (this.stepList.length === 0) {
+      this.stepList.push(this.getMasterQueuePosition(0, core.currentTime + 0.1));
+    }
     this.scheduleWorker.postMessage('start');
     this.isRunning = true;
-    this.stepList.push(this.getStepMetaData(0, core.currentTime + 0.1));
     window.requestAnimationFrame(this.draw.bind(this));
   }
 };
@@ -270,9 +272,12 @@ Sequencer.prototype.resume = function() {
  * @return {Void}
  */
 Sequencer.prototype.draw = function() {
-  if (this.isRunning && this.stepList[0].time <= core.currentTime) {
-    this.updateFrame(this.stepList[0].position);
-    this.stepList.shift();
+  console.log(this.stepList.length);
+  if (this.isRunning) {
+    if (this.stepList[0].time <= core.currentTime) {
+      this.updateFrame(this.stepList[0].position);
+      this.stepList.shift();
+    }
     window.requestAnimationFrame(this.draw.bind(this));
   }
 };
