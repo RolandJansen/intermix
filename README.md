@@ -64,12 +64,13 @@ Create a note event ...
 > The arguments to createNoteEvent() are: The unique ID of the receiver,
 the tone (string or midi note number) and the velocity between 0 and 1.
 
-... and add it at different points in a part:
+... and add it at different points to a part:
 
     var part = new intermix.Part();
     part.addEvent(note, 0).addEvent(note, 4).addEvent(note, 8).addEvent(note, 12);
 
-> The default resolution of Part is a 16th note. To play a sound on every 4th note we add note events at position 0, 4, 8 and 12.
+> The default resolution of Part is a 16th note. To play a sound on every
+4th note we add the event at position 0, 4, 8 and 12.
 
 Finally, add the part to the sequencer and start playing in a loop:
 
