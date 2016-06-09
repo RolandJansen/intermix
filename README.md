@@ -44,15 +44,10 @@ Intermix supports the AMD pattern, so with require.js you can do somthing like t
 
 Here's an example of a basic sequencer that triggers a sound on every beat.
 
-First thing you should do is create an event bus. You could skip this step and
-connect things manually but the event bus makes things much more easy:
-
-    var eventBus = new intermix.EventBus();
-
-Add a sound:
+First we should add a sound:
 
     var wave = new intermix.SoundWave('file.wav');
-    var sound = new intermix.Sound(wave, eventBus);
+    var sound = new intermix.Sound(wave);
 
 > Intermix uses two objects for that. A SoundWave just holds the PCM data and a Sound plays the actual sound. This comes in handy if you want to play a waveform in different contexts.
 If you add an event bus as 2nd argument, the Sound object connects itself to the
@@ -60,7 +55,7 @@ instrument relay.
 
 Then build the sequencer:
 
-    var seq = new intermix.Sequencer(eventBus);
+    var seq = new intermix.Sequencer();
 
 >This creates a bare sequencer that connects itself to the controller relay of
 the event bus.
@@ -97,7 +92,7 @@ You can also draw something on the screen in sync:
       el.style.backgroundColor = (step % 4) === 0 ? 'red' : 'white';
     };
 
-> The sequencer has a callback function named updateFrame(). Its parameter is the last played 64th note by default. It gets called every time before the screen refreshes (usually 60 times a second). In the example above a dom element with a class named "ping" gets a red background on every 4th note and a white one otherwise. This should be used with caution because expensive things like dom operations can easily lead to performance drops.
+> The sequencer has a callback function named updateFrame(). Its parameter is the last played 64th note by default. It gets called when the sequencer moves forward between two screen refreshes. In the example above a dom element with a class named "ping" gets a red background on every 4th note and a white one otherwise. This should be used with caution because expensive things like dom operations can easily lead to performance drops.
 
 ## License
 Copyright (C) 2016 Roland Jansen
