@@ -1,5 +1,7 @@
 'use strict';
 
+var helper = require('./Helper.js');
+
 /**
  * This is an event bus that can be used to connect
  * intermix (and other) components.
@@ -67,7 +69,7 @@ EventBus.prototype.addRelayEndpoint = function(relay, data, context) {
   var uid = this.getUID();
 
   if (typeof this.relays[relay] !== 'undefined' &&
-  this.isPlainObject(data) &&
+  helper.isPlainObject(data) &&
   typeof context !== 'undefined') {
     this.relays[relay][uid] = {
       'context': context,
@@ -246,23 +248,6 @@ EventBus.prototype.getUID = function() {
   }
 
   return uid;
-};
-
-
-/**
- * Tests if an object is a plain javascript object (object literal)
- * and not a constructor, instance, null or anything else.
- * as suggested by RobG:
- * http://stackoverflow.com/questions/5876332/how-can-i-differentiate-between-an-object-literal-other-javascript-objects
- * @param  {Object} obj Any javascript object
- * @return {Boolean}    True if plain js object, false if not
- */
-EventBus.prototype.isPlainObject = function(obj) {
-  if (typeof obj === 'object' && obj !== null) {
-    var proto = Object.getPrototypeOf(obj);
-    return proto === Object.prototype || proto === null;
-  }
-  return false;
 };
 
 module.exports = EventBus;

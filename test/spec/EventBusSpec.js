@@ -1,6 +1,7 @@
 'use strict';
 
 var EventBus = require('../../src/EventBus.js');
+var helper = require('../../src/Helper.js');
 
 describe('EventBus', function() {
   var dataDef = {
@@ -17,15 +18,15 @@ describe('EventBus', function() {
     });
 
     it('has a property "controller" of type plain object', function() {
-      expect(this.eb.isPlainObject(this.eb.relays.controller)).toBeTruthy();
+      expect(helper.isPlainObject(this.eb.relays.controller)).toBeTruthy();
     });
 
     it('has a property "instrument" of type plain object', function() {
-      expect(this.eb.isPlainObject(this.eb.relays.instrument)).toBeTruthy();
+      expect(helper.isPlainObject(this.eb.relays.instrument)).toBeTruthy();
     });
 
     it('has a property "fx" of type plain object', function() {
-      expect(this.eb.isPlainObject(this.eb.relays.fx)).toBeTruthy();
+      expect(helper.isPlainObject(this.eb.relays.fx)).toBeTruthy();
     });
 
   });
@@ -473,52 +474,6 @@ describe('EventBus', function() {
         return ids.indexOf(value) === index;
       });
       expect(unique.length).toEqual(ids.length);
-    });
-
-  });
-
-  describe('.isPlainObject', function() {
-
-    beforeEach(function() {
-      this.eb = new EventBus();
-    });
-
-    it('returns true if argument is an empty object', function() {
-      expect(this.eb.isPlainObject({})).toBeTruthy();
-    });
-
-    it('returns true if argument is a plain object', function() {
-      var obj = { 'a': true, 'b': 'foo', 'c': 23 };
-      expect(this.eb.isPlainObject(obj)).toBeTruthy();
-    });
-
-    it('returns true if argument is a nested object', function() {
-      var obj = { 'a': { 'b': { 'c': true } } };
-      expect(this.eb.isPlainObject(obj)).toBeTruthy();
-    });
-
-    it('returns false if argument is a constructor', function() {
-      var obj = function() { var a = 23; this.b = function() { return a; }; };
-      expect(this.eb.isPlainObject(obj)).toBeFalsy();
-    });
-
-    it('returns false if argument is an instance', function() {
-      var Constr = function() { var a = 23; this.b = function() { return a; }; };
-      var obj = new Constr();
-      expect(this.eb.isPlainObject(obj)).toBeFalsy();
-    });
-
-    it('returns false if argument is an array', function() {
-      var obj = [];
-      expect(this.eb.isPlainObject(obj)).toBeFalsy();
-    });
-
-    it('returns false if argument is null', function() {
-      expect(this.eb.isPlainObject(null)).toBeFalsy();
-    });
-
-    it('returns false if argument is undefined', function() {
-      expect(this.eb.isPlainObject()).toBeFalsy();
     });
 
   });
