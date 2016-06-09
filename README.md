@@ -50,15 +50,12 @@ First we should add a sound:
     var sound = new intermix.Sound(wave);
 
 > Intermix uses two objects for that. A SoundWave just holds the PCM data and a Sound plays the actual sound. This comes in handy if you want to play a waveform in different contexts.
-If you add an event bus as 2nd argument, the Sound object connects itself to the
-instrument relay.
 
 Then build the sequencer:
 
     var seq = new intermix.Sequencer();
 
->This creates a bare sequencer that connects itself to the controller relay of
-the event bus.
+>This creates a bare sequencer.
 
 Create a note event ...
 
