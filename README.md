@@ -81,9 +81,9 @@ Finally, add the part to the sequencer and start playing in a loop:
 
 You can also draw something on the screen in sync:
 
+    var el = document.querySelector('.ping');
     seq.updateFrame = function(lastPlayedStep) {
       var step = Math.round(lastPlayedStep / 4);
-      var el = document.querySelector('.ping');
       el.style.backgroundColor = (step % 4) === 0 ? 'red' : 'white';
     };
 
