@@ -62,15 +62,12 @@ Create a note event ...
     var note = intermix.helper.createNoteEvent(sound.uid, 'c4', 1);
 
 > The arguments to createNoteEvent() are: The unique ID of the receiver,
-the tone (can be a string or midi note number) and the velocity between 0 and 1.
+the tone (string or midi note number) and the velocity between 0 and 1.
 
 ... and add it at different points in a part:
 
     var part = new intermix.Part();
-    part.addEvent(note, 0)
-    .addEvent(note, 4)
-    .addEvent(note, 8)
-    .addEvent(note, 12);
+    part.addEvent(note, 0).addEvent(note, 4).addEvent(note, 8).addEvent(note, 12);
 
 > The default resolution of Part is a 16th note. To play a sound on every 4th note we add note events at position 0, 4, 8 and 12.
 
@@ -89,7 +86,7 @@ You can also draw something on the screen in sync:
       el.style.backgroundColor = (step % 4) === 0 ? 'red' : 'white';
     };
 
-> The sequencer has a callback function named updateFrame(). Its parameter is the last played 64th note by default. It gets called when the sequencer moves forward between two screen refreshes. In the example above a dom element with a class named "ping" gets a red background on every 4th note and a white one otherwise. This should be used with caution because expensive things like dom operations can easily lead to performance drops.
+> The sequencer has a callback function named updateFrame(). Its parameter is the last played 64th note by default. It gets called in between two screen refreshes if the sequencer has moved forward. In the example above a dom element with a class named "ping" gets a red background on every 4th note and a white one otherwise. This should be used with caution because expensive things like dom operations can easily lead to performance drops.
 
 ## License
 Copyright (C) 2016 Roland Jansen
