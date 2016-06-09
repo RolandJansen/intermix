@@ -67,13 +67,10 @@ the event bus.
 
 Create a note event ...
 
-    var note = {
-      'uid': sound.uid,
-      'note': { 'value': 60, 'velocity': 1 }
-    };
+    var note = intermix.helper.createNoteEvent(sound.uid, 'c4', 1);
 
-> An event should include the id of the receiver and a message. Note values
-are integers between [0, 127] with 60 defined as C-5 (like MIDI note-on).
+> The arguments to createNoteEvent() are: The unique ID of the receiver,
+the tone (can be a string or midi note number) and the velocity between 0 and 1.
 
 ... and add it at different points in a part:
 
