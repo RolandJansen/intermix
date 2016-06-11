@@ -8,10 +8,7 @@ Intermix is a javascript library that can be used to build browser-based music a
 
 It has a powerful event bus with relays for instruments, fx and controllers that makes routing of events easy. Relay endpoints can deposit data about their custom events that can be looked up by other bus attendees. A sequencer e.g. (or a controller in general) is able to control any parameter of an instrument without having to know anything about its functionality. This means you can write a synthesizer any way you want as long as you expose its event API to the bus.
 
-Intermix is in a very early stage and the API may change from one release to another. It uses some of the latest stuff in web technology so it currently runs perfectly in Chrome 49+ only. Firefox works except sample accurate pause/resume of sounds.
-
-## Dependencies
-No dependencies to other libraries, just Javascript and Web Audio API.
+Intermix is in a very early stage and the API may change from one release to another. The only browser that is known for fully supporting Intermix is Chrome 49+. See [browser Compatibility](browser-compatibility).
 
 ## Installation
 ### npm
@@ -113,6 +110,16 @@ seq.updateFrame = function(lastPlayedStep) {
 ```
 
 > The sequencer has a callback function named updateFrame(). Its parameter is the last played 64th note by default. It gets called in between two screen refreshes if the sequencer has moved forward. In the example above a dom element with a class named "ping" gets a red background on every 4th note and a white one otherwise. This should be used with caution because expensive things like dom operations can easily lead to performance drops.
+
+## Dependencies
+No dependencies to other libraries, just Javascript and Web Audio API.
+
+## <a name="browser-compatibility">Browser Compatibility
+| Chrome | Firefox | Edge     | Internet Explorer | Opera    | Safari   |
+|--------|---------|----------|-------------------|----------|----------|
+| 49+    | 46+ (*) | untested | untested          | untested | untested |
+
+* Sample accurate pause/resume of sounds not supported.
 
 ## License
 Copyright (C) 2016 Roland Jansen
