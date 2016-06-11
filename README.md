@@ -121,7 +121,7 @@ No dependencies to other libraries, just Javascript and Web Audio API.
 |--------|---------|----------|-------------------|----------|----------|
 | 49+    | 46+ (*) | untested | untested          | untested | untested |
 
-* Sample accurate pause/resume of sounds not supported.
+\* Sample accurate pause/resume of sounds not supported.
 
 ## License
 Copyright (C) 2016 Roland Jansen
