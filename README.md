@@ -111,6 +111,8 @@ seq.updateFrame = function(lastPlayedStep) {
 
 > The sequencer has a callback function named updateFrame(). Its parameter is the last played 64th note by default. It gets called in between two screen refreshes if the sequencer has moved forward. In the example above a dom element with a class named "ping" gets a red background on every 4th note and a white one otherwise. This should be used with caution because expensive things like dom operations can easily lead to performance drops.
 
+There is a wiki page with [the complete API documentation](https://github.com/RolandJansen/intermix.js/wiki/API-Documentation) (ugly but comprehensive).
+
 ## Dependencies
 No dependencies to other libraries, just Javascript and Web Audio API.
 

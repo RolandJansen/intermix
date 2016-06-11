@@ -23,7 +23,7 @@ var core = require('./core.js');
  * var sound = new intermix.Sound(soundWave);
  * sound.play;
  * @example <caption>Concatenate multiple source files into one buffer<br>
- * in the given order and play them (This is broken in v0.1. Don't use it!):</caption>
+ * in the given order and play them:</caption>
  * var soundWave = new intermix.SoundWave(['file1.wav,file2.wav,file3.wav']);
  * var sound = new intermix.Sound(soundWave);
  * sound.play;
