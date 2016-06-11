@@ -6,7 +6,7 @@
 
 Intermix is a javascript library that can be used to build browser-based music applications with a focus on sequencing. It doesn't aim to be a fully fledged audio library. All its audio functionality is designed to fit together well with the sequencer.
 
-It has a powerful event bus with relays for instruments, fx and controllers that makes routing of events easy. Relay endpoints can deposit data about their custom events that can be looked up by other bus attendees. A sequencer e.g. (or a controller in general) is able to control any parameter of an instrument without having to know anything about its functionality. This means you can write a synthesizer any way you want as long as you expose its event API to the bus.
+It has a powerful event bus with relays for instruments, fx and controllers that makes routing of events easy. Relay endpoints can deposit data about their custom events that can be looked up by other bus attendees. This means e.g. if a synthesizer registers to the instrument relay, its custom events for controlling envelope, lfo, etc will become instantly available in the sequencer although there is no coupling between them.
 
 Intermix is in a very early stage and the API may change from one release to another. The only browser that is known for fully supporting Intermix is Chrome 49+. See [browser compatibility](#browser-compatibility).
 
