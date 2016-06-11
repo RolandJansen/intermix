@@ -161,7 +161,18 @@ Sequencer.prototype.fireEvents = function() {
  */
 Sequencer.prototype.processSeqEvent = function(seqEvent, delay) {
   seqEvent.msg['delay'] = delay;
+  seqEvent.msg.duration = this.getDurationTime(seqEvent.msg.duration);
   window.intermix.eventBus.sendToRelayEndpoint(seqEvent.uid, seqEvent);
+};
+
+/**
+ * Computes the duration in seconds
+ * @private
+ * @param  {Int}    duration Note duration in 64th steps
+ * @return {Float}           Note duration in seconds
+ */
+Sequencer.prototype.getDurationTime = function(duration) {
+  return duration * this.timePerStep;
 };
 
 /**

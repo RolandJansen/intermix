@@ -377,7 +377,7 @@ Helper.prototype.getNoteFrequencies = function() {
  * @param  {Float}       velocity Like Midi velocity but high res float of range [0, 1]
  * @return {Object}               A note event
  */
-Helper.prototype.createNoteEvent = function(uid, tone, velocity) {
+Helper.prototype.createNoteEvent = function(uid, tone, velocity, duration) {
   var noteNum, evt;
 
   if (typeof tone === 'number') {
@@ -391,7 +391,8 @@ Helper.prototype.createNoteEvent = function(uid, tone, velocity) {
     msg: {
       type: 'note',
       value: noteNum,
-      velocity: velocity
+      velocity: velocity,
+      duration: duration
     }
   };
 
@@ -401,6 +402,9 @@ Helper.prototype.createNoteEvent = function(uid, tone, velocity) {
     }
     if (velocity < 0 || velocity > 1) {
       throw new Error('Velocity out of bounds: ' + velocity);
+    }
+    if (typeof duration !== 'number' && typeof duration !== 'undefined') {
+      throw new TypeError('Duration if defined must be of type number.');
     }
     return evt;
   } else {
@@ -824,7 +828,18 @@ Sequencer.prototype.fireEvents = function() {
  */
 Sequencer.prototype.processSeqEvent = function(seqEvent, delay) {
   seqEvent.msg['delay'] = delay;
+  seqEvent.msg.duration = this.getDurationTime(seqEvent.msg.duration);
   window.intermix.eventBus.sendToRelayEndpoint(seqEvent.uid, seqEvent);
+};
+
+/**
+ * Computes the duration in seconds
+ * @private
+ * @param  {Int}    duration Note duration in 64th steps
+ * @return {Float}           Note duration in seconds
+ */
+Sequencer.prototype.getDurationTime = function(duration) {
+  return duration * this.timePerStep;
 };
 
 /**

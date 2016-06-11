@@ -55,7 +55,7 @@ Then build the sequencer:
 
     var seq = new intermix.Sequencer();
 
->This creates a bare sequencer.
+>This creates a barebone sequencer.
 
 Create a note event ...
 

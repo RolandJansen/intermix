@@ -61,7 +61,7 @@ describe('Sequencer', function() {
     part2 = { 'pattern': pattern2, 'length': 64 };
     seqEvent = {
       'uid': '1a',
-      'msg': { 'type': 'note', 'value': 60, 'velocity': 1 }
+      'msg': { 'type': 'note', 'value': 60, 'velocity': 1, 'duration': 4 }
     };
 
     sequencer = new Sequencer();
@@ -189,6 +189,18 @@ describe('Sequencer', function() {
       expect(seqEvent.msg.delay).toBeUndefined();
     });
 
+    it('replaces the duration with the duration time in seconds', function() {
+      sequencer.processSeqEvent(seqEvent);
+      expect(seqEvent.msg.duration).toEqual(0.125);
+    });
+
+  });
+
+  describe('.getDurationTime', function() {
+    it('calculates the duration time from 64th steps', function() {
+      var duration = sequencer.getDurationTime(8);
+      expect(duration).toEqual(0.25);
+    });
   });
 
   describe('.increaseQueuePointer', function() {

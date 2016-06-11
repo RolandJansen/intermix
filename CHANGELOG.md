@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - An event bus instance is now available by default at "window.intermix.eventBus".
+- Helper functions available at "window.intermix.helper".
 - Sequencer: Frame animation stall/resume when user switches browser tab.
 
 ### Changed

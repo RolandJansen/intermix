@@ -79,14 +79,26 @@ SimpleSynth.prototype.startEnvelope = function(type, delay) {
     delay + deltaT[0] + deltaT[1] + deltaT[2] + deltaT[3]);
 };
 
-SimpleSynth.prototype.handleRelayData = function(msg) {
-
+SimpleSynth.prototype.play = function(noteMsg) {
+  var freq = intermix.helper.frequencyLookup[noteMsg.value];
+  this.oscillator.frequency.value = freq;
+  this.oscillator.start(noteMsg.delay);
+  this.oscillator.stop(noteMsg.delay + noteMsg.duration);
+  this.startEnvelopes(noteMsg.delay);
 };
 
-SimpleSynth.prototype.handleNote = function(evt) {
-
+SimpleSynth.prototype.handleRelayData = function(evt) {
+  var msg = evt.msg;
+  this.handleEvents[msg.type].call(this, msg);
 };
 
-SimpleSynth.prototype.handleVolume = function(evt)  {
+SimpleSynth.prototype.handleNote = function(msg) {
+  var tone = msg.value;
+  if (tone >= 0 && tone <= 127) {
+    this.play(msg);
+  }
+};
+
+SimpleSynth.prototype.handleVolume = function(msg)  {
 
 };
