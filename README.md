@@ -1,8 +1,12 @@
+# Intermix
+
 [![Build Status](https://travis-ci.org/RolandJansen/intermix.js.svg?branch=master)](https://travis-ci.org/RolandJansen/intermix.js)
 [![Code Climate](https://codeclimate.com/github/RolandJansen/intermix.js/badges/gpa.svg)](https://codeclimate.com/github/RolandJansen/intermix.js)
 [![Test Coverage](https://codeclimate.com/github/RolandJansen/intermix.js/badges/coverage.svg)](https://codeclimate.com/github/RolandJansen/intermix.js/coverage)
 
 Intermix is a javascript library that can be used to build browser-based music applications with a focus on sequencing. It doesn't aim to be a fully fledged audio library. All its audio functionality is designed to fit together well with the sequencer.
+
+It has a powerful event bus with relays for instruments, fx and controllers that makes routing of events easy. Relay endpoints can deposit data about their custom events that can be looked up by other bus attendees. A sequencer e.g. (or a controller in general) is able to control any parameter of an instrument without having to know anything about its functionality. This means you can write a synthesizer any way you want as long as you expose its event API to the bus.
 
 Intermix is in a very early stage and the API may change from one release to another. It uses some of the latest stuff in web technology so it currently runs perfectly in Chrome 49+ only. Firefox works except sample accurate pause/resume of sounds.
 
@@ -31,7 +35,7 @@ bower install intermix
 then add it via script tag to your HTML head:
 
 ```html
-    <script type="text/javascript" src="bower_components/intermix/dist/intermix.js"></script>
+<script type="text/javascript" src="bower_components/intermix/dist/intermix.js"></script>
 ```
 
 ### Other
