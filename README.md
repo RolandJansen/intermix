@@ -80,6 +80,7 @@ var note = intermix.helper.createNoteEvent(sound.uid, 'c4', 1);
 
 > The arguments to createNoteEvent() are: The unique ID of the receiver,
 the tone (string or midi note number) and the velocity between 0 and 1.
+There is an optional "duration" parameter that we don't need here.
 
 ... and add it at different points to a part:
 
