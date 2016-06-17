@@ -34,8 +34,8 @@ var Sequencer = function() {
   this.stepList = [];         //list of steps that were triggered and are still ahead of time
   this.lastPlayedStep = 0;    //step in queue that was played (not triggered) recently (used for drawing).
   this.loop = false;          //play a section of the queue in a loop
-  this.loopStart;             //first step of the loop
-  this.loopEnd;               //last step of the loop
+  this.loopStart = 0;         //first step of the loop
+  this.loopEnd = 63;          //last step of the loop
   this.isRunning = false;     //true if sequencer is running, otherwise false
   this.animationFrame;        //has to be overridden with a function. Will be called in the
                               //draw function with the lastPlayedStep int as parameter.
@@ -161,7 +161,7 @@ Sequencer.prototype.fireEvents = function() {
  */
 Sequencer.prototype.processSeqEvent = function(seqEvent, delay) {
   seqEvent.msg['delay'] = delay;
-  seqEvent.msg.duration = this.getDurationTime(seqEvent.msg.duration);
+  seqEvent.msg.duration = this.getDurationTime(seqEvent.msg.steps);
   window.intermix.eventBus.sendToRelayEndpoint(seqEvent.uid, seqEvent);
 };
 
@@ -171,8 +171,8 @@ Sequencer.prototype.processSeqEvent = function(seqEvent, delay) {
  * @param  {Int}    duration Note duration in 64th steps
  * @return {Float}           Note duration in seconds
  */
-Sequencer.prototype.getDurationTime = function(duration) {
-  return duration * this.timePerStep;
+Sequencer.prototype.getDurationTime = function(steps) {
+  return steps * this.timePerStep;
 };
 
 /**

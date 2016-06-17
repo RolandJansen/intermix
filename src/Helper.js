@@ -31,14 +31,25 @@ Helper.prototype.getNoteFrequencies = function() {
   return frequencies;
 };
 
+Helper.prototype.createGenericEvent = function(uid, type, value) {
+  return {
+    uid: uid,
+    msg: {
+      type: type,
+      value: value
+    }
+  };
+};
+
 /**
  * Creates an event of type "note".
  * @param  {String}      uid      Unique ID of the event receiver
  * @param  {String|Int}  note     Note (like "c3", "a#5") or midi note number
  * @param  {Float}       velocity Like Midi velocity but high res float of range [0, 1]
+ * @param  {Int}         steps    Length of a tone in 64th note steps
  * @return {Object}               A note event
  */
-Helper.prototype.createNoteEvent = function(uid, tone, velocity, duration) {
+Helper.prototype.createNoteEvent = function(uid, tone, velocity, steps) {
   var noteNum, evt;
 
   if (typeof tone === 'number') {
@@ -53,7 +64,7 @@ Helper.prototype.createNoteEvent = function(uid, tone, velocity, duration) {
       type: 'note',
       value: noteNum,
       velocity: velocity,
-      duration: duration
+      steps: steps
     }
   };
 

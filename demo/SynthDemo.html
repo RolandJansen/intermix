@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Intermix Demo</title>
+    <link rel="stylesheet"
+    href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+    integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"
+    crossorigin="anonymous"
+    >
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.0.0/css/bootstrap-slider.css" media="screen" title="no title" charset="utf-8">
+    <link rel="stylesheet" href="assets/css/demos.css" media="screen" title="no title" charset="utf-8">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.0.0/bootstrap-slider.js"></script>
+    <script type="text/javascript" src="../dist/intermix.js"></script>
+    <script type="text/javascript" src="SimpleSynth.js"></script>
+  </head>
+  <body>
+    <div class="container row">
+      <div class="demo col-md-8">
+        <!-- <h1>Sound</h1> -->
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            A simple synthesizer done with Intermix. It consists
+            of an oscillator and a lowpass filter with an AD envelope.
+            Both envelope parameters are exposed to the Intermix event bus.
+            This demo controls the instrument without a direct connection to
+            or knowledge about it.
+          </div>
+          <div class="panel-body">
+            <form id="inputs">
+              <input class="btn btn-default" type="button" value="Start" onclick="play()">
+              <input class="btn btn-default" type="button" value="Stop" onclick="stop()">
+            </form>
+          </div>
+          <div class="panel-footer">
+            There is a tutorial on how to build this synthesizer (vaporware).
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      var sliders = [];
+      var synth = new SimpleSynth();
+      var synthID = synth.uid;
+      var synthEvents = intermix.eventBus.getEndpointSpec(synthID);
+      var seq = new intermix.Sequencer();
+      var part = new intermix.Part();
+      part.addEvent(intermix.helper.createNoteEvent(synthID, 'c4', 1, 4), 0)
+      .addEvent(intermix.helper.createNoteEvent(synthID, 'f4', 1, 4), 1)
+      .addEvent(intermix.helper.createNoteEvent(synthID, 'd#4', 1, 4), 2)
+      .addEvent(intermix.helper.createNoteEvent(synthID, 'g4', 1, 4), 3)
+      .addEvent(intermix.helper.createNoteEvent(synthID, 'f4', 1, 4), 4)
+      .addEvent(intermix.helper.createNoteEvent(synthID, 'a#4', 1, 4), 5)
+      .addEvent(intermix.helper.createNoteEvent(synthID, 'g4', 1, 4), 6)
+      .addEvent(intermix.helper.createNoteEvent(synthID, 'c5', 1, 4), 7)
+      .addEvent(intermix.helper.createNoteEvent(synthID, 'f5', 1, 4), 8)
+      .addEvent(intermix.helper.createNoteEvent(synthID, 'd#5', 1, 4), 9)
+      .addEvent(intermix.helper.createNoteEvent(synthID, 'g5', 1, 4), 10)
+      .addEvent(intermix.helper.createNoteEvent(synthID, 'f5', 1, 4), 11)
+      .addEvent(intermix.helper.createNoteEvent(synthID, 'a#5', 1, 4), 12)
+      .addEvent(intermix.helper.createNoteEvent(synthID, 'g5', 1, 4), 13)
+      .addEvent(intermix.helper.createNoteEvent(synthID, 'c6', 1, 4), 14)
+      .addEvent(intermix.helper.createNoteEvent(synthID, 'c5', 1, 4), 15);
+
+      seq.addPart(part, 0);
+      seq.loop = true;
+
+      addControls();
+
+      function play() {
+        seq.start();
+      };
+
+      function stop() {
+        seq.stop();
+      };
+
+      function oneShot() {
+        synth.startNow();
+      };
+
+      function addControls() {
+        var outerDiv = document.createElement('div');
+        var divider = document.createElement('br');
+        var form = document.getElementById('inputs');
+        form.appendChild(outerDiv);
+
+        for (eType in synthEvents) {
+          var values = synthEvents[eType];
+          var range = '[' + values[0] + ', ' + values[1] + ']';
+          var heading = document.createTextNode(eType + ' :');
+          var slider = document.createElement('input');
+
+          slider.setAttribute('type', 'text');
+          slider.setAttribute('id', eType);
+          slider.setAttribute('data-slider-id', eType + 'Slider');
+          slider.setAttribute('data-slider-min', values[0]);
+          slider.setAttribute('data-slider-max', values[1]);
+          slider.setAttribute('data-slider-step', 0.01);
+          slider.setAttribute('data-slider-value', values[1] /2);
+          slider.setAttribute('data-slider-tooltip', 'hide');
+
+          outerDiv.appendChild(divider);
+          outerDiv.appendChild(heading);
+          outerDiv.appendChild(slider);
+
+          sliders.push({ type: eType, el: new Slider('#' + eType).on('slide', sendEvent) });
+        }
+      };
+
+      function sendEvent() {
+        sliders.forEach(function(slider) {
+          var value = slider.el.getValue();
+          var evt = intermix.helper.createGenericEvent(synthID, slider.type, value);
+          intermix.eventBus.sendToRelayEndpoint(synthID, evt);
+        });
+      };
+
+    </script>
+  </body>
+</html>
