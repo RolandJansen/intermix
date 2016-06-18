@@ -75,8 +75,8 @@ Helper.prototype.createNoteEvent = function(uid, tone, velocity, steps) {
     if (velocity < 0 || velocity > 1) {
       throw new Error('Velocity out of bounds: ' + velocity);
     }
-    if (typeof duration !== 'number' && typeof duration !== 'undefined') {
-      throw new TypeError('Duration if defined must be of type number.');
+    if (typeof steps !== 'number' && typeof steps !== 'undefined') {
+      throw new TypeError('Steps if defined must be of type number.');
     }
     return evt;
   } else {

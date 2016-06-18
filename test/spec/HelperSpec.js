@@ -33,12 +33,12 @@ describe('A Helper', function() {
       this.uid = '2305230523052342';
       this.value = 60;
       this.velocity = 1;
-      this.duration = 4;
+      this.steps = 4;
       this.msg = {
         type: 'note',
         value: this.value,
         velocity: this.velocity,
-        duration: this.duration
+        steps: this.steps
       };
       this.evt = { uid: this.uid, msg: this.msg };
     });
@@ -46,12 +46,12 @@ describe('A Helper', function() {
     describe('on success', function() {
 
       it('returns a valid note event when given a midi note number', function() {
-        var evt = this.helper.createNoteEvent(this.uid, this.value, this.velocity, this.duration);
+        var evt = this.helper.createNoteEvent(this.uid, this.value, this.velocity, this.steps);
         expect(evt).toEqual(this.evt);
       });
 
       it('returns a valid note event when given a tone string', function() {
-        var evt = this.helper.createNoteEvent(this.uid, 'c4', this.velocity, this.duration);
+        var evt = this.helper.createNoteEvent(this.uid, 'c4', this.velocity, this.steps);
         expect(evt).toEqual(this.evt);
       });
 
@@ -94,7 +94,7 @@ describe('A Helper', function() {
         }).toThrowError(TypeError);
       });
 
-      it('throws a type error if duration is defined but not a number', function() {
+      it('throws a type error if steps is defined but not a number', function() {
         var self = this;
         expect(function() {
           self.helper.createNoteEvent(self.uid, 'c4', 1, 'foo');

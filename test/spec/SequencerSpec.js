@@ -61,7 +61,7 @@ describe('Sequencer', function() {
     part2 = { 'pattern': pattern2, 'length': 64 };
     seqEvent = {
       'uid': '1a',
-      'msg': { 'type': 'note', 'value': 60, 'velocity': 1, 'duration': 4 }
+      'msg': { 'type': 'note', 'value': 60, 'velocity': 1, 'steps': 4 }
     };
 
     sequencer = new Sequencer();
@@ -189,7 +189,7 @@ describe('Sequencer', function() {
       expect(seqEvent.msg.delay).toBeUndefined();
     });
 
-    it('replaces the duration with the duration time in seconds', function() {
+    it('adds a duration property with tone duration in seconds', function() {
       sequencer.processSeqEvent(seqEvent);
       expect(seqEvent.msg.duration).toEqual(0.125);
     });
