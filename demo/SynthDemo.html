@@ -21,10 +21,11 @@
         <div class="panel panel-primary">
           <div class="panel-heading">
             A simple synthesizer done with Intermix. It consists
-            of an oscillator and a lowpass filter with an AD envelope.
+            of an oscillator and a lowpass filter with its cutoff frequency
+            controlled by an AD envelope.
             Both envelope parameters are exposed to the Intermix event bus.
-            This demo controls the instrument without a direct connection to
-            or knowledge about it.
+            They can be controlled without any direct communication between the
+            controller and the instrument.
           </div>
           <div class="panel-body">
             <form id="inputs">
@@ -98,7 +99,7 @@
           slider.setAttribute('data-slider-min', values[0]);
           slider.setAttribute('data-slider-max', values[1]);
           slider.setAttribute('data-slider-step', 0.01);
-          slider.setAttribute('data-slider-value', values[1] /2);
+          slider.setAttribute('data-slider-value', values[2]);
           slider.setAttribute('data-slider-tooltip', 'hide');
 
           outerDiv.appendChild(divider);
