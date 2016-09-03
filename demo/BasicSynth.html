@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="assets/css/demos.css" media="screen" title="no title" charset="utf-8">
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.0.0/bootstrap-slider.js"></script>
     <script type="text/javascript" src="../dist/intermix.js"></script>
-    <script type="text/javascript" src="SimpleSynth.js"></script>
+    <script type="text/javascript" src="BasicSynth.js"></script>
   </head>
   <body>
     <div class="container row">
@@ -20,7 +20,7 @@
         <!-- <h1>Sound</h1> -->
         <div class="panel panel-primary">
           <div class="panel-heading">
-            A simple synthesizer done with Intermix. It consists
+            A very basic synthesizer done with Intermix. It consists
             of an oscillator and a lowpass filter with its cutoff frequency
             controlled by an AD envelope.
             Both envelope parameters are exposed to the Intermix event bus.
@@ -42,7 +42,7 @@
 
     <script type="text/javascript">
       var sliders = [];
-      var synth = new SimpleSynth();
+      var synth = new BasicSynth();
       var synthID = synth.uid;
       var synthEvents = intermix.eventBus.getEndpointSpec(synthID);
       var seq = new intermix.Sequencer();

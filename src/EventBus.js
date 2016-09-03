@@ -11,7 +11,7 @@ var helper = require('./Helper.js');
  * system that can be used to share control data between
  * relay attendees.
  * An attendee has to add itself to a relay to become
- * a relay endpoint. Now, all other bus attendees can
+ * an endpoint. Now, all other bus attendees can
  * read out its controllers and send/receive data to/from it.
  * The event bus has two buildin relays 'instrument' and 'fx',
  * others can be added.
