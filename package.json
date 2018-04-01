@@ -8,8 +8,8 @@
     "clean": "rimraf dist/*",
     "docgen": "jsdoc -c conf.json --verbose",
     "docgen:md": "jsdoc2md src/**/*.js > doc/api.md",
-    "prebuild": "npm run prebuild:js",
-    "build": "npm run build:js && npm run build:js:mini",
+    "prebuild": "npm run clean",
+    "build": "webpack",
     "watch": "npm run test:karma && npm run watch:js &",
     "watch:cmd": "start cmd /k npm run test:karma && npm run watch:js",
     "test": "npm run test:node",
@@ -57,6 +57,11 @@
     "proxyquire-universal": "^1.0.8",
     "rimraf": "^2.5.0",
     "sinon": "^1.17.3",
-    "web-audio-test-api": "^0.5.2"
+    "source-map-loader": "^0.2.3",
+    "ts-loader": "^4.1.0",
+    "typescript": "^2.8.1",
+    "web-audio-test-api": "^0.5.2",
+    "webpack": "^4.4.1",
+    "webpack-cli": "^2.0.13"
   }
 }
