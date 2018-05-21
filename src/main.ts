@@ -1,7 +1,9 @@
 'use strict';
 
+import { audioCtx } from './core';
+
+let intermix = {}
 //intermix = require('./core.js');
-var intermix = import('./core.ts') || {};
 // intermix.EventBus = require('./EventBus.js');
 // intermix.SoundWave = require('./SoundWave.js');
 // intermix.Sound = require('./Sound.js');
@@ -11,4 +13,4 @@ var intermix = import('./core.ts') || {};
 // intermix.helper = require('./Helper.js');
 // intermix.eventBus = new intermix.EventBus();
 
-module.exports = intermix;
+export default intermix;

@@ -7,6 +7,13 @@ module.exports = {
     module: {
         rules: [
             {
+                test: '/\.ts$/',
+                // apply tslint loader as preLoader
+                enforce: 'pre',
+                loader: 'tslint-loader',
+                options: { /* Loader options go here */ }
+            },
+            {
                 test: '/\.tsx?$',
                 // ts-loader seems to be better integrated
                 // with webpack then awesome-ts-loader

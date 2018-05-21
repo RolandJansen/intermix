@@ -30,7 +30,7 @@
  */
 'use strict';
 
-var audioCtx = null;
+let audioCtx;
 
 var isMobile = {
   'Android': function() {
@@ -58,16 +58,16 @@ var isMobile = {
   }
 };
 
-(function() {
+// (function() {
 
-  window.AudioContext = window.AudioContext || window.webkitAudioContext;
+//   window.AudioContext = window.AudioContext || window.webkitAudioContext;
 
-  if (typeof window.AudioContext !== 'undefined') {
-    audioCtx = new window.AudioContext();
-  } else {
-    throw new Error('Couldn\'t initialize the audio context.');
-  }
+//   if (typeof window.AudioContext !== 'undefined') {
+//     audioCtx = new window.AudioContext();
+//   } else {
+//     throw new Error('Couldn\'t initialize the audio context.');
+//   }
 
-})();
+// })();
 
-module.exports = audioCtx;
+export { audioCtx };
