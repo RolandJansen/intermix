@@ -1,12 +1,17 @@
 {
     "compilerOptions": {
+        //https://www.typescriptlang.org/docs/handbook/compiler-options.html
         "outDir": "./dist/",
+        // "outFile": "dist/intermix.js",
         "sourceMap": true,
-        "noImplicitAny": true,
         "noEmitOnError": true,
-        "strictNullChecks": true,
         "module": "es6",
         "target": "es5",
-        "allowJs": true
-    }
+        "declaration": true,    //generate typings
+        // "allowJs": true
+        "strict": true
+    },
+    "include": [
+        "src/**/*"
+    ]
 }

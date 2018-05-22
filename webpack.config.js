@@ -1,20 +1,21 @@
 const path = require('path');
 
 module.exports = {
+    mode: 'development',
     entry: './src/main.ts',
     // Extract ts sourcemaps and write them into the final bundle.
     devtool: 'inline-source-map',
     module: {
         rules: [
+            // {
+            //     test: '/\.ts$/',
+            //     // apply tslint loader as preLoader
+            //     enforce: 'pre',
+            //     loader: 'tslint-loader',
+            //     options: { /* Loader options go here */ }
+            // },
             {
-                test: '/\.ts$/',
-                // apply tslint loader as preLoader
-                enforce: 'pre',
-                loader: 'tslint-loader',
-                options: { /* Loader options go here */ }
-            },
-            {
-                test: '/\.tsx?$',
+                test: /\.tsx?$/,
                 // ts-loader seems to be better integrated
                 // with webpack then awesome-ts-loader
                 use: 'ts-loader',
