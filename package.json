@@ -15,7 +15,6 @@
     "watch:cmd": "start cmd /k npm run test:karma && npm run watch:js",
     "test": "npm run test:node",
     "test:cmd": "npm run test:node:cmd",
-    "prebuild:js": "npm run clean && npm run lint",
     "build:js": "browserify src/main.js -o dist/intermix.js -v -p browserify-derequire -s intermix",
     "build:js:mini": "browserify src/main.js -o dist/intermix.min.js -d -v -s intermix -p browserify-derequire -p [minifyify --no-map]",
     "watch:js": "watchify src/main.js -o dist/intermix.js -v -d -p browserify-derequire -s intermix",

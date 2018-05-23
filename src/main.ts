@@ -1,9 +1,3 @@
-'use strict';
-
-import { audioCtx } from './core';
-
-let intermix = {}
-//intermix = require('./core.js');
 // intermix.EventBus = require('./EventBus.js');
 // intermix.SoundWave = require('./SoundWave.js');
 // intermix.Sound = require('./Sound.js');
@@ -12,5 +6,15 @@ let intermix = {}
 
 // intermix.helper = require('./Helper.js');
 // intermix.eventBus = new intermix.EventBus();
+import Helper from "./Helper";
 
-export default intermix;
+export default class Intermix {
+
+    public audioContext: AudioContext;
+    public helper: object;
+
+    constructor() {
+        this.audioContext = new window.AudioContext();
+        this.helper = new Helper();
+    }
+}
