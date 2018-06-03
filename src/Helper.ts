@@ -1,4 +1,4 @@
-import { IGenericEvent } from "./IHelper";
+import { IEventMessage, IIntermixEvent } from "./IHelper";
 /**
  * This class provides functions that makes
  * working with Intermix easier.
@@ -17,17 +17,19 @@ export default class Helper {
 
   /**
    * Creates an event of any type.
-   * @param uid   Unique ID of the event receiver
-   * @param type  Event type (note, volume, etc)
-   * @param value Value of the event
-   * @return      An intermix event object (not a js event)
+   * @param uid     Unique ID of the event receiver
+   * @param type    Event type (note, volume, etc)
+   * @param payload value of the event
+   * @return        An intermix event object (not a js event)
    */
-  public createGenericEvent(uid: string,
-                            type: string,
-                            value: number|string|boolean): IGenericEvent {
+  public getGenericEvent(uid: string,
+                         type: string,
+                         payload: IEventMessage): IIntermixEvent {
     return {
       uid,
-      msg: { type, value },
+      type,
+      timestamp: Date.now(),
+      payload,
     };
   }
 
@@ -42,7 +44,7 @@ export default class Helper {
   public createNoteEvent(uid: string,
                          tone: number | string,
                          velocity: number,
-                         steps: number): IGenericEvent {
+                         steps: number): IIntermixEvent {
     if (typeof tone === "string") {
       tone = this.getNoteNumber(tone);
     }
@@ -52,8 +54,9 @@ export default class Helper {
 
     return {
       uid,
-      msg: {
-        type: "note",
+      type: "note",
+      timestamp: Date.now(),
+      payload: {
         value: tone,
         velocity,
         steps,
@@ -67,15 +70,16 @@ export default class Helper {
    * @param  volume Like Midi Volume (Integer of range [0, 127])
    * @return        A volume event
    */
-  public createVolumeEvent(uid: string, volume: number): IGenericEvent {
+  public createVolumeEvent(uid: string, volume: number): IIntermixEvent {
     if (volume < 0 || volume > 127) {
       throw new Error("Volume out of bounds: " + volume);
     }
 
     return {
       uid,
-      msg: {
-        type: "volume",
+      type: "volumeChange",
+      timestamp: Date.now(),
+      payload: {
         value: volume,
       },
     };

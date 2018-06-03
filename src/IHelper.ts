@@ -1,11 +1,12 @@
 export interface IEventMessage {
-    type: string;
     value: number | string | boolean;
     velocity?: number;
     steps?: number;
 }
 
-export interface IGenericEvent {
+export interface IIntermixEvent {
     uid: string;
-    msg: IEventMessage;
+    type: string;
+    timestamp: number;
+    payload: IEventMessage;
 }
