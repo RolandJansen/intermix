@@ -1,11 +1,28 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.intermix = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+'use strict';
+
+//intermix = require('./core.js');
+var intermix = _dereq_('./core.js') || {};
+intermix.EventBus = _dereq_('./EventBus.js');
+intermix.SoundWave = _dereq_('./SoundWave.js');
+intermix.Sound = _dereq_('./Sound.js');
+intermix.Sequencer = _dereq_('./Sequencer.js');
+intermix.Part = _dereq_('./Part.js');
+
+intermix.helper = _dereq_('./Helper.js');
+intermix.eventBus = new intermix.EventBus();
+
+module.exports = intermix;
+
+},{"./EventBus.js":3,"./Helper.js":4,"./Part.js":5,"./Sequencer.js":6,"./Sound.js":7,"./SoundWave.js":8,"./core.js":9}],2:[function(_dereq_,module,exports){
 var bundleFn = arguments[3];
 var sources = arguments[4];
 var cache = arguments[5];
 
 var stringify = JSON.stringify;
 
-module.exports = function (fn, options) {
+module.exports = function (fn) {
+    var keys = [];
     var wkey;
     var cacheKeys = Object.keys(cache);
 
@@ -16,7 +33,7 @@ module.exports = function (fn, options) {
         // be an object with the default export as a property of it. To ensure
         // the existing api and babel esmodule exports are both supported we
         // check for both
-        if (exp === fn || exp && exp.default === fn) {
+        if (exp === fn || exp.default === fn) {
             wkey = key;
             break;
         }
@@ -59,17 +76,12 @@ module.exports = function (fn, options) {
 
     var URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
 
-    var blob = new Blob([src], { type: 'text/javascript' });
-    if (options && options.bare) { return blob; }
-    var workerUrl = URL.createObjectURL(blob);
-    var worker = new Worker(workerUrl);
-    if (typeof URL.revokeObjectURL == "function") {
-      URL.revokeObjectURL(workerUrl);
-    }
-    return worker;
+    return new Worker(URL.createObjectURL(
+        new Blob([src], { type: 'text/javascript' })
+    ));
 };
 
-},{}],2:[function(_dereq_,module,exports){
+},{}],3:[function(_dereq_,module,exports){
 'use strict';
 
 var helper = _dereq_('./Helper.js');
@@ -83,7 +95,7 @@ var helper = _dereq_('./Helper.js');
  * system that can be used to share control data between
  * relay attendees.
  * An attendee has to add itself to a relay to become
- * a relay endpoint. Now, all other bus attendees can
+ * an endpoint. Now, all other bus attendees can
  * read out its controllers and send/receive data to/from it.
  * The event bus has two buildin relays 'instrument' and 'fx',
  * others can be added.
@@ -324,7 +336,7 @@ EventBus.prototype.getUID = function() {
 
 module.exports = EventBus;
 
-},{"./Helper.js":3}],3:[function(_dereq_,module,exports){
+},{"./Helper.js":4}],4:[function(_dereq_,module,exports){
 'use strict';
 
 /**
@@ -402,8 +414,8 @@ Helper.prototype.createNoteEvent = function(uid, tone, velocity, steps) {
     if (velocity < 0 || velocity > 1) {
       throw new Error('Velocity out of bounds: ' + velocity);
     }
-    if (typeof duration !== 'number' && typeof duration !== 'undefined') {
-      throw new TypeError('Duration if defined must be of type number.');
+    if (typeof steps !== 'number' && typeof steps !== 'undefined') {
+      throw new TypeError('Steps if defined must be of type number.');
     }
     return evt;
   } else {
@@ -512,7 +524,7 @@ Helper.prototype.isPlainObject = function(obj) {
 
 module.exports = new Helper();
 
-},{}],4:[function(_dereq_,module,exports){
+},{}],5:[function(_dereq_,module,exports){
 'use strict';
 
 /**
@@ -663,7 +675,7 @@ Part.prototype.extendOnEnd = function(extLength) {
 
 module.exports = Part;
 
-},{}],5:[function(_dereq_,module,exports){
+},{}],6:[function(_dereq_,module,exports){
 'use strict';
 
 var work = _dereq_('webworkify');   //prepares the worker for browserify
@@ -1051,7 +1063,7 @@ Sequencer.prototype.copyArray = function(sourceArray) {
 
 module.exports = Sequencer;
 
-},{"./core.js":8,"./scheduleWorker.js":10,"webworkify":1}],6:[function(_dereq_,module,exports){
+},{"./core.js":9,"./scheduleWorker.js":10,"webworkify":2}],7:[function(_dereq_,module,exports){
 'use strict';
 
 var core = _dereq_('./core.js');
@@ -1416,7 +1428,7 @@ Sound.prototype.getDetune = function() {
 
 module.exports = Sound;
 
-},{"./core.js":8}],7:[function(_dereq_,module,exports){
+},{"./core.js":9}],8:[function(_dereq_,module,exports){
 'use strict';
 
 var core = _dereq_('./core.js');
@@ -1827,7 +1839,7 @@ SoundWave.prototype.sortBinBuffers = function(filenames, binBuffers) {
 
 module.exports = SoundWave;
 
-},{"./core.js":8}],8:[function(_dereq_,module,exports){
+},{"./core.js":9}],9:[function(_dereq_,module,exports){
 /**
  * This is the foundation of the Intermix library.
  * It simply creates the audio context objects
@@ -1902,23 +1914,7 @@ var isMobile = {
 
 module.exports = audioCtx;
 
-},{}],9:[function(_dereq_,module,exports){
-'use strict';
-
-//intermix = require('./core.js');
-var intermix = _dereq_('./core.js') || {};
-intermix.EventBus = _dereq_('./EventBus.js');
-intermix.SoundWave = _dereq_('./SoundWave.js');
-intermix.Sound = _dereq_('./Sound.js');
-intermix.Sequencer = _dereq_('./Sequencer.js');
-intermix.Part = _dereq_('./Part.js');
-
-intermix.helper = _dereq_('./Helper.js');
-intermix.eventBus = new intermix.EventBus();
-
-module.exports = intermix;
-
-},{"./EventBus.js":2,"./Helper.js":3,"./Part.js":4,"./Sequencer.js":5,"./Sound.js":6,"./SoundWave.js":7,"./core.js":8}],10:[function(_dereq_,module,exports){
+},{}],10:[function(_dereq_,module,exports){
 /**
  * This is a webworker that provides a timer
  * that fires the scheduler for the sequencer.
@@ -1955,5 +1951,5 @@ var worker = function(self) {
 
 module.exports = worker;
 
-},{}]},{},[9])(9)
+},{}]},{},[1])(1)
 });
