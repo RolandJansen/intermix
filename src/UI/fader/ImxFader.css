@@ -1,0 +1,27 @@
+.imx__fader-container {
+    position: relative;
+    width: 60px;
+    height: 200px;
+    border: 3px solid rgb(136, 11, 130);
+    background-color: beige;
+}
+
+.imx__fader-background {
+    position: absolute;
+    top: 20px;
+    left: 25px;
+    width: 10px;
+    height: 160px;
+    border: 3px solid #73AD21;
+    background-color: aquamarine;
+}
+
+.imx__fader-knob {
+    position: absolute;
+    width: 40px;
+    height: 20px;
+    left: 10px;
+    top: 170px;
+    border: 3px solid #0f2b3d;
+    background-color: aqua;
+}

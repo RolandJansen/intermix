@@ -43,6 +43,11 @@
     "url": "https://github.com/RolandJansen/intermix.js/issues"
   },
   "homepage": "https://github.com/RolandJansen/intermix.js#readme",
+  "eslintConfig": {
+    "env": {
+      "es6": true
+    }
+  },
   "devDependencies": {
     "@types/webaudioapi": "0.0.27",
     "atob": "^2.0.3",

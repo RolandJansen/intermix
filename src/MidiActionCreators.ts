@@ -1,5 +1,5 @@
-import * as mat from './midiActionTypes'
-import { IMidiAction } from './Interfaces'
+import { IMidiAction } from "./Interfaces";
+import * as mat from "./midiActionTypes";
 
 /**
  * These functions represents the midi standard.
@@ -27,19 +27,18 @@ export function midiPortamentoTime(time: number) {
 }
 
 function getMidiAction(type: string, value: number, error = false) {
-    const minValue = 0;
-    const maxValue = 127;
+    let payload: number | RangeError;
 
-    if (value >= minValue && value <= maxValue) {
-        return {
-            type,
-            payload: value,
-            error,
-        }
+    if (value < 0 || value > 127) {
+        error = true;
+        payload = new RangeError("The argument must be between 0 and 127.");
+    } else {
+        payload = value;
     }
+
     return {
         type,
-        payload: new RangeError("The argument must be between 0 and 127."),
-        error: true,
-    }
+        payload,
+        error,
+    };
 }
