@@ -20,7 +20,6 @@ class ImxFader extends HTMLElement {
         this.settings = {
             min: 0.0,
             max: 1.0,
-            step: 0.1,
             value: 0.0,
         }
 
@@ -38,8 +37,8 @@ class ImxFader extends HTMLElement {
             knobRange: 160
         }
 
-        // event flags
-        this.mouseDown = false;
+        // if true, use interval [0,127] instead of [0,1]
+        this.useMidiValues = false;
     }
 
     static get observedAttributes() {
@@ -67,12 +66,10 @@ class ImxFader extends HTMLElement {
         document.addEventListener("mousemove", this, false);
 
         // read html attributes
-        this.getAttribute('min') !== null ? this.min = Number(this.getAttribute('min')) : true;
-        this.getAttribute('max') !== null ? this.max = Number(this.getAttribute('max')) : true;
-        this.getAttribute('step') !== null ? this.step = Number(this.getAttribute('step')) : true;
-        this.getAttribute('value') !== null ? this.value = Number(this.getAttribute('value')) : true;
-        this.getAttribute('width') !== null ? this.width = Number(this.getAttribute('width')) : true;
-        this.getAttribute('height') !== null ? this.height = Number(this.getAttribute('height')) : true;
+        this.getAttribute('useMidiValues') !== null ? this.setMidiInterval() : false;
+        this.getAttribute('value') !== null ? this.value = Number(this.getAttribute('value')) : false;
+        this.getAttribute('width') !== null ? this.width = Number(this.getAttribute('width')) : false;
+        this.getAttribute('height') !== null ? this.height = Number(this.getAttribute('height')) : false;
     }
 
     /**
@@ -85,9 +82,9 @@ class ImxFader extends HTMLElement {
      * @param {string} newValue The new value of this attribute
      */
     attributeChangedCallback(name, oldValue, newValue) {
-        // if (oldValue !== null && oldValue !== newValue) {
-        //     this.value = newValue;
-        // }
+        if (oldValue !== null && oldValue !== newValue) {
+            this.value = newValue;
+        }
     }
 
     /**
@@ -139,22 +136,23 @@ class ImxFader extends HTMLElement {
         let y = evt.clientY;
         if (this.mouseDown) {
             let nextPos = this.faderKnob.offsetTop + evt.movementY;
-            if (nextPos >= this.knobHiPos && nextPos <= this.knobLowPos) {
+            if (nextPos >= this.style.knobHiPos && nextPos <= this.style.knobLowPos) {
                 this.faderKnob.style.top = nextPos + "px";
-            } else if (nextPos < this.knobHiPos) {
-                this.faderKnob.style.top = this.knobHiPos + "px";
-                nextPos = this.knobHiPos;
+            } else if (nextPos < this.style.knobHiPos) {
+                this.faderKnob.style.top = this.style.knobHiPos + "px";
+                nextPos = this.style.knobHiPos;
             } else {
-                this.faderKnob.style.top = this.knobLowPos + "px";
-                nextPos = this.knobLowPos;
+                this.faderKnob.style.top = this.style.knobLowPos + "px";
+                nextPos = this.style.knobLowPos;
             }
-            const yPos = nextPos - this.knobHiPos;
-            const val = (this.knobRange - yPos)/this.knobRange;
-            this.setAttribute('value', val);
+            const yPos = nextPos - this.style.knobHiPos;
+            const val = (this.style.knobRange - yPos)/this.style.knobRange;
+            this.useMidiValues ? this.value = val*127 : val;
         }
     }
 
     setKnobPosition(value) {
+        this.useMidiValues ? value = value/127 : false;
         const absolutePos = this.knobRange - this.knobRange*value + this.knobHiPos;
         this.faderKnob.style.pos = absolutePos;
     }
@@ -165,38 +163,18 @@ class ImxFader extends HTMLElement {
         this.faderKnob = shadowRoot.getElementById('imx__fader-knob');
     }
     
-    get min() {
-        return this.settings.min;
-    }
-
-    set min(value) {
-        if (typeof value === 'number') {
-            this.settings.min = value;
-        }
-    }
-
-    get max() {
-        return this.settings.max;
-    }
-
-    set max(value) {
-        if (typeof value === 'number') {
-            this.settings.max = value;
-        }
-    }
-
     get value() {
-        return this.getAttribute('value');
+        return this.settings.value;
     }
 
     set value(value) {
-        // debugger;
         if (typeof value === 'number' &&
             value <= this.max &&
             value >= this.min) {
             this.settings.value = value;
+            this.setKnobPosition(value);
         } else {
-            throw new Error('Value must be a number between ' + this.min + ' and ' + this.max + '.');
+            throw new Error('Value must be of type number between ' + this.min + ' and ' + this.max + '.');
         }
     }
 
@@ -205,11 +183,11 @@ class ImxFader extends HTMLElement {
     }
 
     set width(width) {
-        const stretch   = width/this.faderWidth;
+        const stretch   = width/this.style.width;
         const center    = width/2;
-        const bgWidth   = this.bgWidth*stretch;
+        const bgWidth   = this.style.bgWidth*stretch;
         const bgLeft    = center - bgWidth/2;
-        const knobWidth = this.knobWidth*stretch;
+        const knobWidth = this.style.knobWidth*stretch;
         const knobLeft  = center - knobWidth/2;
         
         this.faderContainer.style.width = width;
@@ -225,11 +203,11 @@ class ImxFader extends HTMLElement {
     }
 
     set height(height) {
-        const stretch = height/this.faderHeight;
+        const stretch = height/this.style.height;
         const center = height/2;
-        const bgHeight = this.bgHeight*stretch;
+        const bgHeight = this.style.bgHeight*stretch;
         const bgTop = center - bgHeight/2;
-        const knobHeight = this.knobHeight*stretch;
+        const knobHeight = this.style.knobHeight*stretch;
         const knobTop = center - knobHeight/2;
 
         this.faderContainer.style.height = height;
@@ -238,6 +216,13 @@ class ImxFader extends HTMLElement {
         this.faderKnob.style.height = knobHeight;
         this.faderKnob.style.top = knobTop;
         this.style.height = height;
+    }
+
+    setMidiInterval() {
+        this.useMidiValues = true;
+        this.settings.min = 0;
+        this.settings.max = 127;
+        return true;
     }
 
 }
