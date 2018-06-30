@@ -167,12 +167,12 @@ class ImxFader extends HTMLElement {
     }
     
     set width(width) {
-        const container = this.faderContainer.getBoundingClientRect();
-        const stretch   = width / this.faderContainer.clientWidth;
+        // const container = this.faderContainer.getBoundingClientRect();
+        // const stretch   = width / this.faderContainer.clientWidth;
         const center    = width/2;
-        const bgWidth   = this._style.bgWidth*stretch;
-        const bgLeft    = center - bgWidth/2;
-        const knobWidth = this._style.knobWidth*stretch;
+        const bgWidth   = width/6;
+        const bgLeft    = center - bgWidth/2 - 1; //border is 2px, so -1
+        const knobWidth = bgWidth*4;
         const knobLeft  = center - knobWidth/2;
         
         this.faderContainer.style.width = width;
@@ -180,7 +180,6 @@ class ImxFader extends HTMLElement {
         this.faderBackground.style.left = bgLeft;
         this.faderKnob.style.width = knobWidth;
         this.faderKnob.style.left = knobLeft;
-        debugger
         this.setAttribute('width', width);
     }
     
@@ -189,11 +188,11 @@ class ImxFader extends HTMLElement {
     }
     
     set height(height) {
-        const stretch = height/this._style.height;
+        // const stretch = height/this._style.height;
         const center = height/2;
-        const bgHeight = this._style.bgHeight*stretch;
+        const bgHeight = Math.round(height*0.8);
         const bgTop = center - bgHeight/2;
-        const knobHeight = this._style.knobHeight*stretch;
+        const knobHeight = Math.round(height*0.12);
         const knobTop = center - knobHeight/2;
         
         this.faderContainer.style.height = height;
@@ -232,16 +231,17 @@ class ImxFader extends HTMLElement {
     }
     
     _handleMouseDown() {
-        this.faderKnob.style.backgroundColor = "red";
+        // this.faderKnob.style.backgroundColor = "red";
         this.mouseDown = true;
     }
     
     _handleMouseUp() {
-        this.faderKnob.style.backgroundColor = "aqua";
+        // this.faderKnob.style.backgroundColor = "aqua";
         this.mouseDown = false;
     }
     
     _handleMouseMove(evt) {
+        console.log(this.bgStyle.height);
         evt.preventDefault();
         let y = evt.clientY;
         if (this.mouseDown) {
@@ -259,7 +259,7 @@ class ImxFader extends HTMLElement {
             let val = (this._style.knobRange - yPos)/this._style.knobRange;
             this.useMidiValues ? val = Math.round(val*127) : val;
             this._emitValue(val);
-            this.value = val;
+            this.setAttribute('value', val);
         }
     }
 
@@ -272,10 +272,6 @@ class ImxFader extends HTMLElement {
         }));
     }
 
-    _getNumberFromCSS(cssValue) {
-
-    }
-    
 }
 const ImxFaderUnmutable = Object.freeze(ImxFader);
 customElements.define('imx-fader', ImxFaderUnmutable);
