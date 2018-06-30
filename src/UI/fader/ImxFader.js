@@ -9,40 +9,44 @@ const currentDocument = document.currentScript.ownerDocument;
  */
 class ImxFader extends HTMLElement {
     
+    static get observedAttributes() {
+        return ['value'];
+    }
+    
     constructor() {
         super();
         
-        this.faderContainer;
-        this.faderBackground;
-        this.faderKnob;
+        // attach template to shadow root
+        this.attachShadow({mode: 'open'});
+        const template = currentDocument.querySelector('#imx-fader-template');
+        const instance = template.content.cloneNode(true);
+        this.shadowRoot.appendChild(instance);
+        
+        this.faderContainer = this.shadowRoot.getElementById('imx__fader-container');
+        this.faderBackground = this.shadowRoot.getElementById('imx__fader-background');
+        this.faderKnob = this.shadowRoot.getElementById('imx__fader-knob');
+        
+        // this.getShadowRootRefs(shadowRoot);
 
         // defaults
-        this.settings = {
+        this._settings = {
             min: 0.0,
             max: 1.0,
-            value: 0.0,
         }
 
-        // style defaults
+        // style refs
         // knobRange: knobLowPos - knobHiPos
-        this.style = {
-            width: 60,
-            height: 200,
-            bgWidth: 10,
-            bgHeight: 160,
+        this.containerStyle = window.getComputedStyle(this.faderContainer, null);
+        console.log(this.containerStyle);
+        this._style = {
+            bgWidth: this.faderBackground.style.width,
+            bgHeight: this.faderBackground.style.height,
             knobWidth: 40,
             knobHeight: 20,
             knobHiPos: 10,
             knobLowPos: 170,
             knobRange: 160
         }
-
-        // if true, use interval [0,127] instead of [0,1]
-        this.useMidiValues = false;
-    }
-
-    static get observedAttributes() {
-        return ['value'];
     }
 
     /**
@@ -52,24 +56,45 @@ class ImxFader extends HTMLElement {
      * @callback connectedCallback
      */
     connectedCallback() {
-        // attach template to shadow root
-        const shadowRoot = this.attachShadow({mode: 'open'});
-        const template = currentDocument.querySelector('#imx-fader-template');
-        const instance = template.content.cloneNode(true);
-        shadowRoot.appendChild(instance);
-
-        this.getShadowRootRefs(shadowRoot);
-    
         // add event listener
         this.faderKnob.addEventListener("mousedown", this, false);
         document.addEventListener("mouseup", this, false);
         document.addEventListener("mousemove", this, false);
 
-        // read html attributes
-        this.getAttribute('useMidiValues') !== null ? this.setMidiInterval() : false;
-        this.getAttribute('value') !== null ? this.value = Number(this.getAttribute('value')) : false;
-        this.getAttribute('width') !== null ? this.width = Number(this.getAttribute('width')) : false;
-        this.getAttribute('height') !== null ? this.height = Number(this.getAttribute('height')) : false;
+        // process attributes or add them if needed
+        if (this.hasAttribute('useMidiValues')) {
+            this.useMidiValues = true;
+        }
+        if (this.hasAttribute('value')) {
+            this.value = Number(this.getAttribute('value'));
+        } else {
+            this.value = 0;
+        }
+        if (this.hasAttribute('width')) {
+            this.width = Number(this.getAttribute('width'));
+        } else {
+            this.width = 60;
+        }
+        if (this.hasAttribute('height')) {
+            this.height = Number(this.getAttribute('height'));
+        } else {
+            this.height = 200;
+        }
+
+        // if properties have been set before DOM insertion,
+        // upgrade them to use get/set methods.
+        this._upgradeProperty('useMidiValues');
+        this._upgradeProperty('value');
+        this._upgradeProperty('width');
+        this._upgradeProperty('height');
+    }
+
+    _upgradeProperty(prop) {
+        if (this.hasOwnProperty(prop)) {
+            let value = this[prop];
+            delete this[prop];
+            this[prop] = value;
+        }
     }
 
     /**
@@ -82,9 +107,9 @@ class ImxFader extends HTMLElement {
      * @param {string} newValue The new value of this attribute
      */
     attributeChangedCallback(name, oldValue, newValue) {
-        if (oldValue !== null && oldValue !== newValue) {
-            this.value = newValue;
-        }
+        // if (oldValue !== null && oldValue !== newValue) {
+        //     this.value = newValue;
+        // }
     }
 
     /**
@@ -98,10 +123,94 @@ class ImxFader extends HTMLElement {
         this.removeEventListener('mousemove');
     }
     
+    set value(value) {
+        if (typeof value === 'number' &&
+        value <= this._settings.max &&
+        value >= this._settings.min) {
+            this.setAttribute('value', value);
+            this._setKnobPosition(value);
+        } else {
+            throw new Error('Value must be of type number between ' + this._settings.min + ' and ' + this._settings.max + '.');
+        }
+    }
+    
+    _setKnobPosition(value) {
+        this.useMidiValues ? value = value/127 : false;
+        const absolutePos = this._style.knobRange - this._style.knobRange*value + this._style.knobHiPos;
+        this.faderKnob.style.top = absolutePos;
+    }
+
+    get value() {
+        return Number(this.getAttribute('value'));
+    }
+    
+    set useMidiValues(value) {
+        const isChecked = Boolean(value);
+        if (isChecked) {
+            this._setMidiInterval();
+            this.setAttribute('useMidiValues', '');
+        } else {
+            this.removeAttribute('useMidiValues');
+        }
+    }
+    
+    _setMidiInterval() {
+        this._settings.min = 0;
+        this._settings.max = 127;
+        return true;
+    }
+
+    /**
+     * if true, use interval [0,127] instead of [0,1]
+     */
+    get useMidiValues() {
+        return this.hasAttribute('useMidiValues');
+    }
+    
+    set width(width) {
+        const stretch   = parseInt(this.faderContainer.style.width, 10);
+        const center    = width/2;
+        const bgWidth   = this._style.bgWidth*stretch;
+        const bgLeft    = center - bgWidth/2;
+        const knobWidth = this._style.knobWidth*stretch;
+        const knobLeft  = center - knobWidth/2;
+        
+        this.faderContainer.style.width = width;
+        this.faderBackground.style.width = bgWidth;
+        this.faderBackground.style.left = bgLeft;
+        this.faderKnob.style.width = knobWidth;
+        this.faderKnob.style.left = knobLeft;
+        this.setAttribute('width', width);
+    }
+    
+    get width() {
+        return Number(this.getAttribute('width'));
+    }
+    
+    set height(height) {
+        const stretch = height/this._style.height;
+        const center = height/2;
+        const bgHeight = this._style.bgHeight*stretch;
+        const bgTop = center - bgHeight/2;
+        const knobHeight = this._style.knobHeight*stretch;
+        const knobTop = center - knobHeight/2;
+        
+        this.faderContainer.style.height = height;
+        this.faderBackground.style.height = bgHeight;
+        this.faderBackground.style.top = bgTop;
+        this.faderKnob.style.height = knobHeight;
+        this.faderKnob.style.top = knobTop;
+        this.setAttribute('height', height);
+    }
+    
+    get height() {
+        return Number(this.getAttribute('height'));
+    }
+
     /**
      * Event listeners are initialized with "this"
      * as handler. This means they call this.handleEvent
-     * as default. This prevents a context change and keeps
+     * by default. This prevents a context change and keeps
      * the listeners removable (in contrast to "bind").
      * @callback ImxFader~handleEvent
      * @param {event} evt The event object
@@ -110,121 +219,62 @@ class ImxFader extends HTMLElement {
     handleEvent(evt) {
         switch(evt.type) {
             case 'mousedown':
-            this.handleMouseDown();
+            this._handleMouseDown();
             break;
             case 'mouseup':
-            this.handleMouseUp();
+            this._handleMouseUp();
             break;
             case 'mousemove':
-            this.handleMouseMove(evt);
+            this._handleMouseMove(evt);
             break;
         };
     }
     
-    handleMouseDown() {
+    _handleMouseDown() {
         this.faderKnob.style.backgroundColor = "red";
         this.mouseDown = true;
     }
     
-    handleMouseUp() {
+    _handleMouseUp() {
         this.faderKnob.style.backgroundColor = "aqua";
         this.mouseDown = false;
     }
     
-    handleMouseMove(evt) {
+    _handleMouseMove(evt) {
         evt.preventDefault();
         let y = evt.clientY;
         if (this.mouseDown) {
             let nextPos = this.faderKnob.offsetTop + evt.movementY;
-            if (nextPos >= this.style.knobHiPos && nextPos <= this.style.knobLowPos) {
+            if (nextPos >= this._style.knobHiPos && nextPos <= this._style.knobLowPos) {
                 this.faderKnob.style.top = nextPos + "px";
-            } else if (nextPos < this.style.knobHiPos) {
-                this.faderKnob.style.top = this.style.knobHiPos + "px";
-                nextPos = this.style.knobHiPos;
+            } else if (nextPos < this._style.knobHiPos) {
+                this.faderKnob.style.top = this._style.knobHiPos + "px";
+                nextPos = this._style.knobHiPos;
             } else {
-                this.faderKnob.style.top = this.style.knobLowPos + "px";
-                nextPos = this.style.knobLowPos;
+                this.faderKnob.style.top = this._style.knobLowPos + "px";
+                nextPos = this._style.knobLowPos;
             }
-            const yPos = nextPos - this.style.knobHiPos;
-            const val = (this.style.knobRange - yPos)/this.style.knobRange;
-            this.useMidiValues ? this.value = val*127 : val;
+            const yPos = nextPos - this._style.knobHiPos;
+            let val = (this._style.knobRange - yPos)/this._style.knobRange;
+            this.useMidiValues ? val = Math.round(val*127) : val;
+            this._emitValue(val);
+            this.value = val;
         }
     }
 
-    setKnobPosition(value) {
-        this.useMidiValues ? value = value/127 : false;
-        const absolutePos = this.knobRange - this.knobRange*value + this.knobHiPos;
-        this.faderKnob.style.pos = absolutePos;
+    _emitValue(value) {
+        this.dispatchEvent(new CustomEvent('change', {
+            detail: {
+                value: value,
+            },
+            bubbles: true,
+        }));
+    }
+
+    _getNumberFromCSS(cssValue) {
+
     }
     
-    getShadowRootRefs(shadowRoot) {
-        this.faderContainer = shadowRoot.getElementById('imx__fader-container');
-        this.faderBackground = shadowRoot.getElementById('imx__fader-background');
-        this.faderKnob = shadowRoot.getElementById('imx__fader-knob');
-    }
-    
-    get value() {
-        return this.settings.value;
-    }
-
-    set value(value) {
-        if (typeof value === 'number' &&
-            value <= this.max &&
-            value >= this.min) {
-            this.settings.value = value;
-            this.setKnobPosition(value);
-        } else {
-            throw new Error('Value must be of type number between ' + this.min + ' and ' + this.max + '.');
-        }
-    }
-
-    get width() {
-        return this.style.width;
-    }
-
-    set width(width) {
-        const stretch   = width/this.style.width;
-        const center    = width/2;
-        const bgWidth   = this.style.bgWidth*stretch;
-        const bgLeft    = center - bgWidth/2;
-        const knobWidth = this.style.knobWidth*stretch;
-        const knobLeft  = center - knobWidth/2;
-        
-        this.faderContainer.style.width = width;
-        this.faderBackground.style.width = bgWidth;
-        this.faderBackground.style.left = bgLeft;
-        this.faderKnob.style.width = knobWidth;
-        this.faderKnob.style.left = knobLeft;
-        this.style.width = width;
-    }
-
-    get height() {
-        return this.style.height;
-    }
-
-    set height(height) {
-        const stretch = height/this.style.height;
-        const center = height/2;
-        const bgHeight = this.style.bgHeight*stretch;
-        const bgTop = center - bgHeight/2;
-        const knobHeight = this.style.knobHeight*stretch;
-        const knobTop = center - knobHeight/2;
-
-        this.faderContainer.style.height = height;
-        this.faderBackground.style.height = bgHeight;
-        this.faderBackground.style.top = bgTop;
-        this.faderKnob.style.height = knobHeight;
-        this.faderKnob.style.top = knobTop;
-        this.style.height = height;
-    }
-
-    setMidiInterval() {
-        this.useMidiValues = true;
-        this.settings.min = 0;
-        this.settings.max = 127;
-        return true;
-    }
-
 }
 const ImxFaderUnmutable = Object.freeze(ImxFader);
 customElements.define('imx-fader', ImxFaderUnmutable);
