@@ -5,14 +5,14 @@
     </head>
     <body>
         <imx-fader id="fader" useMidiValues value="15"></imx-fader>
-        <imx-fader width="150" height="120"></imx-fader>
+        <!-- <imx-fader width="150" height="120"></imx-fader> -->
         <script>
             const fader = document.getElementById('fader');
             fader.addEventListener('change', (e) => {
                 console.log('value is: ' + e.detail.value);
             })
         </script>
-        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/1.0.14/webcomponents-hi.js"></script> -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/1.0.14/webcomponents-hi.js"></script>
         <link rel="import" href="./ImxFader.html">
     </body>
 </html>

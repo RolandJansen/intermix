@@ -26,8 +26,6 @@ class ImxFader extends HTMLElement {
         this.faderBackground = this.shadowRoot.getElementById('imx__fader-background');
         this.faderKnob = this.shadowRoot.getElementById('imx__fader-knob');
         
-        // this.getShadowRootRefs(shadowRoot);
-
         // defaults
         this._settings = {
             min: 0.0,
@@ -37,10 +35,11 @@ class ImxFader extends HTMLElement {
         // style refs
         // knobRange: knobLowPos - knobHiPos
         this.containerStyle = window.getComputedStyle(this.faderContainer, null);
-        console.log(this.containerStyle);
+        this.bgStyle = window.getComputedStyle(this.faderBackground, null);
+        this.knobStyle = window.getComputedStyle(this.faderKnob, null);
         this._style = {
-            bgWidth: this.faderBackground.style.width,
-            bgHeight: this.faderBackground.style.height,
+            bgWidth: 10,
+            bgHeight: 160,
             knobWidth: 40,
             knobHeight: 20,
             knobHiPos: 10,
@@ -168,7 +167,8 @@ class ImxFader extends HTMLElement {
     }
     
     set width(width) {
-        const stretch   = parseInt(this.faderContainer.style.width, 10);
+        const container = this.faderContainer.getBoundingClientRect();
+        const stretch   = width / this.faderContainer.clientWidth;
         const center    = width/2;
         const bgWidth   = this._style.bgWidth*stretch;
         const bgLeft    = center - bgWidth/2;
@@ -180,6 +180,7 @@ class ImxFader extends HTMLElement {
         this.faderBackground.style.left = bgLeft;
         this.faderKnob.style.width = knobWidth;
         this.faderKnob.style.left = knobLeft;
+        debugger
         this.setAttribute('width', width);
     }
     

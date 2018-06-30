@@ -2,26 +2,37 @@
     position: relative;
     width: 60px;
     height: 200px;
-    border: 3px solid rgb(136, 11, 130);
-    background-color: beige;
+    /* border: 3px solid rgb(136, 11, 130); */
+    background-color: white;
 }
 
 .imx__fader-background {
     position: absolute;
     top: 20px;
-    left: 25px;
+    left: 24px;
     width: 10px;
     height: 160px;
-    border: 3px solid #73AD21;
-    background-color: aquamarine;
+    border: 2px solid darkgray;
+    border-radius: 6px; 
+    background-color: darkgray;
+    background: linear-gradient(darkgray 60%, cyan 40%);
+    box-shadow: inset 2px 2px 4px black, inset -2px -2px 4px black;
 }
 
 .imx__fader-knob {
     position: absolute;
     width: 40px;
-    height: 20px;
+    height: 24px;
     left: 10px;
     top: 170px;
-    border: 3px solid #0f2b3d;
-    background-color: aqua;
+    background: linear-gradient(to bottom, darkgray, white);
+    border-radius: 3px;
+    box-shadow: 0px 2px 5px black, inset 0px 2px 3px white, inset 0px -2px 3px black;
+}
+
+.imx__fader-knob hr {
+    position: relative;
+    /* height: 2px; */
+    top: 3px;
+    /* transform: translateY(-100%); */
 }
