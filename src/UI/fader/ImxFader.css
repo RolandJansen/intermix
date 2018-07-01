@@ -8,8 +8,8 @@
 
 .imx__fader-background {
     position: absolute;
-    top: 20px;
-    left: 24px;
+    /* top: 20px; */
+    /* left: 24px; */
     /* width: 10px; */
     /* height: 160px; */
     border: 2px solid darkgray;

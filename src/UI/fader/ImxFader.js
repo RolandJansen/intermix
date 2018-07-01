@@ -32,20 +32,8 @@ class ImxFader extends HTMLElement {
             max: 1.0,
         }
 
-        // style refs
-        // knobRange: knobLowPos - knobHiPos
-        // this.containerStyle = window.getComputedStyle(this.faderContainer, null);
-        // this.bgStyle = window.getComputedStyle(this.faderBackground, null);
-        // this.knobStyle = window.getComputedStyle(this.faderKnob, null);
-        this.graphics = {
-            // bgWidth: 10,
-            // bgHeight: 160,
-            // knobWidth: 40,
-            // knobHeight: 20,
-            knobHiPos: 10,
-            // knobLowPos: 170,
-            knobRange: 160
-        }
+        // element measures (computed by setHeight and setWidth)
+        this.graphics = {}
     }
 
     /**
@@ -81,13 +69,20 @@ class ImxFader extends HTMLElement {
         }
 
         // if properties have been set before DOM insertion,
-        // upgrade them to use get/set methods.
+        // upgrade them to use getter/setter.
         this._upgradeProperty('useMidiValues');
         this._upgradeProperty('value');
         this._upgradeProperty('width');
         this._upgradeProperty('height');
     }
 
+    /**
+     * If a property was set before the element get got inserted
+     * into DOM, they won't use their getter/setter. This method
+     * checks and upgrades them if necessary.
+     * @private
+     * @param {any} prop A property to be upgraded
+     */
     _upgradeProperty(prop) {
         if (this.hasOwnProperty(prop)) {
             let value = this[prop];
@@ -97,9 +92,7 @@ class ImxFader extends HTMLElement {
     }
 
     /**
-     * This is called every time the 'value' attribute changes.
-     * Notable detail: values are always strings (not numbers)
-     * which should be taken into consideration in getter/setter.
+     * Currently not in use.
      * @callback attributeChangedCallback
      * @param {string} name Name of the changed attribute
      * @param {string} oldValue The current value of this attribute
@@ -122,6 +115,14 @@ class ImxFader extends HTMLElement {
         this.removeEventListener('mousemove');
     }
     
+    /**
+     * Setter for the value property. It checks if the value is inside
+     * the currently used interval and throws an error if not. Use number values.
+     * @example
+     * // Use it like a property:
+     * let fader = document.getElementById('my-fader');
+     * fader.value = 0.5;
+     */
     set value(value) {
         if (typeof value === 'number' &&
         value <= this.settings.max &&
@@ -133,19 +134,37 @@ class ImxFader extends HTMLElement {
         }
     }
     
+    /**
+     * Upgrades the fader knob so it represents its current
+     * internal value.
+     * @private
+     * @param {number} value The current fader value.
+     */
     _setKnobPosition(value) {
         this.useMidiValues ? value = value/127 : false;
         const absolutePos = this.graphics.knobRange - this.graphics.knobRange*value + this.graphics.knobHiPos;
         this.faderKnob.style.top = absolutePos + 'px';
-        // this.faderKnob.style.top = '20px';
     }
 
+    /**
+     * Getter for the value property. Returns a number.
+     * @example
+     * // Use it like a property:
+     * let fader = document.getElementById('my-fader');
+     * let currentFaderVal = fader.value;
+     */
     get value() {
         return Number(this.getAttribute('value'));
     }
     
     /**
-     * if true, use interval [0,127] instead of [0,1]
+     * Setter for the useMidiValue property.
+     * If true, use interval [0,127] instead of [0,1].
+     * Use boolean values.
+     * @example
+     * // Use it like a property:
+     * let fader = document.getElementById('my-fader');
+     * fader.useMidiValues = true;
      */
     set useMidiValues(value) {
         const isChecked = Boolean(value);
@@ -157,19 +176,38 @@ class ImxFader extends HTMLElement {
         }
     }
     
+    /**
+     * Upgrades internal settings to use values within [0, 127].
+     * @private
+     */
     _setMidiInterval() {
         this.settings.min = 0;
         this.settings.max = 127;
         return true;
     }
 
+    /**
+     * Getter for the useMidiValues property.
+     * Returns a boolean.
+     * @example
+     * // Use it like a property:
+     * let fader = document.getElementById('my-fader');
+     * let midiInterval = fader.useMidiValues;
+     */
     get useMidiValues() {
         return this.hasAttribute('useMidiValues');
     }
     
+    /**
+     * Setter for the width property.
+     * It computes all width based values and
+     * upgrades the element accordingly. Use number values.
+     * @example
+     * // Use it like a property:
+     * let fader = document.getElementById('my-fader');
+     * fader.width = 50;
+     */
     set width(width) {
-        // const container = this.faderContainer.getBoundingClientRect();
-        // const stretch   = width / this.faderContainer.clientWidth;
         const center    = width/2;
         this.graphics.bgWidth   = width/6;
         const bgLeft    = center - this.graphics.bgWidth/2 - 2; //border is 2px
@@ -184,19 +222,35 @@ class ImxFader extends HTMLElement {
         this.setAttribute('width', width);
     }
     
+    /**
+     * Getter for the width property.
+     * Returns a number.
+     * @example
+     * // Use it like a property:
+     * let fader = document.getElementById('my-fader');
+     * let faderWidth = fader.width;
+     */
     get width() {
         return Number(this.getAttribute('width'));
     }
     
+    /**
+     * Setter for the height property.
+     * It computes all height based values and
+     * upgrades the element accordingly. Use number values.
+     * @example
+     * // Use it like a property:
+     * let fader = document.getElementById('my-fader');
+     * fader.height = 100;
+     */
     set height(height) {
-        // const stretch = height/this.graphics.height;
-        const center = height/2;
+        this.graphics.center = height/2;  //for faders with center as 0, currently not in use
         this.graphics.bgHeight = Math.round(height*0.8);
         this.graphics.bgTop = (height - this.graphics.bgHeight)/2;
         this.graphics.knobHeight = Math.round(height*0.12);
+        this.graphics.knobHiPos = this.graphics.bgTop - this.graphics.knobHeight/2;
         this.graphics.knobLowPos = this.graphics.bgHeight + this.graphics.bgTop - this.graphics.knobHeight/2;
-        // const knobTop = this.graphics.bgHeight + this.graphics.bgTop;
-        debugger
+    
         this.faderContainer.style.height = height;
         this.faderBackground.style.height = this.graphics.bgHeight;
         this.faderBackground.style.top = this.graphics.bgTop;
@@ -205,6 +259,14 @@ class ImxFader extends HTMLElement {
         this.setAttribute('height', height);
     }
     
+    /**
+     * Getter for the height property.
+     * Returns a number.
+     * @example
+     * // Use it like a property:
+     * let fader = document.getElementById('my-fader');
+     * let faderHeight = fader.height;
+     */
     get height() {
         return Number(this.getAttribute('height'));
     }
@@ -232,18 +294,28 @@ class ImxFader extends HTMLElement {
         };
     }
     
+    /**
+     * Handler for the mousedown event.
+     * @private
+     */
     _handleMouseDown() {
-        // this.faderKnob.style.backgroundColor = "red";
         this.mouseDown = true;
     }
     
+    /**
+     * Handler for the mouseup event.
+     * @private
+     */
     _handleMouseUp() {
-        // this.faderKnob.style.backgroundColor = "aqua";
         this.mouseDown = false;
     }
     
+    /**
+     * Handler for the mousemove event.
+     * @private
+     * @param {event} evt The event object.
+     */
     _handleMouseMove(evt) {
-        console.log(this.graphics.bgHeight);
         evt.preventDefault();
         let y = evt.clientY;
         if (this.mouseDown) {
@@ -255,7 +327,6 @@ class ImxFader extends HTMLElement {
                 const gradient = 'linear-gradient(to bottom, darkgray, ' +
                     darkgrayRatio + 'px, cyan ' + darkgrayRatio + 'px, cyan ' +
                     this.graphics.bgHeight + 'px)';
-                console.log(gradient);
                 this.faderBackground.style.background = gradient;
             } else if (nextPos < this.graphics.knobHiPos) {
                 this.faderKnob.style.top = this.graphics.knobHiPos + "px";
@@ -274,6 +345,16 @@ class ImxFader extends HTMLElement {
         }
     }
 
+    /**
+     * Emits a custom 'change' event that contains the current fader value
+     * @private
+     * @example
+     * let fader = document.getElementById('my-fader');
+     * fader.addEventListener("change", function(e) {
+     *     console.log('Current fader value is: ' + e.detail.value);
+     * }, false);
+     * @param {number} value The current internal value of the fader
+     */
     _emitValue(value) {
         this.dispatchEvent(new CustomEvent('change', {
             detail: {
