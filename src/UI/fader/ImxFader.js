@@ -27,23 +27,23 @@ class ImxFader extends HTMLElement {
         this.faderKnob = this.shadowRoot.getElementById('imx__fader-knob');
         
         // defaults
-        this._settings = {
+        this.settings = {
             min: 0.0,
             max: 1.0,
         }
 
         // style refs
         // knobRange: knobLowPos - knobHiPos
-        this.containerStyle = window.getComputedStyle(this.faderContainer, null);
-        this.bgStyle = window.getComputedStyle(this.faderBackground, null);
-        this.knobStyle = window.getComputedStyle(this.faderKnob, null);
-        this._style = {
-            bgWidth: 10,
-            bgHeight: 160,
-            knobWidth: 40,
-            knobHeight: 20,
+        // this.containerStyle = window.getComputedStyle(this.faderContainer, null);
+        // this.bgStyle = window.getComputedStyle(this.faderBackground, null);
+        // this.knobStyle = window.getComputedStyle(this.faderKnob, null);
+        this.graphics = {
+            // bgWidth: 10,
+            // bgHeight: 160,
+            // knobWidth: 40,
+            // knobHeight: 20,
             knobHiPos: 10,
-            knobLowPos: 170,
+            // knobLowPos: 170,
             knobRange: 160
         }
     }
@@ -124,25 +124,29 @@ class ImxFader extends HTMLElement {
     
     set value(value) {
         if (typeof value === 'number' &&
-        value <= this._settings.max &&
-        value >= this._settings.min) {
+        value <= this.settings.max &&
+        value >= this.settings.min) {
             this.setAttribute('value', value);
             this._setKnobPosition(value);
         } else {
-            throw new Error('Value must be of type number between ' + this._settings.min + ' and ' + this._settings.max + '.');
+            throw new Error('Value must be of type number between ' + this.settings.min + ' and ' + this.settings.max + '.');
         }
     }
     
     _setKnobPosition(value) {
         this.useMidiValues ? value = value/127 : false;
-        const absolutePos = this._style.knobRange - this._style.knobRange*value + this._style.knobHiPos;
-        this.faderKnob.style.top = absolutePos;
+        const absolutePos = this.graphics.knobRange - this.graphics.knobRange*value + this.graphics.knobHiPos;
+        this.faderKnob.style.top = absolutePos + 'px';
+        // this.faderKnob.style.top = '20px';
     }
 
     get value() {
         return Number(this.getAttribute('value'));
     }
     
+    /**
+     * if true, use interval [0,127] instead of [0,1]
+     */
     set useMidiValues(value) {
         const isChecked = Boolean(value);
         if (isChecked) {
@@ -154,14 +158,11 @@ class ImxFader extends HTMLElement {
     }
     
     _setMidiInterval() {
-        this._settings.min = 0;
-        this._settings.max = 127;
+        this.settings.min = 0;
+        this.settings.max = 127;
         return true;
     }
 
-    /**
-     * if true, use interval [0,127] instead of [0,1]
-     */
     get useMidiValues() {
         return this.hasAttribute('useMidiValues');
     }
@@ -170,15 +171,15 @@ class ImxFader extends HTMLElement {
         // const container = this.faderContainer.getBoundingClientRect();
         // const stretch   = width / this.faderContainer.clientWidth;
         const center    = width/2;
-        const bgWidth   = width/6;
-        const bgLeft    = center - bgWidth/2 - 1; //border is 2px, so -1
-        const knobWidth = bgWidth*4;
-        const knobLeft  = center - knobWidth/2;
+        this.graphics.bgWidth   = width/6;
+        const bgLeft    = center - this.graphics.bgWidth/2 - 2; //border is 2px
+        this.graphics.knobWidth = this.graphics.bgWidth*4;
+        const knobLeft  = center - this.graphics.knobWidth/2;
         
         this.faderContainer.style.width = width;
-        this.faderBackground.style.width = bgWidth;
+        this.faderBackground.style.width = this.graphics.bgWidth;
         this.faderBackground.style.left = bgLeft;
-        this.faderKnob.style.width = knobWidth;
+        this.faderKnob.style.width = this.graphics.knobWidth;
         this.faderKnob.style.left = knobLeft;
         this.setAttribute('width', width);
     }
@@ -188,18 +189,19 @@ class ImxFader extends HTMLElement {
     }
     
     set height(height) {
-        // const stretch = height/this._style.height;
+        // const stretch = height/this.graphics.height;
         const center = height/2;
-        const bgHeight = Math.round(height*0.8);
-        const bgTop = center - bgHeight/2;
-        const knobHeight = Math.round(height*0.12);
-        const knobTop = center - knobHeight/2;
-        
+        this.graphics.bgHeight = Math.round(height*0.8);
+        this.graphics.bgTop = (height - this.graphics.bgHeight)/2;
+        this.graphics.knobHeight = Math.round(height*0.12);
+        this.graphics.knobLowPos = this.graphics.bgHeight + this.graphics.bgTop - this.graphics.knobHeight/2;
+        // const knobTop = this.graphics.bgHeight + this.graphics.bgTop;
+        debugger
         this.faderContainer.style.height = height;
-        this.faderBackground.style.height = bgHeight;
-        this.faderBackground.style.top = bgTop;
-        this.faderKnob.style.height = knobHeight;
-        this.faderKnob.style.top = knobTop;
+        this.faderBackground.style.height = this.graphics.bgHeight;
+        this.faderBackground.style.top = this.graphics.bgTop;
+        this.faderKnob.style.height = this.graphics.knobHeight;
+        this.faderKnob.style.top = this.graphics.knobLowPos;
         this.setAttribute('height', height);
     }
     
@@ -241,22 +243,31 @@ class ImxFader extends HTMLElement {
     }
     
     _handleMouseMove(evt) {
-        console.log(this.bgStyle.height);
+        console.log(this.graphics.bgHeight);
         evt.preventDefault();
         let y = evt.clientY;
         if (this.mouseDown) {
             let nextPos = this.faderKnob.offsetTop + evt.movementY;
-            if (nextPos >= this._style.knobHiPos && nextPos <= this._style.knobLowPos) {
+            if (nextPos >= this.graphics.knobHiPos && nextPos <= this.graphics.knobLowPos) {
                 this.faderKnob.style.top = nextPos + "px";
-            } else if (nextPos < this._style.knobHiPos) {
-                this.faderKnob.style.top = this._style.knobHiPos + "px";
-                nextPos = this._style.knobHiPos;
+                const darkgrayRatio = nextPos - this.graphics.bgTop + this.graphics.knobHeight/2;
+                const cyanRatio = 100 - darkgrayRatio;
+                const gradient = 'linear-gradient(to bottom, darkgray, ' +
+                    darkgrayRatio + 'px, cyan ' + darkgrayRatio + 'px, cyan ' +
+                    this.graphics.bgHeight + 'px)';
+                console.log(gradient);
+                this.faderBackground.style.background = gradient;
+            } else if (nextPos < this.graphics.knobHiPos) {
+                this.faderKnob.style.top = this.graphics.knobHiPos + "px";
+                this.faderBackground.style.background = 'cyan';
+                nextPos = this.graphics.knobHiPos;
             } else {
-                this.faderKnob.style.top = this._style.knobLowPos + "px";
-                nextPos = this._style.knobLowPos;
+                this.faderKnob.style.top = this.graphics.knobLowPos + "px";
+                this.faderBackground.style.background = 'darkgray';
+                nextPos = this.graphics.knobLowPos;
             }
-            const yPos = nextPos - this._style.knobHiPos;
-            let val = (this._style.knobRange - yPos)/this._style.knobRange;
+            const yPos = nextPos - this.graphics.knobHiPos;
+            let val = (this.graphics.knobRange - yPos)/this.graphics.knobRange;
             this.useMidiValues ? val = Math.round(val*127) : val;
             this._emitValue(val);
             this.setAttribute('value', val);
