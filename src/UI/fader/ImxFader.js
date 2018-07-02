@@ -32,7 +32,7 @@ class ImxFader extends HTMLElement {
             max: 1.0,
         }
 
-        // element measures (computed by setHeight and setWidth)
+        // element measures (computed by set height and set width)
         this.graphics = {}
     }
 
@@ -77,9 +77,9 @@ class ImxFader extends HTMLElement {
     }
 
     /**
-     * If a property was set before the element get got inserted
-     * into DOM, they won't use their getter/setter. This method
-     * checks and upgrades them if necessary.
+     * If a property is set before the element gets inserted
+     * into DOM, it won't use its getter/setter. This method
+     * checks and upgrades the property if necessary.
      * @private
      * @param {any} prop A property to be upgraded
      */
