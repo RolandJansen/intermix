@@ -158,7 +158,7 @@ class ImxFader extends HTMLElement {
     }
     
     /**
-     * Setter for the useMidiValue property.
+     * Setter for the useMidiValues property.
      * If true, use interval [0,127] instead of [0,1].
      * Use boolean values.
      * @example
@@ -192,7 +192,7 @@ class ImxFader extends HTMLElement {
      * @example
      * // Use it like a property:
      * let fader = document.getElementById('my-fader');
-     * let midiInterval = fader.useMidiValues;
+     * fader.useMidiValues ? fader.value = 64 : fader.value = 0.5;
      */
     get useMidiValues() {
         return this.hasAttribute('useMidiValues');

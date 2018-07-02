@@ -1,0 +1,15 @@
+.imx__rotary-outer-circle {
+    position: relative;
+}
+
+.imx__rotary-inner-circle {
+    position: absolute;
+}
+
+.imx__rotary-delimiter {
+    position: absolute;
+}
+
+.imx__rotary-needle {
+    position: absolute;
+}
