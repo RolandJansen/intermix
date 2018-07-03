@@ -1,5 +1,7 @@
 .imx__rotary-outer-circle {
     position: relative;
+    border-radius: 50%;
+    border: 3px solid #000000;
     box-shadow: 2px 2px black;
 }
 
