@@ -1,5 +1,10 @@
 .imx__rotary-outer-circle {
     position: relative;
+    box-shadow: 2px 2px black;
+}
+
+.imx__rotary-middle-circle {
+    position: absolute;
 }
 
 .imx__rotary-inner-circle {
