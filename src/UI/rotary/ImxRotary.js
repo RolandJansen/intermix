@@ -22,19 +22,21 @@ class ImxRotary extends HTMLElement {
         this.rt = {
             outerCircle: this.shadowRoot.getElementById('imx__rotary-outer-circle'),
             innerCircle: this.shadowRoot.getElementById('imx__rotary-inner-circle'),
-            leftDelimiter = this.shadowRoot.getElementById('imx__rotary-left-delimiter'),
-            rightDelimiter = this.shadowRoot.getElementById('imx__rotary-right-delimiter'),
-            needle = this.shadowRoot.getElementById('imx__rotary-needle'),
-        }
+            leftDelimiter: this.shadowRoot.getElementById('imx__rotary-left-delimiter'),
+            rightDelimiter: this.shadowRoot.getElementById('imx__rotary-right-delimiter'),
+            needle: this.shadowRoot.getElementById('imx__rotary-needle'),
+        };
         
         // defaults
         this.settings = {
             min: 0.0,
             max: 1.0,
-        }
+        };
+        
+        // element dimensions (computed by 'set width()')
+        this.dim = {};
 
-        // element measures (computed by set width)
-        this.graphics = {}
+        this.mouseDown = false;
     }
 
     /**
@@ -181,28 +183,94 @@ class ImxRotary extends HTMLElement {
     }
 
     /**
-     * Setter for the width property.
-     * It computes all width based values and
+     * Setter for the diameter property.
+     * It computes all dimension based properties and
      * upgrades the element accordingly. Use number values.
      * @example
      * // Use it like a property:
      * let rotary = document.getElementById('my-rotary');
-     * rotary.width = 50;
+     * rotary.diameter = 50;
      */
-    set width(width) {
-        this.setAttribute('width', width);
+    set diameter(value) {
+
+        this.dim.center = {
+            x: width/2,
+            y: width/2,
+        }
+
+        this.rt.outerCircle.style.width = value;
+        this.rt.outerCircle.style.height = value;
+        this.setAttribute('diameter', value);
     }
 
     /**
-     * Getter for the width property.
+     * Getter for the diameter property.
      * Returns a number.
      * @example
      * // Use it like a property:
      * let rotary = document.getElementById('my-rotary');
-     * let rotaryWidth = rotary.width;
+     * let rotaryWidth = rotary.diameter;
      */
-    get width() {
-        return Number(this.getAttribute('width'));
+    get diameter() {
+        return Number(this.getAttribute('diameter'));
+    }
+
+    /**
+     * Event listeners are initialized with "this"
+     * as handler. This means they call this.handleEvent
+     * by default. This prevents a context change and keeps
+     * the listeners removable (in contrast to "bind").
+     * @callback ImxRotary~handleEvent
+     * @param {event} evt The event object
+     * @returns {void}
+     */
+    handleEvent(evt) {
+        switch(evt.type) {
+            case 'mousedown':
+            this._handleMouseDown();
+            break;
+            case 'mouseup':
+            this._handleMouseUp();
+            break;
+            case 'mousemove':
+            this._handleMouseMove(evt);
+            break;
+            case 'wheel':
+            this._handleMouseWheel(evt);
+        };
+    }
+
+    /**
+     * Event handler for the mousedown event.
+     * @private
+     */
+    _handleMouseDown() {
+        this.mouseDown = true;
+    }
+
+    /**
+     * Event handler for the mouseup event.
+     * @private
+     */
+    _handleMouseUp() {
+        this.mouseDown = false;
+    }
+
+    /**
+     * Event handler for the mousemove event.
+     * @private
+     * @param {event} evt The event object.
+     */
+    _handleMouseMove(evt) {
+        evt.preventDefault();
+    }
+
+    /**
+     * Event handler for the wheel event.
+     * @param {event} evt 
+     */
+    _handleMouseWheel(evt) {
+        evt.preventDefault();
     }
 
     /**

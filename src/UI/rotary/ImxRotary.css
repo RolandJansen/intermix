@@ -1,5 +1,8 @@
 .imx__rotary-outer-circle {
     position: relative;
+    border-radius: 50%;
+    border: 3px solid #000000;
+    background-color: aqua;
 }
 
 .imx__rotary-inner-circle {

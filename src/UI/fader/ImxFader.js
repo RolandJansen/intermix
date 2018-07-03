@@ -32,8 +32,10 @@ class ImxFader extends HTMLElement {
             max: 1.0,
         }
 
-        // element measures (computed by set height and set width)
-        this.graphics = {}
+        // element dimensions (computed by set height and set width)
+        this.dim = {}
+
+        this.mouseDown = false;
     }
 
     /**
@@ -142,7 +144,7 @@ class ImxFader extends HTMLElement {
      */
     _setKnobPosition(value) {
         this.useMidiValues ? value = value/127 : false;
-        const absolutePos = this.graphics.knobRange - this.graphics.knobRange*value + this.graphics.knobHiPos;
+        const absolutePos = this.dim.knobRange - this.dim.knobRange*value + this.dim.knobHiPos;
         this.faderKnob.style.top = absolutePos + 'px';
     }
 
@@ -209,15 +211,15 @@ class ImxFader extends HTMLElement {
      */
     set width(width) {
         const center    = width/2;
-        this.graphics.bgWidth   = width/6;
-        const bgLeft    = center - this.graphics.bgWidth/2 - 2; //border is 2px
-        this.graphics.knobWidth = this.graphics.bgWidth*4;
-        const knobLeft  = center - this.graphics.knobWidth/2;
+        this.dim.bgWidth   = width/6;
+        const bgLeft    = center - this.dim.bgWidth/2 - 2; //border is 2px
+        this.dim.knobWidth = this.dim.bgWidth*4;
+        const knobLeft  = center - this.dim.knobWidth/2;
         
         this.faderContainer.style.width = width;
-        this.faderBackground.style.width = this.graphics.bgWidth;
+        this.faderBackground.style.width = this.dim.bgWidth;
         this.faderBackground.style.left = bgLeft;
-        this.faderKnob.style.width = this.graphics.knobWidth;
+        this.faderKnob.style.width = this.dim.knobWidth;
         this.faderKnob.style.left = knobLeft;
         this.setAttribute('width', width);
     }
@@ -244,18 +246,18 @@ class ImxFader extends HTMLElement {
      * fader.height = 100;
      */
     set height(height) {
-        this.graphics.center = height/2;  //for faders with center as 0, currently not in use
-        this.graphics.bgHeight = Math.round(height*0.8);
-        this.graphics.bgTop = (height - this.graphics.bgHeight)/2;
-        this.graphics.knobHeight = Math.round(height*0.12);
-        this.graphics.knobHiPos = this.graphics.bgTop - this.graphics.knobHeight/2;
-        this.graphics.knobLowPos = this.graphics.bgHeight + this.graphics.bgTop - this.graphics.knobHeight/2;
+        this.dim.center = height/2;  //for faders with center as 0, currently not in use
+        this.dim.bgHeight = Math.round(height*0.8);
+        this.dim.bgTop = (height - this.dim.bgHeight)/2;
+        this.dim.knobHeight = Math.round(height*0.12);
+        this.dim.knobHiPos = this.dim.bgTop - this.dim.knobHeight/2;
+        this.dim.knobLowPos = this.dim.bgHeight + this.dim.bgTop - this.dim.knobHeight/2;
     
         this.faderContainer.style.height = height;
-        this.faderBackground.style.height = this.graphics.bgHeight;
-        this.faderBackground.style.top = this.graphics.bgTop;
-        this.faderKnob.style.height = this.graphics.knobHeight;
-        this.faderKnob.style.top = this.graphics.knobLowPos;
+        this.faderBackground.style.height = this.dim.bgHeight;
+        this.faderBackground.style.top = this.dim.bgTop;
+        this.faderKnob.style.height = this.dim.knobHeight;
+        this.faderKnob.style.top = this.dim.knobLowPos;
         this.setAttribute('height', height);
     }
     
@@ -295,7 +297,7 @@ class ImxFader extends HTMLElement {
     }
     
     /**
-     * Handler for the mousedown event.
+     * Event handler for the mousedown event.
      * @private
      */
     _handleMouseDown() {
@@ -303,7 +305,7 @@ class ImxFader extends HTMLElement {
     }
     
     /**
-     * Handler for the mouseup event.
+     * Event handler for the mouseup event.
      * @private
      */
     _handleMouseUp() {
@@ -311,7 +313,7 @@ class ImxFader extends HTMLElement {
     }
     
     /**
-     * Handler for the mousemove event.
+     * Event handler for the mousemove event.
      * @private
      * @param {event} evt The event object.
      */
@@ -320,25 +322,25 @@ class ImxFader extends HTMLElement {
         let y = evt.clientY;
         if (this.mouseDown) {
             let nextPos = this.faderKnob.offsetTop + evt.movementY;
-            if (nextPos >= this.graphics.knobHiPos && nextPos <= this.graphics.knobLowPos) {
+            if (nextPos >= this.dim.knobHiPos && nextPos <= this.dim.knobLowPos) {
                 this.faderKnob.style.top = nextPos + "px";
-                const darkgrayRatio = nextPos - this.graphics.bgTop + this.graphics.knobHeight/2;
+                const darkgrayRatio = nextPos - this.dim.bgTop + this.dim.knobHeight/2;
                 const cyanRatio = 100 - darkgrayRatio;
                 const gradient = 'linear-gradient(to bottom, darkgray, ' +
                     darkgrayRatio + 'px, cyan ' + darkgrayRatio + 'px, cyan ' +
-                    this.graphics.bgHeight + 'px)';
+                    this.dim.bgHeight + 'px)';
                 this.faderBackground.style.background = gradient;
-            } else if (nextPos < this.graphics.knobHiPos) {
-                this.faderKnob.style.top = this.graphics.knobHiPos + "px";
+            } else if (nextPos < this.dim.knobHiPos) {
+                this.faderKnob.style.top = this.dim.knobHiPos + "px";
                 this.faderBackground.style.background = 'cyan';
-                nextPos = this.graphics.knobHiPos;
+                nextPos = this.dim.knobHiPos;
             } else {
-                this.faderKnob.style.top = this.graphics.knobLowPos + "px";
+                this.faderKnob.style.top = this.dim.knobLowPos + "px";
                 this.faderBackground.style.background = 'darkgray';
-                nextPos = this.graphics.knobLowPos;
+                nextPos = this.dim.knobLowPos;
             }
-            const yPos = nextPos - this.graphics.knobHiPos;
-            let val = (this.graphics.knobRange - yPos)/this.graphics.knobRange;
+            const yPos = nextPos - this.dim.knobHiPos;
+            let val = (this.dim.knobRange - yPos)/this.dim.knobRange;
             this.useMidiValues ? val = Math.round(val*127) : val;
             this._emitValue(val);
             this.setAttribute('value', val);
