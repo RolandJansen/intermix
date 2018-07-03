@@ -61,10 +61,10 @@ class ImxRotary extends HTMLElement {
         } else {
             this.value = 0;
         }
-        if (this.hasAttribute('width')) {
-            this.width = Number(this.getAttribute('width'));
+        if (this.hasAttribute('diameter')) {
+            this.diameter = Number(this.getAttribute('diameter'));
         } else {
-            this.width = 160;
+            this.diameter = 160;
         }
 
         // if properties have been set before DOM insertion,
@@ -194,8 +194,8 @@ class ImxRotary extends HTMLElement {
     set diameter(value) {
 
         this.dim.center = {
-            x: width/2,
-            y: width/2,
+            x: value/2,
+            y: value/2,
         }
 
         this.rt.outerCircle.style.width = value;

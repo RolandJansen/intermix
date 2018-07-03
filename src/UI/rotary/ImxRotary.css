@@ -1,16 +1,57 @@
 .imx__rotary-outer-circle {
     position: relative;
+    border: 2px solid #303030;
     border-radius: 50%;
-    border: 3px solid #000000;
-    box-shadow: 2px 2px black;
+    box-shadow: 0px 3px 5px 3px black;
+    background-image: linear-gradient(to bottom, lightgray, #303030);
+}
+
+.imx__rotary-outer-edge-circle {
+    position: absolute;
+    top: 7px;
+    left: 7px;
+    width: 146px;
+    height: 146px;
+    border-radius: 50%;
+    background-image: linear-gradient(to top, lightgray, #303030);
 }
 
 .imx__rotary-middle-circle {
     position: absolute;
+    /* z-index: 100; */
+    top: 9px;
+    left: 9px;
+    width: 142px;
+    height: 142px;
+    border-radius: 50%;
+    /* background-color: cyan; */
+    background-color: #303030;
+}
+
+.imx__rotary-middle-static-mask {
+    position: absolute;
+    /* z-index: 100; */
+    width: 70;
+    height: 70;
+    top: 80;
+    left: 80;
+    background-color: #303030;
+    border-bottom-right-radius: 100%;
+    border-top: 1px solid darkgray;
+    border-left: 1px solid darkgray;
+    transform-origin: 0 0;
+    transform: rotate(45deg);
 }
 
 .imx__rotary-inner-circle {
     position: absolute;
+    top: 30px;
+    left: 30px;
+    width: 100px;
+    height: 100px;
+    border: 1px solid darkgray;
+    border-radius: 50%;
+    background-color: #303030;
 }
 
 .imx__rotary-delimiter {
