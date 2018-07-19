@@ -51,7 +51,8 @@
     height: 100px;
     border: 1px solid darkgray;
     border-radius: 50%;
-    background-color: #303030;
+    /* background-color: #383838; */
+    background-image: linear-gradient(to bottom, #606060, 5%, #252525);
 }
 
 .imx__rotary-delimiter {
@@ -60,4 +61,13 @@
 
 .imx__rotary-needle {
     position: absolute;
+    top: 80px;
+    left: 80px;
+    width: 51px;
+    height: 1px;
+    background-color: darkgray;
+    /* background-image: linear-gradient(to bottom, white, black); */
+    transform-origin: 0 0;
+    transform: rotate(134deg);
+    /* transform: rotate(45deg); */
 }

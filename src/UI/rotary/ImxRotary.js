@@ -21,9 +21,10 @@ class ImxRotary extends HTMLElement {
         // refs to shadowed html elements
         this.rt = {
             outerCircle: this.shadowRoot.getElementById('imx__rotary-outer-circle'),
+            middleCircle: this.shadowRoot.getElementById('imx__rotary-middle-circle'),
             innerCircle: this.shadowRoot.getElementById('imx__rotary-inner-circle'),
-            leftDelimiter: this.shadowRoot.getElementById('imx__rotary-left-delimiter'),
-            rightDelimiter: this.shadowRoot.getElementById('imx__rotary-right-delimiter'),
+            // leftDelimiter: this.shadowRoot.getElementById('imx__rotary-left-delimiter'),
+            // rightDelimiter: this.shadowRoot.getElementById('imx__rotary-right-delimiter'),
             needle: this.shadowRoot.getElementById('imx__rotary-needle'),
         };
         
