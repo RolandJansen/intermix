@@ -23,15 +23,31 @@ class ImxRotary extends HTMLElement {
             outerCircle: this.shadowRoot.getElementById('imx__rotary-outer-circle'),
             middleCircle: this.shadowRoot.getElementById('imx__rotary-middle-circle'),
             innerCircle: this.shadowRoot.getElementById('imx__rotary-inner-circle'),
-            // leftDelimiter: this.shadowRoot.getElementById('imx__rotary-left-delimiter'),
-            // rightDelimiter: this.shadowRoot.getElementById('imx__rotary-right-delimiter'),
+            maskLowerLeft: this.shadowRoot.getElementById('imx__rotary-mask-lower-left'),
+            maskUpperLeft: this.shadowRoot.getElementById('imx__rotary-mask-upper-left'),
+            maskRight: this.shadowRoot.getElementById('imx__rotary-mask-right'),
             needle: this.shadowRoot.getElementById('imx__rotary-needle'),
         };
+
+        // rotate masks to default positions
+        this.rt.maskLowerLeft.style.transform = 'rotate(135deg)';
+        this.rt.maskUpperLeft.style.transform = 'rotate(225deg)';
+        this.rt.maskRight.style.transform = 'rotate(315deg)';
+
+        // keep track of mask visibility
+        this.masks = {
+            lowerLeftVisible: true,
+            upperLeftVisible: true,
+            rightVisible: true,
+        }
         
         // defaults
         this.settings = {
             min: 0.0,
             max: 1.0,
+            minDeg: 135,
+            maxDeg: 405,
+            rangeDeg: 270,
         };
         
         // element dimensions (computed by 'set width()')
@@ -49,9 +65,9 @@ class ImxRotary extends HTMLElement {
     connectedCallback() {
         // add event listener
         this.rt.outerCircle.addEventListener('mousedown', this, false);
-        this.rt.outerCircle.addEventListener('mouseup', this, false);
-        this.rt.outerCircle.addEventListener('mousemove', this, false);
-        this.rt.outerCircle.addEventListener('wheel', this, false);
+        document.addEventListener('mouseup', this, false);
+        document.addEventListener('mousemove', this, false);
+        document.addEventListener('wheel', this, false);
 
         // process attributes or add them if needed
         if (this.hasAttribute('useMidiValues')) {
@@ -72,7 +88,7 @@ class ImxRotary extends HTMLElement {
         // upgrade them to use getter/setter.
         this._upgradeProperty('useMidiValues');
         this._upgradeProperty('value');
-        this._upgradeProperty('width');
+        this._upgradeProperty('diameter');
     }
 
     /**
@@ -101,6 +117,17 @@ class ImxRotary extends HTMLElement {
         this.removeEventListener('mousemove');
         this.removeEventListener('wheel');
     }
+    
+    /**
+     * Getter for the value property. Returns a number.
+     * @example
+     * // Use it like a property:
+     * let rotary = document.getElementById('my-rotary');
+     * let currentRotaryVal = rotary.value;
+     */
+    get value() {
+        return Number(this.getAttribute('value'));
+    }
 
     /**
      * Setter for the value property. It checks if the value is inside
@@ -117,29 +144,20 @@ class ImxRotary extends HTMLElement {
             this.setAttribute('value', value);
             this._setNeedlePosition(value);
         } else {
-            throw new Error('Value must be of type number between ' + this.settings.min + ' and ' + this.settings.max + '.');
+            throw new Error(`Value must be of type number between ${this.settings.min} and ${this.settings.max}.`);
         }
     }
 
     /**
-     * Upgrades the rotary needle so it represents its current
-     * internal value.
-     * @private
-     * @param {number} value The current rotary value.
-     */
-    _setNeedlePosition(value) {
-        this.useMidiValues ? value = value/127 : false;
-    }
-
-    /**
-     * Getter for the value property. Returns a number.
+     * Getter for the useMidiValues property.
+     * Returns a boolean.
      * @example
      * // Use it like a property:
      * let rotary = document.getElementById('my-rotary');
-     * let currentRotaryVal = rotary.value;
+     * rotary.useMidiValues ? rotary.value = 64 : rotary.value = 0.5;
      */
-    get value() {
-        return Number(this.getAttribute('value'));
+    get useMidiValues() {
+        return this.hasAttribute('useMidiValues');
     }
 
     /**
@@ -160,7 +178,7 @@ class ImxRotary extends HTMLElement {
             this.removeAttribute('useMidiValues');
         }
     }
-
+    
     /**
      * Upgrades internal settings to use values within [0, 127].
      * @private
@@ -170,40 +188,7 @@ class ImxRotary extends HTMLElement {
         this.settings.max = 127;
         return true;
     }
-
-    /**
-     * Getter for the useMidiValues property.
-     * Returns a boolean.
-     * @example
-     * // Use it like a property:
-     * let rotary = document.getElementById('my-rotary');
-     * rotary.useMidiValues ? rotary.value = 64 : rotary.value = 0.5;
-     */
-    get useMidiValues() {
-        return this.hasAttribute('useMidiValues');
-    }
-
-    /**
-     * Setter for the diameter property.
-     * It computes all dimension based properties and
-     * upgrades the element accordingly. Use number values.
-     * @example
-     * // Use it like a property:
-     * let rotary = document.getElementById('my-rotary');
-     * rotary.diameter = 50;
-     */
-    set diameter(value) {
-
-        this.dim.center = {
-            x: value/2,
-            y: value/2,
-        }
-
-        this.rt.outerCircle.style.width = value;
-        this.rt.outerCircle.style.height = value;
-        this.setAttribute('diameter', value);
-    }
-
+    
     /**
      * Getter for the diameter property.
      * Returns a number.
@@ -214,6 +199,25 @@ class ImxRotary extends HTMLElement {
      */
     get diameter() {
         return Number(this.getAttribute('diameter'));
+    }
+    
+    /**
+     * Setter for the diameter property.
+     * It computes all dimension based properties and
+     * upgrades the element accordingly. Use number values.
+     * @example
+     * // Use it like a property:
+     * let rotary = document.getElementById('my-rotary');
+     * rotary.diameter = 50;
+     */
+    set diameter(value) {
+        this.dim.center = {
+            x: value/2,
+            y: value/2,
+        }
+        this.rt.outerCircle.style.width = value;
+        this.rt.outerCircle.style.height = value;
+        this.setAttribute('diameter', value);
     }
 
     /**
@@ -240,7 +244,7 @@ class ImxRotary extends HTMLElement {
             this._handleMouseWheel(evt);
         };
     }
-
+    
     /**
      * Event handler for the mousedown event.
      * @private
@@ -263,15 +267,79 @@ class ImxRotary extends HTMLElement {
      * @param {event} evt The event object.
      */
     _handleMouseMove(evt) {
-        evt.preventDefault();
+        if (this.mouseDown) {
+            evt.preventDefault();
+            let val = this.value;
+            let maxVal = 1;
+            if (this.useMidiValues) {
+                val -= evt.movementY;
+                maxVal = 127;
+            } else {
+                val -= evt.movementY/127;
+            }
+            val < 0 ? val = 0 : true;
+            val > maxVal ? val = maxVal : true;
+            this._setNeedlePosition(val);
+            this.value = val;
+            this._emitValue(val);
+        }
     }
-
+    
     /**
      * Event handler for the wheel event.
+     * @todo Compare with _handleMouseMove, great intersection
      * @param {event} evt 
      */
     _handleMouseWheel(evt) {
-        evt.preventDefault();
+        if (this.mouseDown) {
+            evt.preventDefault();
+            let val = this.value;
+            let maxVal = 1;
+            if (this.useMidiValues) {
+                val -= evt.movementY/2;
+                maxVal = 127;
+            } else {
+                val -= evt.movementY/127;
+            }
+            val < 0 ? val = 0 : true;
+            val > maxVal ? val = maxVal : true;
+            this._setNeedlePosition(val);
+            this.value = val;
+            this._emitValue(val);
+        }
+    }
+    
+    /**
+     * Upgrades the rotary needle so it represents its current
+     * internal value.
+     * @private
+     * @param {number} value The current rotary value.
+     */
+    _setNeedlePosition(value) {
+        this.useMidiValues ? value = value/127 : false;
+        const deg = value*this.settings.rangeDeg + this.settings.minDeg;
+        this.rt.needle.style.transform = `rotate(${deg}deg)`;
+        this._updateMasks(deg);
+    }
+
+    _updateMasks(deg) {
+        this.rt.maskLowerLeft.style.transform = `rotate(${deg}deg)`;
+        if (deg < 225 && !this.masks.upperLeftVisible) {
+            this.rt.maskUpperLeft.style.visibility = 'visible';
+            this.masks.upperLeftVisible = true;
+        }
+        if (deg >= 225 && this.masks.upperLeftVisible) {
+            this.rt.maskUpperLeft.style.visibility = 'hidden';
+            this.masks.upperLeftVisible = false;
+        }
+        if (deg < 315 && !this.masks.rightVisible) {
+            this.rt.maskRight.style.visibility = 'visible';
+            this.masks.rightVisible = true;
+        }
+        if (deg >= 315 && this.masks.rightVisible) {
+            this.rt.maskRight.style.visibility = 'hidden';
+            this.masks.rightVisible = false;
+        }
     }
 
     /**

@@ -24,11 +24,23 @@
     width: 142px;
     height: 142px;
     border-radius: 50%;
-    /* background-color: cyan; */
-    background-color: #303030;
+    background-color: cyan;
+    /* background-color: #303030; */
 }
 
-.imx__rotary-middle-static-mask {
+.imx__rotary-mask {
+    position: absolute;
+    width: 71px;
+    height: 71px;
+    top: 80px;
+    left: 80px;
+    background-color: #303030;
+    transform-origin: 0 0;
+    border-bottom-right-radius: 100%;
+    /* transform: rotate(135deg); */
+}
+
+.imx__rotary-delimiter-mask {
     position: absolute;
     /* z-index: 100; */
     width: 70;
@@ -55,19 +67,15 @@
     background-image: linear-gradient(to bottom, #606060, 5%, #252525);
 }
 
-.imx__rotary-delimiter {
-    position: absolute;
-}
-
 .imx__rotary-needle {
     position: absolute;
-    top: 80px;
-    left: 80px;
-    width: 51px;
+    top: 81px;
+    left: 81px;
+    width: 50px;
     height: 1px;
     background-color: darkgray;
     /* background-image: linear-gradient(to bottom, white, black); */
     transform-origin: 0 0;
-    transform: rotate(134deg);
+    /* transform: rotate(135deg); */
     /* transform: rotate(45deg); */
 }

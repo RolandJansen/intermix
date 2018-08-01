@@ -341,7 +341,7 @@ class ImxFader extends HTMLElement {
             }
             const yPos = nextPos - this.dim.knobHiPos;
             let val = (this.dim.knobRange - yPos)/this.dim.knobRange;
-            this.useMidiValues ? val = Math.round(val*127) : val;
+            this.useMidiValues ? val = Math.round(val*127) : false;
             this._emitValue(val);
             this.setAttribute('value', val);
         }
