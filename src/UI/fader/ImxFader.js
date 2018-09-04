@@ -1,5 +1,17 @@
 //used in imported html scripts to get access to the dom
-const currentDocument = document.currentScript.ownerDocument;
+// const currentDocument = document.currentScript.ownerDocument;
+
+/**
+   * Cloning contents from a &lt;template&gt; element is more performant
+   * than using innerHTML because it avoids addtional HTML parse costs.
+   */
+const template = document.createElement('template');
+template.innerHTML = `
+    <div class="imx__fader-container" id="imx__fader-container">
+        <div class="imx__fader-background" id="imx__fader-background"></div>
+        <div class="imx__fader-knob" id="imx__fader-knob"><hr></div>
+    </div>
+`;
 
 /**
  * A basic fader web component in pure html/css/js.
@@ -18,7 +30,7 @@ class ImxFader extends HTMLElement {
         
         // attach template to shadow root
         this.attachShadow({mode: 'open'});
-        const template = currentDocument.querySelector('#imx-fader-template');
+        // const template = currentDocument.querySelector('#imx-fader-template');
         const instance = template.content.cloneNode(true);
         this.shadowRoot.appendChild(instance);
         
@@ -156,6 +168,7 @@ class ImxFader extends HTMLElement {
      * let currentFaderVal = fader.value;
      */
     get value() {
+        console.log('this is the value getter: ' + this.getAttribute('value'));
         return Number(this.getAttribute('value'));
     }
     
