@@ -1,3 +1,4 @@
+require("document-register-element/pony")(window);
 //used in imported html scripts to get access to the dom
 // const currentDocument = document.currentScript.ownerDocument;
 
@@ -30,13 +31,13 @@ class ImxFader extends HTMLElement {
         
         // attach template to shadow root
         this.attachShadow({mode: 'open'});
-        // const template = currentDocument.querySelector('#imx-fader-template');
         const instance = template.content.cloneNode(true);
         this.shadowRoot.appendChild(instance);
-        
         this.faderContainer = this.shadowRoot.getElementById('imx__fader-container');
         this.faderBackground = this.shadowRoot.getElementById('imx__fader-background');
         this.faderKnob = this.shadowRoot.getElementById('imx__fader-knob');
+        // console.log(this.shadowRoot.childNodes[1]);
+        // console.log(this.faderKnob);
         
         // defaults
         this.settings = {
@@ -380,5 +381,5 @@ class ImxFader extends HTMLElement {
     }
 
 }
-const ImxFaderUnmutable = Object.freeze(ImxFader);
-customElements.define('imx-fader', ImxFaderUnmutable);
+// const ImxFaderUnmutable = Object.freeze(ImxFader);
+customElements.define('imx-fader', ImxFader);
