@@ -1,18 +1,17 @@
-require("document-register-element/pony")(window);
 //used in imported html scripts to get access to the dom
-// const currentDocument = document.currentScript.ownerDocument;
+const currentDocument = document.currentScript.ownerDocument;
 
 /**
    * Cloning contents from a &lt;template&gt; element is more performant
    * than using innerHTML because it avoids addtional HTML parse costs.
    */
-const template = document.createElement('template');
-template.innerHTML = `
-    <div class="imx__fader-container" id="imx__fader-container">
-        <div class="imx__fader-background" id="imx__fader-background"></div>
-        <div class="imx__fader-knob" id="imx__fader-knob"><hr></div>
-    </div>
-`;
+// const template = document.createElement('template');
+// template.innerHTML = `
+//     <div class="imx__fader-container" id="imx__fader-container">
+//         <div class="imx__fader-background" id="imx__fader-background"></div>
+//         <div class="imx__fader-knob" id="imx__fader-knob"><hr></div>
+//     </div>
+// `;
 
 /**
  * A basic fader web component in pure html/css/js.
@@ -31,13 +30,12 @@ class ImxFader extends HTMLElement {
         
         // attach template to shadow root
         this.attachShadow({mode: 'open'});
+        const template = currentDocument.querySelector('#imx__fader-template');
         const instance = template.content.cloneNode(true);
         this.shadowRoot.appendChild(instance);
         this.faderContainer = this.shadowRoot.getElementById('imx__fader-container');
         this.faderBackground = this.shadowRoot.getElementById('imx__fader-background');
         this.faderKnob = this.shadowRoot.getElementById('imx__fader-knob');
-        // console.log(this.shadowRoot.childNodes[1]);
-        // console.log(this.faderKnob);
         
         // defaults
         this.settings = {
