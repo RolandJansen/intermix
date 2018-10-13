@@ -1,17 +1,29 @@
 {
     "compilerOptions": {
-        //https://www.typescriptlang.org/docs/handbook/compiler-options.html
-        "outDir": "",          //empty value because webpack takes care of it
+        // https://www.typescriptlang.org/docs/handbook/compiler-options.html
+        // https://www.typescriptlang.org/docs/handbook/tsconfig-json.html
+        "moduleResolution": "node",  //search for imports in node_modules
+        // "outDir": "./dist",          //empty value because webpack takes care of it
+        "outFile": "./dist/intermix.js",
         "sourceMap": true,
         "noEmitOnError": true,
-        "module": "es6",
-        "target": "es5",
+        "removeComments": true,
+        "module": "AMD",
+        "target": "ES6",
         "declaration": true,   //generate typings
-        "declarationDir": "./dts/",
+        // "declarationDir": "./dts/",
         // "allowJs": true
-        "strict": true
+        // "checkJs": true,
+        "strict": true,
     },
-    "include": [
-        "src/**/*"
+    "files": [
+        "./src/main.ts"
     ]
+    // "include": [
+    //     "src/**/*"
+    // ],
+    // "exclude": [
+    //     "node-modules",
+    //     "dist/**/*"
+    // ]
 }

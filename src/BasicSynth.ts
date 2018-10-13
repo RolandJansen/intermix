@@ -24,18 +24,14 @@ const MY_SYNTH_ENV_DECAY = "MY_SYNTH_ENV_DECAY";
 
 class MySynth {
 
-  private im: Intermix;
   private ac: AudioContext;
   private uid: string;
   private filter: BiquadFilterNode;
   private attack: number;
   private decay: number;
 
-  constructor(intermix: Intermix) {
-    this.im = intermix;
-
-    // map the AudioContext to a class member (optional)
-    this.ac = this.im.audioContext;
+  constructor(ac: AudioContext) {
+    this.ac = dAudioContext;
 
     // Create a new biquad filter
     this.filter = this.ac.createBiquadFilter();
@@ -46,11 +42,18 @@ class MySynth {
     // Initial envelope decay value in seconds
     this.decay = 0.1;
 
-    this.uid = this.im.registerPlugin("My Synthesizer");
-    this.im.registerActionCreators([
-      this.getEnvAttackAction,
-      this.getEnvDecayAction,
-    ]);
+  }
+
+  // list of all audio output nodes
+  public get outputs(): AudioNode[] {
+    return [
+      this.filter,
+    ];
+  }
+
+  // list of all input nodes, if no inputs, return an empty list
+  public get inputs(): AudioNode[] {
+    return [];
   }
 
   private getEnvAttackAction(attack: number, error = false): IMySynthAction {
