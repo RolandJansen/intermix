@@ -9,7 +9,7 @@
     "clean": "rimraf dist/*",
     "docgen": "jsdoc -c conf.json --verbose",
     "docgen:md": "jsdoc2md src/**/*.js > doc/api.md",
-    "prebuild": "npm run clean",
+    "prebuild": "npm run lint && npm run clean",
     "build": "tsc",
     "watch": "npm run test:karma && npm run watch:js &",
     "watch:cmd": "start cmd /k npm run test:karma && npm run watch:js",

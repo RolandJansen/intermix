@@ -37,4 +37,24 @@ export default class Intermix {
         return this._store;
     }
 
+    public getPluginRef(pluginName: string): boolean {
+        return true;
+    }
+
+    public loadPlugin(): boolean {
+        return true;
+    }
+
+    public removePlugin(): boolean {
+        return true;
+    }
+
+    public startPlugin(): boolean {
+        return true;
+    }
+
+    public stopPlugin(): boolean {
+        return true;
+    }
+
 }

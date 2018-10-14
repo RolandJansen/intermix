@@ -1,4 +1,4 @@
-import { IMidiAction } from "./Interfaces";
+import { IMidiAction } from "../Interfaces";
 import * as mat from "./midiActionTypes";
 
 /**
