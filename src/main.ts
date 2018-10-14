@@ -37,7 +37,7 @@ export default class Intermix {
         return this._store;
     }
 
-    public getPluginRef(pluginName: string): boolean {
+    public getPluginInstanceRef(instanceId: number): boolean {
         return true;
     }
 
@@ -49,11 +49,7 @@ export default class Intermix {
         return true;
     }
 
-    public startPlugin(): boolean {
-        return true;
-    }
-
-    public stopPlugin(): boolean {
+    public makePluginInstance(pluginId: number): boolean {
         return true;
     }
 
