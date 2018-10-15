@@ -12,8 +12,8 @@
     "prebuild": "npm run lint && npm run clean",
     "build": "tsc",
     "watch": "tsc --watch",
-    "test": "jest",
-    "test:cmd": "npm run test:node:cmd",
+    "test": "jest --watch",
+    "test:all": "jest",
     "test:node": "istanbul cover --include-all-sources jasmine JASMINE_CONFIG_PATH=test/jasmine.json",
     "test:node:cmd": "istanbul cover --include-all-sources node_modules/jasmine/bin/jasmine.js JASMINE_CONFIG_PATH=test/jasmine.json"
   },
