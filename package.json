@@ -5,7 +5,7 @@
   "main": "dist/intermix.js",
   "types": "dist/intermix.d.ts",
   "scripts": {
-    "lint": "tslint src/main.ts",
+    "lint": "tslint -p ./tsconfig.json",
     "clean": "rimraf dist/*",
     "docgen": "jsdoc -c conf.json --verbose",
     "docgen:md": "jsdoc2md src/**/*.js > doc/api.md",
@@ -15,7 +15,7 @@
     "test": "jest",
     "test:cmd": "npm run test:node:cmd",
     "test:node": "istanbul cover --include-all-sources jasmine JASMINE_CONFIG_PATH=test/jasmine.json",
-    "test:node:cmd": "istanbul cover --include-all-sources node_modules/jasmine/bin/jasmine.js JASMINE_CONFIG_PATH=test/jasmine.json",
+    "test:node:cmd": "istanbul cover --include-all-sources node_modules/jasmine/bin/jasmine.js JASMINE_CONFIG_PATH=test/jasmine.json"
   },
   "repository": {
     "type": "git",
