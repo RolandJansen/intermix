@@ -27,7 +27,6 @@ export default class Intermix {
             reducer,
             initialState,
         );
-        console.log(this._store.getState());
     }
 
     get audioContext(): AudioContext {
@@ -54,4 +53,7 @@ export default class Intermix {
         return true;
     }
 
+    private initDefaultPlugins(): boolean {
+        return true;
+    }
 }

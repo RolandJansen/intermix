@@ -1,5 +1,6 @@
 import "web-audio-test-api";
 import Intermix from "../main";
+import { initialState } from "../store/initialState";
 
 let imx: Intermix;
 
@@ -16,8 +17,5 @@ test("Intermix instance initializes the audioContext", () => {
 });
 
 test("Intermix instance creates a store object", () => {
-    const storeType = typeof imx.store;
-    console.log(imx.store);
-    expect(storeType).toBe("object");
-    // expect(imx.store.getState().controllers).toBeDefined();
+    expect(imx.store.getState()).toEqual(initialState);
 });
