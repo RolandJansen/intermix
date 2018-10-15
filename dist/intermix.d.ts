@@ -1,6 +1,8 @@
 declare module "store/initialState" {
     export const initialState: {
         controllers: never[];
+        instruments: never[];
+        processors: never[];
     };
 }
 declare module "store/reducers" {
@@ -10,11 +12,15 @@ declare module "store/reducers" {
 }
 declare module "main" {
     import { Store } from "redux";
-    export class Intermix {
+    export default class Intermix {
         private _store;
         private _audioContext;
         constructor();
         readonly audioContext: AudioContext;
         readonly store: Store;
+        getPluginInstanceRef(instanceId: number): boolean;
+        loadPlugin(): boolean;
+        removePlugin(): boolean;
+        makePluginInstance(pluginId: number): boolean;
     }
 }

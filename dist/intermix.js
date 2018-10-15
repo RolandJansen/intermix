@@ -3,6 +3,8 @@ define("store/initialState", ["require", "exports"], function (require, exports)
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.initialState = {
         controllers: [],
+        instruments: [],
+        processors: [],
     };
 });
 define("store/reducers", ["require", "exports"], function (require, exports) {
@@ -29,6 +31,18 @@ define("main", ["require", "exports", "redux", "store/initialState", "store/redu
         }
         get store() {
             return this._store;
+        }
+        getPluginInstanceRef(instanceId) {
+            return true;
+        }
+        loadPlugin() {
+            return true;
+        }
+        removePlugin() {
+            return true;
+        }
+        makePluginInstance(pluginId) {
+            return true;
         }
     }
     exports.default = Intermix;
