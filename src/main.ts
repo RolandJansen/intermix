@@ -27,6 +27,7 @@ export default class Intermix {
             reducer,
             initialState,
         );
+        console.log(this._store.getState());
     }
 
     get audioContext(): AudioContext {
