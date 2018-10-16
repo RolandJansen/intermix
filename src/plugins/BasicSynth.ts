@@ -12,7 +12,7 @@ import Intermix from "./main";
  * For API docs of the AudioContext see
  * https://developer.mozilla.org/de/docs/Web/API/AudioContext
  */
-interface IMySynthAction {
+interface IInstrumentAction {
   type: string;
   payload: number | RangeError;
   meta: string;
@@ -22,16 +22,14 @@ interface IMySynthAction {
 const MY_SYNTH_ENV_ATTACK = "MY_SYNTH_ENV_ATTACK";
 const MY_SYNTH_ENV_DECAY = "MY_SYNTH_ENV_DECAY";
 
-class MySynth {
+export default class BasicSynth {
 
-  private ac: AudioContext;
   private uid: string;
   private filter: BiquadFilterNode;
   private attack: number;
   private decay: number;
 
-  constructor(ac: AudioContext) {
-    this.ac = dAudioContext;
+  constructor(private ac: AudioContext) {
 
     // Create a new biquad filter
     this.filter = this.ac.createBiquadFilter();

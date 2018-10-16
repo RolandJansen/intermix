@@ -14,6 +14,7 @@ define("store/reducers", ["require", "exports"], function (require, exports) {
         switch (action.type) {
             case "fantasyAction":
                 return Object.assign({}, state);
+            default: return state;
         }
     }
     exports.default = reducer;
@@ -42,6 +43,9 @@ define("main", ["require", "exports", "redux", "store/initialState", "store/redu
             return true;
         }
         makePluginInstance(pluginId) {
+            return true;
+        }
+        initDefaultPlugins() {
             return true;
         }
     }

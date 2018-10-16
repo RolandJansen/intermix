@@ -7,7 +7,7 @@ declare module "store/initialState" {
 }
 declare module "store/reducers" {
     import { Action } from "redux";
-    function reducer(state: {} | undefined, action: Action): {} | undefined;
+    function reducer(state: {} | undefined, action: Action): {};
     export default reducer;
 }
 declare module "main" {
@@ -22,5 +22,6 @@ declare module "main" {
         loadPlugin(): boolean;
         removePlugin(): boolean;
         makePluginInstance(pluginId: number): boolean;
+        private initDefaultPlugins();
     }
 }

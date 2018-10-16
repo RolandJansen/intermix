@@ -9,7 +9,6 @@ import reducer from "./store/reducers";
 // intermix.Sequencer = require('./Sequencer.js');
 // intermix.Part = require('./Part.js');
 
-// intermix.helper = require('./Helper.js');
 // intermix.eventBus = new intermix.EventBus();
 // import Helper from "./Helper";
 
@@ -17,7 +16,6 @@ export default class Intermix {
 
     private _store: Store;
 
-    // tslint:disable-next-line:variable-name
     private _audioContext: AudioContext;
     // public helper: object;
 
