@@ -8,7 +8,7 @@
         "sourceMap": true,
         "noEmitOnError": true,
         "removeComments": true,
-        "module": "AMD",
+        "module": "System",
         "target": "ES6",
         "declaration": true,   //generate typings
         // "declarationDir": "./dts/",
