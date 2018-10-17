@@ -17,5 +17,6 @@ test("Intermix instance initializes the audioContext", () => {
 });
 
 test("Intermix instance creates a store object", () => {
+    console.log(JSON.stringify(Intermix));
     expect(imx.store.getState()).toEqual(initialState);
 });
