@@ -1,7 +1,11 @@
-import { createStore, Store } from "redux";
+import { Store } from "redux";
+import store from "./store/store";
 
-import { initialState } from "./store/initialState";
-import reducer from "./store/reducers";
+// In vscode, go to File->Preferences->Settings
+// search for "experimental decorators" and enable
+// the corresponding setting to disable warnings
+// in the editor.
+// TODO: put this in the readme.
 
 // intermix.EventBus = require('./EventBus.js');
 // intermix.SoundWave = require('./SoundWave.js');
@@ -14,17 +18,11 @@ import reducer from "./store/reducers";
 
 export default class Intermix {
 
-    private _store: Store;
-
     private _audioContext: AudioContext;
     // public helper: object;
 
     constructor() {
         this._audioContext = new AudioContext();
-        this._store = createStore(
-            reducer,
-            initialState,
-        );
     }
 
     get audioContext(): AudioContext {
@@ -32,7 +30,7 @@ export default class Intermix {
     }
 
     get store(): Store {
-        return this._store;
+        return store;
     }
 
     public getPluginInstanceRef(instanceId: number): boolean {

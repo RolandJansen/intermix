@@ -11,6 +11,7 @@
         "module": "System",
         "target": "ES6",
         "declaration": true,   //generate typings
+        "experimentalDecorators": true,  //should be experimental no more
         // "declarationDir": "./dts/",
         // "allowJs": true
         // "checkJs": true,

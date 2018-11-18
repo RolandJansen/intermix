@@ -1,4 +1,5 @@
-import Intermix from "./main";
+import { IAction, IActionDef, IPlugin } from "../registry/interfaces";
+import { connectActionCreators, makeActionCreators, makePluginId } from "../registry/PluginDecorators";
 /**
  * An example plugin for intermix.js
  *
@@ -12,25 +13,50 @@ import Intermix from "./main";
  * For API docs of the AudioContext see
  * https://developer.mozilla.org/de/docs/Web/API/AudioContext
  */
-interface IInstrumentAction {
-  type: string;
-  payload: number | RangeError;
-  meta: string;
-  error?: boolean;
-}
+export default class BasicSynth implements IPlugin {
 
-const MY_SYNTH_ENV_ATTACK = "MY_SYNTH_ENV_ATTACK";
-const MY_SYNTH_ENV_DECAY = "MY_SYNTH_ENV_DECAY";
+  @makePluginId
+  public static uid: string;
 
-export default class BasicSynth {
+  public static actionDefs: IActionDef[] = [
+    {
+      type: "BASIC_SYNTH_ENV_ATTACK",
+      desc: "Envelope Attack",
+      minVal: 0,
+      maxVal: 1,
+      steps: 128,
+    },
+    {
+      type: "BASIC_SYNTH_ENV_DECAY",
+      desc: "Envelope Decay",
+      minVal: 0,
+      maxVal: 1,
+      steps: 128,
+    },
+  ];
 
-  private uid: string;
+  /**
+   * A basic factory that produces BasicSynth instances.
+   * This is vital since it is used by the plugin registry.
+   * @param ac An AudioContext instance
+   */
+  public static getPluginInstance(pluginId: string, ac: AudioContext) {
+    return new BasicSynth(pluginId, ac);
+  }
+
+  public name = "Basic Synth";
+  public version = "1.0.0";
+  public author = "Roland Jansen";
+
+  @makeActionCreators(BasicSynth.actionDefs)
+  @connectActionCreators
+  private actions: object = {};
+
   private filter: BiquadFilterNode;
   private attack: number;
   private decay: number;
 
-  constructor(private ac: AudioContext) {
-
+  constructor(public uid: string, private ac: AudioContext) {
     // Create a new biquad filter
     this.filter = this.ac.createBiquadFilter();
 
@@ -54,33 +80,6 @@ export default class BasicSynth {
     return [];
   }
 
-  private getEnvAttackAction(attack: number, error = false): IMySynthAction {
-    return this.getMySynthAction(MY_SYNTH_ENV_ATTACK, attack, "Filter Attack");
-  }
-
-  private getEnvDecayAction(decay: number, error = false) {
-    return this.getMySynthAction(MY_SYNTH_ENV_DECAY, decay, "Filter Decay");
-  }
-
-  private getMySynthAction(type: string, value: number, meta: string, error = false) {
-    let payload: number | RangeError;
-
-    if (value < 0 || value > 1) {
-      error = true;
-      payload = new RangeError("The argument must be between 0 and 1.");
-    } else {
-      payload = value;
-    }
-
-    return {
-      type,
-      payload,
-      meta,
-      error,
-    };
-
-  }
-
   // Sets filtertype, quality and initial cutoff frequency
   private initFilter(): void {
     this.filter.type = "lowpass";
@@ -90,7 +89,7 @@ export default class BasicSynth {
 
   // Connects the filter to main out
   private connect(): void {
-    this.filter.connect(intermix.destination);
+    this.filter.connect(this.ac.destination);
   }
 
   // Schedules an envelope run
@@ -105,7 +104,7 @@ export default class BasicSynth {
   // Creates a sawtooth oscillator object and returns it.
   // An oscillation destroys itself after a note is played.
   private getNewOsc(freq: number): OscillatorNode {
-    const osc = intermix.createOscillator();
+    const osc = this.ac.createOscillator();
     osc.type = "sawtooth";
     osc.frequency.value = freq;
     osc.connect(this.filter);
