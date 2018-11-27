@@ -1,5 +1,6 @@
+import { ActionCreatorsMapObject } from "redux";
 import { IAction, IActionDef, IPlugin } from "../registry/interfaces";
-import { connectActionCreators, makeActionCreators, makePluginId } from "../registry/PluginDecorators";
+import { AbstractPlugin } from "./AbstractPlugin";
 /**
  * An example plugin for intermix.js
  *
@@ -13,10 +14,7 @@ import { connectActionCreators, makeActionCreators, makePluginId } from "../regi
  * For API docs of the AudioContext see
  * https://developer.mozilla.org/de/docs/Web/API/AudioContext
  */
-export default class BasicSynth implements IPlugin {
-
-  @makePluginId
-  public static uid: string;
+export default class BasicSynth extends AbstractPlugin implements IPlugin {
 
   public static actionDefs: IActionDef[] = [
     {
@@ -24,6 +22,7 @@ export default class BasicSynth implements IPlugin {
       desc: "Envelope Attack",
       minVal: 0,
       maxVal: 1,
+      defVal: 0,
       steps: 128,
     },
     {
@@ -31,32 +30,23 @@ export default class BasicSynth implements IPlugin {
       desc: "Envelope Decay",
       minVal: 0,
       maxVal: 1,
+      defVal: 0.5,
       steps: 128,
     },
   ];
 
-  /**
-   * A basic factory that produces BasicSynth instances.
-   * This is vital since it is used by the plugin registry.
-   * @param ac An AudioContext instance
-   */
-  public static getPluginInstance(pluginId: string, ac: AudioContext) {
-    return new BasicSynth(pluginId, ac);
-  }
-
-  public name = "Basic Synth";
-  public version = "1.0.0";
-  public author = "Roland Jansen";
-
-  @makeActionCreators(BasicSynth.actionDefs)
-  @connectActionCreators
-  private actions: object = {};
-
+  public actionCreators: ActionCreatorsMapObject;
   private filter: BiquadFilterNode;
   private attack: number;
   private decay: number;
 
-  constructor(public uid: string, private ac: AudioContext) {
+  constructor(public readonly pluginUid: string, private ac: AudioContext) {
+    super(
+      "Basic Synth",
+      "1.0.0",
+      "Roland Jansen",
+    );
+
     // Create a new biquad filter
     this.filter = this.ac.createBiquadFilter();
 
@@ -65,6 +55,9 @@ export default class BasicSynth implements IPlugin {
 
     // Initial envelope decay value in seconds
     this.decay = 0.1;
+
+    // Initialize filter
+    this.initFilter();
 
   }
 
@@ -130,7 +123,7 @@ export default class BasicSynth implements IPlugin {
 
   // Handles note events
   private handleNote = function(msg): void {
-    var tone = msg.value;
+    const tone = msg.value;
     if (tone >= 0 && tone <= 127) {
       this.start(msg);
     }
@@ -146,31 +139,12 @@ export default class BasicSynth implements IPlugin {
     this.decay = msg.value;
   };
 
-  // Define any number of controllable events
-  // and name them at will. Custom events should
-  // be defined with a name and an array with
-  // min/max/default values.
-  // Here we just have attack/decay.
-  this.events = {
-    filterEnvAttack: [0, 0.2, 0.1],
-    filterEnvDecay: [0, 0.2, 0.1],
-  };
   // Define callback functions for the
   // previously defined events.
-  this.handleEvents = {
+  private handleEvents = {
     note: this.handleNote,
     filterEnvAttack: this.handleAttack,
     filterEnvDecay: this.handleDecay
   };
-
-  // Register this plugin to the instrument relay
-  // of the intermix event bus. It returns a unique id
-  // which is of no use in this example.
-  this.uid = intermix.eventBus.addRelayEndpoint('instrument', this.events, this);
-
-  // Setup the audio chain (which consists of
-  // just one filter) and connect it to the audio output
-  this.initFilter();
-  this.connect();
 
 }

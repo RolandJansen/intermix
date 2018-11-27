@@ -3,7 +3,12 @@ import { store } from "../store/store";
 import { IAction, IActionDef } from "./interfaces";
 
 /**
- *
+ * The whole file is obsolete. It's still here to demonstrate
+ * how decorators work. Could be handy in the near future.
+ */
+
+/**
+ * Obsolete
  * @param target
  * @param propertyKey
  */
@@ -13,7 +18,7 @@ export function makePluginId(target: any, propertyKey: string | symbol): void {
 }
 
 /**
- *
+ * Obsolete
  * @param actionDefs
  */
 export function makeActionCreators(actionDefs: IActionDef[]) {
@@ -47,6 +52,11 @@ export function makeActionCreators(actionDefs: IActionDef[]) {
     };
 }
 
+/**
+ * Obsolete
+ * @param target Class object
+ * @param propertyKey class property to be transformed
+ */
 export function connectActionCreators(target: any, propertyKey: string | symbol): void {
     const actionCreators = target.propertyKey;
     const boundActionCreators = {};

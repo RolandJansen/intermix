@@ -1,4 +1,5 @@
-import { Action, createStore, Store } from "redux";
+import { Action, Store } from "redux";
+import { createStore } from "redux-dynamic-reducer";
 
 /**
  * The main reducer that's called by the store every time an action
@@ -13,8 +14,13 @@ export function rootReducer(state = {}, action: Action) {
 }
 
 /**
- * There is no initial state because the only object known
- * to intermix are plugin classes and instances that are
- * not present at startup.
+ * The store is empty and there are no reducers at startup.
+ * Reducers will be attached as plugin instances are added.
+ * That's why we use an enhanced "createStore" function to
+ * attach reducers dynamically.
+ *
+ * In the future this could be done without an external
+ * library. See:
+ * https://tylergaw.com/articles/dynamic-redux-reducers/
  */
 export const store: Store = createStore(rootReducer);

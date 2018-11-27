@@ -1,11 +1,12 @@
 
 export interface IPlugin  {
+    productId: string;
     name: string;
     version: string;
     author: string;
     actionDefs: IActionDef[];
     actionCreators: {};
-    getInstance(pluginId: string, ac: AudioContext);
+    [propName: string]: any;
 }
 
 export interface IAction {
@@ -15,10 +16,16 @@ export interface IAction {
     error?: Error;
 }
 
+// Is this in redux already?
+// export type IActionCreator = (payload: number) => IAction;
+
 export interface IActionDef {
     type: string;
     desc: string;
     minVal: number;
     maxVal: number;
+    defVal: number;
     steps?: number;
 }
+
+export type tuple = [string, any];
