@@ -1,5 +1,5 @@
 import { ActionCreatorsMapObject } from "redux";
-import { IAction, IActionDef, IPlugin } from "../registry/interfaces";
+import { IAction, IActionDef, IPlugin, tuple } from "../registry/interfaces";
 import { AbstractPlugin } from "./AbstractPlugin";
 /**
  * An example plugin for intermix.js
@@ -73,6 +73,20 @@ export default class BasicSynth extends AbstractPlugin implements IPlugin {
     return [];
   }
 
+  // this won't work because the id
+  // is missing in action type.
+  public onChange(changed: tuple) {
+    switch (changed[0]) {
+      case "BASIC_SYNTH_ENV_ATTACK":
+        this.handleAttack(changed[1]);
+        break;
+      case "BASIC_SYNTH_ENV_DECAY":
+        this.handleDecay(changed[1]);
+      default:
+        break;
+    }
+  }
+
   // Sets filtertype, quality and initial cutoff frequency
   private initFilter(): void {
     this.filter.type = "lowpass";
@@ -106,7 +120,7 @@ export default class BasicSynth extends AbstractPlugin implements IPlugin {
 
   // Plays a note
   private start(noteMsg): void {
-    const freq = intermix.helper.getNoteFrequency(noteMsg.value);
+    const freq = this.getNoteFrequency(noteMsg.value);
     const osc = this.getNewOsc(freq);
     osc.start(noteMsg.delay);
     osc.stop(noteMsg.delay + noteMsg.duration);
@@ -116,10 +130,10 @@ export default class BasicSynth extends AbstractPlugin implements IPlugin {
   // This function has to be implemented by every plugin.
   // It gets called by the eventbus if a message arrives.
   // Here we use a lookup table to avoid conditionals.
-  private handleRelayData(evt): void {
-    const msg = evt.msg;
-    this.handleEvents[msg.type].call(this, msg);
-  }
+  // private handleRelayData(evt): void {
+  //   const msg = evt.msg;
+  //   this.handleEvents[msg.type].call(this, msg);
+  // }
 
   // Handles note events
   private handleNote = function(msg): void {
@@ -137,14 +151,6 @@ export default class BasicSynth extends AbstractPlugin implements IPlugin {
   // Handles decay-time-change events
   private handleDecay = function(msg) {
     this.decay = msg.value;
-  };
-
-  // Define callback functions for the
-  // previously defined events.
-  private handleEvents = {
-    note: this.handleNote,
-    filterEnvAttack: this.handleAttack,
-    filterEnvDecay: this.handleDecay
   };
 
 }
