@@ -1,6 +1,6 @@
 import { ActionCreatorsMapObject, bindActionCreators } from "redux";
-import { IAction, IActionDef, IPlugin, tuple } from "../registry/interfaces";
 import { store } from "../store/store";
+import { IAction, IActionDef, IPlugin, tuple } from "./interfaces";
 
 // in plugins müssen actionsCreators in
 // einem objekt gekapselt sein.
@@ -16,6 +16,7 @@ export abstract class AbstractPlugin implements IPlugin {
 
     public abstract actionCreators: ActionCreatorsMapObject;
 
+    // frequency lookup not readonly because it has to be fast
     protected frequencyLookup: number[];
     protected readonly _actionDefs: IActionDef[];
     private readonly _productId: string;

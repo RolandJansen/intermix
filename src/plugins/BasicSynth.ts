@@ -1,6 +1,6 @@
 import { ActionCreatorsMapObject } from "redux";
+import { AbstractPlugin } from "../registry/AbstractPlugin";
 import { IAction, IActionDef, IPlugin, tuple } from "../registry/interfaces";
-import { AbstractPlugin } from "./AbstractPlugin";
 /**
  * An example plugin for intermix.js
  *
