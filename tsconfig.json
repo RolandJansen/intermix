@@ -16,6 +16,7 @@
         // "allowJs": true
         // "checkJs": true,
         "strict": true,
+        "lib": [ "dom", "es7" ],  // used to get es7 lang features like [].includes()
     },
     "files": [
         "./src/main.ts"

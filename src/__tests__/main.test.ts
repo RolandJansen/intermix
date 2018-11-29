@@ -8,15 +8,11 @@ beforeEach(() => {
     imx = new Intermix();
 });
 
-afterEach(() => {
-    // imx = null;
-});
-
 test("Intermix instance initializes the audioContext", () => {
     expect(imx.audioContext).toBeInstanceOf(AudioContext);
 });
 
-test("Intermix instance creates a store object", () => {
-    console.log(JSON.stringify(Intermix));
-    expect(imx.store.getState()).toEqual(initialState);
-});
+// test("Intermix instance creates a store object", () => {
+//     // console.log(JSON.stringify(Intermix));
+//     expect(imx.store.getState()).toEqual(initialState);
+// });

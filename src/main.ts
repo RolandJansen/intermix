@@ -1,5 +1,5 @@
 import { Store } from "redux";
-import store from "./store/store";
+import { store } from "./store/store";
 
 // In vscode, go to File->Preferences->Settings
 // search for "experimental decorators" and enable
@@ -19,7 +19,6 @@ import store from "./store/store";
 export default class Intermix {
 
     private _audioContext: AudioContext;
-    // public helper: object;
 
     constructor() {
         this._audioContext = new AudioContext();

@@ -1,5 +1,5 @@
 import { ActionCreatorsMapObject } from "redux";
-import { AbstractPlugin } from "../registry/AbstractPlugin";
+import AbstractPlugin from "../registry/AbstractPlugin";
 import { IAction, IActionDef, IPlugin, tuple } from "../registry/interfaces";
 /**
  * An example plugin for intermix.js
@@ -16,7 +16,7 @@ import { IAction, IActionDef, IPlugin, tuple } from "../registry/interfaces";
  */
 export default class BasicSynth extends AbstractPlugin implements IPlugin {
 
-  public static actionDefs: IActionDef[] = [
+  public actionDefs: IActionDef[] = [
     {
       type: "BASIC_SYNTH_ENV_ATTACK",
       desc: "Envelope Attack",
@@ -40,7 +40,7 @@ export default class BasicSynth extends AbstractPlugin implements IPlugin {
   private attack: number;
   private decay: number;
 
-  constructor(public readonly pluginUid: string, private ac: AudioContext) {
+  constructor(private ac: AudioContext) {
     super(
       "Basic Synth",
       "1.0.0",
@@ -79,11 +79,12 @@ export default class BasicSynth extends AbstractPlugin implements IPlugin {
     switch (changed[0]) {
       case "BASIC_SYNTH_ENV_ATTACK":
         this.handleAttack(changed[1]);
-        break;
+        return true;
       case "BASIC_SYNTH_ENV_DECAY":
         this.handleDecay(changed[1]);
+        return true;
       default:
-        break;
+        return false;
     }
   }
 

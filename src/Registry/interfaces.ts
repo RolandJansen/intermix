@@ -1,11 +1,13 @@
 
 export interface IPlugin  {
     productId: string;
+    uid: string;
     name: string;
     version: string;
     author: string;
     actionDefs: IActionDef[];
     actionCreators: {};
+    frequencyLookup: number[];
     [propName: string]: any;
 }
 

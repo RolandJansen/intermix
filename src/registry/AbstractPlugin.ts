@@ -12,14 +12,16 @@ import { IAction, IActionDef, IPlugin, tuple } from "./interfaces";
  * The basic skeleton of an Intermix Plugin
  * @todo: actionCreators should be a real map for better performance (not object)
  */
-export abstract class AbstractPlugin implements IPlugin {
+export default abstract class AbstractPlugin implements IPlugin {
 
+    public abstract readonly actionDefs: IActionDef[];
     public abstract actionCreators: ActionCreatorsMapObject;
 
     // frequency lookup not readonly because it has to be fast
-    protected frequencyLookup: number[];
-    protected readonly _actionDefs: IActionDef[];
+    public frequencyLookup: number[];
     private readonly _productId: string;
+    private uidLength = 4;
+    private _uid: string;
 
     constructor(
         private readonly _name: string,
@@ -32,11 +34,20 @@ export abstract class AbstractPlugin implements IPlugin {
             this.author,
         );
 
+        this._uid = this.getRandomString(this.uidLength);
         this.frequencyLookup = this.getNoteFrequencies();
     }
 
     public get productId() {
         return this._productId;
+    }
+
+    public get uid() {
+        return this._uid;
+    }
+
+    public set uid(uid: string) {
+        this._uid = uid;
     }
 
     public get name() {
@@ -51,10 +62,6 @@ export abstract class AbstractPlugin implements IPlugin {
         return this._author;
     }
 
-    public get actionDefs() {
-        return this._actionDefs;
-    }
-
     public abstract get inputs(): AudioNode[];
     public abstract get outputs(): AudioNode[];
 
@@ -63,7 +70,68 @@ export abstract class AbstractPlugin implements IPlugin {
      * has changed.
      * @param changed Parameter with new value from store
      */
-    public abstract onChange(changed: tuple): void;
+    public abstract onChange(changed: tuple): boolean;
+
+    /**
+     * Generates a random string.
+     * @param length Length of the output string in digits
+     * @returns      random string
+     */
+    public getRandomString(length: number): string {
+        const randomChars: string[] = [];
+        const input = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        for (let i = 0; i < length; i++) {
+            randomChars[i] = input.charAt(Math.floor(Math.random() * input.length));
+        }
+
+        return randomChars.join("");
+    }
+
+    /**
+     * Checks that the uid of a plugin instance
+     * is really unique. If not, it generates a
+     * new one and checks again.
+     * However it's important that the plugin which owns the
+     * uid is not part of the pluginList.
+     * @param pluginList An array which holds all plugin instances
+     * @returns The verified uid or a new one
+     */
+    public verifyPluginUid(pluginList: IPlugin[], uid: string): string {
+        const idLength = uid.length;
+        pluginList.forEach((p) => {
+            if (p.uid === uid) {
+                const newUid = this.getRandomString(idLength);
+                uid = this.verifyPluginUid(pluginList, newUid);
+            }
+        });
+        return uid;
+    }
+
+    /**
+     * A convenience method that takes a string
+     * of the form "C3" or "d#4" and returns the
+     * corresponding midi note number.
+     * "h" will be converted to "b".
+     * @param  tone String representing a note
+     * @return      Number representing a note
+     */
+    public getNoteNumber(tone: string): number {
+        const notes = ["c", "c#", "d", "d#", "e", "f", "f#", "g", "g#", "a", "a#", "b"];
+        const str = tone.toLowerCase();
+
+        if (str.match(/^[a-h]#?[0-9]$/)) {
+            let note = str.substring(0, str.length - 1);
+            const oct = parseInt(str.slice(-1), 10);
+
+            if (note === "h") {
+                note = "b";
+            }
+            return notes.indexOf(note) + (oct + 1) * 12;  // +1: because 1st midi octave is -1
+        } else {
+            throw new Error("Unvalid string. Has to be like [a-h]<#>[0-9]");
+        }
+    }
 
     /**
      * Creates action creator functions from an object with
@@ -101,65 +169,9 @@ export abstract class AbstractPlugin implements IPlugin {
     }
 
     /**
-     * Takes an object with action creators (functions that take a value and
-     * return an action object) and wraps them into dispatch calls.
-     * This is only for convenience so we have one function call instead of two
-     * (actions are created and dispatched at once).
-     * @param actionCreators An object whose values are action creators.
-     * @returns    An object with action creators bound to a dispatch function.
-     */
-    protected connectActionCreators(actionCreators: ActionCreatorsMapObject): ActionCreatorsMapObject {
-        const boundActionCreators = {};
-        let ac: string;
-
-        for (ac in actionCreators) {
-            if (actionCreators.hasOwnProperty(ac)) {
-                boundActionCreators[ac] = bindActionCreators(actionCreators[ac], store.dispatch);
-            }
-        }
-
-        return boundActionCreators;
-    }
-
-    /**
-     * Returns the frequency of a note.
-     * @param  note Note (like "c3", "a#5") or midi note number
-     * @return      Frequency
-     */
-    protected getNoteFrequency(note: number | string): number {
-        if (typeof note === "string") {
-            note = this.getNoteNumber(note);
-        }
-        return this.frequencyLookup[note];
-    }
-
-    /**
-     * Takes a string of the form c3 or d#4 and
-     * returns the corresponding number. Upper classes
-     * strings are allowed and "h" will be converted to "b".
-     * @param  tone String representing a note
-     * @return      Number representing a note
-     */
-    private getNoteNumber(tone: string): number {
-        const notes = ["c", "c#", "d", "d#", "e", "f", "f#", "g", "g#", "a", "a#", "b"];
-        const str = tone.toLowerCase();
-
-        if (str.match(/^[a-h]#?[0-9]$/)) {
-            let note = str.substring(0, str.length - 1);
-            const oct = parseInt(str.slice(-1), 10);
-
-            if (note === "h") {
-                note = "b";
-            }
-            return notes.indexOf(note) + (oct + 1) * 12;  // +1: because 1st midi octave is -1
-        } else {
-            throw new Error("Unvalid string. Has to be like [a-h]<#>[0-9]");
-        }
-    }
-
-    /**
      * Computes the frequencies of all midi notes and returns
      * them as an array. Used for frequency lookup.
+     * @see https://newt.phys.unsw.edu.au/jw/notes.html
      * @return    Frequency table
      */
     private getNoteFrequencies(): number[] {
@@ -183,4 +195,5 @@ export abstract class AbstractPlugin implements IPlugin {
         const pluginId = name + version + author;
         return btoa(pluginId);
     }
+
 }

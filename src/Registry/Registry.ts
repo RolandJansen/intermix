@@ -1,4 +1,4 @@
-import { ActionCreatorsMapObject, Store } from "redux";
+import { ActionCreatorsMapObject, bindActionCreators, Store } from "redux";
 import { store } from "../store/store";
 import { IAction, IActionDef, IPlugin, tuple } from "./interfaces";
 
@@ -29,9 +29,7 @@ export default class Registry {
      * @param plugin New plugin to be registered
      */
     public registerPlugin(pluginClass): void {
-        const pluginUid: string = this.getPluginUid(this.pluginStore, this.uidLength);
-        const actionDefs = pluginClass.actionDefs;
-        const pInstance = this.getPluginInstance(pluginClass, pluginUid, this.ac);
+        const pInstance = this.getPluginInstance(pluginClass, this.ac);
 
         pInstance.actionCreators = this.generateActionCreators(
             pInstance,
@@ -66,8 +64,8 @@ export default class Registry {
      * @param ac An AudioContext instance
      * @returns An instance of the given plugin class
      */
-    private getPluginInstance(pluginClass, pluginUid: string, ac: AudioContext): IPlugin {
-        return new pluginClass(pluginUid, ac);
+    private getPluginInstance(pluginClass, ac: AudioContext): IPlugin {
+        return new pluginClass(ac);
     }
 
     /**
@@ -125,7 +123,7 @@ export default class Registry {
         actionDefs: IActionDef[],
         pluginId: string): ActionCreatorsMapObject {
         const creators = pInstance.makeActionCreators(actionDefs, pluginId);
-        return pInstance.connectActionCreators(creators);
+        return bindActionCreators(creators, store.dispatch);
     }
 
     private generateReducers(actionDefs: IActionDef[]) {
@@ -168,37 +166,6 @@ export default class Registry {
                 return state;
             }
         };
-    }
-
-    /**
-     * Generates a unique id string.
-     * @param pluginList An array which holds all plugin instances
-     */
-    private getPluginUid(pluginList: IPlugin[], idLength: number): string {
-        let uid = this.getRandomId(idLength);
-        pluginList.forEach((p) => {
-            if (p.uid === uid) {
-                const newUid = this.getRandomId(idLength);
-                uid = this.getPluginUid(pluginList, idLength);
-            }
-        });
-        return uid;
-    }
-
-    /**
-     * Generates an id string.
-     * @param length Length of the ID string in digits
-     * @returns      ID string
-     */
-    private getRandomId(length: number): string {
-        const randomChars: string[] = [];
-        const input = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-        for (let i = 0; i < length; i++) {
-            randomChars[i] = input.charAt(Math.floor(Math.random() * input.length));
-        }
-
-        return randomChars.join("");
     }
 
 }
