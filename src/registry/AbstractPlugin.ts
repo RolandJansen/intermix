@@ -1,6 +1,5 @@
 import { ActionCreatorsMapObject, bindActionCreators } from "redux";
-import { store } from "../store/store";
-import { IAction, IActionDef, IPlugin, tuple } from "./interfaces";
+import { IAction, IActionDef, IPlugin, Payload, Tuple } from "./interfaces";
 
 // in plugins müssen actionsCreators in
 // einem objekt gekapselt sein.
@@ -70,7 +69,7 @@ export default abstract class AbstractPlugin implements IPlugin {
      * has changed.
      * @param changed Parameter with new value from store
      */
-    public abstract onChange(changed: tuple): boolean;
+    public abstract onChange(changed: Tuple): boolean;
 
     /**
      * Generates a random string.
@@ -140,18 +139,18 @@ export default abstract class AbstractPlugin implements IPlugin {
      * @param pluginUid The unique id of the plugin instance
      * @returns  Object with action creator functions
      */
-    protected makeActionCreators(actionDefs: IActionDef[], pluginUid: string): ActionCreatorsMapObject {
+    public makeActionCreators(actionDefs: IActionDef[], pluginUid: string): ActionCreatorsMapObject {
         const actionCreators: ActionCreatorsMapObject = {};
 
         actionDefs.forEach((actionDef) => {
             const min = actionDef.minVal;
             const max = actionDef.maxVal;
-            const actionType = pluginUid + actionDef.type;
 
-            actionCreators[actionType] = (payload: number): IAction => {
+            actionCreators[actionDef.type] = (payload: Payload): IAction => {
 
                 const action: IAction = {
-                    type: actionType,
+                    type: actionDef.type,
+                    dest: pluginUid,
                     payload,
                 };
 

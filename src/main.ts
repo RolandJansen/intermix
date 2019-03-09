@@ -1,4 +1,5 @@
 import { Store } from "redux";
+import Registry from "./registry/Registry";
 import { store } from "./store/store";
 
 // In vscode, go to File->Preferences->Settings
@@ -19,9 +20,11 @@ import { store } from "./store/store";
 export default class Intermix {
 
     private _audioContext: AudioContext;
+    private _registry: Registry;
 
     constructor() {
         this._audioContext = new AudioContext();
+        this._registry = new Registry(this.audioContext);
     }
 
     get audioContext(): AudioContext {

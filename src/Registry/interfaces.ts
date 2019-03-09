@@ -1,3 +1,4 @@
+import { ActionCreatorsMapObject, AnyAction } from "redux";
 
 export interface IPlugin  {
     productId: string;
@@ -6,14 +7,17 @@ export interface IPlugin  {
     version: string;
     author: string;
     actionDefs: IActionDef[];
-    actionCreators: {};
+    actionCreators: ActionCreatorsMapObject;
     frequencyLookup: number[];
     [propName: string]: any;
 }
 
-export interface IAction {
-    type: string;
-    payload: number | string;
+export type Payload = number | string | boolean;
+
+export interface IAction extends AnyAction {
+    // type: string;
+    dest: string;
+    payload: Payload;
     meta?: string;
     error?: Error;
 }
@@ -30,4 +34,20 @@ export interface IActionDef {
     steps?: number;
 }
 
-export type tuple = [string, any];
+export type Tuple = [string, any];
+// export type State = Map<string, Payload>;
+export interface IState {
+    [propName: string]: Payload | IState;
+}
+
+export interface IActionHandlerMap {
+    [propName: string]: ActionHandler;
+}
+
+// registry functions
+export type Select = (state: IState, pluginUid: string) => any;
+export type GetChanged = (oldState: any, newState: any) => Tuple;
+export type OnChange = (change: Tuple) => boolean;
+export type ActionHandler = (state: IState, action: AnyAction | IAction) => IState;
+// export type GenericAction = IAction | AnyAction;
+// export type Reducer = (state: IState, action: IAction) => IState;

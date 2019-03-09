@@ -1,6 +1,6 @@
 import { ActionCreatorsMapObject } from "redux";
 import AbstractPlugin from "../registry/AbstractPlugin";
-import { IAction, IActionDef, IPlugin, tuple } from "../registry/interfaces";
+import { IActionDef, IPlugin, Tuple } from "../registry/interfaces";
 /**
  * An example plugin for intermix.js
  *
@@ -75,7 +75,7 @@ export default class BasicSynth extends AbstractPlugin implements IPlugin {
 
   // this won't work because the id
   // is missing in action type.
-  public onChange(changed: tuple) {
+  public onChange(changed: Tuple) {
     switch (changed[0]) {
       case "BASIC_SYNTH_ENV_ATTACK":
         this.handleAttack(changed[1]);
@@ -121,7 +121,7 @@ export default class BasicSynth extends AbstractPlugin implements IPlugin {
 
   // Plays a note
   private start(noteMsg): void {
-    const freq = this.getNoteFrequency(noteMsg.value);
+    const freq = this.frequencyLookup[noteMsg.value];
     const osc = this.getNewOsc(freq);
     osc.start(noteMsg.delay);
     osc.stop(noteMsg.delay + noteMsg.duration);

@@ -1,6 +1,15 @@
-import { ActionCreatorsMapObject, bindActionCreators, Store } from "redux";
+import { ActionCreatorsMapObject, AnyAction, bindActionCreators, Reducer, Store } from "redux";
 import { store } from "../store/store";
-import { IAction, IActionDef, IPlugin, tuple } from "./interfaces";
+import {
+    GetChanged,
+    IAction,
+    IActionDef,
+    IActionHandlerMap,
+    IPlugin,
+    IState,
+    Select,
+    Tuple,
+} from "./interfaces";
 
 /**
  * Plugin registry
@@ -9,16 +18,18 @@ import { IAction, IActionDef, IPlugin, tuple } from "./interfaces";
  * name+version+author => base64
  * instanzen werden nur hochgezählt, dabei die ID im store via
  * action hinterlegen.
- *
  */
 export default class Registry {
 
-    private ac: AudioContext;
-    private pluginStore: IPlugin[] = [];
-    private uidLength = 4;  // length of unique keys for plugin instances
+    private _ac: AudioContext;
+    private _pluginStore: IPlugin[] = [];
 
     public constructor(audioContext: AudioContext) {
-        this.ac = audioContext;
+        this._ac = audioContext;
+    }
+
+    public get pluginStore() {
+        return this._pluginStore;
     }
 
     /**
@@ -26,18 +37,23 @@ export default class Registry {
      * * builds action creators and reducers
      * * registers reducers to the store
      * * adds the plugin to the plugin store
-     * @param plugin New plugin to be registered
+     * @param pluginClass New plugin to be registered
      */
-    public registerPlugin(pluginClass): void {
-        const pInstance = this.getPluginInstance(pluginClass, this.ac);
+    public registerPlugin<p extends IPlugin>(pluginClass: new(ac: AudioContext) => p): void {
+        const pInstance = this.getPluginInstance(pluginClass, this._ac);
 
-        pInstance.actionCreators = this.generateActionCreators(
+        pInstance.actionCreators = this.generateActionCreators(pInstance);
+
+        const reducers = this.getPluginReducer(pInstance);
+        store.attachReducers({ [pInstance.uid]: { reducers } });
+
+        // finally make the plugin observe the store for changes
+        this.observeStore(
+            store,
+            this.select,
+            this.getChanged,
             pInstance,
-            actionDefs,
-            pluginUid);
-
-        const reducers = this.generateReducers(actionDefs);
-        store.attachReducers({ [pluginUid]: { reducers } });
+        );
 
         this.pluginStore.push(pInstance);
     }
@@ -49,7 +65,7 @@ export default class Registry {
     public unregisterPlugin(pluginUid: string): boolean {
         this.pluginStore.forEach((plugin, index) => {
             if (plugin.uid === pluginUid) {
-                this.pluginStore.splice(index, 1);
+                this._pluginStore.splice(index, 1);
                 return true;
             }
         });
@@ -57,14 +73,12 @@ export default class Registry {
     }
 
     /**
-     * A basic factory that produces plugin instances.
-     * This is vital since it is used by the plugin registry.
+     * A plugin instance factory.
      * @param pluginClass The class to be instanciated
-     * @param pluginUid A unique id to distinguish the instance from others
      * @param ac An AudioContext instance
      * @returns An instance of the given plugin class
      */
-    private getPluginInstance(pluginClass, ac: AudioContext): IPlugin {
+    private getPluginInstance<p extends IPlugin>(pluginClass: new(ac: AudioContext) => p, ac: AudioContext): p {
         return new pluginClass(ac);
     }
 
@@ -75,13 +89,16 @@ export default class Registry {
      * @param select Function that selects the sub-state for a plugin
      * @param onChange Method from the plugin that gets invoked when the state changes.
      */
-    private observeStore(st: Store, select, getChanged, onChange) {
-        let currentState: {};
+    private observeStore(st: Store, select: Select, getChanged: GetChanged, pInstance: IPlugin) {
+        const uid = pInstance.uid;
+        const onChange = pInstance.onChange;
+        let currentState: IState = {};
 
         function handleChange() {
-            const nextState = select(st.getState());
+            const nextState: IState = select(st.getState(), uid);
 
-            // check if next/current don't link to the same object
+            // check by reference that
+            // both objects are different
             if (nextState !== currentState) {
                 const changed = getChanged(currentState, nextState);
                 currentState = nextState;
@@ -94,20 +111,22 @@ export default class Registry {
         return unsubscribe;
     }
 
-    private select(globalState, pluginUid: string) {
+    private select(globalState: IState, pluginUid: string) {
         if (globalState.hasOwnProperty(pluginUid)) {
             return globalState[pluginUid];
         }
         throw new Error(`Plugin with ID ${ pluginUid } not found in state object.`);
     }
 
-    private getChanged(currentState, nextState): tuple {
+    private getChanged(currentState: IState, nextState: IState): Tuple {
         let prop: string;
+        let change: Tuple = ["", ""];
         for (prop in currentState) {
             if (currentState[prop] !== nextState[prop]) {
-                return [prop, nextState[prop]];
+                change = [prop, nextState[prop]];
             }
         }
+        return change;
     }
 
     /**
@@ -115,20 +134,41 @@ export default class Registry {
      * the dispatcher of the store, so an action is
      * automatically dispatched after creation.
      * @param pInstance The plugin instance
-     * @param actionDefs Array of action definitions
-     * @param pluginId Unique ID of the plugin instance
      */
-    private generateActionCreators(
-        pInstance: IPlugin,
-        actionDefs: IActionDef[],
-        pluginId: string): ActionCreatorsMapObject {
-        const creators = pInstance.makeActionCreators(actionDefs, pluginId);
+    private generateActionCreators(pInstance: IPlugin): ActionCreatorsMapObject {
+        const creators = pInstance.makeActionCreators(
+            pInstance.actionDefs,
+            pInstance.pluginId,
+        );
         return bindActionCreators(creators, store.dispatch);
     }
 
-    private generateReducers(actionDefs: IActionDef[]) {
+    /**
+     * Generates the initial state for a plugin from
+     * its ActionDef object. Plugin state is represented
+     * as a Map (instead of a generic object) for better
+     * performance and ease of use.
+     * @param pInstance Instance of a plugin
+     */
+    private generateInitialState(pInstance: IPlugin): IState {
+        const iState: IState = {};
+
+        pInstance.actionDefs.forEach((aDef) => {
+            iState[aDef.type] = aDef.defVal;
+        });
+
+        return iState;
+    }
+
+    /**
+     * Builds a top-level reducer for a plugin.
+     * @param actionDefs ActionDef object from plugin instance
+     */
+    private getPluginReducer(pInstance: IPlugin) {
+        const actionDefs = pInstance.actionDefs;
         const handlers = this.getActionHandlerMappings(actionDefs);
-        return this.createReducer({}, handlers);
+        const initState: IState = this.generateInitialState(pInstance);
+        return this.createReducer(initState, handlers);
     }
 
     /**
@@ -137,34 +177,37 @@ export default class Registry {
      * https://redux.js.org/recipes/reducingboilerplate#generating-reducers
      * @param actionDefs An array of action definitions (see IActionDef)
      */
-    private getActionHandlerMappings(actionDefs: IActionDef[]): object {
-        const handlers = {};
+    private getActionHandlerMappings(actionDefs: IActionDef[]): IActionHandlerMap {
+        const handlers: IActionHandlerMap = {};
 
         actionDefs.forEach((actionDef) => {
-            handlers[actionDef.type] = (state, action) => {
+            handlers[actionDef.type] = (state: IState, action: AnyAction | IAction): IState => {
                 return Object.assign({}, state, {
                     [action.type]: action.payload,
                 });
             };
         });
-
         return handlers;
     }
 
     /**
-     * A generic way to build a reducer with pre-defined handlers
+     * A generic way to build a reducer with pre-defined handlers.
+     * These handlers get called according to a lookup table and
+     * they do the real work.
      * This approach is explained in detail in the redux doc section
      * "Reducing Boilerplate".
+     * @todo Write a type/interface for this kind of reducer (return type)
      * @param initialState Initial state of the sub-state-tree for this reducer
-     * @param handlers object mapping from action-types to handlers
+     * @param handlers Lookup table: action-types -> handlers
      */
-    private createReducer(initialState, handlers) {
-        return (state = initialState, action) => {
+    private createReducer(initialState: IState, handlers: IActionHandlerMap): Reducer {
+        return (state = initialState, action: AnyAction | IAction) => {
             if (handlers.hasOwnProperty(action.type)) {
-                return handlers[action.type](state, action);
-            } else {
-                return state;
+                const handler = handlers[action.type];
+                const newState = handler(state, action);
+                return newState;
             }
+            return state;
         };
     }
 

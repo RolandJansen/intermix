@@ -1,64 +1,19 @@
-import { ActionCreatorsMapObject } from "redux";
-import AbstractPlugin from "../AbstractPlugin";
-import { IActionDef, IPlugin, tuple } from "../interfaces";
+import { IPlugin } from "../interfaces";
+import TestPlugin from "../TestPlugin";
 
 // Tests the implemented public and
 // protected methods of the AbstractPlugin class.
 // This is achieved by building a bare test
 // class which becomes the object under test.
 
-/**
- * This class will be used to indirectly
- * test the abstract class.
- * Implementation doesn't matter and
- * is not subject to tests.
- */
-class TestPlugin extends AbstractPlugin implements IPlugin {
-
-    public actionCreators: ActionCreatorsMapObject;
-    public actionDefs: IActionDef[] = [
-        {
-            type: "ACTION1",
-            desc: "action one",
-            minVal: 0,
-            maxVal: 127,
-            defVal: 0,
-        },
-        {
-            type: "ACTION2",
-            desc: "action two",
-            minVal: 0,
-            maxVal: 127,
-            defVal: 0,
-        },
-    ];
-
-    public get inputs() {
-        return [];
-    }
-
-    public get outputs() {
-        return [];
-    }
-
-    constructor() {
-        super("testplug", "v1.0.0", "Some Bloke");
-        this.actionCreators = this.makeActionCreators(
-            this.actionDefs,
-            this.uid,
-        );
-    }
-
-    public onChange(changed: tuple) {
-        return true;
-    }
-
-}
-
 let plug: TestPlugin;
 
 beforeEach(() => {
     plug = new TestPlugin();
+    plug.actionCreators = plug.makeActionCreators(
+        plug.actionDefs,
+        plug.uid,
+    );
 });
 
 test("Read access for productId", () => {
@@ -150,8 +105,8 @@ describe("makeActionCreators", () => {
     let at2: string;
 
     beforeEach(() => {
-        at1 = plug.uid + plug.actionDefs[0].type;
-        at2 = plug.uid + plug.actionDefs[1].type;
+        at1 = plug.actionDefs[0].type;
+        at2 = plug.actionDefs[1].type;
     });
 
     test("creates proper action types", () => {
@@ -162,10 +117,11 @@ describe("makeActionCreators", () => {
     test("creates actionCreators that return proper actions", () => {
         const action = plug.actionCreators[at1](23);
         expect(action.type).toEqual(at1);
+        expect(action.dest).toEqual(plug.uid);
         expect(action.payload).toEqual(23);
     });
 
-    test("Actions don't contain errors when value is in bounds", () => {
+    test("Actions don't contain errors when value is within bounds", () => {
         let action = plug.actionCreators[at1](0);
         expect(action.error).not.toBeDefined();
 
