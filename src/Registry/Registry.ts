@@ -1,5 +1,6 @@
-import { ActionCreatorsMapObject, AnyAction, bindActionCreators, Reducer, Store } from "redux";
+import { ActionCreatorsMapObject, AnyAction, bindActionCreators, Reducer, ReducersMapObject, Store } from "redux";
 import { store } from "../store/store";
+import combineReducersWithRoot from "./combineReducersWithRoot";
 import {
     GetChanged,
     IAction,
@@ -42,20 +43,21 @@ export default class Registry {
     public registerPlugin<p extends IPlugin>(pluginClass: new(ac: AudioContext) => p): void {
         const pInstance = this.getPluginInstance(pluginClass, this._ac);
 
-        pInstance.actionCreators = this.generateActionCreators(pInstance);
+        pInstance.actionCreators = this.getBoundActionCreators(pInstance);
+        this.pluginStore.push(pInstance);
 
-        const reducers = this.getPluginReducer(pInstance);
-        store.attachReducers({ [pInstance.uid]: { reducers } });
+        this.replaceReducer(this.pluginStore, this.getRootReducer());
 
-        // finally make the plugin observe the store for changes
-        this.observeStore(
+        // attach the initial state to the plugin
+        pInstance.initState = this.getInitialState(pInstance);
+
+        // make the plugin observe the store for changes
+        pInstance.unsubscribe = this.observeStore(
             store,
             this.select,
             this.getChanged,
             pInstance,
         );
-
-        this.pluginStore.push(pInstance);
     }
 
     /**
@@ -63,13 +65,41 @@ export default class Registry {
      * @param pluginUid Unique ID of the plugin to be removed
      */
     public unregisterPlugin(pluginUid: string): boolean {
+        let result = false;
         this.pluginStore.forEach((plugin, index) => {
             if (plugin.uid === pluginUid) {
+                plugin.unsubscribe();
                 this._pluginStore.splice(index, 1);
-                return true;
+                result = true;
+                return;
             }
         });
-        return false;
+
+        this.replaceReducer(this.pluginStore, this.getRootReducer());
+        store.dispatch({ type: "REMOVE", payload: pluginUid });
+        return result;
+    }
+
+    /**
+     * Calculates reducers for all loaded plugins
+     * then combines them with a root reducer and
+     * and replaces the reducer in the redux store.
+     * @param pStore Array with plugin instances
+     * @param rootReducer A redux reducer that handles root state
+     */
+    private replaceReducer(pStore: IPlugin[], rootReducer: Reducer): void {
+        const subReducers: ReducersMapObject = {};
+
+        pStore.forEach((plugin) => {
+            subReducers[plugin.uid] = this.getPluginReducer(plugin);
+        });
+
+        const reducer = combineReducersWithRoot(
+            subReducers,
+            rootReducer,
+        );
+
+        store.replaceReducer(reducer);
     }
 
     /**
@@ -135,7 +165,7 @@ export default class Registry {
      * automatically dispatched after creation.
      * @param pInstance The plugin instance
      */
-    private generateActionCreators(pInstance: IPlugin): ActionCreatorsMapObject {
+    private getBoundActionCreators(pInstance: IPlugin): ActionCreatorsMapObject {
         const creators = pInstance.makeActionCreators(
             pInstance.actionDefs,
             pInstance.pluginId,
@@ -150,7 +180,7 @@ export default class Registry {
      * performance and ease of use.
      * @param pInstance Instance of a plugin
      */
-    private generateInitialState(pInstance: IPlugin): IState {
+    private getInitialState(pInstance: IPlugin): IState {
         const iState: IState = {};
 
         pInstance.actionDefs.forEach((aDef) => {
@@ -167,7 +197,7 @@ export default class Registry {
     private getPluginReducer(pInstance: IPlugin) {
         const actionDefs = pInstance.actionDefs;
         const handlers = this.getActionHandlerMappings(actionDefs);
-        const initState: IState = this.generateInitialState(pInstance);
+        const initState: IState = this.getInitialState(pInstance);
         return this.createReducer(initState, handlers);
     }
 
@@ -205,6 +235,22 @@ export default class Registry {
             if (handlers.hasOwnProperty(action.type)) {
                 const handler = handlers[action.type];
                 const newState = handler(state, action);
+                return newState;
+            }
+            return state;
+        };
+    }
+
+    /**
+     * Returns the root reducer with handlers that can operate
+     * on the root state. Use with combineReducersWithRoot().
+     */
+    private getRootReducer(): Reducer {
+        return (state = {}, action: AnyAction) => {
+            if (action.type === "REMOVE" &&
+            state.hasOwnProperty(action.payload)) {
+                const newState = JSON.parse(JSON.stringify(state));
+                delete newState[action.payload];
                 return newState;
             }
             return state;

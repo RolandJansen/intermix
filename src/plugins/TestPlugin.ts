@@ -24,7 +24,7 @@ export default class TestPlugin extends AbstractPlugin implements IPlugin {
             desc: "action two",
             minVal: 0,
             maxVal: 127,
-            defVal: 0,
+            defVal: 1,
         },
     ];
 
