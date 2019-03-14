@@ -1,5 +1,4 @@
-import { Action, Store } from "redux";
-import { createStore } from "redux-dynamic-reducer";
+import { Action, createStore, Store } from "redux";
 
 /**
  * The main reducer that's called by the store every time an action

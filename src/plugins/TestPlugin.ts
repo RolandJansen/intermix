@@ -37,11 +37,10 @@ export default class TestPlugin extends AbstractPlugin implements IPlugin {
     }
 
     constructor(private ac: AudioContext) {
-        super("testplug", "v1.0.0", "Some Bloke");
+        super("Testplugin", "v1.0.0", "Roland Jansen");
     }
 
     public onChange(changed: Tuple) {
         return true;
     }
-
 }

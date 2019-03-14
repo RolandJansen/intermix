@@ -1,8 +1,10 @@
 import { ActionCreatorsMapObject } from "redux";
 import AbstractPlugin from "../registry/AbstractPlugin";
-import { IActionDef, IPlugin, Tuple } from "../registry/interfaces";
+import { IActionDef, IPlugin, Note, Tuple } from "../registry/interfaces";
 /**
- * An example plugin for intermix.js
+ * An example synthesizer plugin for intermix.js
+ *
+ *
  *
  * Technically, the intermix namespace (window.intermix) is
  * just an extended AudioContext instance.
@@ -18,7 +20,7 @@ export default class BasicSynth extends AbstractPlugin implements IPlugin {
 
   public actionDefs: IActionDef[] = [
     {
-      type: "BASIC_SYNTH_ENV_ATTACK",
+      type: "ENV_ATTACK",
       desc: "Envelope Attack",
       minVal: 0,
       maxVal: 1,
@@ -26,7 +28,7 @@ export default class BasicSynth extends AbstractPlugin implements IPlugin {
       steps: 128,
     },
     {
-      type: "BASIC_SYNTH_ENV_DECAY",
+      type: "ENV_DECAY",
       desc: "Envelope Decay",
       minVal: 0,
       maxVal: 1,
@@ -58,7 +60,6 @@ export default class BasicSynth extends AbstractPlugin implements IPlugin {
 
     // Initialize filter
     this.initFilter();
-
   }
 
   // list of all audio output nodes
@@ -77,16 +78,34 @@ export default class BasicSynth extends AbstractPlugin implements IPlugin {
   // is missing in action type.
   public onChange(changed: Tuple) {
     switch (changed[0]) {
-      case "BASIC_SYNTH_ENV_ATTACK":
-        this.handleAttack(changed[1]);
-        return true;
-      case "BASIC_SYNTH_ENV_DECAY":
-        this.handleDecay(changed[1]);
-        return true;
+      case "ENV_ATTACK":
+      this.handleAttack(changed[1]);
+      return true;
+      case "ENV_DECAY":
+      this.handleDecay(changed[1]);
+      return true;
       default:
-        return false;
+      return false;
     }
   }
+
+  // Handles note events
+  private handleNote(note: Note): void {
+    const tone = note[0];
+    if (tone >= 0 && tone <= 127) {
+      this.start(note);
+    }
+  }
+
+  // Handles attack-time-change events
+  private handleAttack(value: number) {
+    this.attack = value;
+  }
+
+  // Handles decay-time-change events
+  private handleDecay = function(value: number) {
+    this.decay = value;
+  };
 
   // Sets filtertype, quality and initial cutoff frequency
   private initFilter(): void {
@@ -120,38 +139,12 @@ export default class BasicSynth extends AbstractPlugin implements IPlugin {
   }
 
   // Plays a note
-  private start(noteMsg): void {
-    const freq = this.frequencyLookup[noteMsg.value];
+  private start(note: Note): void {
+    const freq = this.frequencyLookup[note[0]];
     const osc = this.getNewOsc(freq);
-    osc.start(noteMsg.delay);
+    osc.start(note[2]);
     osc.stop(noteMsg.delay + noteMsg.duration);
     this.startEnvelope(noteMsg.delay);
   }
-
-  // This function has to be implemented by every plugin.
-  // It gets called by the eventbus if a message arrives.
-  // Here we use a lookup table to avoid conditionals.
-  // private handleRelayData(evt): void {
-  //   const msg = evt.msg;
-  //   this.handleEvents[msg.type].call(this, msg);
-  // }
-
-  // Handles note events
-  private handleNote = function(msg): void {
-    const tone = msg.value;
-    if (tone >= 0 && tone <= 127) {
-      this.start(msg);
-    }
-  };
-
-  // Handles attack-time-change events
-  private handleAttack = function(msg) {
-    this.attack = msg.value;
-  };
-
-  // Handles decay-time-change events
-  private handleDecay = function(msg) {
-    this.decay = msg.value;
-  };
 
 }

@@ -9,7 +9,6 @@ import { IAction, IActionDef, IPlugin, Payload, Tuple } from "./interfaces";
 
 /**
  * The basic skeleton of an Intermix Plugin
- * @todo: actionCreators should be a real map for better performance (not object)
  */
 export default abstract class AbstractPlugin implements IPlugin {
 

@@ -12,7 +12,9 @@ export interface IPlugin  {
     [propName: string]: any;
 }
 
-export type Payload = number | string | boolean;
+// array with midi note number, duration in ms and delay in ms
+export type Note = [number, number, number];
+export type Payload = number | string | boolean | Note;
 
 export interface IAction extends AnyAction {
     // type: string;
@@ -28,14 +30,13 @@ export interface IAction extends AnyAction {
 export interface IActionDef {
     type: string;
     desc: string;
-    minVal: number;
-    maxVal: number;
-    defVal: number;
+    defVal: Payload;
+    minVal?: number;
+    maxVal?: number;
     steps?: number;
 }
 
 export type Tuple = [string, any];
-// export type State = Map<string, Payload>;
 export interface IState {
     [propName: string]: Payload | IState;
 }
