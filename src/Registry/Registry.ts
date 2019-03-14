@@ -54,14 +54,17 @@ export default class Registry {
         // make the plugin observe the store for changes
         pInstance.unsubscribe = this.observeStore(
             store,
-            this.select,
+            this.selectSubState,
             this.getChanged,
             pInstance,
         );
     }
 
     /**
-     * Removes a plugin instance from the plugin store.
+     * Removes a plugin from the system.
+     * In detail: Removes a plugin instance from the plugin store
+     * and the redux store (state and reducer) and
+     * unsubscribes to changes.
      * @param pluginUid Unique ID of the plugin to be removed
      */
     public unregisterPlugin(pluginUid: string): boolean {
@@ -70,13 +73,13 @@ export default class Registry {
             if (plugin.uid === pluginUid) {
                 plugin.unsubscribe();
                 this._pluginStore.splice(index, 1);
+                this.replaceReducer(this.pluginStore, this.getRootReducer());
+                store.dispatch({ type: "REMOVE", payload: pluginUid });
                 result = true;
                 return;
             }
         });
 
-        this.replaceReducer(this.pluginStore, this.getRootReducer());
-        store.dispatch({ type: "REMOVE", payload: pluginUid });
         return result;
     }
 
@@ -113,6 +116,8 @@ export default class Registry {
     }
 
     /**
+     * Subscribes a plugin to the store. The function that will
+     * be called by the store invokes the onChange handler of the plugin.
      * For details see:
      * https://github.com/reduxjs/redux/issues/303#issuecomment-125184409
      * @param st Instance of the store that keeps the state
@@ -141,13 +146,25 @@ export default class Registry {
         return unsubscribe;
     }
 
-    private select(globalState: IState, pluginUid: string) {
+    /**
+     * Returns the sub state of a plugin from the global state object
+     * @param globalState The global state object from redux store
+     * @param pluginUid Unique id of the plugin
+     */
+    private selectSubState(globalState: IState, pluginUid: string) {
         if (globalState.hasOwnProperty(pluginUid)) {
             return globalState[pluginUid];
         }
         throw new Error(`Plugin with ID ${ pluginUid } not found in state object.`);
     }
 
+    /**
+     * Determines which value has been changed between
+     * two successive states. Only works with flat
+     * plugin states.
+     * @param currentState Original plugin state
+     * @param nextState Changed plugin state
+     */
     private getChanged(currentState: IState, nextState: IState): Tuple {
         let prop: string;
         let change: Tuple = ["", ""];

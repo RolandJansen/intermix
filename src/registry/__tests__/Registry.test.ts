@@ -10,9 +10,9 @@ import Registry from "../Registry";
 jest.mock("../../store/store");
 
 let registry: Registry;
-let globalState: IState = {};
+let globalState: IState;
 const ac = new AudioContext();
-// const tempPlugin = new TestPlugin(ac);
+const pluginInitState: IState = { ACTION1: 0, ACTION2: 1 };
 
 beforeEach(() => {
     globalState = {};
@@ -33,12 +33,16 @@ beforeEach(() => {
     registry = new Registry(ac);
 });
 
+test("registry has a public member 'pluginStore'", () => {
+    expect(registry.pluginStore).toBeDefined();
+});
+
 describe("registerPlugin", () => {
 
     let plug: IPlugin;
-    const pluginInitState: IState = { ACTION1: 0, ACTION2: 1 };
 
     beforeEach(() => {
+        (store.replaceReducer as jest.Mock).mock.calls = []; // reset call history
         registry.registerPlugin(TestPlugin);
         plug = registry.pluginStore[0];
     });
@@ -65,7 +69,7 @@ describe("registerPlugin", () => {
     });
 
     test("Replaces the reducer in the store", () => {
-        expect(store.replaceReducer).toBeCalled();
+        expect(store.replaceReducer).toBeCalledTimes(1);
     });
 
     test("adds the initial state object to the plugin", () => {
@@ -103,21 +107,35 @@ describe("unregisterPlugin", () => {
         expect(registry.pluginStore.length).toBe(0);
     });
 
-//     // test("removes the corresponding subtree from store", () => {
+    test("removes the corresponding subtree from store", () => {
+        registry.unregisterPlugin(plug.uid);
+        expect(store.getState()).toEqual({});
+    });
 
-//     // });
+    test("Replaces the reducer in the store", () => {
+        (store.replaceReducer as jest.Mock).mock.calls = []; // reset call history
+        registry.unregisterPlugin(plug.uid);
+        expect(store.replaceReducer).toBeCalledTimes(1);
+    });
 
-//     // test("removes all reducers from store", () => {
+    test("removes the plugin state from the global state", () => {
+        const initState = { [plug.uid]: pluginInitState };
+        const removeAction = { type: "REMOVE", payload: plug.uid };
+        (store.dispatch as jest.Mock).mock.calls = []; // reset call history
+        expect(store.getState()).toEqual(initState);
+        registry.unregisterPlugin(plug.uid);
+        expect(store.dispatch).toBeCalledTimes(1);
+        expect(store.dispatch).toBeCalledWith(removeAction);
+        expect(store.getState()).toEqual({}); // this works cause reducer is empty
+    });
 
-//     // });
+    test("returns true if plugin was found in pluginStore", () => {
+        const result = registry.unregisterPlugin(plug.uid);
+        expect(result).toBeTruthy();
+    });
 
-//     test("returns true if successful", () => {
-//         const result = registry.unregisterPlugin(plug.uid);
-//         expect(result).toBeTruthy();
-//     });
-
-//     test("returns false if not succeeded", () => {
-//         const result = registry.unregisterPlugin("asdf");
-//         expect(result).toBeFalsy();
-//     });
+    test("returns false if plugin was not found in pluginStore", () => {
+        const result = registry.unregisterPlugin("asdf");
+        expect(result).toBeFalsy();
+    });
 });
