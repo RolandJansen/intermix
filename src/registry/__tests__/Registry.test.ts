@@ -11,6 +11,7 @@ jest.mock("../../store/store");
 
 let registry: Registry;
 let globalState: IState;
+let plug: IPlugin;
 const ac = new AudioContext();
 const pluginInitState: IState = { ACTION1: 0, ACTION2: 1 };
 
@@ -27,10 +28,14 @@ beforeEach(() => {
     // handles its argument like a constant
     (store.getState as jest.Mock).mockImplementation(() => globalState);
 
-    // subscribe must return a function to meet the typedef
+    // subscribe must return some function to meet the typedef
     (store.subscribe as jest.Mock).mockReturnValue(() => true);
 
+    (store.replaceReducer as jest.Mock).mock.calls = []; // reset call history
+
     registry = new Registry(ac);
+    registry.registerPlugin(TestPlugin);
+    plug = registry.pluginStore[0];
 });
 
 test("registry has a public member 'pluginStore'", () => {
@@ -38,14 +43,6 @@ test("registry has a public member 'pluginStore'", () => {
 });
 
 describe("registerPlugin", () => {
-
-    let plug: IPlugin;
-
-    beforeEach(() => {
-        (store.replaceReducer as jest.Mock).mock.calls = []; // reset call history
-        registry.registerPlugin(TestPlugin);
-        plug = registry.pluginStore[0];
-    });
 
     test("dumps a plugin instance to the pluginStore", () => {
         // this is pretty obvious but anyway...
@@ -89,11 +86,7 @@ describe("registerPlugin", () => {
 
 describe("unregisterPlugin", () => {
 
-    let plug: IPlugin;
-
     beforeEach(() => {
-        registry.registerPlugin(TestPlugin);
-        plug = registry.pluginStore[0];
         jest.spyOn(plug, "unsubscribe");
     });
 
@@ -113,9 +106,8 @@ describe("unregisterPlugin", () => {
     });
 
     test("Replaces the reducer in the store", () => {
-        (store.replaceReducer as jest.Mock).mock.calls = []; // reset call history
         registry.unregisterPlugin(plug.uid);
-        expect(store.replaceReducer).toBeCalledTimes(1);
+        expect(store.replaceReducer).toBeCalledTimes(2);
     });
 
     test("removes the plugin state from the global state", () => {
