@@ -8,6 +8,7 @@ import { IActionDef } from "./interfaces";
  * https://www.midi.org/specifications-old/item/table-3-control-change-messages-data-bytes-2
  */
 export const midiActionTypes: string[] = [
+    // Shouldn't this be an enum? Does it makes sense at all?
     "00_BANK_SELECT",
     "01_MODULATION_WHEEL",
     "02_BREATH_CONTROLLER",

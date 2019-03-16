@@ -1,6 +1,7 @@
 import { ActionCreatorsMapObject, AnyAction, bindActionCreators, Reducer, ReducersMapObject, Store } from "redux";
 import { store } from "../store/store";
 import combineReducersWithRoot from "./combineReducersWithRoot";
+import { commonActionDefs } from "./commonActionDefs";
 import {
     GetChanged,
     IAction,
@@ -184,7 +185,7 @@ export default class Registry {
      */
     private getBoundActionCreators(pInstance: IPlugin): ActionCreatorsMapObject {
         const creators = pInstance.makeActionCreators(
-            pInstance.actionDefs,
+            [ ...commonActionDefs, ...pInstance.actionDefs ],
             pInstance.pluginId,
         );
         return bindActionCreators(creators, store.dispatch);

@@ -142,8 +142,6 @@ export default abstract class AbstractPlugin implements IPlugin {
         const actionCreators: ActionCreatorsMapObject = {};
 
         actionDefs.forEach((actionDef) => {
-            const min = actionDef.minVal;
-            const max = actionDef.maxVal;
 
             actionCreators[actionDef.type] = (payload: Payload): IAction => {
 
@@ -153,13 +151,16 @@ export default abstract class AbstractPlugin implements IPlugin {
                     payload,
                 };
 
-                if (payload >= min && payload <= max) {
-                    return action;
+                // if min/max exists, check for range
+                if (actionDef.minVal && actionDef.maxVal) {
+                    const min = actionDef.minVal;
+                    const max = actionDef.maxVal;
+
+                    if (!(payload >= min && payload <= max)) {
+                        action.error = new RangeError(`payload ${ payload } out of bounds.
+                        Must be within ${ min } and ${ max }`);
+                    }
                 }
-
-                action.error = new RangeError(`payload ${ payload } out of bounds.
-                Must be within ${ min } and ${ max }`);
-
                 return action;
             };
         });

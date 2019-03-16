@@ -74,10 +74,13 @@ export default class BasicSynth extends AbstractPlugin implements IPlugin {
     return [];
   }
 
-  // this won't work because the id
-  // is missing in action type.
+  // onChange gets called
+  // on every state change
   public onChange(changed: Tuple) {
     switch (changed[0]) {
+      case "NOTE":
+      this.handleNote(changed[1]);
+      return true;
       case "ENV_ATTACK":
       this.handleAttack(changed[1]);
       return true;
@@ -97,13 +100,19 @@ export default class BasicSynth extends AbstractPlugin implements IPlugin {
     }
   }
 
-  // Handles attack-time-change events
-  private handleAttack(value: number) {
+  // Handles attack-time-change events.
+  // You could also archive this with getter/setter
+  // but for the sake of consistency we use one handler
+  // per action in this example.
+  private handleAttack(value: number): void {
     this.attack = value;
   }
 
-  // Handles decay-time-change events
-  private handleDecay = function(value: number) {
+  // Handles decay-time-change events.
+  // You could also archive this with getter/setter
+  // but for the sake of consistency we use one handler
+  // per action in this example.
+  private handleDecay = function(value: number): void {
     this.decay = value;
   };
 
@@ -112,11 +121,6 @@ export default class BasicSynth extends AbstractPlugin implements IPlugin {
     this.filter.type = "lowpass";
     this.filter.Q.value = 15;
     this.filter.frequency.value = 1000;
-  }
-
-  // Connects the filter to main out
-  private connect(): void {
-    this.filter.connect(this.ac.destination);
   }
 
   // Schedules an envelope run
@@ -139,12 +143,11 @@ export default class BasicSynth extends AbstractPlugin implements IPlugin {
   }
 
   // Plays a note
-  private start(note: Note): void {
-    const freq = this.frequencyLookup[note[0]];
+  private start([noteNumber, duration, delay]: Note): void {
+    const freq = this.frequencyLookup[noteNumber];
     const osc = this.getNewOsc(freq);
-    osc.start(note[2]);
-    osc.stop(noteMsg.delay + noteMsg.duration);
-    this.startEnvelope(noteMsg.delay);
+    osc.start(delay);
+    osc.stop(delay + duration);
+    this.startEnvelope(delay);
   }
-
 }

@@ -13,7 +13,11 @@ export interface IPlugin  {
 }
 
 // array with midi note number, duration in ms and delay in ms
-export type Note = [number, number, number];
+export type NoteNumber = number;
+type NoteDuration = number;
+type NoteDelay = number;
+export type Note = [NoteNumber, NoteDuration, NoteDelay];
+
 export type Payload = number | string | boolean | Note;
 
 export interface IAction extends AnyAction {

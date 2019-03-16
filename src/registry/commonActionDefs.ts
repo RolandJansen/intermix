@@ -4,13 +4,15 @@ export const commonActionTypes: string[] = [
     "NOTE",
 ];
 
+/**
+ * Definitions of actions that every
+ * plugin can handle (but don't need to).
+ * They are not part of the plugins state.
+ */
 export const commonActionDefs: IActionDef[] = [
     {
         type: "NOTE",
         desc: "Midi Note Number",
-        minVal: 0,
-        maxVal: 127,
-        defVal: [0, 0],
-        steps: 128,
+        defVal: [0, 0, 0],
     },
 ];

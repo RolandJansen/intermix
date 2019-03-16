@@ -51,9 +51,13 @@ describe("registerPlugin", () => {
 
     test("adds action creator functions to the plugin instance", () => {
         const acKeys = Object.keys(plug.actionCreators);
-        expect(acKeys.length).toBe(2);
         expect(acKeys).toContain("ACTION1");
         expect(acKeys).toContain("ACTION2");
+    });
+
+    test("adds ac functions for common actions to the plugin instance", () => {
+        const acKeys = Object.keys(plug.actionCreators);
+        expect(acKeys).toContain("NOTE");
     });
 
     test("action creators are bound to store.dispatch()", () => {
