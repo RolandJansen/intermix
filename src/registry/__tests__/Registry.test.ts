@@ -44,8 +44,7 @@ test("registry has a public member 'pluginStore'", () => {
 
 describe("registerPlugin", () => {
 
-    test("dumps a plugin instance to the pluginStore", () => {
-        // this is pretty obvious but anyway...
+    test("creates and dumps a plugin instance to the pluginStore", () => {
         expect(registry.pluginStore.length).toEqual(1);
     });
 
@@ -55,7 +54,7 @@ describe("registerPlugin", () => {
         expect(acKeys).toContain("ACTION2");
     });
 
-    test("adds ac functions for common actions to the plugin instance", () => {
+    test("adds action creators for common actions to the plugin instance", () => {
         const acKeys = Object.keys(plug.actionCreators);
         expect(acKeys).toContain("NOTE");
     });
@@ -64,6 +63,7 @@ describe("registerPlugin", () => {
         const action = {
             type: "ACTION1",
             payload: 23,
+            dest: plug.uid,
         };
         plug.actionCreators.ACTION1(23);
         expect((store.dispatch as jest.Mock)).toBeCalledWith(action);

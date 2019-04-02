@@ -1,6 +1,6 @@
 import { ActionCreatorsMapObject } from "redux";
 import AbstractPlugin from "../registry/AbstractPlugin";
-import { IActionDef, IPlugin, Tuple } from "../registry/interfaces";
+import { IActionDef, IPlugin, IPluginMetaData, Tuple } from "../registry/interfaces";
 
 /**
  * This class will be used to indirectly
@@ -11,7 +11,14 @@ import { IActionDef, IPlugin, Tuple } from "../registry/interfaces";
 export default class TestPlugin extends AbstractPlugin implements IPlugin {
 
     public actionCreators: ActionCreatorsMapObject = {};
-    public actionDefs: IActionDef[] = [
+    public readonly metaData: IPluginMetaData = {
+        type:    "instrument",
+        name:    "Testplugin",
+        version: "1.0.0",
+        author:  "Roland Jansen",
+        desc:    "The simplest possible plugin to be used in tests",
+    };
+    public readonly actionDefs: IActionDef[] = [
         {
             type: "ACTION1",
             desc: "action one",
@@ -37,7 +44,7 @@ export default class TestPlugin extends AbstractPlugin implements IPlugin {
     }
 
     constructor(private ac: AudioContext) {
-        super("Testplugin", "v1.0.0", "Roland Jansen");
+        super();
     }
 
     public onChange(changed: Tuple) {

@@ -1,15 +1,20 @@
 import { ActionCreatorsMapObject, AnyAction } from "redux";
 
 export interface IPlugin  {
-    productId: string;
     uid: string;
-    name: string;
-    version: string;
-    author: string;
-    actionDefs: IActionDef[];
+    readonly metaData: IPluginMetaData;
+    readonly actionDefs: IActionDef[];
     actionCreators: ActionCreatorsMapObject;
     frequencyLookup: number[];
     [propName: string]: any;
+}
+
+export interface IPluginMetaData {
+    type: string;
+    name: string;
+    version: string;
+    author: string;
+    desc: string;
 }
 
 // array with midi note number, duration in ms and delay in ms

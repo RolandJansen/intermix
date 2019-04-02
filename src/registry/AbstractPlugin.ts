@@ -1,5 +1,5 @@
-import { ActionCreatorsMapObject, bindActionCreators } from "redux";
-import { IAction, IActionDef, IPlugin, Payload, Tuple } from "./interfaces";
+import { ActionCreatorsMapObject } from "redux";
+import { IActionDef, IPlugin, IPluginMetaData, Tuple } from "./interfaces";
 
 // in plugins müssen actionsCreators in
 // einem objekt gekapselt sein.
@@ -12,52 +12,17 @@ import { IAction, IActionDef, IPlugin, Payload, Tuple } from "./interfaces";
  */
 export default abstract class AbstractPlugin implements IPlugin {
 
+    public abstract readonly metaData: IPluginMetaData;
     public abstract readonly actionDefs: IActionDef[];
     public abstract actionCreators: ActionCreatorsMapObject;
 
-    // frequency lookup not readonly because it has to be fast
-    public frequencyLookup: number[];
-    private readonly _productId: string;
-    private uidLength = 4;
-    private _uid: string;
+    public readonly frequencyLookup: number[];
+    public readonly uidLength = 4;
+    public readonly uid: string;
 
-    constructor(
-        private readonly _name: string,
-        private readonly _version: string,
-        private readonly _author: string) {
-
-        this._productId = this.getProductId(
-            this.name,
-            this.version,
-            this.author,
-        );
-
-        this._uid = this.getRandomString(this.uidLength);
+    constructor() {
+        this.uid = this.getRandomString(this.uidLength);
         this.frequencyLookup = this.getNoteFrequencies();
-    }
-
-    public get productId() {
-        return this._productId;
-    }
-
-    public get uid() {
-        return this._uid;
-    }
-
-    public set uid(uid: string) {
-        this._uid = uid;
-    }
-
-    public get name() {
-        return this._name;
-    }
-
-    public get version() {
-        return this._version;
-    }
-
-    public get author() {
-        return this._author;
     }
 
     public abstract get inputs(): AudioNode[];
@@ -69,42 +34,6 @@ export default abstract class AbstractPlugin implements IPlugin {
      * @param changed Parameter with new value from store
      */
     public abstract onChange(changed: Tuple): boolean;
-
-    /**
-     * Generates a random string.
-     * @param length Length of the output string in digits
-     * @returns      random string
-     */
-    public getRandomString(length: number): string {
-        const randomChars: string[] = [];
-        const input = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-        for (let i = 0; i < length; i++) {
-            randomChars[i] = input.charAt(Math.floor(Math.random() * input.length));
-        }
-
-        return randomChars.join("");
-    }
-
-    /**
-     * Checks that the uid of a plugin instance
-     * is really unique. If not, it generates a
-     * new one and checks again.
-     * However it's important that the plugin which owns the
-     * uid is not part of the pluginList.
-     * @param pluginList An array which holds all plugin instances
-     * @returns The verified uid or a new one
-     */
-    public verifyPluginUid(pluginList: IPlugin[], uid: string): string {
-        const idLength = uid.length;
-        pluginList.forEach((p) => {
-            if (p.uid === uid) {
-                const newUid = this.getRandomString(idLength);
-                uid = this.verifyPluginUid(pluginList, newUid);
-            }
-        });
-        return uid;
-    }
 
     /**
      * A convenience method that takes a string
@@ -132,42 +61,6 @@ export default abstract class AbstractPlugin implements IPlugin {
     }
 
     /**
-     * Creates action creator functions from an object with
-     * action definitions.
-     * @param actionDefs Object with action definitions
-     * @param pluginUid The unique id of the plugin instance
-     * @returns  Object with action creator functions
-     */
-    public makeActionCreators(actionDefs: IActionDef[], pluginUid: string): ActionCreatorsMapObject {
-        const actionCreators: ActionCreatorsMapObject = {};
-
-        actionDefs.forEach((actionDef) => {
-
-            actionCreators[actionDef.type] = (payload: Payload): IAction => {
-
-                const action: IAction = {
-                    type: actionDef.type,
-                    dest: pluginUid,
-                    payload,
-                };
-
-                // if min/max exists, check for range
-                if (actionDef.minVal && actionDef.maxVal) {
-                    const min = actionDef.minVal;
-                    const max = actionDef.maxVal;
-
-                    if (!(payload >= min && payload <= max)) {
-                        action.error = new RangeError(`payload ${ payload } out of bounds.
-                        Must be within ${ min } and ${ max }`);
-                    }
-                }
-                return action;
-            };
-        });
-        return actionCreators;
-    }
-
-    /**
      * Computes the frequencies of all midi notes and returns
      * them as an array. Used for frequency lookup.
      * @see https://newt.phys.unsw.edu.au/jw/notes.html
@@ -184,15 +77,18 @@ export default abstract class AbstractPlugin implements IPlugin {
     }
 
     /**
-     * Computes a unique product identifier by concatenating
-     * name, version and author and returns this string base64 encoded.
-     * @param name    Name of the plugin
-     * @param version Version number (e.g. "1.2.3")
-     * @param author  The developer (author, company, org, etc)
+     * Generates a random string.
+     * @param length Length of the output string in digits
+     * @returns      random string
      */
-    private getProductId(name: string, version: string, author: string) {
-        const pluginId = name + version + author;
-        return btoa(pluginId);
-    }
+    private getRandomString(length: number): string {
+        const randomChars: string[] = [];
+        const input = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
+        for (let i = 0; i < length; i++) {
+            randomChars[i] = input.charAt(Math.floor(Math.random() * input.length));
+        }
+
+        return randomChars.join("");
+    }
 }

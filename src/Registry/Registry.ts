@@ -9,6 +9,7 @@ import {
     IActionHandlerMap,
     IPlugin,
     IState,
+    Payload,
     Select,
     Tuple,
 } from "./interfaces";
@@ -23,12 +24,9 @@ import {
  */
 export default class Registry {
 
-    private _ac: AudioContext;
     private _pluginStore: IPlugin[] = [];
 
-    public constructor(audioContext: AudioContext) {
-        this._ac = audioContext;
-    }
+    public constructor(private ac: AudioContext) { }
 
     public get pluginStore() {
         return this._pluginStore;
@@ -41,13 +39,18 @@ export default class Registry {
      * * adds the plugin to the plugin store
      * @param pluginClass New plugin to be registered
      */
-    public registerPlugin<p extends IPlugin>(pluginClass: new(ac: AudioContext) => p): void {
-        const pInstance = this.getPluginInstance(pluginClass, this._ac);
+    public registerPlugin<p extends IPlugin>(pluginClass: new (ac: AudioContext) => p): void {
+        const pInstance = this.getPluginInstance(pluginClass, this.ac);
 
+        // generate action creator functions and bind them to the dispatcher
         pInstance.actionCreators = this.getBoundActionCreators(pInstance);
+
+        // add plugin instance to the plugin store
         this.pluginStore.push(pInstance);
 
-        this.replaceReducer(this.pluginStore, this.getRootReducer());
+        // build a new root reducers that handles the
+        // plugin state and replace the current one.
+        this.replaceReducer(this.getRootReducer());
 
         // attach the initial state to the plugin
         pInstance.initState = this.getInitialState(pInstance);
@@ -70,14 +73,14 @@ export default class Registry {
      */
     public unregisterPlugin(pluginUid: string): boolean {
         let result = false;
+
         this.pluginStore.forEach((plugin, index) => {
             if (plugin.uid === pluginUid) {
                 plugin.unsubscribe();
                 this._pluginStore.splice(index, 1);
-                this.replaceReducer(this.pluginStore, this.getRootReducer());
+                this.replaceReducer(this.getRootReducer());
                 store.dispatch({ type: "REMOVE", payload: pluginUid });
                 result = true;
-                return;
             }
         });
 
@@ -85,35 +88,37 @@ export default class Registry {
     }
 
     /**
-     * Calculates reducers for all loaded plugins
-     * then combines them with a root reducer and
-     * and replaces the reducer in the redux store.
-     * @param pStore Array with plugin instances
-     * @param rootReducer A redux reducer that handles root state
-     */
-    private replaceReducer(pStore: IPlugin[], rootReducer: Reducer): void {
-        const subReducers: ReducersMapObject = {};
-
-        pStore.forEach((plugin) => {
-            subReducers[plugin.uid] = this.getPluginReducer(plugin);
-        });
-
-        const reducer = combineReducersWithRoot(
-            subReducers,
-            rootReducer,
-        );
-
-        store.replaceReducer(reducer);
-    }
-
-    /**
-     * A plugin instance factory.
+     * A plugin instance factory:
+     * Returns a plugin instance with a unique ID.
      * @param pluginClass The class to be instanciated
      * @param ac An AudioContext instance
      * @returns An instance of the given plugin class
      */
-    private getPluginInstance<p extends IPlugin>(pluginClass: new(ac: AudioContext) => p, ac: AudioContext): p {
-        return new pluginClass(ac);
+    private getPluginInstance<p extends IPlugin>(pluginClass: new (ac: AudioContext) => p, ac: AudioContext): p {
+        let plugin = new pluginClass(ac);
+
+        // repeat instanciation if uid is not unique in pluginStore
+        while (!this.isUidUnique(plugin.uid)) {
+            plugin = new pluginClass(ac);
+        }
+
+        return plugin;
+    }
+
+    /**
+     * Checks if there is another plugin in the
+     * plugin store with the same uid.
+     * However it's important that the plugin which owns the
+     * uid is not part of the pluginList.
+     * @param uid The unique ID of a plugin instance
+     */
+    private isUidUnique(uid: string): boolean {
+        this.pluginStore.forEach((plug) => {
+            if (plug.uid === uid) {
+                return false;
+            }
+        });
+        return true;
     }
 
     /**
@@ -156,7 +161,7 @@ export default class Registry {
         if (globalState.hasOwnProperty(pluginUid)) {
             return globalState[pluginUid];
         }
-        throw new Error(`Plugin with ID ${ pluginUid } not found in state object.`);
+        throw new Error(`Plugin with ID ${pluginUid} not found in state object.`);
     }
 
     /**
@@ -184,11 +189,34 @@ export default class Registry {
      * @param pInstance The plugin instance
      */
     private getBoundActionCreators(pInstance: IPlugin): ActionCreatorsMapObject {
-        const creators = pInstance.makeActionCreators(
-            [ ...commonActionDefs, ...pInstance.actionDefs ],
-            pInstance.pluginId,
+        const creators = this.getActionCreators(
+            [...commonActionDefs, ...pInstance.actionDefs],
+            pInstance.uid,
         );
         return bindActionCreators(creators, store.dispatch);
+    }
+
+    /**
+     * Creates action creator functions from an object with
+     * action definitions.
+     * @param actionDefs Object with action definitions
+     * @param pluginUid The unique id of the plugin instance
+     * @returns  Object with action creator functions
+     */
+    private getActionCreators(actionDefs: IActionDef[], pluginUid: string): ActionCreatorsMapObject {
+        const actionCreators: ActionCreatorsMapObject = {};
+
+        actionDefs.forEach((actionDef) => {
+
+            actionCreators[actionDef.type] = (payload: Payload): IAction => {
+                return {
+                    type: actionDef.type,
+                    dest: pluginUid,
+                    payload,
+                };
+            };
+        });
+        return actionCreators;
     }
 
     /**
@@ -206,6 +234,27 @@ export default class Registry {
         });
 
         return iState;
+    }
+
+    /**
+     * Calculates reducers for all loaded plugins
+     * then combines them with a root reducer and
+     * and replaces the reducer in the redux store.
+     * @param rootReducer A redux reducer that handles root state
+     */
+    private replaceReducer(rootReducer: Reducer): void {
+        const subReducers: ReducersMapObject = {};
+
+        this.pluginStore.forEach((plugin) => {
+            subReducers[plugin.uid] = this.getPluginReducer(plugin);
+        });
+
+        const reducer = combineReducersWithRoot(
+            subReducers,
+            rootReducer,
+        );
+
+        store.replaceReducer(reducer);
     }
 
     /**
@@ -266,7 +315,7 @@ export default class Registry {
     private getRootReducer(): Reducer {
         return (state = {}, action: AnyAction) => {
             if (action.type === "REMOVE" &&
-            state.hasOwnProperty(action.payload)) {
+                state.hasOwnProperty(action.payload)) {
                 const newState = JSON.parse(JSON.stringify(state));
                 delete newState[action.payload];
                 return newState;
