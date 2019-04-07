@@ -27,17 +27,20 @@ type Pattern = IAction[][];
  */
 export default class SeqPart {
 
-    public static stepsPerBarDefault = 16; // global pattern resolution: 1bar = 1 full note
-    public name = "Part";
+    public static stepsPerBarDefault = 16;  // global pattern resolution: 1bar = 1 full note
+    public static partName = "Part";        // global default name
+
+    public name = SeqPart.partName;
     private stepMultiplier: number; // 64 = stepsPerBar * stepMultiplier
     private pattern: Pattern;       // holds the sequence data
 
     /**
      * Initializes the pattern
-     * @param length      length in stepsPerBar (if sPB=16: 16=1bar; 8=1/2bar)
+     * @param length      length in stepsPerBar (if sPB=16: 16=1bar)
      * @param stepsPerBar pattern resolution: 1bar = 1 full note
      */
-    constructor(length: number, public stepsPerBar = SeqPart.stepsPerBarDefault) {
+    constructor(length: number = SeqPart.stepsPerBarDefault,
+                public stepsPerBar = SeqPart.stepsPerBarDefault) {
         if ((64 % stepsPerBar) === 0) {
             this.stepMultiplier = 64 / stepsPerBar;
             this.pattern = this.initPattern(length);
@@ -47,14 +50,30 @@ export default class SeqPart {
     }
 
     /**
+     * The actual array structure of the part.
+     * You should use higher order API unless you
+     * know exactly what you're doing.
+     */
+    public get seqPattern() {
+        return this.pattern;
+    }
+
+    /**
+     * Get the length of the pattern in stepsPerBar
+     */
+    public get length() {
+        return this.pattern.length / this.stepMultiplier;
+    }
+
+    /**
      * Adds an event to the pattern at a given position
      * @param  action  The event (note, controller, whatever)
-     * @param  position  Position in the pattern
+     * @param  step  Position in the pattern
      * @return The part object to make the function chainable.
      */
-    public addAction(action: IAction, position: number): SeqPart {
-        if (position <= this.pattern.length) {
-            const pos = position * this.stepMultiplier;
+    public addAction(action: IAction, step: number): SeqPart {
+        if (step <= this.pattern.length) {
+            const pos = step * this.stepMultiplier;
             this.pattern[pos].push(action);
         } else {
             throw new Error("Position out of pattern bounds.");
@@ -65,11 +84,11 @@ export default class SeqPart {
     /**
      * Removes an event at a given position
      * @param  action  The event (note, controller, whatever)
-     * @param  position  Position in the pattern
+     * @param  step  Position in the pattern
      * @return The part object to make the function chainable
      */
-    public removeAction(action: IAction, position: number): SeqPart {
-        const pos = (position) * this.stepMultiplier;
+    public removeAction(action: IAction, step: number): SeqPart {
+        const pos = step * this.stepMultiplier;
         const index = this.pattern[pos].indexOf(action);
         if (index >= 0) {
             this.pattern[pos].splice(index, 1);
@@ -78,7 +97,7 @@ export default class SeqPart {
     }
 
     /**
-     * Get all positions that contain at least one event.
+     * Get all positions that contain at least one note.
      * Can be handy to draw events on the screen.
      * @example <caption>from {@tutorial Stepsequencer}</caption>
      * bdSteps = bdPart.getNotePositions();
@@ -88,7 +107,6 @@ export default class SeqPart {
      * @return List with all non-empty pattern entries
      */
     public getNotePositions() {
-        // Sollte für jede Note ein Array oder Objekt zurückgeben (note, position, länge)
         const positions: number[] = [];
         this.pattern.forEach((actions, index) => {
             if (actions.length > 0) {
@@ -102,12 +120,14 @@ export default class SeqPart {
         return positions;
     }
 
-    /**
-     * Get the length of the pattern in 64th notes
-     * @return Length of the pattern
-     */
-    public getLength(): number {
-        return this.pattern.length;
+    public getActionsAtStep(step: number): IAction[] {
+        let actions: IAction[] = [];
+        const position = step * this.stepMultiplier;
+
+        if (position < this.pattern.length) {
+            actions = this.pattern[position];
+        }
+        return actions;
     }
 
     /**
@@ -116,7 +136,7 @@ export default class SeqPart {
      */
     public extendOnTop(extLength: number) {
         const extension = this.initPattern(extLength);
-        this.pattern = extension.concat(this.pattern);
+        this.pattern = [ ...extension, ...this.pattern];
     }
 
     /**
@@ -141,16 +161,5 @@ export default class SeqPart {
         }
         return pattern;
     }
-
-    /**
-     * Removes all events at a given position
-     * @param  position Position in the pattern
-     * @return The part object to make the function chainable
-     */
-    // private removeEvents(position) {
-    //     const pos = (position) * this._multiply;
-    //     this.pattern[pos] = [];
-    //     return this;
-    // }
 
 }

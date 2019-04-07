@@ -1,121 +1,186 @@
+import { IAction } from "../../../registry/interfaces";
 import SeqPart from "../SeqPart";
 
-let part: SeqPart;
+describe("SeqPart", () => {
+    let part: SeqPart;
 
-// var evt1 = { 'uid': '123', 'msg': { 'type': 'note', 'value': 60, 'velocity': 1 } };
-// var evt2 = { 'uid': '456', 'msg': { 'type': 'volume', 'value': 72 } };
+    const action1: IAction = {
+        type: "NOTE",
+        dest: "abcd",
+        payload: [0, 0, 0, 0],
+    };
+    const action2 = {
+        type: "SYSEX",
+        dest: "abcd",
+        payload: 0x14a70f,
+    };
 
-beforeEach(() => {
-    part = new SeqPart(16);
+    beforeEach(() => {
+        part = new SeqPart();
+    });
+
+    test("has a default name", () => {
+        expect(part.name).toBe("Part");
+    });
+
+    test("has 16 stepsPerBar by default", () => {
+        expect(part.stepsPerBar).toEqual(16);
+    });
+
+    test("can have other stepsPerBar values", () => {
+        const customPart = new SeqPart(undefined, 32);
+        expect(customPart.stepsPerBar).toEqual(32);
+    });
+
+    test("throws if 64 is not divisible by stepsPerBar", () => {
+        expect(() => {
+            const sp = new SeqPart(undefined, 23);
+        }).toThrow();
+    });
+
+    test("has one bar pattern-length", () => {
+        expect(part.length).toEqual(16);
+    });
+
+    test("can have another pattern-length", () => {
+        const otherPart = new SeqPart(224);
+        expect(otherPart.length).toEqual(224);
+    });
+
+    describe(".addAction", () => {
+
+        it("is chainable", () => {
+            const ctx = part.addAction(action1, 2);
+            expect(ctx).toEqual(part);
+        });
+
+        it("adds an action at a given position", () => {
+            // cumbersome test because we want to avoid
+            // the use of other high level api (part.getActionsAtStep())
+            const stepMultiplyer = 64 / part.stepsPerBar;
+            part.addAction(action1, 4);
+
+            const actions = part.seqPattern[4 * stepMultiplyer];
+            expect(actions[0]).toBe(action1);
+        });
+
+        it("throws if position is out of pattern bounds", () => {
+            expect(() => {
+                part.addAction(action1, 16);
+            }).toThrow();
+        });
+
+    });
+
+    describe(".getActionsAtStep", () => {
+
+        it("returns an array with actions if any", () => {
+            part.addAction(action1, 2);
+            const actions = part.getActionsAtStep(2);
+            expect(actions[0]).toBe(action1);
+        });
+
+        it("returns an empty array if step is out of bounds", () => {
+            expect(part.getActionsAtStep(16)).toEqual([]);
+        });
+
+    });
+
+    describe(".removeEvent", () => {
+
+        beforeEach(() => {
+            part.addAction(action1, 4).addAction(action2, 4);
+        });
+
+        it("is chainable", () => {
+            const ctx = part.removeAction(action1, 4);
+            expect(ctx).toEqual(part);
+        });
+
+        it("removes an event from a given position", () => {
+            // cumbersome test because we want to avoid
+            // the use of other high level api (part.getActionsAtStep())
+            const stepMultiplyer = 64 / part.stepsPerBar;
+            part.removeAction(action1, 4);
+
+            const actions = part.seqPattern[4 * stepMultiplyer];
+            expect(actions[0]).toEqual(action2);
+        });
+
+        it("fails silently if event is not found at position", () => {
+            const oldPattern = [...part.seqPattern];
+            part.removeAction(action1, 3);
+            expect(part.seqPattern).toEqual(oldPattern);
+        });
+
+        it("throws if position is out of pattern bounds", () => {
+            expect(() => {
+                part.removeAction(action1, 16);
+            }).toThrow();
+        });
+
+    });
+
+    describe(".getNotePositions", () => {
+
+        it("returns an array with all positions where note events are found", () => {
+            part.addAction(action1, 2)
+                .addAction(action2, 4)
+                .addAction(action2, 6)
+                .addAction(action1, 6);
+
+            expect(part.getNotePositions()).toEqual([2, 6]);
+        });
+
+    });
+
+    describe(".getActionsAtStep", () => {
+
+        it("returns an array with all actions at a given step", () => {
+            part.addAction(action1, 4).addAction(action2, 4);
+
+            const actions = part.getActionsAtStep(4);
+            expect(actions.length).toEqual(2);
+            expect(actions).toContain(action1);
+            expect(actions).toContain(action2);
+        });
+
+        it("returns an empty array if step is out of bounds", () => {
+            const actions = part.getActionsAtStep(23);
+            expect(actions.length).toEqual(0);
+        });
+
+    });
+
+    describe(".extendOnTop", () => {
+
+        it("extends the pattern on top", () => {
+            const newSteps = 23;
+            const oldPatternLength = part.length;
+            const oldPatternZero = newSteps * (64 / part.stepsPerBar);
+
+            part.addAction(action1, 0);
+            part.extendOnTop(newSteps);
+
+            expect(part.length).toEqual(newSteps + oldPatternLength);
+            expect(part.seqPattern[oldPatternZero][0]).toEqual(action1);
+        });
+
+    });
+
+    describe(".extendOnEnd", () => {
+
+        it("extends the pattern on end", () => {
+            const newSteps = 23;
+            const oldPatternLength = part.length;
+
+            part.addAction(action1, 0);
+            part.extendOnEnd(newSteps);
+
+            expect(part.length).toEqual(newSteps + oldPatternLength);
+            expect(part.seqPattern[0][0]).toEqual(action1);
+        });
+
+    });
+
 });
-
-afterEach(() => {
-    // part = null;
-});
-
-test("get the default name", () => {
-    expect(part.name).toBe("Part");
-});
-
-// it('should get initialized by default with one bar pattern-length', function () {
-//     expect(part.getLength()).toEqual(64);
-// });
-
-// it('should get initialized with a given pattern-length', function () {
-//     var otherPart = new Part(224);
-//     expect(otherPart.getLength()).toEqual(224);
-// });
-
-// describe('.addEvent', function () {
-
-//     it('is chainable', function () {
-//         var ctx = part.addEvent(evt1, 2);
-//         expect(ctx).toEqual(part);
-//     });
-
-//     it('on success adds an event at a given position', function () {
-//         part.addEvent(evt1, 4);
-//         expect(part.pattern[16][0]).toBe(evt1);
-//     });
-
-//     it('on failure throws an error if position is out of pattern bounds', function () {
-//         expect(function () { part.addEvent(17); }).toThrowError('Position out of pattern bounds.');
-//     });
-
-// });
-
-// describe('.removeEvent', function () {
-
-//     beforeEach(function () {
-//         part.addEvent(evt1, 4);
-//         part.addEvent(evt2, 4);
-//     });
-
-//     afterEach(function () {
-//         part.pattern[16] = [];
-//     });
-
-//     it('is chainable', function () {
-//         var ctx = part.removeEvent(evt1, 4);
-//         expect(ctx).toEqual(part);
-//     });
-
-//     it('removes an event from a given position', function () {
-//         part.removeEvent(evt1, 4);
-//         expect(part.pattern[16][0]).toBe(evt2);
-//     });
-
-//     it('does nothing if event is not found at position', function () {
-//         part.removeEvent(evt1, 3);
-//     });
-
-//     it('does nothing if a wrong event is passed in', function () {
-//         var evt = {};
-//         part.removeEvent(evt, 4);
-//         expect(part.pattern[16].length).toEqual(2);
-//     });
-
-// });
-
-// describe('.getLength', function () {
-
-//     it('returns the length of the pattern in 64th notes', function () {
-//         expect(part.getLength()).toEqual(part.pattern.length);
-//     });
-
-// });
-
-// describe('.getNotePositions', function () {
-
-//     it('returns an array with all positions where note events are found', function () {
-//         part.addEvent(evt1, 2)
-//             .addEvent(evt2, 4)
-//             .addEvent(evt2, 6)
-//             .addEvent(evt1, 6);
-
-//         expect(part.getNotePositions()).toEqual([2, 6]);
-//     });
-
-// });
-
-// describe('.extendOnTop', function () {
-
-//     it('extends the pattern on top', function () {
-//         part.addEvent(evt1, 0);
-//         part.extendOnTop(32);
-//         expect(part.getLength()).toEqual(96);
-//         expect(part.pattern[32][0]).toBe(evt1);
-//     });
-
-// });
-
-// describe('.extendOnEnd', function () {
-
-//     it('extends the pattern on end', function () {
-//         part.addEvent(evt1, 0);
-//         part.extendOnEnd(32);
-//         expect(part.getLength()).toEqual(96);
-//         expect(part.pattern[0][0]).toBe(evt1);
-//     });
-
-// });

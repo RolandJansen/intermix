@@ -13,6 +13,6 @@ export const commonActionDefs: IActionDef[] = [
     {
         type: "NOTE",
         desc: "Midi Note Number",
-        defVal: [0, 0, 0],
+        defVal: [0, 0, 0, 0],
     },
 ];

@@ -21,7 +21,8 @@ export interface IPluginMetaData {
 export type NoteNumber = number;
 type NoteDuration = number;
 type NoteDelay = number;
-export type Note = [NoteNumber, NoteDuration, NoteDelay];
+type NoteVelocity = number;
+export type Note = [NoteNumber, NoteDuration, NoteDelay, NoteVelocity];
 
 export type Payload = number | string | boolean | Note;
 
