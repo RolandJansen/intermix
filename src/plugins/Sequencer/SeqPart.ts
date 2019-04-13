@@ -31,6 +31,7 @@ export default class SeqPart {
     public static partName = "Part";        // global default name
 
     public name = SeqPart.partName;
+    public pointer: number;         // can be set to a specific point in the pattern (by the sequencer)
     private stepMultiplier: number; // 64 = stepsPerBar * stepMultiplier
     private pattern: Pattern;       // holds the sequence data
 
