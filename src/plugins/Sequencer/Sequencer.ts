@@ -1,6 +1,7 @@
 import { ActionCreatorsMapObject, AnyAction } from "redux";
 import AbstractPlugin from "../../registry/AbstractPlugin";
 import { IActionDef, IAudioAction, IPlugin, Tuple } from "../../registry/interfaces";
+// import scheduleWorker from "./scheduleWorker";
 import seqActionDefs from "./SeqActionDefs";
 import SeqPart from "./SeqPart";
 
