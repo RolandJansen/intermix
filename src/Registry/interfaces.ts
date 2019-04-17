@@ -17,21 +17,23 @@ export interface IPluginMetaData {
     desc: string;
 }
 
-// array with midi note number, duration in ms and delay in ms
-export type NoteNumber = number;
-type NoteDuration = number;
-type NoteDelay = number;
-type NoteVelocity = number;
-export type Note = [NoteNumber, NoteDuration, NoteDelay, NoteVelocity];
+type NoteNumber = number;
+type Velocity = number;
+export type Note = [ NoteNumber, Velocity ];
 
 export type Payload = number | string | boolean | Note;
 
 export interface IAction extends AnyAction {
-    // type: string;
     dest: string;
     payload: Payload;
     meta?: string;
     error?: Error;
+}
+
+export interface IAudioAction extends IAction {
+    duration?: number;
+    delay?: number;
+    sequencerSteps?: number;
 }
 
 // Is this in redux already?

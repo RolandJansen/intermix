@@ -1,6 +1,6 @@
-import { IAction } from "../../registry/interfaces";
+import { IAction, IAudioAction } from "../../registry/interfaces";
 
-type Pattern = IAction[][];
+type Pattern = IAudioAction[][];
 
 /**
  * Represents a part of a sequence. It can be
@@ -57,6 +57,14 @@ export default class SeqPart {
      */
     public get seqPattern() {
         return this.pattern;
+    }
+
+    public getActionsAtPointerPosition(): IAudioAction[] {
+        let actionsAtPointerPosition: IAudioAction[] = [];
+        if (this.pointer < this.pattern.length) {
+            actionsAtPointerPosition = this.pattern[this.pointer];
+        }
+        return actionsAtPointerPosition;
     }
 
     /**
