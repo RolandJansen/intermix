@@ -37,7 +37,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
 
     // constants
     private readonly resolution = 64;       // shortest possible note.
-    private readonly intervalInMili = 100;  // the interval the scheduler gets invoked.
+    private readonly schedulerIntervalInMili = 100;
     private readonly lookaheadInSec = 0.3;  // should be longer than interval.
 
     private bpm = Sequencer.bpmDefault;
@@ -67,7 +67,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
                 this.scheduler();
             }
 
-            this.scheduleWorker.postMessage({ interval: this.intervalInMili });
+            this.scheduleWorker.postMessage({ interval: this.schedulerIntervalInMili });
         };
     }
 
