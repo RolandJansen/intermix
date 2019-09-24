@@ -7,23 +7,20 @@
  * because of typescript and webpack.
  * Usage: See Sequencer.js for details
  */
-var timer = null;
-var interval = 100;
 
-var worker = function(self) {
-  self.addEventListener('message', function(e) {
-    if (e.data === 'start') {
-      timer = setInterval(function() {self.postMessage('tick');}, interval);
-    } else if (e.data === 'stop') {
-      clearInterval(timer);
-    } else if (e.data.interval) {
-      interval = e.data.interval;
-      if (timer) {
+let timer = null;
+let interval = 100;
+
+addEventListener("message", (e) => {
+    if (e.data === "start") {
+        timer = setInterval(() => { postMessage("tick", "*"); }, interval);
+    } else if (e.data === "stop") {
         clearInterval(timer);
-        timer = setInterval(function() {self.postMessage('tick');}, interval);
-      }
+    } else if (e.data.interval) {
+        interval = e.data.interval;
+        if (timer) {
+            clearInterval(timer);
+            timer = setInterval(() => { postMessage("tick", "*"); }, interval);
+        }
     }
-  });
-};
-
-module.exports = worker;
+});

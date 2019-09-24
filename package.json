@@ -58,8 +58,10 @@
     "testURL": "http://localhost/"
   },
   "devDependencies": {
+    "@types/benchmark": "^1.0.31",
     "@types/jest": "^23.3.1",
     "atob": "^2.0.3",
+    "benchmark": "^2.1.4",
     "dts-bundle-webpack": "^1.0.2",
     "expect-more-jest": "^2.3.0",
     "jest": "^23.4.2",

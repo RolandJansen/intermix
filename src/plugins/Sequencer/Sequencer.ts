@@ -1,6 +1,7 @@
-import { ActionCreatorsMapObject } from "redux";
+import { ActionCreatorsMapObject, AnyAction } from "redux";
 import AbstractPlugin from "../../registry/AbstractPlugin";
-import { IAction, IActionDef, IPlugin, Tuple } from "../../registry/interfaces";
+import { IActionDef, IAudioAction, IPlugin, Tuple } from "../../registry/interfaces";
+// import scheduleWorker from "./scheduleWorker";
 import seqActionDefs from "./SeqActionDefs";
 import SeqPart from "./SeqPart";
 
@@ -36,7 +37,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
 
     // constants
     private readonly resolution = 64;       // shortest possible note.
-    private readonly intervalInMili = 100;  // the interval the scheduler gets invoked.
+    private readonly schedulerIntervalInMili = 100;
     private readonly lookaheadInSec = 0.3;  // should be longer than interval.
 
     private bpm = Sequencer.bpmDefault;
@@ -66,7 +67,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
                 this.scheduler();
             }
 
-            this.scheduleWorker.postMessage({ interval: this.intervalInMili });
+            this.scheduleWorker.postMessage({ interval: this.schedulerIntervalInMili });
         };
     }
 
@@ -134,6 +135,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
     private stop(): void {
         this.scheduleWorker.postMessage("stop");
         this.nextStepTimeInSec = 0;
+        this.resetQueuePointer();
         this.isRunning = false;
     }
 
@@ -187,7 +189,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
 
         while (this.nextStepTimeInSec < limit) {
             this.addPartsToRunqueue();
-            this.fireActionsForNextStep();
+            this.sendAllActionsInNextStep();
             this.stepList.push(this.getMasterQueuePosition(this.nextStep, this.nextStepTimeInSec));
             this.nextStepTimeInSec += this.timePerStepInSec;
 
@@ -249,19 +251,19 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
     /**
      * Fires all events for the upcomming step.
      */
-    private fireActionsForNextStep(): void {
+    private sendAllActionsInNextStep(): void {
         const markForDelete = [];
         this.runqueue.forEach((part, index) => {
             if (part.pointer === part.length - 1) {
                 markForDelete.unshift(index);
             } else {
-                const nextStepActions = part.pattern[part.pointer];
+                const nextStepActions = part.getActionsAtPointerPosition();
                 if (nextStepActions && nextStepActions.length > 1) {
                     nextStepActions.forEach((seqEvent) => {
-                        this.fireAction(seqEvent, this.nextStepTimeInSec);
+                        this.sendAction(seqEvent, this.nextStepTimeInSec);
                     });
                 } else if (nextStepActions && nextStepActions.length === 1) {
-                    this.fireAction(nextStepActions[0], this.nextStepTimeInSec);
+                    this.sendAction(nextStepActions[0], this.nextStepTimeInSec);
                 }
             }
             part.pointer++;
@@ -270,14 +272,24 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
     }
 
     /**
-     * Adds delay to an action and dispatches it.
+     * Adds delay and eventually durationto an action and
+     * returns it. The dispatching
+     * happens automatically as the function gets invoked.
      * @param  seqEvent  The event to process
      * @param  delay     time in seconds when the event should start
      */
-    private fireAction(action: IAction, delay: number): void {
-        action.delay = delay;
-    //     seqEvent.msg.duration = this.getDurationTime(seqEvent.msg.steps);
-    //     window.intermix.eventBus.sendToRelayEndpoint(seqEvent.uid, seqEvent);
+    private sendAction(action: IAudioAction, delay: number): IAudioAction {
+        const actionOut = action;
+
+        switch (action.type) {
+            case "NOTE":
+            actionOut.delay = delay;
+            actionOut.duration = this.getDurationTime(action.sequencerSteps);
+            default:
+            actionOut.delay = delay;
+        }
+
+        return actionOut;
     }
 
     /**
@@ -325,7 +337,6 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
         };
     }
 
-
     /**
      * Resumes the AudioContext and starts the sequencer at its
      * current position. It just starts if sequencer and AudioContext
@@ -347,16 +358,12 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
      * @param  part      An instance of Part
      * @param  position  Position in the master queue
      */
-    private addPart(part: SeqPart, position: number): void {
-        if (part.length && part.pattern) {
-            if (!this.queue[position]) {
-                this.queue[position] = [];
-            }
-            this.queue[position].push(part);
-            return this;
-        } else {
-            throw new TypeError("Given parameter doesn't seem to be a part object");
+    private addPart(part: SeqPart, position: number): Sequencer {
+        if (!this.queue[position]) {
+            this.queue[position] = [];
         }
+        this.queue[position].push(part);
+        return this;
     }
 
     /**
@@ -364,19 +371,15 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
      * @param  part     Part instance to be removed
      * @param  position Position in the master queue
      */
-    private removePart(part: SeqPart, position: number): void {
-        if (part.length && part.pattern) {
-            if (this.queue[position] instanceof Array &&
-                this.queue[position].length > 0) {
-                const index = this.queue[position].indexOf(part);
-                if (index >= 0) {
-                    this.queue[position].splice(index, 1);
-                }
+    private removePart(part: SeqPart, position: number): Sequencer {
+        if (this.queue[position] instanceof Array &&
+            this.queue[position].length > 0) {
+            const index = this.queue[position].indexOf(part);
+            if (index >= 0) {
+                this.queue[position].splice(index, 1);
             }
-            return this;
-        } else {
-            throw new TypeError("Given parameter doesn't seem to be a part object");
         }
+        return this;
     }
 
     /**
@@ -389,8 +392,8 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
      * @param   sourceArray Array that should be copied.
      * @return  Copy of the source array.
      */
-    private copyArray(sourceArray: []): [] {
-        const destArray = new Array(sourceArray.length);
+    private copyArray(sourceArray: any[]): any[] {
+        const destArray: any[] = new Array(sourceArray.length);
         let i = sourceArray.length;
         while (i--) {
             destArray[i] = sourceArray[i];
