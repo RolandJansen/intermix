@@ -23,6 +23,10 @@ module.exports = {
     module: {
         rules: [
             {
+                test: /\.worker\.ts$/,
+                use: 'worker-loader'
+            },
+            {
                 test: /\.tsx?$/,
                 use: 'ts-loader',
                 exclude: /(node-modules|bower_components)/

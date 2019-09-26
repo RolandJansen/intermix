@@ -1,4 +1,5 @@
 import { Store } from "redux";
+import Sequencer from "./plugins/Sequencer/Sequencer";
 import Registry from "./registry/Registry";
 import { store } from "./store/store";
 
@@ -21,10 +22,12 @@ export default class Intermix {
 
     private _audioContext: AudioContext;
     private _registry: Registry;
+    private _sequencer: Sequencer;
 
     constructor() {
         this._audioContext = new AudioContext();
         this._registry = new Registry(this.audioContext);
+        this._sequencer = new Sequencer(this._audioContext);
     }
 
     get audioContext(): AudioContext {

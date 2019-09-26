@@ -1,6 +1,6 @@
-import { IAction, IAudioAction } from "../../registry/interfaces";
+import { IAction } from "../../registry/interfaces";
 
-type Pattern = IAudioAction[][];
+type Pattern = IAction[][];
 
 /**
  * Represents a part of a sequence. It can be
@@ -31,7 +31,7 @@ export default class SeqPart {
     public static partName = "Part";        // global default name
 
     public name = SeqPart.partName;
-    public pointer: number;         // can be set to a specific point in the pattern (by the sequencer)
+    public pointer: number = 0;         // can be set to a specific point in the pattern (by the sequencer)
     private stepMultiplier: number; // 64 = stepsPerBar * stepMultiplier
     private pattern: Pattern;       // holds the sequence data
 
@@ -59,8 +59,8 @@ export default class SeqPart {
         return this.pattern;
     }
 
-    public getActionsAtPointerPosition(): IAudioAction[] {
-        let actionsAtPointerPosition: IAudioAction[] = [];
+    public getActionsAtPointerPosition(): IAction[] {
+        let actionsAtPointerPosition: IAction[] = [];
         if (this.pointer < this.pattern.length) {
             actionsAtPointerPosition = this.pattern[this.pointer];
         }

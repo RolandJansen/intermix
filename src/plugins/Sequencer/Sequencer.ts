@@ -1,11 +1,19 @@
+// tslint:disable-next-line: no-reference
+///<reference path="../../../typings/custom.d.ts" />
 import { ActionCreatorsMapObject, AnyAction } from "redux";
 import AbstractPlugin from "../../registry/AbstractPlugin";
 import { IActionDef, IAudioAction, IPlugin, Tuple } from "../../registry/interfaces";
+import ScheduleWorker from "./scheduler.worker";
 // import scheduleWorker from "./scheduleWorker";
 import seqActionDefs from "./SeqActionDefs";
 import SeqPart from "./SeqPart";
 
 type SeqQueue = SeqPart[][];
+
+interface IQueuePosition {
+    position: number;
+    timestamp: number;
+}
 
 /**
  * The main class of the sequencer. It does the queuing of
@@ -33,7 +41,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
 
     public readonly actionDefs: IActionDef[] = seqActionDefs;
 
-    public actionCreators: ActionCreatorsMapObject;
+    public actionCreators: ActionCreatorsMapObject = {};
 
     // constants
     private readonly resolution = 64;       // shortest possible note.
@@ -46,8 +54,8 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
 
     private timePerStepInSec: number;           // period of time between two steps
     private nextStepTimeInSec: number;      // time in seconds when the next step will be triggered
-    private nextStep: number;          // position in the queue that will get triggered next
-    private stepList = [];         // list of steps that were triggered but are still ahead of time
+    private nextStep: number = 0;          // position in the queue that will get triggered next
+    private stepList: IQueuePosition[] = [];         // list of steps that were triggered but are still ahead of time
     private lastPlayedStep = 0;    // step in queue that was played (not triggered) recently (used for drawing).
     private loop = false;          // play a section of the queue in a loop
     private loopStart = 0;         // first step of the loop
@@ -56,13 +64,14 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
     // draw function with the lastPlayedStep int as parameter.
 
     // Initialize the scheduler-timer
-    private scheduleWorker = new Worker("scheduleWorker");
+    private scheduleWorker = new ScheduleWorker("");
 
     constructor(private ac: AudioContext) {
         super();
         this.timePerStepInSec = this.getTimePerStep();
+        this.nextStepTimeInSec = this.timePerStepInSec;
 
-        this.scheduleWorker.onmessage = (e) => {
+        this.scheduleWorker.onmessage = (e: MessageEvent) => {
             if (e.data === "tick") {
                 this.scheduler();
             }
@@ -206,7 +215,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
      */
     private draw(): void {
         if (this.isRunning) {
-            if (this.stepList[0].time <= this.ac.currentTime) {
+            if (this.stepList[0].timestamp <= this.ac.currentTime) {
                 this.updateFrame(this.stepList[0].position);
                 this.stepList.shift();
             }
@@ -252,7 +261,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
      * Fires all events for the upcomming step.
      */
     private sendAllActionsInNextStep(): void {
-        const markForDelete = [];
+        const markForDelete: number[] = [];
         this.runqueue.forEach((part, index) => {
             if (part.pointer === part.length - 1) {
                 markForDelete.unshift(index);
@@ -272,7 +281,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
     }
 
     /**
-     * Adds delay and eventually durationto an action and
+     * Adds delay and eventually duration to an action and
      * returns it. The dispatching
      * happens automatically as the function gets invoked.
      * @param  seqEvent  The event to process
@@ -284,7 +293,9 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
         switch (action.type) {
             case "NOTE":
             actionOut.delay = delay;
-            actionOut.duration = this.getDurationTime(action.sequencerSteps);
+            if (action.sequencerSteps) {
+                actionOut.duration = this.getDurationTime(action.sequencerSteps);
+            }
             default:
             actionOut.delay = delay;
         }
@@ -330,10 +341,10 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
         this.setQueuePointer(0);
     }
 
-    private getMasterQueuePosition(step: number, timestamp: number) {
+    private getMasterQueuePosition(step: number, timestamp: number): IQueuePosition {
         return {
             position: step,
-            time: timestamp,
+            timestamp,
         };
     }
 
