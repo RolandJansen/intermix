@@ -10,7 +10,6 @@ import { IActionDef, IPlugin, IPluginMetaData, Tuple } from "../registry/interfa
  */
 export default class TestPlugin extends AbstractPlugin implements IPlugin {
 
-    public actionCreators: ActionCreatorsMapObject = {};
     public readonly metaData: IPluginMetaData = {
         type:    "instrument",
         name:    "Testplugin",

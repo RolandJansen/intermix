@@ -1,5 +1,5 @@
 import { ActionCreatorsMapObject } from "redux";
-import { IActionDef, IPlugin, IPluginMetaData, Tuple } from "./interfaces";
+import { IActionDef, IPlugin, IPluginMetaData, IState, Tuple } from "./interfaces";
 
 // in plugins müssen actionsCreators in
 // einem objekt gekapselt sein.
@@ -14,11 +14,14 @@ export default abstract class AbstractPlugin implements IPlugin {
 
     public abstract readonly metaData: IPluginMetaData;
     public abstract readonly actionDefs: IActionDef[];
-    public abstract actionCreators: ActionCreatorsMapObject;
+    // public abstract actionCreators: ActionCreatorsMapObject;
 
     public readonly frequencyLookup: number[];
     public readonly uidLength = 4;
     public readonly uid: string;
+
+    public actionCreators: ActionCreatorsMapObject = {};
+    public initState: IState = {};
 
     constructor() {
         this.uid = this.getRandomString(this.uidLength);
@@ -27,6 +30,7 @@ export default abstract class AbstractPlugin implements IPlugin {
 
     public abstract get inputs(): AudioNode[];
     public abstract get outputs(): AudioNode[];
+    // public abstract unsubscribe(): void;
 
     /**
      * This gets called by the registry when the store
@@ -34,6 +38,10 @@ export default abstract class AbstractPlugin implements IPlugin {
      * @param changed Parameter with new value from store
      */
     public abstract onChange(changed: Tuple): boolean;
+
+    public unsubscribe() {
+        // will be overridden by the registry
+    }
 
     /**
      * A convenience method that takes a string

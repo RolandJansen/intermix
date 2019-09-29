@@ -18,43 +18,41 @@ import { store } from "./store/store";
 // intermix.eventBus = new intermix.EventBus();
 // import Helper from "./Helper";
 
-export default class Intermix {
+const reduxStore: Store = store;
 
-    private _audioContext: AudioContext;
-    private _registry: Registry;
-    private _sequencer: Sequencer;
+const audioContext: AudioContext = new AudioContext();
+const registry: Registry = new Registry(audioContext);
 
-    constructor() {
-        this._audioContext = new AudioContext();
-        this._registry = new Registry(this.audioContext);
-        this._sequencer = new Sequencer(this._audioContext);
-    }
-
-    get audioContext(): AudioContext {
-        return this._audioContext;
-    }
-
-    get store(): Store {
-        return store;
-    }
-
-    public getPluginInstanceRef(instanceId: number): boolean {
-        return true;
-    }
-
-    public loadPlugin(): boolean {
-        return true;
-    }
-
-    public removePlugin(): boolean {
-        return true;
-    }
-
-    public makePluginInstance(pluginId: number): boolean {
-        return true;
-    }
-
-    private initDefaultPlugins(): boolean {
-        return true;
-    }
+export function getSequencerInstance(): Sequencer {
+    const seq: Sequencer = registry.registerPlugin(Sequencer);
+    return seq;
 }
+
+    // this should be encapsulated in a dev namespace
+    // get audioContext(): AudioContext {
+    //     return this._audioContext;
+    // }
+
+    // get store(): Store {
+    //     return store;
+    // }
+
+    // public getPluginInstanceRef(instanceId: number): boolean {
+    //     return true;
+    // }
+
+    // public loadPlugin(): boolean {
+    //     return true;
+    // }
+
+    // public removePlugin(): boolean {
+    //     return true;
+    // }
+
+    // public makePluginInstance(pluginId: number): boolean {
+    //     return true;
+    // }
+
+    // private initDefaultPlugins(): boolean {
+    //     return true;
+    // }

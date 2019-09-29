@@ -1,6 +1,8 @@
 import { ActionCreatorsMapObject, AnyAction } from "redux";
 
 export interface IPlugin  {
+    unsubscribe: any;
+    initState: IState;
     uid: string;
     readonly metaData: IPluginMetaData;
     readonly actionDefs: IActionDef[];

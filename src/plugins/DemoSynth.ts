@@ -45,7 +45,7 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
     },
   ];
 
-  public actionCreators: ActionCreatorsMapObject;
+  // public actionCreators: ActionCreatorsMapObject;
   private filter: BiquadFilterNode;
   private attack: number;
   private decay: number;

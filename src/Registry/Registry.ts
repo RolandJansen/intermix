@@ -24,6 +24,8 @@ import {
  */
 export default class Registry {
 
+    // this is just a list that holds plugin
+    // instances, not the redux store (should probably be renamed)
     private _pluginStore: IPlugin[] = [];
 
     public constructor(private ac: AudioContext) { }
@@ -39,7 +41,7 @@ export default class Registry {
      * * adds the plugin to the plugin store
      * @param pluginClass New plugin to be registered
      */
-    public registerPlugin<p extends IPlugin>(pluginClass: new (ac: AudioContext) => p): void {
+    public registerPlugin<p extends IPlugin>(pluginClass: new (ac: AudioContext) => p): p {
         const pInstance = this.getPluginInstance(pluginClass, this.ac);
 
         // generate action creator functions and bind them to the dispatcher
@@ -62,6 +64,8 @@ export default class Registry {
             this.getChanged,
             pInstance,
         );
+
+        return pInstance;
     }
 
     /**

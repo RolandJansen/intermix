@@ -1,6 +1,6 @@
 // tslint:disable-next-line: no-reference
 ///<reference path="../../../typings/custom.d.ts" />
-import { ActionCreatorsMapObject, AnyAction } from "redux";
+// import { ActionCreatorsMapObject, AnyAction } from "redux";
 import AbstractPlugin from "../../registry/AbstractPlugin";
 import { IActionDef, IAudioAction, IPlugin, Tuple } from "../../registry/interfaces";
 import ScheduleWorker from "./scheduler.worker";
@@ -40,8 +40,8 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
     };
 
     public readonly actionDefs: IActionDef[] = seqActionDefs;
-
-    public actionCreators: ActionCreatorsMapObject = {};
+    // public actionCreators: ActionCreatorsMapObject = {};
+    // public initState: IState = {};
 
     // constants
     private readonly resolution = 64;       // shortest possible note.

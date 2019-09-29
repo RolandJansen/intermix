@@ -1,5 +1,5 @@
 const path = require('path');
-// const HtmlWebpackPlugin = require('html-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const DtsBundleWebpack = require('dts-bundle-webpack');
 const webpack = require('webpack');
 
@@ -44,9 +44,9 @@ module.exports = {
             outputAsModuleFolder: true
         }),  // bundle type files
         new webpack.NamedModulesPlugin(),  // clean build logs
-        // new HtmlWebpackPlugin({
-        //     template: './src/demo/demo.html'
-        // }),  // use a html template for the demo
+        new HtmlWebpackPlugin({
+            template: './src/demo/SequencerDemo.html'
+        }),  // use a html template for the demo
         new webpack.HotModuleReplacementPlugin()  // use hot resync
     ],
     devServer: {
