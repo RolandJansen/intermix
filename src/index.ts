@@ -19,13 +19,16 @@ import { store } from "./store/store";
 // import Helper from "./Helper";
 
 const reduxStore: Store = store;
-
 const audioContext: AudioContext = new AudioContext();
 const registry: Registry = new Registry(audioContext);
+const defaultSequencer: Sequencer = registry.registerPlugin(Sequencer);
 
-export function getSequencerInstance(): Sequencer {
-    const seq: Sequencer = registry.registerPlugin(Sequencer);
-    return seq;
+export function getAudioContext(): AudioContext {
+    return audioContext;
+}
+
+export function getDefaultSequencer(): Sequencer {
+    return defaultSequencer;
 }
 
     // this should be encapsulated in a dev namespace
