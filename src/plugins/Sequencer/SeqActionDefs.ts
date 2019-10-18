@@ -2,7 +2,7 @@ export default [
     {
         type: "START",
         desc: "starts playback",
-        defVal: true,
+        defVal: false,
     },
     {
         type: "STOP",
@@ -12,12 +12,12 @@ export default [
     {
         type: "PAUSE",
         desc: "pauses playback",
-        defVal: true,
+        defVal: false,
     },
     {
         type: "RESUME",
         desc: "resumes from pause state",
-        defVal: true,
+        defVal: false,
     },
     {
         type: "SET_BPM",

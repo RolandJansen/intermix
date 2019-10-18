@@ -3,8 +3,7 @@
 // import { ActionCreatorsMapObject, AnyAction } from "redux";
 import AbstractPlugin from "../../registry/AbstractPlugin";
 import { IActionDef, IAudioAction, IPlugin, Tuple } from "../../registry/interfaces";
-import ScheduleWorker from "./scheduler.worker";
-// import scheduleWorker from "./scheduleWorker";
+import ClockWorker from "./clock.worker";
 import seqActionDefs from "./SeqActionDefs";
 import SeqPart from "./SeqPart";
 
@@ -64,19 +63,19 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
     // draw function with the lastPlayedStep int as parameter.
 
     // Initialize the scheduler-timer
-    private scheduleWorker = new ScheduleWorker("");
+    private clock = new ClockWorker();
 
     constructor(private ac: AudioContext) {
         super();
         this.timePerStepInSec = this.getTimePerStep();
         this.nextStepTimeInSec = this.timePerStepInSec;
 
-        this.scheduleWorker.onmessage = (e: MessageEvent) => {
+        this.clock.onmessage = (e: MessageEvent) => {
             if (e.data === "tick") {
                 this.scheduler();
             }
 
-            this.scheduleWorker.postMessage({ interval: this.schedulerIntervalInMili });
+            this.clock.postMessage({ interval: this.schedulerIntervalInMili });
         };
     }
 
@@ -106,21 +105,21 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
     public onChange(changed: Tuple) {
         switch (changed[0]) {
             case "START":
-            this.start();
-            return true;
+                this.start();
+                return true;
             case "STOP":
-            this.stop();
-            return true;
+                this.stop();
+                return true;
             case "PAUSE":
-            this.pause();
-            return true;
+                this.pause();
+                return true;
             case "RESUME":
-            this.resume();
-            return true;
+                this.resume();
+                return true;
             case "SET_BPM":
-            this.setBpmAndTimePerStep(changed[1]);
+                this.setBpmAndTimePerStep(changed[1]);
             default:
-            return false;
+                return false;
         }
     }
 
@@ -128,11 +127,12 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
      * Starts the sequencer
      */
     private start(): void {
+
         if (!this.isRunning) {
             if (this.stepList.length === 0) {
                 this.stepList.push(this.getMasterQueuePosition(0, this.ac.currentTime + 0.1));
             }
-            this.scheduleWorker.postMessage("start");
+            this.clock.postMessage("start");
             this.isRunning = true;
             window.requestAnimationFrame(this.draw.bind(this));
         }
@@ -142,7 +142,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
      * Stops the sequencer (halts at the current position)
      */
     private stop(): void {
-        this.scheduleWorker.postMessage("stop");
+        this.clock.postMessage("stop");
         this.nextStepTimeInSec = 0;
         this.resetQueuePointer();
         this.isRunning = false;
@@ -292,12 +292,12 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
 
         switch (action.type) {
             case "NOTE":
-            actionOut.delay = delay;
-            if (action.sequencerSteps) {
-                actionOut.duration = this.getDurationTime(action.sequencerSteps);
-            }
+                actionOut.delay = delay;
+                if (action.sequencerSteps) {
+                    actionOut.duration = this.getDurationTime(action.sequencerSteps);
+                }
             default:
-            actionOut.delay = delay;
+                actionOut.delay = delay;
         }
 
         return actionOut;

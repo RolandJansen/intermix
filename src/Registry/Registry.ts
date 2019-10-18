@@ -65,6 +65,7 @@ export default class Registry {
             pInstance,
         );
 
+        console.log(store.getState());
         return pInstance;
     }
 
@@ -136,7 +137,7 @@ export default class Registry {
      */
     private observeStore(st: Store, select: Select, getChanged: GetChanged, pInstance: IPlugin) {
         const uid = pInstance.uid;
-        const onChange = pInstance.onChange;
+        const onChange = pInstance.onChange.bind(pInstance);
         let currentState: IState = {};
 
         function handleChange() {
@@ -233,8 +234,8 @@ export default class Registry {
     private getInitialState(pInstance: IPlugin): IState {
         const iState: IState = {};
 
-        pInstance.actionDefs.forEach((aDef) => {
-            iState[aDef.type] = aDef.defVal;
+        pInstance.actionDefs.forEach((actionDef) => {
+            iState[actionDef.type] = actionDef.defVal;
         });
 
         return iState;

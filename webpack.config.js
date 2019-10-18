@@ -45,7 +45,7 @@ module.exports = {
         }),  // bundle type files
         new webpack.NamedModulesPlugin(),  // clean build logs
         new HtmlWebpackPlugin({
-            template: './src/demo/SequencerDemo.html'
+            template: './src/demo/demo.html'
         }),  // use a html template for the demo
         new webpack.HotModuleReplacementPlugin()  // use hot resync
     ],

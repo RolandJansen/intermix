@@ -1,7 +1,7 @@
-import { Store } from "redux";
+import { Action, Store } from "redux";
 import Sequencer from "./plugins/Sequencer/Sequencer";
 import Registry from "./registry/Registry";
-// import { store } from "./store/store";
+import { store } from "./store/store";
 
 // In vscode, go to File->Preferences->Settings
 // search for "experimental decorators" and enable
@@ -21,22 +21,30 @@ import Registry from "./registry/Registry";
 // const reduxStore: Store = store;
 const audioContext: AudioContext = new AudioContext();
 const registry: Registry = new Registry(audioContext);
-console.log(registry);
 const defaultSequencer: Sequencer = registry.registerPlugin(Sequencer);
+console.log(store.getState());
+
+export function getState() {
+    return store.getState();
+}
+
+export function dispatch(action: Action) {
+    // console.log(action);
+    store.dispatch(action);
+}
+
+// useful if the browser doesn't allow ac to start
+export function resumeAudioContext() {
+    audioContext.resume();
+}
 
 export function getAudioContext(): AudioContext {
     return audioContext;
 }
 
 export function getDefaultSequencer(): Sequencer {
-    console.log(defaultSequencer);
     return defaultSequencer;
 }
-
-    // this should be encapsulated in a dev namespace
-    // get audioContext(): AudioContext {
-    //     return this._audioContext;
-    // }
 
     // get store(): Store {
     //     return store;

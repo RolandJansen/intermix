@@ -1,0 +1,39 @@
+<html>
+    <head>
+        <title>Sequencer Demo</title>
+    </head>
+    <body onload="init();">
+        <button id="resumeAudioContext">resume audio context</button>
+        <button id="start">start sequencer</button>
+        <button id="setbpm">set bpm to 180</button>
+        <button id="getstate">get current state</button>
+    </body>
+    <script>
+        function init() {
+            const seq = intermix.getDefaultSequencer();
+            console.log(seq.actionCreators);
+        }
+
+        document.getElementById('resumeAudioContext').addEventListener('click', () => {
+            intermix.resumeAudioContext();
+            console.log("Audio Context Resumed");
+        });
+
+        document.getElementById('start').addEventListener('click', () => {
+            const seq = intermix.getDefaultSequencer();
+            // console.log(seq.actionCreators);
+            seq.actionCreators["START"](true);
+            // console.log(startAction);
+            // intermix.dispatch(startAction);
+        })
+
+        document.getElementById("getstate").addEventListener('click', () => {
+            console.log(intermix.getState());
+        })
+
+        document.getElementById("setbpm").addEventListener('click', () => {
+            const seq = intermix.getDefaultSequencer();
+            seq.actionCreators["SET_BPM"](180);
+        })
+    </script>
+</html>

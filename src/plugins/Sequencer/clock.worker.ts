@@ -1,4 +1,4 @@
-// import { worker } from "cluster";
+// import clockGenerator from "./clockGenerator.implementation";
 
 /**
  * This is a webworker that provides a timer
@@ -15,16 +15,19 @@ let timer: number = 0;
 let interval: number = 0;
 
 ctx.addEventListener("message", (e) => {
+    const data: any = e.data;
 
-    if (e.data.interval) {
-        interval = e.data.interval;
+    if (data.interval) {
+        interval = data.interval;
         if (timer) {
             clearInterval(timer);
             timer = window.setInterval(() => { postMessage("tick", "*"); }, interval);
         }
-    } else if (e.data === "start") {
+    }
+
+    if (data === "start") {
         timer = window.setInterval(() => { postMessage("tick", "*"); }, interval);
-    } else if (e.data === "stop") {
+    } else if (data === "stop") {
         clearInterval(timer);
     }
 });
