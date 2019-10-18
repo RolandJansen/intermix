@@ -104,11 +104,12 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
     // on every state change
     public onChange(changed: Tuple) {
         switch (changed[0]) {
-            case "START":
-                this.start();
-                return true;
-            case "STOP":
-                this.stop();
+            case "RUNNING":
+                if (changed[1] === true) {
+                    this.start();
+                } else {
+                    this.stop();
+                }
                 return true;
             case "PAUSE":
                 this.pause();

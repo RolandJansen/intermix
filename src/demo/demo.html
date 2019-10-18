@@ -5,6 +5,7 @@
     <body onload="init();">
         <button id="resumeAudioContext">resume audio context</button>
         <button id="start">start sequencer</button>
+        <button id="stop">stop sequencer</button>
         <button id="setbpm">set bpm to 180</button>
         <button id="getstate">get current state</button>
     </body>
@@ -21,10 +22,12 @@
 
         document.getElementById('start').addEventListener('click', () => {
             const seq = intermix.getDefaultSequencer();
-            // console.log(seq.actionCreators);
-            seq.actionCreators["START"](true);
-            // console.log(startAction);
-            // intermix.dispatch(startAction);
+            seq.actionCreators["RUNNING"](true);
+        })
+
+        document.getElementById('stop').addEventListener('click', () => {
+            const seq = intermix.getDefaultSequencer();
+            seq.actionCreators["RUNNING"](false);
         })
 
         document.getElementById("getstate").addEventListener('click', () => {

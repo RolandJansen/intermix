@@ -22,7 +22,6 @@ import { store } from "./store/store";
 const audioContext: AudioContext = new AudioContext();
 const registry: Registry = new Registry(audioContext);
 const defaultSequencer: Sequencer = registry.registerPlugin(Sequencer);
-console.log(store.getState());
 
 export function getState() {
     return store.getState();

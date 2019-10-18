@@ -11,6 +11,10 @@
  */
 const ctx: Worker = self as any;
 
+// this is a workaround for a bug in webpack-devsserver 3.8.1.
+// onmessage expects two arguments which doesn't match the api.
+const sendMessage: any = self.postMessage;
+
 let timer: number = 0;
 let interval: number = 0;
 
@@ -20,15 +24,15 @@ ctx.addEventListener("message", (e) => {
     if (data.interval) {
         interval = data.interval;
         if (timer) {
-            clearInterval(timer);
-            timer = window.setInterval(() => { postMessage("tick", "*"); }, interval);
+            self.clearInterval(timer);
+            timer = self.setInterval(() => { sendMessage("tick"); }, interval);
         }
     }
 
     if (data === "start") {
-        timer = window.setInterval(() => { postMessage("tick", "*"); }, interval);
+        timer = self.setInterval(() => { sendMessage("tick"); }, interval);
     } else if (data === "stop") {
-        clearInterval(timer);
+        self.clearInterval(timer);
     }
 });
 

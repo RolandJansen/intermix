@@ -10,7 +10,7 @@
         "declaration": true,   //generate typings
         "experimentalDecorators": true,  //should be experimental no more
         "strict": true,
-        "lib": [ "dom", "es7" ],  // used to get es7 lang features like [].includes()
+        "lib": [ "dom", "es7", "webworker" ],  // used to get es7 lang features like [].includes()
     },
     "files": [
         "./src/index.ts"

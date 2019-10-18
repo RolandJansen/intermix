@@ -1,13 +1,8 @@
 export default [
     {
-        type: "START",
-        desc: "starts playback",
+        type: "RUNNING",
+        desc: "starts or stopps playback",
         defVal: false,
-    },
-    {
-        type: "STOP",
-        desc: "stops playback",
-        defVal: true,
     },
     {
         type: "PAUSE",
