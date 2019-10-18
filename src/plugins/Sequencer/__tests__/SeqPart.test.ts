@@ -7,7 +7,7 @@ describe("SeqPart", () => {
     const action1: IAction = {
         type: "NOTE",
         dest: "abcd",
-        payload: [0, 0, 0, 0],
+        payload: [0, 0],
     };
     const action2 = {
         type: "SYSEX",
@@ -86,7 +86,7 @@ describe("SeqPart", () => {
 
     });
 
-    describe(".removeEvent", () => {
+    describe(".removeAction", () => {
 
         beforeEach(() => {
             part.addAction(action1, 4).addAction(action2, 4);

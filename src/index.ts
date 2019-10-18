@@ -1,7 +1,7 @@
 import { Store } from "redux";
 import Sequencer from "./plugins/Sequencer/Sequencer";
 import Registry from "./registry/Registry";
-import { store } from "./store/store";
+// import { store } from "./store/store";
 
 // In vscode, go to File->Preferences->Settings
 // search for "experimental decorators" and enable
@@ -18,9 +18,10 @@ import { store } from "./store/store";
 // intermix.eventBus = new intermix.EventBus();
 // import Helper from "./Helper";
 
-const reduxStore: Store = store;
+// const reduxStore: Store = store;
 const audioContext: AudioContext = new AudioContext();
 const registry: Registry = new Registry(audioContext);
+console.log(registry);
 const defaultSequencer: Sequencer = registry.registerPlugin(Sequencer);
 
 export function getAudioContext(): AudioContext {
@@ -28,6 +29,7 @@ export function getAudioContext(): AudioContext {
 }
 
 export function getDefaultSequencer(): Sequencer {
+    console.log(defaultSequencer);
     return defaultSequencer;
 }
 

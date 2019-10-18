@@ -26,6 +26,10 @@ class WorkerMock {
     }
 }
 
+test("dummy test", () => {
+    // every suite must contain at least one test
+});
+
 // beforeEach(() => {
 //     scheduleWorker = new WorkerMock("../scheduleWorker");
 //     tickCounter = [];
