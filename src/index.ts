@@ -1,4 +1,4 @@
-import { Action, Store } from "redux";
+import { Action } from "redux";
 import Sequencer from "./plugins/Sequencer/Sequencer";
 import Registry from "./registry/Registry";
 import { store } from "./store/store";
@@ -15,12 +15,11 @@ import { store } from "./store/store";
 // intermix.Sequencer = require('./Sequencer.js');
 // intermix.Part = require('./Part.js');
 
-// intermix.eventBus = new intermix.EventBus();
-// import Helper from "./Helper";
-
-// const reduxStore: Store = store;
+// system components
 const audioContext: AudioContext = new AudioContext();
 const registry: Registry = new Registry(audioContext);
+
+// plugins
 const defaultSequencer: Sequencer = registry.registerPlugin(Sequencer);
 
 export function getState() {
@@ -44,10 +43,6 @@ export function getAudioContext(): AudioContext {
 export function getDefaultSequencer(): Sequencer {
     return defaultSequencer;
 }
-
-    // get store(): Store {
-    //     return store;
-    // }
 
     // public getPluginInstanceRef(instanceId: number): boolean {
     //     return true;

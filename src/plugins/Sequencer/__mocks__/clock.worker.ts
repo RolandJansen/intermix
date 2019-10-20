@@ -1,6 +1,5 @@
-export default class ScheduleWorker {
-
-    constructor(private workerFile: string) {
+export default class ClockWorker {
+    constructor() {
         // tslint:disable-next-line:no-empty
         this.onmessage = () => {};
     }
@@ -11,13 +10,9 @@ export default class ScheduleWorker {
     }
 
     // mock expects data: { } instead of e: { data: { } }
-    public postMessage(msg: string | JSON): void {
+    public postMessage(msg: any): void {
         const event: any = {};
-        if (typeof msg === "string") {
-            event.data = msg;
-        } else {
-            event.data = msg;
-        }
+        event.data = msg;
         this.onmessage(event);
     }
 }

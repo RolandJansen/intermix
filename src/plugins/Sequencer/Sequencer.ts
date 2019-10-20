@@ -1,6 +1,7 @@
 // tslint:disable-next-line: no-reference
-///<reference path="../../../typings/custom.d.ts" />
+// /<reference path="../../../typings/custom.d.ts" />
 // import { ActionCreatorsMapObject, AnyAction } from "redux";
+// import * as ClockWorker from "worker-loader!./clock.worker";
 import AbstractPlugin from "../../registry/AbstractPlugin";
 import { IActionDef, IAudioAction, IPlugin, Tuple } from "../../registry/interfaces";
 import ClockWorker from "./clock.worker";
@@ -39,8 +40,6 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
     };
 
     public readonly actionDefs: IActionDef[] = seqActionDefs;
-    // public actionCreators: ActionCreatorsMapObject = {};
-    // public initState: IState = {};
 
     // constants
     private readonly resolution = 64;       // shortest possible note.
@@ -62,20 +61,22 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
     private isRunning = false;     // true if sequencer is running, otherwise false
     // draw function with the lastPlayedStep int as parameter.
 
-    // Initialize the scheduler-timer
-    private clock = new ClockWorker();
+    private clock: Worker;
 
     constructor(private ac: AudioContext) {
         super();
         this.timePerStepInSec = this.getTimePerStep();
         this.nextStepTimeInSec = this.timePerStepInSec;
 
+        // Initialize the scheduler-timer
+        this.clock = new ClockWorker();
+        this.clock.postMessage({ interval: this.schedulerIntervalInMili });
+
         this.clock.onmessage = (e: MessageEvent) => {
+            console.log("Sequencer received: " + e.data);
             if (e.data === "tick") {
                 this.scheduler();
             }
-
-            this.clock.postMessage({ interval: this.schedulerIntervalInMili });
         };
     }
 
@@ -128,7 +129,6 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
      * Starts the sequencer
      */
     private start(): void {
-
         if (!this.isRunning) {
             if (this.stepList.length === 0) {
                 this.stepList.push(this.getMasterQueuePosition(0, this.ac.currentTime + 0.1));
@@ -215,7 +215,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
      * overridden by the application with stuff to be drawn on the screen.
      */
     private draw(): void {
-        if (this.isRunning) {
+        if (this.isRunning && this.stepList[0]) {
             if (this.stepList[0].timestamp <= this.ac.currentTime) {
                 this.updateFrame(this.stepList[0].position);
                 this.stepList.shift();
