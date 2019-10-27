@@ -11,10 +11,11 @@ let interval: number = 0;
 export default function clock(data: any, worker: any) {
     // "sendMessage" is a workaround for a bug in webpack-dev-server 3.8.1.
     // Type "onMessage" expects two arguments which doesn't match with the api.
-    const sendMessage: any = worker.postMessage;
+    const sendMessage: any = worker.postMessage.bind(worker);
 
     if (data.interval) {
         interval = data.interval;
+        sendMessage({ interval });
         if (timer) {
             clearInterval(timer);
             timer = worker.setInterval(() => { sendMessage("tick"); }, interval);
@@ -25,5 +26,7 @@ export default function clock(data: any, worker: any) {
         timer = worker.setInterval(() => { sendMessage("tick"); }, interval);
     } else if (data === "stop") {
         clearInterval(timer);
+    } else if (data === "getIntervalInMili") {
+        sendMessage({ interval });
     }
 }

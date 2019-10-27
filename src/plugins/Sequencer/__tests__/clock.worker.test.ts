@@ -1,50 +1,56 @@
-import clock from "../clock.implementation";
+import clockImplementation from "../clock.implementation";
+import ClockWorker from "../GenericWorkerMock";
 
 const interval1 = 100;
-const inverval2 = 150;
-let clockWorker: any;
+const interval2 = 150;
+let receivedInterval = 0;
+let clock: any; // ClockWorker can't be used as a type here
 let tickCounter: string[];
 
-class WorkerMock {
-    constructor() {
-        // tslint:disable-next-line:no-empty
-        this.onmessage = () => {};
-    }
-
-    // should be overwritten by the code using the worker
-    public onmessage(event: Event): any {
-        return true;
-    }
-
-    // mock expects data: { } instead of e: { data: { } }
-    public postMessage(msg: string | JSON): void {
-        const event: any = {};
-        if (typeof msg === "string") {
-            event.data = msg;
-        } else {
-            event.data = msg;
-        }
-        this.onmessage(event);
-    }
-}
-
 beforeEach(() => {
-    clockWorker = new WorkerMock();
+    jest.useFakeTimers();
+
+    clock = new ClockWorker();
+    clock.internal.onmessage = clockImplementation;
     tickCounter = [];
+    receivedInterval = 0;
 
-    clockWorker.addEventListener("message", (e) => {
-        const data: any = e.data;
-
-        clock(data, self);
-    });
-
-    clockWorker.onmessage = (e) => {
+    clock.onmessage = async (e: MessageEvent) => {
         if (e.data === "tick") {
             tickCounter.push(e.data);
+        } else if (e.data.interval) {
+            receivedInterval = e.data.interval;
         }
     };
+
 });
 
-// it("starts the timer", () => {
-//     scheduleWorker.postMessage({ interval: interval1 });
-// });
+it("set the clock interval", () => {
+    clock.postMessage({ interval: interval1 });
+    expect(receivedInterval).toEqual(interval1);
+});
+
+it("sends the inverval time on request", () => {
+    clock.postMessage("getIntervalInMili");
+    expect(receivedInterval).toEqual(interval1);
+});
+
+it("calls setInterval when \"start\" is received", () => {
+    clock.postMessage("start");
+    expect(setInterval).toHaveBeenCalledTimes(1);
+    expect(setInterval).toHaveBeenLastCalledWith(expect.any(Function), interval1);
+});
+
+it("calls clearInterval when \"stop\" is received", () => {
+    clock.postMessage("stop");
+    expect(clearInterval).toHaveBeenCalledTimes(1);
+});
+
+it("restarts the interval when a new interval time is received in running state", () => {
+    clock.postMessage("start");
+    clock.postMessage({ interval: interval2 });
+
+    expect(clearInterval).toHaveBeenCalledTimes(1);
+    expect(setInterval).toHaveBeenCalledTimes(2);
+    expect(setInterval).toHaveBeenLastCalledWith(expect.any(Function), interval2);
+});

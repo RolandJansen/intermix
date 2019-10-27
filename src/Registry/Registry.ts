@@ -65,7 +65,7 @@ export default class Registry {
             pInstance,
         );
 
-        console.log(store.getState());
+        // console.log(store.getState());
         return pInstance;
     }
 

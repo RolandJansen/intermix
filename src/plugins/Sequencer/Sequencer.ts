@@ -73,7 +73,6 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
         this.clock.postMessage({ interval: this.schedulerIntervalInMili });
 
         this.clock.onmessage = (e: MessageEvent) => {
-            console.log("Sequencer received: " + e.data);
             if (e.data === "tick") {
                 this.scheduler();
             }
