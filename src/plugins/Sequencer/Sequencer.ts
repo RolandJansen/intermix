@@ -1,9 +1,7 @@
-// tslint:disable-next-line: no-reference
-// /<reference path="../../../typings/custom.d.ts" />
 // import { ActionCreatorsMapObject, AnyAction } from "redux";
 // import * as ClockWorker from "worker-loader!./clock.worker";
 import AbstractPlugin from "../../registry/AbstractPlugin";
-import { IActionDef, IAudioAction, IPlugin, Tuple } from "../../registry/interfaces";
+import { IActionDef, IAudioAction, ISeqPartLoad, IPlugin, Tuple } from "../../registry/interfaces";
 import ClockWorker from "./clock.worker";
 import seqActionDefs from "./SeqActionDefs";
 import SeqPart from "./SeqPart";
@@ -67,11 +65,11 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
         super();
         this.timePerStepInSec = this.getTimePerStep();
         this.nextStepTimeInSec = this.timePerStepInSec;
+        this.draw.bind(this);  // prevent contextchange in raf
 
-        // Initialize the scheduler-timer
+        // Initialize the timer
         this.clock = new ClockWorker();
         this.clock.postMessage({ interval: this.schedulerIntervalInMili });
-
         this.clock.onmessage = (e: MessageEvent) => {
             if (e.data === "tick") {
                 this.scheduler();
@@ -81,7 +79,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
 
     // has to be overridden from outside
     // tslint:disable-next-line:no-empty
-    public animationFrame(): void {}
+    // public animationFrame(): void {}
 
     /**
      * Has to be overridden by the app to render to the screen.
@@ -90,12 +88,12 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
      */
     public updateFrame(lastPlayedStep: number): boolean { return true; }
 
-    // list of all input nodes, if no inputs, return an empty list
+    // list of all audio input nodes, if no inputs, return an empty list
     public get inputs(): AudioNode[] {
         return [];
     }
 
-    // list of all audio output nodes
+    // list of all audio output nodes, if no inputs, return an empty list
     public get outputs(): AudioNode[] {
         return [];
     }
@@ -104,21 +102,26 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
     // on every state change
     public onChange(changed: Tuple) {
         switch (changed[0]) {
-            case "RUNNING":
-                if (changed[1] === true) {
+            case "STATE":
+                if (changed[1] === 1) {
                     this.start();
+                } else if (changed[1] === 2) {
+                    this.pause();
                 } else {
                     this.stop();
                 }
                 return true;
-            case "PAUSE":
-                this.pause();
-                return true;
-            case "RESUME":
-                this.resume();
-                return true;
-            case "SET_BPM":
+            case "BPM":
                 this.setBpmAndTimePerStep(changed[1]);
+                return true;
+            case "ADD_PART":
+                const addPart: ISeqPartLoad = changed[1];
+                this.addPart(addPart.part, addPart.position);
+                return true;
+            case "REMOVE_PART":
+                const rmPart: ISeqPartLoad = changed[1];
+                this.removePart(rmPart.part, rmPart.position);
+                return true;
             default:
                 return false;
         }
@@ -129,6 +132,9 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
      */
     private start(): void {
         if (!this.isRunning) {
+            if (this.ac.state === "suspended") {
+                this.ac.resume();
+            }
             if (this.stepList.length === 0) {
                 this.stepList.push(this.getMasterQueuePosition(0, this.ac.currentTime + 0.1));
             }
@@ -219,7 +225,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
                 this.updateFrame(this.stepList[0].position);
                 this.stepList.shift();
             }
-            window.requestAnimationFrame(this.draw.bind(this));
+            window.requestAnimationFrame(this.draw);
         }
     }
 
@@ -349,32 +355,15 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
     }
 
     /**
-     * Resumes the AudioContext and starts the sequencer at its
-     * current position. It just starts if sequencer and AudioContext
-     * both are stopped.
-     * @return  true if resumed, false if not
-     */
-    private resume(): boolean {
-        if (this.ac.state === "suspended" && !this.isRunning) {
-            this.start();
-            this.ac.resume();
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
      * Adds a part to the master queue.
      * @param  part      An instance of Part
      * @param  position  Position in the master queue
      */
-    private addPart(part: SeqPart, position: number): Sequencer {
+    private addPart(part: SeqPart, position: number) {
         if (!this.queue[position]) {
             this.queue[position] = [];
         }
         this.queue[position].push(part);
-        return this;
     }
 
     /**
@@ -382,7 +371,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
      * @param  part     Part instance to be removed
      * @param  position Position in the master queue
      */
-    private removePart(part: SeqPart, position: number): Sequencer {
+    private removePart(part: SeqPart, position: number) {
         if (this.queue[position] instanceof Array &&
             this.queue[position].length > 0) {
             const index = this.queue[position].indexOf(part);
@@ -390,7 +379,15 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
                 this.queue[position].splice(index, 1);
             }
         }
-        return this;
+    }
+
+    // probably not needed
+    private isPartObject(partObject: any): partObject is ISeqPartLoad {
+        if ((partObject as ISeqPartLoad).part &&
+            (partObject as ISeqPartLoad).position) {
+                return true;
+        }
+        return false;
     }
 
     /**

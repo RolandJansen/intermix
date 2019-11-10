@@ -30,7 +30,6 @@ export default abstract class AbstractPlugin implements IPlugin {
 
     public abstract get inputs(): AudioNode[];
     public abstract get outputs(): AudioNode[];
-    // public abstract unsubscribe(): void;
 
     /**
      * This gets called by the registry when the store

@@ -1,25 +1,32 @@
-// import "web-audio-test-api";
-
-// import { AudioContext } from "web-audio-test-api";
+/// <reference path="../../../../typings/web-audio-test-api.d.ts" />
+import "web-audio-test-api";
+import { IAction, ISeqPartLoad } from "../../../registry/interfaces";
+import ClockWorker from "../clock.worker";
+import SeqPart from "../SeqPart";
 import Sequencer from "../Sequencer";
 
-// All 'new' features of the api have to be enabled here
-// WebAudioTestAPI.setState({
-//   "AudioContext#suspend": "enabled",
-//   "AudioContext#resume": "enabled",
-// });
+// tslint:disable: no-string-literal
+// We use string-literals to test private functions like:
+// objectName["privateMethod"](parameters)
+// Normally this could be considered as bad style ("test API only")
+// but here we want to check the values of private fields to
+// check the result of certain api calls.
 
-test("dummy test", () => {
-    // every suite must contain at least one test
+// mock dependencies of the module under test
+jest.mock("../clock.worker");
+
+// WebAudioTestAPI Config
+WebAudioTestAPI.setState({
+    "AudioContext#suspend": "enabled",
+    "AudioContext#resume": "enabled",
 });
+
 
 describe("Sequencer", () => {
     let ac: AudioContext;
     let sequencer: Sequencer;
-    // Sequencer, sequencer, pattern1
-    //   , pattern2, part1, part2, seqEvent;
 
-    function createArray(length: number) {
+    function createPattern(length: number) {
         const arr = [];
         for (let i = 0; i < length; i++) {
             arr[i] = i + 1;
@@ -30,63 +37,164 @@ describe("Sequencer", () => {
     beforeEach(() => {
         ac = new AudioContext();
         sequencer = new Sequencer(ac);
+        // sequencer.clock.mockClear();
+    });
 
-        // mock window object globally if running on node
-        // if (typeof window === "undefined") {
-        //   global.window = {
-        //     intermix: global.intermix,
-        //     requestAnimationFrame: jasmine.createSpy("requestAnimationFrame"),
-        //     AudioContext: jasmine.createSpy("AudioContext")
-        //   };
+    test("ensure that we're testing against the WebAudioTestAPI", () => {
+        expect(ac.$name).toEqual("AudioContext");
+    });
 
-        //   Sequencer = proxyquire("../../src/Sequencer.js", {
-        //     "webworkify": function(worker) { return worker; },
-        //     "./core.js": ac,
-        //     "./scheduleWorker.js": jasmine.createSpyObj("scheduleWorker", [ "postMessage", "onmessage" ]),
-        //     "@noCallThru": true
-        //   });
-        // } else {
-        //   // var proxyquire = require('proxyquire');
-        //   window.requestAnimationFrame = jasmine.createSpy("requestAnimationFrame");
-        //   Sequencer = proxyquire("../../src/Sequencer.js", {
-        //     "webworkify": function(worker) { return worker; },
-        //     "./core.js": ac,
-        //     "./scheduleWorker.js": jasmine.createSpyObj("scheduleWorker", [ "postMessage", "onmessage" ])
-        //   });
-        // }
+    test("has a metadata section", () => {
+        expect(sequencer.metaData.type).toEqual("controller");
+        expect(sequencer.metaData.name).toEqual("Intermix Sequencer");
+    });
 
-        // pattern1 = [];
-        // pattern2 = [];
-        // for (var i = 0; i <= 3; i++) {
-        //     pattern1[i] = createArray(4);
-        //     pattern2[i] = createArray(3);
-        // }
-        // part1 = { "pattern": pattern1, "length": 64 };
-        // part2 = { "pattern": pattern2, "length": 64 };
-        // seqEvent = {
-        //     "uid": "1a",
-        //     "msg": { "type": "note", "value": 60, "velocity": 1, "steps": 4 }
-        // };
+    test("has action definitions", () => {
+        const stateAction = {
+            type: "STATE",
+            desc: "0=stop, 1=start, 2=pause",
+            defVal: 0,
+        };
+        expect(sequencer.actionDefs).toContainEqual(stateAction);
+    });
+
+    test("has an empty list of inputs", () => {
+        expect(sequencer.inputs.length).toEqual(0);
+    });
+
+    test("has an empty list of outputs", () => {
+        expect(sequencer.outputs.length).toEqual(0);
+    });
+
+    describe("onChange", () => {
+
+        test("returns true when called with a recognized value", () => {
+            const expected = sequencer.onChange(["STATE", 0]);
+            expect(expected).toBeTruthy();
+        });
+
+        test("returns false when called with an unrecognized value", () => {
+            const expected = sequencer.onChange(["something-different", true]);
+            expect(expected).toBeFalsy();
+        });
+
+        test("sets bpm", () => {
+            sequencer.onChange(["BPM", 160]);
+            expect(sequencer["bpm"]).toEqual(160);
+            expect(sequencer["timePerStepInSec"]).toEqual(0.0234375);
+        });
+    });
+
+    describe("playback", () => {
+
+        beforeEach(() => {
+            window.requestAnimationFrame = jest.fn();
+        });
+
+        test("starts", () => {
+            sequencer.onChange(["STATE", 1]);
+            expect(sequencer["clock"].postMessage).toBeCalledWith("start");
+            expect(sequencer["isRunning"]).toBeTruthy();
+            expect(window.requestAnimationFrame).toBeCalled();
+        });
+
+        test("stops", () => {
+            sequencer.onChange(["STATE", 0]);
+            expect(sequencer["clock"].postMessage).toBeCalledWith("stop");
+            expect(sequencer["isRunning"]).toBeFalsy();
+            expect(sequencer["nextStep"]).toEqual(0);
+            expect(sequencer["runqueue"].length).toEqual(0);
+        });
+
+        test("pauses", () => {
+            sequencer.onChange(["STATE", 1]);
+            expect(sequencer["isRunning"]).toBeTruthy();
+
+            sequencer.onChange(["STATE", 2]);
+            expect(sequencer["ac"].state).toMatch("suspended");
+            expect(sequencer["isRunning"]).toBeFalsy();
+        });
+
+        test("doesn't pause if sequencer is not running", () => {
+            sequencer.onChange(["STATE", 2]);
+            expect(sequencer["ac"].state).toMatch("running");
+        });
+
+        test("starts and resumes audio context after pause", () => {
+            sequencer.onChange(["STATE", 1]);
+            sequencer.onChange(["STATE", 2]);
+            expect(sequencer["ac"].state).toMatch("suspended");
+            sequencer.onChange(["STATE", 1]);
+            expect(sequencer["ac"].state).toMatch("running");
+        });
 
     });
 
-    // afterEach(function() {
-    //   if (typeof global.window.document !== "undefined") {
-    //     delete global.window;
-    //   }
-    //   ac = Sequencer = sequencer = pattern1 =
-    //     pattern2 = part1 = part2 = seqEvent = null;
-    // });
+    describe("masterqueue", () => {
+        let part1: SeqPart;
+        let part2: SeqPart;
+        let partObject1: ISeqPartLoad;
+        let partObject2: ISeqPartLoad;
 
-    // it("ensure that we're testing against the WebAudioTestAPI", () => {
-        // expect(AudioContext.WEB_AUDIO_TEST_API_VERSION).toBeDefined();  // is the api mock there?
-        // expect(sequencer.ac.$name).toBeDefined();                    //are we testing against it?
-    // });
+        const action1: IAction = {
+            type: "NOTE",
+            dest: "abcd",
+            payload: [0, 0],
+        };
+        const action2: IAction = {
+            type: "SYSEX",
+            dest: "abcd",
+            payload: 0x14a70f,
+        };
 
-    // it("registers to the controller relay of eventBus", function () {
-    //     // should be more nicely rewritten as a 'registerToRelay' test
-    //     expect(window.intermix.eventBus.addRelayEndpoint).toHaveBeenCalledWith("controller", {}, sequencer);
-    // });
+        beforeEach(() => {
+            part1 = new SeqPart();
+            part2 = new SeqPart();
+
+            part1.addAction(action1, 2)
+                .addAction(action1, 4);
+
+            part2.addAction(action2, 1)
+                .addAction(action2, 3);
+
+            partObject1 = {
+                part: part1,
+                position: 5,
+            };
+            partObject2 = {
+                part: part2,
+                position: 5,
+            };
+        });
+
+        test("add a part", () => {
+            sequencer.onChange(["ADD_PART", partObject1]);
+            expect(sequencer["queue"][5][0]).toBe(part1);
+        });
+
+        test("add many parts to the same position", () => {
+            sequencer.onChange(["ADD_PART", partObject1]);
+            sequencer.onChange(["ADD_PART", partObject2]);
+            expect(sequencer["queue"][5][1]).toBe(part2);
+        });
+
+        test("remove a part", () => {
+            sequencer.onChange(["ADD_PART", partObject1]);
+            sequencer.onChange(["ADD_PART", partObject2]);
+            sequencer.onChange(["ADD_PART", partObject2]);
+            sequencer.onChange(["REMOVE_PART", partObject2]);
+            expect(sequencer["queue"][5][0]).toBe(part1);
+            expect(sequencer["queue"][5][1]).toBe(part2);
+            expect(sequencer["queue"][5].length).toBe(2);
+        });
+
+        test("removes nothing if part not found", () => {
+            sequencer.onChange(["ADD_PART", partObject1]);
+            sequencer.onChange(["ADD_PART", partObject1]);
+            sequencer.onChange(["REMOVE_PART", partObject2]);
+            expect(sequencer["queue"][5].length).toBe(2);
+        });
+    });
 
     // describe("scheduler", function () {
 
@@ -257,18 +365,6 @@ describe("Sequencer", () => {
 
     // });
 
-    // describe(".resetQueuePointer", function () {
-
-    //     it("resets the queue pointer", function () {
-    //         sequencer.runqueue.push(part1, part2);
-    //         sequencer.setQueuePointer(23);
-    //         sequencer.resetQueuePointer();
-    //         expect(sequencer.nextStep).toEqual(0);
-    //         expect(sequencer.runqueue.length).toEqual(0);
-    //     });
-
-    // });
-
     // describe(".getMasterQueuePosition", function () {
 
     //     beforeEach(function () {
@@ -290,94 +386,10 @@ describe("Sequencer", () => {
     // });
 
     // describe(".start", function () {
-    //     // has to be refactored (probably 2 new describe blocks):
-    //     // it should do nothing if !isRunning
-    //     // it shouldn't add to stepList if stepList is not empty
-
-    //     beforeEach(function () {
-    //         sequencer.start();
-    //     });
-
-    //     it("sets isRunning to true", function () {
-    //         expect(sequencer.isRunning).toBeTruthy();
-    //     });
-
-    //     it("starts the scheduleWorker", function () {
-    //         expect(sequencer.scheduleWorker.postMessage).toHaveBeenCalledWith("start");
-    //     });
 
     //     it("adds an entry to the stepList as a start delay for .draw ", function () {
     //         expect(sequencer.stepList[0].time).toEqual(sequencer.ac.currentTime + 0.1);
     //     });
-
-    //     it("calls window.requestAnimationFrame", function () {
-    //         expect(window.requestAnimationFrame).toHaveBeenCalled();
-    //     });
-
-    // });
-
-    // describe(".stop", function () {
-
-    //     beforeEach(function () {
-    //         sequencer.stop();
-    //     });
-
-    //     it("sets isRunning to false", function () {
-    //         expect(sequencer.isRunning).toBeFalsy();
-    //     });
-
-    //     it("sets nextStepTime to 0 (will be set in the scheduler on start)", function () {
-    //         expect(sequencer.nextStepTime).toBe(0);
-    //     });
-
-    //     it("halts the scheduleWorker", function () {
-    //         expect(sequencer.scheduleWorker.postMessage).toHaveBeenCalledWith("stop");
-    //     });
-
-    // });
-
-    // describe(".pause", function () {
-
-    //     it("should pause", function () {
-    //         sequencer.start();
-    //         sequencer.pause();
-    //         expect(sequencer.ac.state).toMatch("suspended");
-    //         expect(sequencer.isRunning).toBeFalsy();
-    //     });
-
-    //     it("should not pause if sequencer's not running", function () {
-    //         sequencer.pause();
-    //         expect(sequencer.ac.state).toMatch("running");
-    //     });
-
-    //     it("should not pause if AudioContext already suspenden", function () {
-    //         sequencer.ac.suspend();
-    //         var paused = sequencer.pause();
-    //         expect(paused).toBeFalsy();
-    //     });
-
-    // });
-
-    // describe(".resume", function () {
-
-    //     it("resumes when paused", function () {
-    //         sequencer.ac.suspend();
-    //         expect(sequencer.ac.state).toMatch("suspended");
-    //         sequencer.resume();
-    //         expect(sequencer.ac.state).toMatch("running");
-    //     });
-
-    //     it("doesn't resume if sequencer's running already", function () {
-    //         sequencer.start();
-    //         var resumed = sequencer.resume();
-    //         expect(resumed).toBeFalsy();
-    //     });
-
-    //     it("doesn't resume if AudioContext is not suspended", function () {
-    //         var resumed = sequencer.resume();
-    //         expect(resumed).toBeFalsy();
-    //     });
-
     // });
 
     // describe(".draw", function () {
@@ -460,50 +472,6 @@ describe("Sequencer", () => {
 
     //     it("is a function", function () {
     //         expect(typeof sequencer.updateFrame).toBe("function");
-    //     });
-
-    // });
-
-    // describe(".addPart", function () {
-
-    //     it("is chainable", function () {
-    //         var ctx = sequencer.addPart(part1, 4);
-    //         expect(ctx).toEqual(sequencer);
-    //     });
-
-    //     it("adds a part to the master queue", function () {
-    //         sequencer.addPart(part1, 5);
-    //         expect(sequencer.queue[5][0]).toBe(part1);
-    //     });
-
-    //     it("throws if parameter is not a part object", function () {
-    //         expect(function () { sequencer.addPart("brzz", 6); }).toThrowError(TypeError);
-    //     });
-
-    // });
-
-    // describe(".removePart", function () {
-
-    //     beforeEach(function () {
-    //         sequencer.addPart(part1, 5);
-    //     });
-
-    //     it("is chainable", function () {
-    //         var ctx = sequencer.removePart(part1, 5);
-    //         expect(ctx).toEqual(sequencer);
-    //     });
-
-    //     it("removes a part from the master queue", function () {
-    //         sequencer.removePart(part1, 5);
-    //         expect(sequencer.queue[5][0]).toBeUndefined();
-    //     });
-
-    //     it("throws if parameter is not a part object", function () {
-    //         expect(function () { sequencer.removePart({}, 5); }).toThrowError(TypeError);
-    //     });
-
-    //     it("fails silently if part not found on given position", function () {
-    //         expect(function () { sequencer.removePart(part1, 6); }).not.toThrow();
     //     });
 
     // });

@@ -1,4 +1,5 @@
 import { ActionCreatorsMapObject, AnyAction } from "redux";
+import SeqPart from "../plugins/Sequencer/SeqPart";
 
 export interface IPlugin  {
     unsubscribe: any;
@@ -25,9 +26,14 @@ export type Note = [ NoteNumber, Velocity ];
 
 export type Payload = number | string | boolean | Note;
 
+export interface ISeqPartLoad {
+    part: SeqPart;
+    position: number;
+}
+
 export interface IAction extends AnyAction {
     dest: string;
-    payload: Payload;
+    payload: Payload | ISeqPartLoad;
     meta?: string;
     error?: Error;
 }
