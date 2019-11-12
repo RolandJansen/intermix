@@ -49,8 +49,8 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
     private runqueue: SeqPart[] = [];   // list with parts that are playing or will be played shortly
 
     private timePerStepInSec: number;           // period of time between two steps
-    private nextStepTimeInSec: number;      // time in seconds when the next step will be triggered
-    private nextStep: number = 0;          // position in the queue that will get triggered next
+    private nextStepTimeInSec = 0;      // time relative to ac.currentTime until the next sequencer step
+    private nextStep = 0;          // position in the queue that will get triggered next
     private stepList: IQueuePosition[] = [];         // list of steps that were triggered but are still ahead of time
     private lastPlayedStep = 0;    // step in queue that was played (not triggered) recently (used for drawing).
     private loop = false;          // play a section of the queue in a loop
@@ -64,7 +64,6 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
     constructor(private ac: AudioContext) {
         super();
         this.timePerStepInSec = this.getTimePerStep();
-        this.nextStepTimeInSec = this.timePerStepInSec;
         this.draw.bind(this);  // prevent contextchange in raf
 
         // Initialize the timer
@@ -197,8 +196,9 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
     private scheduler(): void {
         const timestamp = this.ac.currentTime;
         const limit = timestamp + this.lookaheadInSec;
-        // if invoked for the first time or previously stopped
+
         if (this.nextStepTimeInSec === 0) {
+            // if invoked for the first time or previously stopped
             this.nextStepTimeInSec = timestamp;
         }
 
@@ -207,7 +207,6 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
             this.sendAllActionsInNextStep();
             this.stepList.push(this.getMasterQueuePosition(this.nextStep, this.nextStepTimeInSec));
             this.nextStepTimeInSec += this.timePerStepInSec;
-
             this.increaseQueuePointer();
         }
     }

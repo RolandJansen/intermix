@@ -167,18 +167,18 @@ describe("Sequencer", () => {
             };
         });
 
-        test("add a part", () => {
+        test("adds a part", () => {
             sequencer.onChange(["ADD_PART", partObject1]);
             expect(sequencer["queue"][5][0]).toBe(part1);
         });
 
-        test("add many parts to the same position", () => {
+        test("adds many parts to the same position", () => {
             sequencer.onChange(["ADD_PART", partObject1]);
             sequencer.onChange(["ADD_PART", partObject2]);
             expect(sequencer["queue"][5][1]).toBe(part2);
         });
 
-        test("remove a part", () => {
+        test("removes a part", () => {
             sequencer.onChange(["ADD_PART", partObject1]);
             sequencer.onChange(["ADD_PART", partObject2]);
             sequencer.onChange(["ADD_PART", partObject2]);
@@ -196,31 +196,42 @@ describe("Sequencer", () => {
         });
     });
 
-    // describe("scheduler", function () {
+    describe("scheduler", () => {
 
-    //     beforeEach(function () {
-    //         sequencer.addPartsToRunqueue = jasmine.createSpy("addPartsToRunqueue");
-    //         sequencer.fireEvents = jasmine.createSpy("fireEvents");
-    //         sequencer.increaseQueuePointer = jasmine.createSpy("setQueuePointer");
-    //         sequencer.getMasterQueuePosition = jasmine.createSpy("getMasterQueuePosition");
-    //     });
+        beforeEach(() => {
+            sequencer["increaseQueuePointer"] = jest.fn();
+            sequencer["addPartsToRunqueue"] = jest.fn();
+            sequencer["sendAllActionsInNextStep"] = jest.fn();
+            sequencer["ac"].$processTo("00:01.000");
+        });
 
-    //     afterEach(function () {
-    //         sequencer.ac.$processTo("00:00.000");
-    //     });
+        afterEach(() => {
+            sequencer["ac"].$processTo("00:00.000");
+        });
 
-    //     it("runs until the lookahead limit is reached", function () {
-    //         // should be splitted into separate tests
-    //         sequencer.ac.$processTo("00:01.000");
-    //         sequencer.scheduler();
-    //         expect(sequencer.addPartsToRunqueue).toHaveBeenCalledTimes(10);
-    //         expect(sequencer.fireEvents).toHaveBeenCalledTimes(10);
-    //         expect(sequencer.increaseQueuePointer).toHaveBeenCalledTimes(10);
-    //         expect(sequencer.getMasterQueuePosition).toHaveBeenCalledTimes(10);
-    //         expect(sequencer.nextStepTime).toBeGreaterThan(1.3);
-    //         expect(sequencer.nextStepTime).toBeLessThan(1.4);
-    //     });
-    // });
+        test("runs until all steps in lookahead are processed", () => {
+            // runs 10 times with lookahead=0.3 and bpm=120
+            sequencer["scheduler"]();
+            expect(sequencer["increaseQueuePointer"]).toHaveBeenCalledTimes(10);
+        });
+
+        test("adds parts to runqueue", () => {
+            sequencer["scheduler"]();
+            expect(sequencer["addPartsToRunqueue"]).toHaveBeenCalled();
+        });
+
+        test("fires all actions", () => {
+            sequencer["scheduler"]();
+            expect(sequencer["sendAllActionsInNextStep"]).toHaveBeenCalled();
+        });
+
+        test("increases nextStepTime on every step", () => {
+            const expected = 1.3125;  // 10 x timePerStep + timestamp
+            sequencer["scheduler"]();
+            expect(sequencer["nextStepTimeInSec"]).toEqual(expected);
+        });
+
+    });
 
     // describe(".addPartsToRunqueue", function () {
 

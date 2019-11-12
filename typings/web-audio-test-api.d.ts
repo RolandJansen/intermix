@@ -21,6 +21,7 @@
 interface AudioContext {
     // WEB_AUDIO_TEST_API_VERSION: string;
     $name: string;
+    $processTo: (time: string) => void;
 }
 
 interface IWebAudioTestAPI {
