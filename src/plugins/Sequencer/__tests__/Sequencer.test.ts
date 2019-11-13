@@ -21,7 +21,6 @@ WebAudioTestAPI.setState({
     "AudioContext#resume": "enabled",
 });
 
-
 describe("Sequencer", () => {
     let ac: AudioContext;
     let sequencer: Sequencer;

@@ -1,7 +1,7 @@
 // import { ActionCreatorsMapObject, AnyAction } from "redux";
 // import * as ClockWorker from "worker-loader!./clock.worker";
 import AbstractPlugin from "../../registry/AbstractPlugin";
-import { IActionDef, IAudioAction, ISeqPartLoad, IPlugin, Tuple } from "../../registry/interfaces";
+import { IActionDef, IAudioAction, IPlugin, ISeqPartLoad, Tuple } from "../../registry/interfaces";
 import ClockWorker from "./clock.worker";
 import seqActionDefs from "./SeqActionDefs";
 import SeqPart from "./SeqPart";
