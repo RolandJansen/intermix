@@ -20,11 +20,17 @@ export interface IPluginMetaData {
     desc: string;
 }
 
-type NoteNumber = number;
-type Velocity = number;
-export type Note = [ NoteNumber, Velocity ];
+export interface INote {
+    noteNumber: number;
+    velocity: number;
+    duration: number;
+}
 
-export type Payload = number | string | boolean | Note;
+export interface IDelayedNote extends INote {
+    startTime: number;
+}
+
+export type Payload = number | string | boolean | INote | IDelayedNote;
 
 export interface ISeqPartLoad {
     part: SeqPart;

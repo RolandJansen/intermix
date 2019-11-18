@@ -1,6 +1,5 @@
-import { ActionCreatorsMapObject } from "redux";
 import AbstractPlugin from "../registry/AbstractPlugin";
-import { IActionDef, IPlugin, IPluginMetaData, Note, Tuple } from "../registry/interfaces";
+import { IActionDef, IDelayedNote, IPlugin, IPluginMetaData, Tuple } from "../registry/interfaces";
 /**
  * An example synthesizer plugin for intermix.js
  *
@@ -83,21 +82,22 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
   public onChange(changed: Tuple) {
     switch (changed[0]) {
       case "NOTE":
-      this.handleNote(changed[1]);
-      return true;
+        const note: IDelayedNote = changed[1];
+        this.handleNote(note);
+        return true;
       case "ENV_ATTACK":
-      this.handleAttack(changed[1]);
-      return true;
+        this.handleAttack(changed[1]);
+        return true;
       case "ENV_DECAY":
-      this.handleDecay(changed[1]);
-      return true;
+        this.handleDecay(changed[1]);
+        return true;
       default:
-      return false;
+        return false;
     }
   }
 
   // Handles note events
-  private handleNote(note: Note): void {
+  private handleNote(note: IDelayedNote): void {
     const tone = note[0];
     if (tone >= 0 && tone <= 127) {
       this.start(note);
@@ -116,9 +116,9 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
   // You could also archive this with getter/setter
   // but for the sake of consistency we use one handler
   // per action in this example.
-  private handleDecay = function(value: number): void {
+  private handleDecay(value: number): void {
     this.decay = value;
-  };
+  }
 
   // Sets filtertype, quality and initial cutoff frequency
   private initFilter(): void {
@@ -147,11 +147,11 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
   }
 
   // Plays a note
-  private start([noteNumber, duration, delay]: Note): void {
-    const freq = this.frequencyLookup[noteNumber];
+  private start(note: IDelayedNote): void {
+    const freq = this.frequencyLookup[note.noteNumber];
     const osc = this.getNewOsc(freq);
-    osc.start(delay);
-    osc.stop(delay + duration);
-    this.startEnvelope(delay);
+    osc.start(note.startTime);
+    osc.stop(note.startTime + note.duration);
+    this.startEnvelope(note.startTime);
   }
 }
