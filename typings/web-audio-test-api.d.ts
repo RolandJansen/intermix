@@ -24,6 +24,10 @@ interface AudioContext {
     $processTo: (time: string) => void;
 }
 
+interface AudioBufferSourceNode {
+    $stateAtTime: (time: string) => string;
+}
+
 interface IWebAudioTestAPI {
     VERSION: number | string;
     // utils is missing

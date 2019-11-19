@@ -24,7 +24,7 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
 
     private gainNode: GainNode;
     private audioData: AudioBuffer;
-    private queue: AudioBufferSourceNode[];
+    private queue: AudioBufferSourceNode[] = [];
 
     constructor(private ac: AudioContext) {
         super();
@@ -32,6 +32,9 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
         // create gain node
         this.gainNode = this.ac.createGain();
         this.gainNode.gain.value = 1;
+
+        // create an empty audio buffer to prevent potential errors
+        this.audioData = ac.createBuffer(1, 0, ac.sampleRate);
     }
 
     // list of all audio output nodes
@@ -77,7 +80,7 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
 
     private volumeHandler(volume: number) {
         if (volume >= 0 && volume <= 127) {
-            this.gainNode.gain.value = volume / 127;
+            this.gainNode.gain.value = volume / 128;
         }
     }
 
