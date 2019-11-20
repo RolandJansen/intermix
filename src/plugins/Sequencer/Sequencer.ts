@@ -76,10 +76,6 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
         };
     }
 
-    // has to be overridden from outside
-    // tslint:disable-next-line:no-empty
-    // public animationFrame(): void {}
-
     /**
      * Has to be overridden by the app to render to the screen.
      * Gets called by the draw() method on every screen refresh.

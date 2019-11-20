@@ -1,5 +1,7 @@
-// import "web-audio-test-api";
-// import { getAudioContext, getDefaultSequencer } from "../index";
+/// <reference path="../../typings/web-audio-test-api.d.ts" />
+import "web-audio-test-api";
+import { getAudioContext } from "../index";
+import ClockWorker from "../plugins/Sequencer/clock.worker";
 // import Sequencer from "../plugins/Sequencer/Sequencer";
 // import Registry from "../registry/Registry";
 
@@ -23,18 +25,20 @@
 //     };
 // });
 
+// no workers in node.js, we use the same manual mock as in sequencer test
+jest.mock("../plugins/Sequencer/clock.worker");
+
 describe("Intermix", () => {
 
-    test("index.ts ...", () => {
-        // ... is the place where it all comes together.
-        // So this is not a unit test rather than an integration test.
-        // skipped this for now until all other components are tested.
+    test("provides an audioContext", () => {
+        const audioContext: AudioContext = getAudioContext();
+        expect(audioContext).toBeDefined();
     });
 
-    // test("provides an audioContext", () => {
-    //     const audioContext: AudioContext = getAudioContext();
-    //     expect(audioContext).toBeDefined();
-    // });
+    test("ensure that we're testing against the WebAudioTestAPI", () => {
+        const audioContext: AudioContext = getAudioContext();
+        expect(audioContext.$name).toEqual("AudioContext");
+    });
 
     // test("provides a default sequencer", () => {
     //     const seq: Sequencer = getDefaultSequencer();

@@ -7,7 +7,11 @@ describe("SeqPart", () => {
     const action1: IAction = {
         type: "NOTE",
         dest: "abcd",
-        payload: [0, 0],
+        payload: {
+            noteNumber: 0,
+            velocity: 0,
+            duration: 0,
+        },
     };
     const action2 = {
         type: "SYSEX",

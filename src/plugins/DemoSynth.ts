@@ -98,8 +98,8 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
 
   // Handles note events
   private handleNote(note: IDelayedNote): void {
-    const tone = note[0];
-    if (tone >= 0 && tone <= 127) {
+    // const tone = note;
+    if (note.noteNumber >= 0 && note.noteNumber <= 127) {
       this.start(note);
     }
   }

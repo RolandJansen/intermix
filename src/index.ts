@@ -1,4 +1,6 @@
 import { Action } from "redux";
+import DemoSampler from "./plugins/DemoSampler";
+import DemoSynth from "./plugins/DemoSynth";
 import Sequencer from "./plugins/Sequencer/Sequencer";
 import Registry from "./registry/Registry";
 import { store } from "./store/store";
@@ -9,18 +11,14 @@ import { store } from "./store/store";
 // in the editor.
 // TODO: put this in the readme.
 
-// intermix.EventBus = require('./EventBus.js');
-// intermix.SoundWave = require('./SoundWave.js');
-// intermix.Sound = require('./Sound.js');
-// intermix.Sequencer = require('./Sequencer.js');
-// intermix.Part = require('./Part.js');
-
 // system components
 const audioContext: AudioContext = new AudioContext();
 const registry: Registry = new Registry(audioContext);
 
 // plugins
 const defaultSequencer: Sequencer = registry.registerPlugin(Sequencer);
+const defaultSampler: DemoSampler = registry.registerPlugin(DemoSampler);
+const defaultSynth: DemoSynth = registry.registerPlugin(DemoSynth);
 
 export function getState() {
     return store.getState();
@@ -43,23 +41,3 @@ export function getAudioContext(): AudioContext {
 export function getDefaultSequencer(): Sequencer {
     return defaultSequencer;
 }
-
-    // public getPluginInstanceRef(instanceId: number): boolean {
-    //     return true;
-    // }
-
-    // public loadPlugin(): boolean {
-    //     return true;
-    // }
-
-    // public removePlugin(): boolean {
-    //     return true;
-    // }
-
-    // public makePluginInstance(pluginId: number): boolean {
-    //     return true;
-    // }
-
-    // private initDefaultPlugins(): boolean {
-    //     return true;
-    // }
