@@ -65,14 +65,15 @@ describe("DemoSynth", () => {
             synth["ac"].$processTo("00:00.000");
         });
 
-        test("should return false with an uncovered event", () => {
+        test("should return false with an uncovered parameter", () => {
             const falsyValue = synth.onChange(["FANTASY_PARAMETER", 23]);
             expect(falsyValue).toBeFalsy();
         });
 
         test("should add and delete OscillatorNodes from the queue", () => {
             synth.onChange(["NOTE", note]);
-            expect(synth["queue"].length).toEqual(1);
+            synth.onChange(["NOTE", note]);
+            expect(synth["queue"].length).toEqual(2);
             synth.onChange(["STOP", true]);
             expect(synth["queue"].length).toEqual(0);
         });

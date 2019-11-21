@@ -141,8 +141,7 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
 
     private stop() {
         this.queue.forEach((node) => {
-            // we can't stop a node twice so we just
-            // disconnect
+            // we can't stop a node twice so we just disconnect
             node.disconnect();
         });
         this.queue = [];  // release all references

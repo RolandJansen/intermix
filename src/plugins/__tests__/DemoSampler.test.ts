@@ -73,7 +73,7 @@ describe("DemoSampler", () => {
             sampler["ac"].$processTo("00:00.000");
         });
 
-        test("should return false with an uncovered event", () => {
+        test("should return false with an uncovered parameter", () => {
             const falsyValue = sampler.onChange(["FANTASY_PARAMETER", 23]);
             expect(falsyValue).toBeFalsy();
         });
