@@ -17,141 +17,153 @@ import { IActionDef, IDelayedNote, IPlugin, IPluginMetaData, Tuple } from "../re
  */
 export default class DemoSynth extends AbstractPlugin implements IPlugin {
 
-  public readonly metaData: IPluginMetaData = {
-    type: "instrument",
-    name: "Basic Synth",
-    version: "1.0.0",
-    author: "R. Jansen",
-    desc: "A simple synthesizer demo",
-  };
+    public readonly metaData: IPluginMetaData = {
+        type: "instrument",
+        name: "Demo Synth",
+        version: "1.0.0",
+        author: "R. Jansen",
+        desc: "A simple synthesizer demo",
+    };
 
-  public readonly actionDefs: IActionDef[] = [
-    {
-      type: "ENV_ATTACK",
-      desc: "Envelope Attack",
-      minVal: 0,
-      maxVal: 1,
-      defVal: 0,
-      steps: 128,
-    },
-    {
-      type: "ENV_DECAY",
-      desc: "Envelope Decay",
-      minVal: 0,
-      maxVal: 1,
-      defVal: 0.5,
-      steps: 128,
-    },
-  ];
-
-  // public actionCreators: ActionCreatorsMapObject;
-  private filter: BiquadFilterNode;
-  private attack: number;
-  private decay: number;
-
-  constructor(private ac: AudioContext) {
-    super();
-
-    // Create a new biquad filter
-    this.filter = this.ac.createBiquadFilter();
-
-    // Initial envelope attack value in seconds
-    this.attack = 0.1;
-
-    // Initial envelope decay value in seconds
-    this.decay = 0.1;
-
-    // Initialize filter
-    this.initFilter();
-  }
-
-  // list of all audio output nodes
-  public get outputs(): AudioNode[] {
-    return [
-      this.filter,
+    public readonly actionDefs: IActionDef[] = [
+        {
+            type: "ENV_ATTACK",
+            desc: "Envelope Attack",
+            minVal: 0,
+            maxVal: 1,
+            defVal: 0,
+            steps: 128,
+        },
+        {
+            type: "ENV_DECAY",
+            desc: "Envelope Decay",
+            minVal: 0,
+            maxVal: 1,
+            defVal: 0.5,
+            steps: 128,
+        },
     ];
-  }
 
-  // list of all input nodes, if no inputs, return an empty list
-  public get inputs(): AudioNode[] {
-    return [];
-  }
+    private attack: number;
+    private decay: number;
+    private filter: BiquadFilterNode;
+    private queue: OscillatorNode[] = [];
 
-  // onChange gets called
-  // on every state change
-  public onChange(changed: Tuple) {
-    switch (changed[0]) {
-      case "NOTE":
-        const note: IDelayedNote = changed[1];
-        this.handleNote(note);
-        return true;
-      case "ENV_ATTACK":
-        this.handleAttack(changed[1]);
-        return true;
-      case "ENV_DECAY":
-        this.handleDecay(changed[1]);
-        return true;
-      default:
-        return false;
+    constructor(private ac: AudioContext) {
+        super();
+
+        // Create a new biquad filter
+        this.filter = this.ac.createBiquadFilter();
+
+        // Initial envelope attack value in seconds
+        this.attack = 0.1;
+
+        // Initial envelope decay value in seconds
+        this.decay = 0.1;
+
+        // Initialize filter
+        this.initFilter();
     }
-  }
 
-  // Handles note events
-  private handleNote(note: IDelayedNote): void {
-    // const tone = note;
-    if (note.noteNumber >= 0 && note.noteNumber <= 127) {
-      this.start(note);
+    // list of all audio output nodes
+    public get outputs(): AudioNode[] {
+        return [
+            this.filter,
+        ];
     }
-  }
 
-  // Handles attack-time-change events.
-  // You could also archive this with getter/setter
-  // but for the sake of consistency we use one handler
-  // per action in this example.
-  private handleAttack(value: number): void {
-    this.attack = value;
-  }
+    // list of all input nodes, if no inputs, return an empty list
+    public get inputs(): AudioNode[] {
+        return [];
+    }
 
-  // Handles decay-time-change events.
-  // You could also archive this with getter/setter
-  // but for the sake of consistency we use one handler
-  // per action in this example.
-  private handleDecay(value: number): void {
-    this.decay = value;
-  }
+    // onChange gets called
+    // on every state change
+    public onChange(changed: Tuple) {
+        switch (changed[0]) {
+            case "NOTE":
+                const note: IDelayedNote = changed[1];
+                this.handleNote(note);
+                return true;
+            case "STOP":
+                this.stop();
+                return true;
+            case "ENV_ATTACK":
+                this.handleAttack(changed[1]);
+                return true;
+            case "ENV_DECAY":
+                this.handleDecay(changed[1]);
+                return true;
+            default:
+                return false;
+        }
+    }
 
-  // Sets filtertype, quality and initial cutoff frequency
-  private initFilter(): void {
-    this.filter.type = "lowpass";
-    this.filter.Q.value = 15;
-    this.filter.frequency.value = 1000;
-  }
+    // Handles note events
+    private handleNote(note: IDelayedNote): void {
+        if (note.noteNumber >= 0 && note.noteNumber <= 127) {
+            this.start(note);
+        }
+    }
 
-  // Schedules an envelope run
-  private startEnvelope(delay: number): void {
-    const freq = this.filter.frequency;
-    freq.cancelScheduledValues(delay);
-    freq.setValueAtTime(12000, delay);
-    freq.linearRampToValueAtTime(22050, delay + this.attack);
-    freq.linearRampToValueAtTime(1000, delay + this.decay);
-  }
+    // Handles attack-time-change events.
+    // You could also archive this with getter/setter
+    // but for the sake of consistency we use one handler
+    // per action in this example.
+    private handleAttack(value: number): void {
+        this.attack = value;
+    }
 
-  // Creates a sawtooth oscillator object and returns it.
-  // An oscillation destroys itself after a note is played.
-  private getNewOsc(freq: number): OscillatorNode {
-    const osc = this.ac.createOscillator();
-    osc.type = "sawtooth";
-    osc.frequency.value = freq;
-    osc.connect(this.filter);
-    return osc;
-  }
+    // Handles decay-time-change events.
+    // You could also archive this with getter/setter
+    // but for the sake of consistency we use one handler
+    // per action in this example.
+    private handleDecay(value: number): void {
+        this.decay = value;
+    }
 
-  // Plays a note
-  private start(note: IDelayedNote): void {
-    const freq = this.frequencyLookup[note.noteNumber];
-    const osc = this.getNewOsc(freq);
-    osc.start(note.startTime);
-    osc.stop(note.startTime + note.duration);
-    this.startEnvelope(note.startTime);
-  }
+    // Sets filtertype, quality and initial cutoff frequency
+    private initFilter(): void {
+        this.filter.type = "lowpass";
+        this.filter.Q.value = 15;
+        this.filter.frequency.value = 1000;
+    }
+
+    // Plays a note
+    private start(note: IDelayedNote): void {
+        const freq = this.frequencyLookup[note.noteNumber];
+        const osc = this.getNewOsc(freq);
+        osc.start(note.startTime);
+        osc.stop(note.startTime + note.duration);
+        this.queue.push(osc);
+        this.startEnvelope(note.startTime);
+    }
+
+    private stop() {
+        this.queue.forEach((node) => {
+            // we can't stop a node twice so we just
+            // disconnect
+            node.disconnect();
+        });
+        this.queue = [];  // release all references
+    }
+
+    // Creates a sawtooth oscillator object and returns it.
+    // An oscillation destroys itself after a note is played.
+    private getNewOsc(freq: number): OscillatorNode {
+        const osc = this.ac.createOscillator();
+        osc.type = "sawtooth";
+        osc.frequency.value = freq;
+        // osc.connect(this.filter);
+        return osc;
+    }
+
+    // Schedules an envelope run
+    private startEnvelope(delay: number): void {
+        const freq = this.filter.frequency;
+        freq.cancelScheduledValues(delay);
+        freq.setValueAtTime(12000, delay);
+        freq.linearRampToValueAtTime(22050, delay + this.attack);
+        freq.linearRampToValueAtTime(1000, delay + this.decay);
+    }
 }

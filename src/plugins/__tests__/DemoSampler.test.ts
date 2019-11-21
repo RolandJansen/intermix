@@ -29,7 +29,7 @@ describe("DemoSampler", () => {
     });
 
     test("has action definitions", () => {
-        const stateAction = {
+        const actionDef = {
             type: "VOLUME",
             desc: "loudness",
             minVal: 0,
@@ -37,7 +37,7 @@ describe("DemoSampler", () => {
             defVal: 127,
             steps: 128,
         };
-        expect(sampler.actionDefs).toContainEqual(stateAction);
+        expect(sampler.actionDefs).toContainEqual(actionDef);
     });
 
     test("has zero inputs", () => {
@@ -71,6 +71,11 @@ describe("DemoSampler", () => {
             };
             buffer = ac.createBuffer(1, 22050, 44100);  // create a buffer of 0.5s length
             sampler["ac"].$processTo("00:00.000");
+        });
+
+        test("should return false with an uncovered event", () => {
+            const falsyValue = sampler.onChange(["FANTASY_PARAMETER", 23]);
+            expect(falsyValue).toBeFalsy();
         });
 
         test("should replace the default audio buffer", () => {

@@ -22,9 +22,14 @@ interface AudioContext {
     // WEB_AUDIO_TEST_API_VERSION: string;
     $name: string;
     $processTo: (time: string) => void;
+    toJSON: () => any;
 }
 
 interface AudioBufferSourceNode {
+    $stateAtTime: (time: string) => string;
+}
+
+interface OscillatorNode {
     $stateAtTime: (time: string) => string;
 }
 

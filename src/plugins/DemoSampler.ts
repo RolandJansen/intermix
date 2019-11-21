@@ -55,36 +55,36 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
         switch (changed[0]) {
             case "NOTE":
                 const note: IDelayedNote = changed[1];
-                this.noteHandler(note);
+                this.handleNote(note);
                 return true;
             case "VOLUME":
-                this.volumeHandler(changed[1]);
+                this.handleVolume(changed[1]);
                 return true;
             case "STOP":
                 this.stop();
                 return true;
             case "AUDIODATA":
                 const buffer: AudioBuffer = changed[1];
-                this.audioDataHandler(buffer);
+                this.handleAudioData(buffer);
                 return true;
             default:
                 return false;
         }
     }
 
-    private noteHandler(note: IDelayedNote) {
+    private handleNote(note: IDelayedNote) {
         if (note.noteNumber >= 0 && note.noteNumber <= 127) {
             this.start(note);
         }
     }
 
-    private volumeHandler(volume: number) {
+    private handleVolume(volume: number) {
         if (volume >= 0 && volume <= 127) {
             this.gainNode.gain.value = volume / 128;
         }
     }
 
-    private audioDataHandler(buffer: AudioBuffer) {
+    private handleAudioData(buffer: AudioBuffer) {
         this.audioData = buffer;
     }
 
