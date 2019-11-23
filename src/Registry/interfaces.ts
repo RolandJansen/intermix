@@ -20,6 +20,15 @@ export interface IPluginMetaData {
     desc: string;
 }
 
+export interface IGlobalActionCreators {
+    [uid: string]: ISinglePluginActionCreators;
+}
+
+export interface ISinglePluginActionCreators {
+    metadata: IPluginMetaData;
+    actionCreators: ActionCreatorsMapObject;
+}
+
 export interface INote {
     noteNumber: number;
     velocity: number;

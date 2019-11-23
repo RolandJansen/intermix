@@ -58,11 +58,11 @@ describe("Sequencer", () => {
     });
 
     test("has an empty list of inputs", () => {
-        expect(sequencer.inputs.length).toEqual(0);
+        expect(sequencer.inputs).toHaveLength(0);
     });
 
     test("has an empty list of outputs", () => {
-        expect(sequencer.outputs.length).toEqual(0);
+        expect(sequencer.outputs).toHaveLength(0);
     });
 
     describe("onChange", () => {
@@ -102,7 +102,7 @@ describe("Sequencer", () => {
             expect(sequencer["clock"].postMessage).toBeCalledWith("stop");
             expect(sequencer["isRunning"]).toBeFalsy();
             expect(sequencer["nextStep"]).toEqual(0);
-            expect(sequencer["runqueue"].length).toEqual(0);
+            expect(sequencer["runqueue"]).toHaveLength(0);
         });
 
         test("pauses", () => {
@@ -189,14 +189,14 @@ describe("Sequencer", () => {
             sequencer.onChange(["REMOVE_PART", partObject2]);
             expect(sequencer["queue"][5][0]).toBe(part1);
             expect(sequencer["queue"][5][1]).toBe(part2);
-            expect(sequencer["queue"][5].length).toBe(2);
+            expect(sequencer["queue"][5]).toHaveLength(2);
         });
 
         test("removes nothing if part not found", () => {
             sequencer.onChange(["ADD_PART", partObject1]);
             sequencer.onChange(["ADD_PART", partObject1]);
             sequencer.onChange(["REMOVE_PART", partObject2]);
-            expect(sequencer["queue"][5].length).toBe(2);
+            expect(sequencer["queue"][5]).toHaveLength(2);
         });
     });
 

@@ -4,6 +4,7 @@ import DemoSynth from "./plugins/DemoSynth";
 import Sequencer from "./plugins/Sequencer/Sequencer";
 import Registry from "./registry/Registry";
 import { store } from "./store/store";
+import { IPlugin, IGlobalActionCreators } from "./registry/interfaces";
 
 // In vscode, go to File->Preferences->Settings
 // search for "experimental decorators" and enable
@@ -20,12 +21,11 @@ const defaultSequencer: Sequencer = registry.registerPlugin(Sequencer);
 const defaultSampler: DemoSampler = registry.registerPlugin(DemoSampler);
 const defaultSynth: DemoSynth = registry.registerPlugin(DemoSynth);
 
-export function getState() {
+export function getState(): any {
     return store.getState();
 }
 
 export function dispatch(action: Action) {
-    // console.log(action);
     store.dispatch(action);
 }
 
@@ -38,6 +38,17 @@ export function getAudioContext(): AudioContext {
     return audioContext;
 }
 
-export function getDefaultSequencer(): Sequencer {
-    return defaultSequencer;
+export function getActionCreators(): IGlobalActionCreators {
+    const pluginList = registry.pluginStore;
+    const actionCreators: IGlobalActionCreators = {};
+
+    pluginList.forEach((plugin: IPlugin) => {
+        const pluginAC = {
+            metadata: plugin.metaData,
+            actionCreators: plugin.actionCreators,
+        };
+        actionCreators[plugin.uid] = pluginAC;
+    });
+
+    return actionCreators;
 }
