@@ -1,0 +1,1 @@
+These demos use version 0.3.0 of Intermix. They don't work anymore and will be deleted in v0.5.0.

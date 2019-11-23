@@ -18,6 +18,9 @@
 //     testStuff: number;
 // }
 
+// Interesting post about TS typings:
+// https://stackoverflow.com/questions/40222162/typescript-2-custom-typings-for-untyped-npm-module
+
 interface AudioContext {
     // WEB_AUDIO_TEST_API_VERSION: string;
     $name: string;
