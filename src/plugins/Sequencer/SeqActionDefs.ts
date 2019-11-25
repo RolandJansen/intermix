@@ -18,4 +18,34 @@ export default [
         maxVal: 240,
         defVal: 120,
     },
+    {
+        type: "ADD_PART",
+        desc: "adds a part to the sequencer queue",
+        defVal: {},
+    },
+    {
+        type: "REMOVE_PART",
+        desc: "removes a part from the sequencer queue",
+        defVal: {},
+    },
+    {
+        type: "QUEUE",
+        desc: "saves the queue in the store - just for internal usage",
+        defVal: [],
+    },
+    {
+        type: "LOOP",
+        desc: "sets the loop start- and endpoint in steps",
+        defVal: { start: 0, end: 63 },
+    },
+    {
+        type: "LOOP_ACTIVE",
+        desc: "sets the loop active/inactive",
+        defVal: false,
+    },
+    {
+        type: "JUMP_TO_POSITION",
+        desc: "jump to a specific step in the masterqueue",
+        defVal: 0,
+    },
 ];

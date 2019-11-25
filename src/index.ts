@@ -2,9 +2,10 @@ import { Action } from "redux";
 import DemoSampler from "./plugins/DemoSampler";
 import DemoSynth from "./plugins/DemoSynth";
 import Sequencer from "./plugins/Sequencer/Sequencer";
+import { IGlobalActionCreators, IPlugin } from "./registry/interfaces";
 import Registry from "./registry/Registry";
 import { store } from "./store/store";
-import { IPlugin, IGlobalActionCreators } from "./registry/interfaces";
+import SeqPart from "./plugins/Sequencer/SeqPart";
 
 // In vscode, go to File->Preferences->Settings
 // search for "experimental decorators" and enable
@@ -18,7 +19,7 @@ const registry: Registry = new Registry(audioContext);
 
 // plugins
 const defaultSequencer: Sequencer = registry.registerPlugin(Sequencer);
-const defaultSampler: DemoSampler = registry.registerPlugin(DemoSampler);
+// const defaultSampler: DemoSampler = registry.registerPlugin(DemoSampler);
 const defaultSynth: DemoSynth = registry.registerPlugin(DemoSynth);
 
 export function getState(): any {
@@ -51,4 +52,8 @@ export function getActionCreators(): IGlobalActionCreators {
     });
 
     return actionCreators;
+}
+
+export function getNewPart(): SeqPart {
+    return new SeqPart();
 }

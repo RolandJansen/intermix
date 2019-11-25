@@ -40,7 +40,7 @@ describe("Intermix", () => {
 
     test("provides the global state", () => {
         const globalState: IState = getState();
-        const partialState = JSON.stringify({ VOLUME: 127 });
+        const partialState = JSON.stringify({ ENV_ATTACK: 0, ENV_DECAY: 0.5});
         let gsContainsPs = false;
 
         for (const uid in globalState) {

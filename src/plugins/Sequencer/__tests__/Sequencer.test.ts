@@ -1,6 +1,6 @@
 /// <reference path="../../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
-import { IAction, ISeqPartLoad } from "../../../registry/interfaces";
+import { IAction, ISeqPartLoad, ILoop } from "../../../registry/interfaces";
 import ClockWorker from "../clock.worker";
 import SeqPart from "../SeqPart";
 import Sequencer from "../Sequencer";
@@ -77,7 +77,7 @@ describe("Sequencer", () => {
             expect(expected).toBeFalsy();
         });
 
-        test("sets bpm", () => {
+        test("sets bpm and timePerStep", () => {
             sequencer.onChange(["BPM", 160]);
             expect(sequencer["bpm"]).toEqual(160);
             expect(sequencer["timePerStepInSec"]).toEqual(0.0234375);
@@ -129,6 +129,54 @@ describe("Sequencer", () => {
 
     });
 
+    describe("Loop Mode", () => {
+        let part1: SeqPart;
+        let part2: SeqPart;
+
+        beforeEach(() => {
+            part1 = new SeqPart();
+            part2 = new SeqPart();
+        });
+
+        test("activates looped playback", () => {
+            sequencer.onChange(["LOOP_ACTIVE", true]);
+            expect(sequencer["isLooped"]).toBeTruthy();
+        });
+
+        test("sets loop start- and endpoint", () => {
+            const loop: ILoop = { start: 23, end: 42 };
+            sequencer.onChange(["LOOP", loop]);
+            expect(sequencer["loopStart"]).toEqual(23);
+            expect(sequencer["loopEnd"]).toEqual(42);
+        });
+
+        test("ignores a loop action if it makes no sense", () => {
+            const loop: ILoop = { start: 42, end: 23 }; // loop ends before it starts
+            sequencer.onChange(["LOOP", loop]);
+            expect(sequencer["loopStart"]).toEqual(0);
+            expect(sequencer["loopEnd"]).toEqual(63);
+        });
+
+        test("sets the pointer back to start when end of loop is reached", () => {
+            const loop: ILoop = { start: 23, end: 42 };
+            sequencer.onChange(["LOOP", loop]);
+            sequencer.onChange(["LOOP_ACTIVE", true]);
+
+            sequencer["setQueuePointer"](42);
+            expect(sequencer["nextStep"]).toEqual(42);
+            sequencer["increaseQueuePointer"]();
+            expect(sequencer["nextStep"]).toEqual(23);
+        });
+
+        test("cleans the runqueue when the pointer jumps", () => {
+            sequencer.onChange(["LOOP_ACTIVE", true]);
+            sequencer["setQueuePointer"](63);
+            sequencer["runqueue"].push(part1, part2);
+            sequencer["increaseQueuePointer"]();
+            expect(sequencer["runqueue"]).toHaveLength(0);
+        });
+    });
+
     describe("masterqueue", () => {
         let part1: SeqPart;
         let part2: SeqPart;
@@ -152,6 +200,10 @@ describe("Sequencer", () => {
         };
 
         beforeEach(() => {
+            // object under test didn't pass registry so there
+            // are no action creators
+            sequencer.actionCreators.QUEUE = jest.fn();
+
             part1 = new SeqPart();
             part2 = new SeqPart();
 
@@ -176,6 +228,11 @@ describe("Sequencer", () => {
             expect(sequencer["queue"][5][0]).toBe(part1);
         });
 
+        test("sends a QUEUE action when part is added", () => {
+            sequencer.onChange(["ADD_PART", partObject1]);
+            expect(sequencer.actionCreators.QUEUE).toHaveBeenCalledTimes(1);
+        });
+
         test("adds many parts to the same position", () => {
             sequencer.onChange(["ADD_PART", partObject1]);
             sequencer.onChange(["ADD_PART", partObject2]);
@@ -192,11 +249,28 @@ describe("Sequencer", () => {
             expect(sequencer["queue"][5]).toHaveLength(2);
         });
 
+        test("sends a QUEUE action when part is removed", () => {
+            sequencer.onChange(["ADD_PART", partObject2]);
+            sequencer.onChange(["REMOVE_PART", partObject2]);
+            expect(sequencer.actionCreators.QUEUE).toHaveBeenCalledTimes(2);
+        });
+
         test("removes nothing if part not found", () => {
             sequencer.onChange(["ADD_PART", partObject1]);
             sequencer.onChange(["ADD_PART", partObject1]);
             sequencer.onChange(["REMOVE_PART", partObject2]);
             expect(sequencer["queue"][5]).toHaveLength(2);
+        });
+
+        test("set the pointer to a given position", () => {
+            sequencer.onChange(["JUMP_TO_POSITION", 23]);
+            expect(sequencer["nextStep"]).toEqual(23);
+        });
+
+        test("cleans the runqueue when the pointer jumps", () => {
+            sequencer["runqueue"].push(part1, part2);
+            sequencer.onChange(["JUMP_TO_POSITION", 23]);
+            expect(sequencer["runqueue"]).toHaveLength(0);
         });
     });
 
@@ -329,57 +403,6 @@ describe("Sequencer", () => {
     //     });
     // });
 
-    // describe(".increaseQueuePointer", function () {
-
-    //     it("sets the queue pointer one step forward", function () {
-    //         sequencer.increaseQueuePointer();
-    //         expect(sequencer.nextStep).toEqual(1);
-    //         sequencer.increaseQueuePointer();
-    //         expect(sequencer.nextStep).toEqual(2);
-    //     });
-
-    //     describe("in loop mode", function () {
-
-    //         beforeEach(function () {
-    //             sequencer.loopStart = 5;
-    //             sequencer.loopEnd = 23;
-    //             sequencer.loop = true;
-    //             sequencer.nextStep = 22;
-    //         });
-
-    //         it("sets the pointer back to start when end of loop is reached", function () {
-    //             sequencer.increaseQueuePointer();
-    //             expect(sequencer.nextStep).toEqual(23);
-    //             sequencer.increaseQueuePointer();
-    //             expect(sequencer.nextStep).toEqual(5);
-    //         });
-
-    //         it("cleans the runqueue when the pointer jumps", function () {
-    //             sequencer.runqueue.push(part1, part2);
-    //             sequencer.increaseQueuePointer();
-    //             sequencer.increaseQueuePointer();
-    //             expect(sequencer.runqueue.length).toEqual(0);
-    //         });
-
-    //     });
-
-    // });
-
-    // describe(".setQueuePointer", function () {
-
-    //     it("sets the pointer to a given position", function () {
-    //         sequencer.setQueuePointer(42);
-    //         expect(sequencer.nextStep).toEqual(42);
-    //     });
-
-    //     it("cleans the runqueue when the pointer jumps", function () {
-    //         sequencer.runqueue.push(part1, part2);
-    //         sequencer.setQueuePointer(5);
-    //         expect(sequencer.runqueue.length).toEqual(0);
-    //     });
-
-    // });
-
     // describe(".getMasterQueuePosition", function () {
 
     //     beforeEach(function () {
@@ -487,27 +510,6 @@ describe("Sequencer", () => {
 
     //     it("is a function", function () {
     //         expect(typeof sequencer.updateFrame).toBe("function");
-    //     });
-
-    // });
-
-    // describe(".setBpm", function () {
-
-    //     it("should set the bpm value", function () {
-    //         sequencer.setBpm(160);
-    //         expect(sequencer.bpm).toEqual(160);
-    //         expect(sequencer.timePerStep).toEqual(0.0234375);
-    //     });
-
-    // });
-
-    // describe(".setTimePerStep", function () {
-
-    //     it("should compute the time between two shortest possible notes", function () {
-    //         var t1 = sequencer.setTimePerStep(120, 64);
-    //         var t2 = sequencer.setTimePerStep(160, 24);
-    //         expect(t1).toEqual(0.03125);
-    //         expect(t2).toEqual(0.0625);
     //     });
 
     // });

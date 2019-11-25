@@ -39,7 +39,7 @@ export interface IDelayedNote extends INote {
     startTime: number;
 }
 
-export type Payload = number | string | boolean | INote | IDelayedNote;
+export type Payload = any;
 
 export interface ISeqPartLoad {
     part: SeqPart;
@@ -59,9 +59,6 @@ export interface IAudioAction extends IAction {
     sequencerSteps?: number;
 }
 
-// Is this in redux already?
-// export type IActionCreator = (payload: number) => IAction;
-
 export interface IActionDef {
     type: string;
     desc: string;
@@ -78,6 +75,11 @@ export interface IState {
 
 export interface IActionHandlerMap {
     [propName: string]: ActionHandler;
+}
+
+export interface ILoop {
+    start: number;
+    end: number;
 }
 
 // registry functions

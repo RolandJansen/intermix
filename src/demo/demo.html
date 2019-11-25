@@ -10,9 +10,40 @@
         <button id="getstate">get current state</button>
     </body>
     <script>
+        const allActionCreators = intermix.getActionCreators();
+        let synthUID = "";
+        let seqUID = "";
+        let seqActionCreators = {};
+
         function init() {
-            const seq = intermix.getDefaultSequencer();
-            console.log(seq.actionCreators);
+            for (const uid in allActionCreators) {
+                if (allActionCreators[uid].metadata.name === "Intermix Sequencer") {
+                    seqUID = uid;
+                    seqActionCreators = allActionCreators[uid].actionCreators;
+                }
+                if (allActionCreators[uid].metadata.name === "Demo Synth") {
+                    synthUID = uid;
+                }
+            }
+
+            // make a part and add it to the sequencer
+            const note = {
+                noteNumber: 64,
+                velocity: 1,
+                duration: 1,
+            }
+            const noteAction = {
+                dest: synthUID,
+                payload: note,
+            }
+
+            const part = intermix.getNewPart();
+            part.addAction(noteAction, 0)
+                .addAction(noteAction, 3)
+                .addAction(noteAction, 7)
+                .addAction(noteAction, 11);
+
+            seqActionCreators["ADD_PART"]({ part, position: 0 });
         }
 
         document.getElementById('resumeAudioContext').addEventListener('click', () => {
@@ -21,13 +52,11 @@
         });
 
         document.getElementById('start').addEventListener('click', () => {
-            const seq = intermix.getDefaultSequencer();
-            seq.actionCreators["RUNNING"](true);
+            seqActionCreators["STATE"](1);
         })
 
         document.getElementById('stop').addEventListener('click', () => {
-            const seq = intermix.getDefaultSequencer();
-            seq.actionCreators["RUNNING"](false);
+            seqActionCreators["STATE"](0);
         })
 
         document.getElementById("getstate").addEventListener('click', () => {
@@ -35,8 +64,7 @@
         })
 
         document.getElementById("setbpm").addEventListener('click', () => {
-            const seq = intermix.getDefaultSequencer();
-            seq.actionCreators["SET_BPM"](180);
+            seqActionCreators["BPM"](180);
         })
     </script>
 </html>

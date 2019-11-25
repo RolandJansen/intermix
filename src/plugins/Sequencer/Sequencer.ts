@@ -1,7 +1,5 @@
-// import { ActionCreatorsMapObject, AnyAction } from "redux";
-// import * as ClockWorker from "worker-loader!./clock.worker";
 import AbstractPlugin from "../../registry/AbstractPlugin";
-import { IActionDef, IAudioAction, IPlugin, ISeqPartLoad, Tuple } from "../../registry/interfaces";
+import { IActionDef, IAudioAction, ILoop, IPlugin, ISeqPartLoad, Tuple } from "../../registry/interfaces";
 import ClockWorker from "./clock.worker";
 import seqActionDefs from "./SeqActionDefs";
 import SeqPart from "./SeqPart";
@@ -53,7 +51,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
     private nextStep = 0;          // position in the queue that will get triggered next
     private stepList: IQueuePosition[] = [];         // list of steps that were triggered but are still ahead of time
     private lastPlayedStep = 0;    // step in queue that was played (not triggered) recently (used for drawing).
-    private loop = false;          // play a section of the queue in a loop
+    private isLooped = false;          // play a section of the queue in a loop
     private loopStart = 0;         // first step of the loop
     private loopEnd = 63;          // last step of the loop
     private isRunning = false;     // true if sequencer is running, otherwise false
@@ -64,7 +62,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
     constructor(private ac: AudioContext) {
         super();
         this.timePerStepInSec = this.getTimePerStep();
-        this.draw.bind(this);  // prevent contextchange in raf
+        // this.draw.bind(this);  // prevent contextchange in raf
 
         // Initialize the timer
         this.clock = new ClockWorker();
@@ -117,6 +115,18 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
                 const rmPart: ISeqPartLoad = changed[1];
                 this.removePart(rmPart.part, rmPart.position);
                 return true;
+            case "LOOP":
+                const loop: ILoop = changed[1];
+                this.setLoop(loop);
+                return true;
+            case "LOOP_ACTIVE":
+                const isActive: boolean = changed[1];
+                this.setLoopActive(isActive);
+                return true;
+            case "JUMP_TO_POSITION":
+                const step: number = changed[1];
+                this.setQueuePointer(step);
+                return true;
             default:
                 return false;
         }
@@ -136,6 +146,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
             this.clock.postMessage("start");
             this.isRunning = true;
             window.requestAnimationFrame(this.draw.bind(this));
+            console.log("sequencer started");
         }
     }
 
@@ -147,6 +158,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
         this.nextStepTimeInSec = 0;
         this.resetQueuePointer();
         this.isRunning = false;
+        console.log("sequencer stopped");
     }
 
     /**
@@ -181,6 +193,24 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
      */
     private getTimePerStep(): number {
         return (60 * 4) / (this.bpm * this.resolution);
+    }
+
+    /**
+     * Sets the loop start- and endpoint in steps
+     */
+    private setLoop(loop: ILoop) {
+        if (loop.start < loop.end) {
+            this.loopStart = loop.start;
+            this.loopEnd = loop.end;
+        }
+    }
+
+    /**
+     * Activates or deactivates looped playback
+     * @param isActive True=active, false=inactive
+     */
+    private setLoopActive(isActive: boolean) {
+        this.isLooped = isActive;
     }
 
     /**
@@ -220,7 +250,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
                 this.updateFrame(this.stepList[0].position);
                 this.stepList.shift();
             }
-            window.requestAnimationFrame(this.draw);
+            window.requestAnimationFrame(this.draw.bind(this));
         }
     }
 
@@ -290,7 +320,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
      */
     private sendAction(action: IAudioAction, delay: number): IAudioAction {
         const actionOut = action;
-
+        console.log(actionOut);
         switch (action.type) {
             case "NOTE":
                 actionOut.delay = delay;
@@ -318,7 +348,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
      * jump back to loopstart when end of loop is reached.
      */
     private increaseQueuePointer(): void {
-        if (this.loop && this.nextStep >= this.loopEnd) {
+        if (this.isLooped && this.nextStep >= this.loopEnd) {
             this.nextStep = this.loopStart;
             this.runqueue = [];
         } else {
@@ -359,6 +389,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
             this.queue[position] = [];
         }
         this.queue[position].push(part);
+        this.actionCreators.QUEUE(this.queue);
     }
 
     /**
@@ -372,6 +403,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
             const index = this.queue[position].indexOf(part);
             if (index >= 0) {
                 this.queue[position].splice(index, 1);
+                this.actionCreators.QUEUE(this.queue);
             }
         }
     }
