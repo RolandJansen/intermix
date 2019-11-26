@@ -1,9 +1,9 @@
 /// <reference path="../../typings/web-audio-test-api.d.ts" />
 import { ActionCreatorsMapObject } from "redux";
 import "web-audio-test-api";
-import { dispatch,getActionCreators, getAudioContext, getState, resumeAudioContext } from "../index";
+import { dispatch, getActionCreators, getAudioContext, getState, resumeAudioContext } from "../index";
 import ClockWorker from "../plugins/Sequencer/clock.worker";
-import { IAction, IState } from "../registry/interfaces";
+import { IAction, IGlobalActionCreators, IState } from "../registry/interfaces";
 
 /**
  * Integration tests for the intermix API
@@ -19,6 +19,20 @@ WebAudioTestAPI.setState({
 });
 
 describe("Intermix", () => {
+    let allActionCreators: IGlobalActionCreators = {};
+    let seqAC: ActionCreatorsMapObject = {};
+    let seqUID: string = "";
+
+    beforeEach(() => {
+        allActionCreators = getActionCreators();
+
+        for (const uid in allActionCreators) {
+            if (allActionCreators[uid].metadata.name === "Intermix Sequencer") {
+                seqUID = uid;
+                seqAC = allActionCreators[uid].actionCreators;
+            }
+        }
+    });
 
     test("provides an audioContext", () => {
         const audioContext: AudioContext = getAudioContext();
@@ -52,8 +66,6 @@ describe("Intermix", () => {
     });
 
     test("provides action creators for all plugins", () => {
-        const allActionCreators = getActionCreators();
-
         // tslint:disable-next-line: forin
         for (const uid in allActionCreators) {
             const pluginAC = allActionCreators[uid];
@@ -63,32 +75,14 @@ describe("Intermix", () => {
     });
 
     test("action creators are bound to dispatch", () => {
-        const allActionCreators = getActionCreators();
-        let seqUID: string = "";
-        let seqAC: ActionCreatorsMapObject = {};
-
-        for (const uid in allActionCreators) {
-            if (allActionCreators[uid].metadata.name === "Intermix Sequencer") {
-                seqUID = uid;
-                seqAC = allActionCreators[uid].actionCreators;
-            }
-        }
-        seqAC.BPM(90);
-
+        seqAC.BPM(90);  // calls dispatch
         const globalState = getState();
         expect(globalState[seqUID].BPM).toEqual(90);
     });
 
     test("provides a dispatch function", () => {
-        const allActionCreators = getActionCreators();
-        let seqUID: string = "";
         let globalState = getState();
 
-        for (const uid in allActionCreators) {
-            if (allActionCreators[uid].metadata.name === "Intermix Sequencer") {
-                seqUID = uid;
-            }
-        }
         // state is polluted from former test (not ideal but ok for now)
         expect(globalState[seqUID].BPM).toEqual(90);
 
@@ -102,5 +96,32 @@ describe("Intermix", () => {
         globalState = getState();
         expect(globalState[seqUID].BPM).toEqual(180);
     });
+
+    // This raf mock doesn't work.
+    // It works in the browser and I'm sick of it spending hours on this test.
+    // describe("animate", () => {
+
+    //     beforeAll(() => {
+    //         // make raf synchronous (return value (23) doesn't matter here)
+    //         jest.spyOn(window, "requestAnimationFrame").
+    //             mockImplementation((cb) => 23);
+    //     });
+
+    //     afterAll(() => {
+    //         // doesn't work, probably not needed
+    //         // window.requestAnimationFrame.mockRestore();
+    //     });
+
+    //     test("provides an animation function", () => {
+    //         const doSomething = jest.fn();
+
+    //         animate(doSomething);
+    //         seqAC.STATE(1);
+    //         seqAC.STATE(0);
+    //         expect(window.requestAnimationFrame).toBeCalled();
+    //         expect(doSomething).toHaveBeenCalled();
+    //     });
+
+    // });
 
 });

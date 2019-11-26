@@ -79,7 +79,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
      * Gets called by the draw() method on every screen refresh.
      * @param  lastPlayedStep  The 64th step that was played recently
      */
-    public updateFrame(lastPlayedStep: number): boolean { return true; }
+    public updateFrame(lastPlayedStep: number): void { /* nothing */ }
 
     // list of all audio input nodes, if no inputs, return an empty list
     public get inputs(): AudioNode[] {

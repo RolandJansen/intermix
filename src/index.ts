@@ -1,11 +1,11 @@
 import { Action } from "redux";
 import DemoSampler from "./plugins/DemoSampler";
 import DemoSynth from "./plugins/DemoSynth";
+import SeqPart from "./plugins/Sequencer/SeqPart";
 import Sequencer from "./plugins/Sequencer/Sequencer";
 import { IGlobalActionCreators, IPlugin } from "./registry/interfaces";
 import Registry from "./registry/Registry";
 import { store } from "./store/store";
-import SeqPart from "./plugins/Sequencer/SeqPart";
 
 // In vscode, go to File->Preferences->Settings
 // search for "experimental decorators" and enable
@@ -56,4 +56,9 @@ export function getActionCreators(): IGlobalActionCreators {
 
 export function getNewPart(): SeqPart {
     return new SeqPart();
+}
+
+export function animate(animeFunc: (lastPlayedStep: number) => void) {
+    defaultSequencer.updateFrame = animeFunc;
+    // defaultSequencer.updateFrame(23);
 }
