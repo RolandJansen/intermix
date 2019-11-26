@@ -1,6 +1,12 @@
 <html>
     <head>
         <title>Sequencer Demo</title>
+        <style>
+            #blink {
+                width: 20px;
+                height: 20px;
+            }
+        </style>
     </head>
     <body onload="init();">
         <button id="resumeAudioContext">resume audio context</button>
@@ -8,6 +14,7 @@
         <button id="stop">stop</button>
         <button id="setbpm">set bpm to 180</button>
         <button id="getstate">get current state</button>
+        <div id="blink"></div>
     </body>
     <script>
         const allActionCreators = intermix.getActionCreators();
@@ -44,6 +51,16 @@
                 .addAction(noteAction, 11);
 
             seqActionCreators["ADD_PART"]({ part, position: 0 });
+
+            const animeTest = (step) => {
+                let blinker = document.getElementById("blink");
+                if (step % 16 === 0) {
+                    blinker.style.backgroundColor = "red";
+                } else {
+                    blinker.style.backgroundColor = "white";
+                }
+            }
+            intermix.animate(animeTest);
         }
 
         document.getElementById('resumeAudioContext').addEventListener('click', () => {
