@@ -311,6 +311,10 @@ describe("Sequencer", () => {
 
     });
 
+    describe("process Actions from queue", () => {
+        // test sendAllActionsInNextStep() to sendAction() (scheduled for 0.5.0 #107)
+    });
+
     // describe(".addPartsToRunqueue", function () {
 
     //     beforeEach(function () {

@@ -3,16 +3,19 @@ import { store } from "../store/store";
 import combineReducersWithRoot from "./combineReducersWithRoot";
 import { commonActionDefs } from "./commonActionDefs";
 import {
+    BoundSendAction,
     GetChanged,
     IAction,
     IActionDef,
     IActionHandlerMap,
+    IControllerPlugin,
     IPlugin,
     IState,
     Payload,
     Select,
     Tuple,
 } from "./interfaces";
+// import { dispatch } from "..";
 
 /**
  * Plugin registry
@@ -44,8 +47,16 @@ export default class Registry {
     public registerPlugin<p extends IPlugin>(pluginClass: new (ac: AudioContext) => p): p {
         const pInstance = this.getPluginInstance(pluginClass, this.ac);
 
+        // add commonActionDefs to the plugin if its an instrument
+        if (pInstance.metaData.type === "instrument") {
+            pInstance.actionDefs = [...pInstance.actionDefs, ...commonActionDefs];
+        }
+
         // generate action creator functions and bind them to the dispatcher
         pInstance.actionCreators = this.getBoundActionCreators(pInstance);
+
+        // if the plugin is a controller, it needs a sendAction method
+        this.bindSendActionMethod(pInstance);
 
         // add plugin instance to the plugin store
         this.pluginStore.push(pInstance);
@@ -55,7 +66,7 @@ export default class Registry {
         this.replaceReducer(this.getRootReducer());
 
         // attach the initial state to the plugin
-        pInstance.initState = this.getInitialState(pInstance);
+        pInstance.initState = this.getInitialState(pInstance);  // why do we need this?
 
         // make the plugin observe the store for changes
         pInstance.unsubscribe = this.observeStore(
@@ -129,6 +140,7 @@ export default class Registry {
     /**
      * Subscribes a plugin to the store. The function that will
      * be called by the store invokes the onChange handler of the plugin.
+     * This should be the only intermix function that subscribes to the store.
      * For details see:
      * https://github.com/reduxjs/redux/issues/303#issuecomment-125184409
      * @param st Instance of the store that keeps the state
@@ -222,6 +234,31 @@ export default class Registry {
             };
         });
         return actionCreators;
+    }
+
+    /**
+     * If the plugin is a controller, bind the sendAction method
+     * to the dispatcher so it emmits actions when called.
+     */
+    private bindSendActionMethod(pInstance: IPlugin) {
+        if (this.isInstanceOfIControllerPlugin(pInstance)) {
+            const actionRelay = this.getActionRelay();
+            pInstance.sendAction = (action: IAction) => store.dispatch(actionRelay(action));
+        }
+    }
+
+    /**
+     * Simply returns a data relay function:
+     * It takes an action and returns it without any computation.
+     *
+     * This is for plugins of type IControllerPlugin to
+     * fire actions without knowing anything about their consumers.
+     * Will be wrapped in a dispatch and serves as a generic action creator.
+     */
+    private getActionRelay(): (action: IAction) => IAction {
+        return (action: IAction) => {
+            return action;
+        };
     }
 
     /**
@@ -327,6 +364,11 @@ export default class Registry {
             }
             return state;
         };
+    }
+
+    // type guard for IControllerPlugin
+    private isInstanceOfIControllerPlugin(obj: any): obj is IControllerPlugin {
+        return "sendAction" in obj;
     }
 
 }

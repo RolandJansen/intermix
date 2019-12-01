@@ -57,8 +57,9 @@ describe("DemoSynth", () => {
 
         beforeEach(() => {
             note = {
-                noteNumber: 23,
+                value: 23,
                 velocity: 1,
+                steps: 1,
                 duration: 1,
                 startTime: 1,
             };

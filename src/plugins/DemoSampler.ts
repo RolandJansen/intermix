@@ -17,7 +17,7 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
             desc: "loudness",
             minVal: 0,
             maxVal: 127,
-            defVal: 127,
+            defVal: { value: 127 },
             steps: 128,
         },
     ];
@@ -73,7 +73,7 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
     }
 
     private handleNote(note: IDelayedNote) {
-        if (note.noteNumber >= 0 && note.noteNumber <= 127) {
+        if (note.value >= 0 && note.value <= 127) {
             this.start(note);
         }
     }
@@ -94,7 +94,7 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
      * and even stop them all at a given time.
      */
     private start(note: IDelayedNote) {
-        const frequency = this.frequencyLookup[note.noteNumber];
+        const frequency = this.frequencyLookup[note.value];
         const bufferSrcNode = this.createBufferSrcNode();
 
         bufferSrcNode.playbackRate.value = frequency;

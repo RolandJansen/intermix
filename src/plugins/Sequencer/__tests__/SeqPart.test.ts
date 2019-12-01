@@ -140,18 +140,25 @@ describe("SeqPart", () => {
 
     describe(".getActionsAtStep", () => {
 
-        it("returns an array with all actions at a given step", () => {
+        it("returns an array with all actions at step", () => {
             part.addAction(action1, 4).addAction(action2, 4);
 
             const actions = part.getActionsAtStep(4);
-            expect(actions.length).toEqual(2);
+            expect(actions).toHaveLength(2);
             expect(actions).toContain(action1);
             expect(actions).toContain(action2);
         });
 
+        it("returns an empty array if no actions at step", () => {
+            part.addAction(action1, 4).addAction(action2, 4);
+
+            const actions = part.getActionsAtStep(3);
+            expect(actions).toHaveLength(0);
+        });
+
         it("returns an empty array if step is out of bounds", () => {
             const actions = part.getActionsAtStep(23);
-            expect(actions.length).toEqual(0);
+            expect(actions).toHaveLength(0);
         });
 
     });

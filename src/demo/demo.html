@@ -5,6 +5,7 @@
             #blink {
                 width: 20px;
                 height: 20px;
+                border-style: solid;
             }
         </style>
     </head>
@@ -35,18 +36,25 @@
 
             // make a part and add it to the sequencer
             const note = {
-                noteNumber: 64,
+                value: 64,
                 velocity: 1,
-                duration: 1,
+                steps: 4,
+                duration: 0,
             }
             const noteAction = {
+                type: "NOTE",
                 dest: synthUID,
                 payload: note,
             }
+            const attackAction = {
+                type: "ENV_ATTACK",
+                dest: synthUID,
+                payload: { value: 0.3 },
+            }
 
             const part = intermix.getNewPart();
-            part.addAction(noteAction, 0)
-                .addAction(noteAction, 3)
+            part.addAction(noteAction, 3)
+                // .addAction(attackAction, 5)
                 .addAction(noteAction, 7)
                 .addAction(noteAction, 11);
 

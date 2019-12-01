@@ -59,14 +59,6 @@ export default class SeqPart {
         return this.pattern;
     }
 
-    public getActionsAtPointerPosition(): IAction[] {
-        let actionsAtPointerPosition: IAction[] = [];
-        if (this.pointer < this.pattern.length) {
-            actionsAtPointerPosition = this.pattern[this.pointer];
-        }
-        return actionsAtPointerPosition;
-    }
-
     /**
      * Get the length of the pattern in stepsPerBar
      */
@@ -137,6 +129,18 @@ export default class SeqPart {
             actions = this.pattern[position];
         }
         return actions;
+    }
+
+    /**
+     * This is very close to getActionsAtStep and
+     * can probably be simplified.
+     */
+    public getActionsAtPointerPosition(): IAction[] {
+        let actionsAtPointerPosition: IAction[] = [];
+        if (this.pointer < this.pattern.length) {
+            actionsAtPointerPosition = this.pattern[this.pointer];
+        }
+        return actionsAtPointerPosition;
     }
 
     /**

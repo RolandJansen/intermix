@@ -12,9 +12,12 @@ export const commonActionTypes: string[] = [
 export const commonActionDefs: IActionDef[] = [
     {
         type: "NOTE",
-        desc: "Midi Note Number",
-        defVal: 0,
-        minVal: 0,
-        maxVal: 127,
+        desc: "Midi Note Number alike",
+        defVal: {
+            value: 0,
+            velocity: 1,
+            steps: 0,
+            duration: 0,
+        },
     },
 ];

@@ -6,10 +6,16 @@ export interface IPlugin  {
     initState: IState;
     uid: string;
     readonly metaData: IPluginMetaData;
-    readonly actionDefs: IActionDef[];
+    actionDefs: IActionDef[];
     actionCreators: ActionCreatorsMapObject;
     frequencyLookup: number[];
     [propName: string]: any;
+}
+
+export interface IControllerPlugin extends IPlugin {
+    // if return type is IAction of void depends in if it's
+    // bound (void) or not (IAction)
+    sendAction: (action: IAction) => void;
 }
 
 export interface IPluginMetaData {
@@ -29,14 +35,21 @@ export interface ISinglePluginActionCreators {
     actionCreators: ActionCreatorsMapObject;
 }
 
-export interface INote {
-    noteNumber: number;
-    velocity: number;
-    duration: number;
+export interface IAudioController {
+    value: number;  // e.g. note number (0-127)
 }
 
-export interface IDelayedNote extends INote {
-    startTime: number;
+export interface IDelayedAudioController extends IAudioController {
+    startTime: number; // delay in seconds
+}
+
+export interface INote extends IAudioController {
+    velocity: number;
+    steps: number;  // note length in sequencer steps (default: 64th notes)
+}
+
+export interface IDelayedNote extends INote, IDelayedAudioController {
+    duration: number; // note length in seconds
 }
 
 export type Payload = any;
@@ -48,15 +61,9 @@ export interface ISeqPartLoad {
 
 export interface IAction extends AnyAction {
     dest: string;
-    payload: Payload | ISeqPartLoad;
+    payload: Payload;
     meta?: string;
     error?: Error;
-}
-
-export interface IAudioAction extends IAction {
-    duration?: number;
-    delay?: number;
-    sequencerSteps?: number;
 }
 
 export interface IActionDef {
@@ -87,5 +94,4 @@ export type Select = (state: IState, pluginUid: string) => any;
 export type GetChanged = (oldState: any, newState: any) => Tuple;
 export type OnChange = (change: Tuple) => boolean;
 export type ActionHandler = (state: IState, action: AnyAction | IAction) => IState;
-// export type GenericAction = IAction | AnyAction;
-// export type Reducer = (state: IState, action: IAction) => IState;
+export type BoundSendAction = (action: IAction, startTime: number) => IAction;

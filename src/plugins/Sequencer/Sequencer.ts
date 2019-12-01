@@ -1,5 +1,15 @@
 import AbstractPlugin from "../../registry/AbstractPlugin";
-import { IActionDef, IAudioAction, ILoop, IPlugin, ISeqPartLoad, Tuple } from "../../registry/interfaces";
+import {
+    IAction,
+    IActionDef,
+    IControllerPlugin,
+    IDelayedAudioController,
+    IDelayedNote,
+    ILoop,
+    IPlugin,
+    ISeqPartLoad,
+    Tuple
+} from "../../registry/interfaces";
 import ClockWorker from "./clock.worker";
 import seqActionDefs from "./SeqActionDefs";
 import SeqPart from "./SeqPart";
@@ -23,7 +33,7 @@ interface IQueuePosition {
  * seq.start();
  * @constructor
  */
-export default class Sequencer extends AbstractPlugin implements IPlugin {
+export default class Sequencer extends AbstractPlugin implements IControllerPlugin {
 
     public static bpmDefault = 120;
 
@@ -90,6 +100,16 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
     public get outputs(): AudioNode[] {
         return [];
     }
+
+    /**
+     * This is where you just drop in actions that should be dispatched for
+     * other plugins (not in this plugins actionCreators list).
+     * The implementation will be injected by the registry so we just have to
+     * provide an empty method here. It has to be public so the registry can see it.
+     * @param action An action object that normally holds data for an audio device
+     * @param startTime time in seconds when the audio event should start
+     */
+    public sendAction(action: IAction) { /* nothing */ }
 
     // onChange gets called
     // on every state change
@@ -298,12 +318,15 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
                 markForDelete.unshift(index);
             } else {
                 const nextStepActions = part.getActionsAtPointerPosition();
-                if (nextStepActions && nextStepActions.length > 1) {
+                let action: IAction;
+                if (nextStepActions.length === 1) {
+                    action = this.prepareActionForDispatching(nextStepActions[0], this.nextStepTimeInSec);
+                    this.sendAction(action);
+                } else {
                     nextStepActions.forEach((seqEvent) => {
-                        this.sendAction(seqEvent, this.nextStepTimeInSec);
+                        action = this.prepareActionForDispatching(seqEvent, this.nextStepTimeInSec);
+                        this.sendAction(action);
                     });
-                } else if (nextStepActions && nextStepActions.length === 1) {
-                    this.sendAction(nextStepActions[0], this.nextStepTimeInSec);
                 }
             }
             part.pointer++;
@@ -312,26 +335,26 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
     }
 
     /**
-     * Adds delay and eventually duration to an action and
-     * returns it. The dispatching
-     * happens automatically as the function gets invoked.
-     * @param  seqEvent  The event to process
-     * @param  delay     time in seconds when the event should start
+     * Adds delay and eventually duration to an action and returns it.
+     * Type of payload in the returned object can be IDelayedNote
+     * or IDelayedAudioController (notes have a duration while controllers have not).
+     * @param action An action object that normally holds data for an audio device
+     * @param startTime time in seconds when the audio event should start
      */
-    private sendAction(action: IAudioAction, delay: number): IAudioAction {
-        const actionOut = action;
-        console.log(actionOut);
-        switch (action.type) {
-            case "NOTE":
-                actionOut.delay = delay;
-                if (action.sequencerSteps) {
-                    actionOut.duration = this.getDurationTime(action.sequencerSteps);
-                }
-            default:
-                actionOut.delay = delay;
+    private prepareActionForDispatching(action: IAction, startTime: number): IAction {
+        const payload = action.payload;
+        let delayedPayload;
+        if (action.type === "NOTE") {
+            const duration = this.getDurationTime(action.payload.steps);
+            delayedPayload = Object.assign({}, payload, {
+                startTime,
+                duration,
+            }) as IDelayedNote;
+        } else {
+            delayedPayload = Object.assign({}, payload, { startTime }) as IDelayedAudioController;
         }
-
-        return actionOut;
+        action.payload = delayedPayload;
+        return action;
     }
 
     /**
@@ -412,7 +435,7 @@ export default class Sequencer extends AbstractPlugin implements IPlugin {
     private isPartObject(partObject: any): partObject is ISeqPartLoad {
         if ((partObject as ISeqPartLoad).part &&
             (partObject as ISeqPartLoad).position) {
-                return true;
+            return true;
         }
         return false;
     }
