@@ -15,7 +15,6 @@ import {
     Select,
     Tuple,
 } from "./interfaces";
-// import { dispatch } from "..";
 
 /**
  * Plugin registry
@@ -75,6 +74,8 @@ export default class Registry {
             this.getChanged,
             pInstance,
         );
+
+        this.wireAudioOutputs(pInstance);
 
         // console.log(store.getState());
         return pInstance;
@@ -369,6 +370,19 @@ export default class Registry {
     // type guard for IControllerPlugin
     private isInstanceOfIControllerPlugin(obj: any): obj is IControllerPlugin {
         return "sendAction" in obj;
+    }
+
+    /**
+     * There is no complex audio routing at the moment
+     * so we just connect the 1st audio output of the
+     * plugin with the audio destination.
+     * @param pInstance The plugin to be wired
+     */
+    private wireAudioOutputs(pInstance: IPlugin) {
+        const outputs = pInstance.outputs;
+        if (outputs.length !== 0) {
+            outputs[0].connect(this.ac.destination);
+        }
     }
 
 }

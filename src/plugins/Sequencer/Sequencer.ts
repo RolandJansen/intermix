@@ -8,7 +8,7 @@ import {
     ILoop,
     IPlugin,
     ISeqPartLoad,
-    Tuple
+    Tuple,
 } from "../../registry/interfaces";
 import ClockWorker from "./clock.worker";
 import seqActionDefs from "./SeqActionDefs";
@@ -212,7 +212,10 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
      * @return time in seconds
      */
     private getTimePerStep(): number {
-        return (60 * 4) / (this.bpm * this.resolution);
+        const bpmDivisor = this.resolution / 4; // number of steps per one beat (beat: 1/4)
+        const timePerBeat = 60 / this.bpm;
+        const timePerStep = timePerBeat / bpmDivisor; // or: (60 * 4) / (this.bpm * this.resolution)
+        return timePerStep;
     }
 
     /**
@@ -253,6 +256,8 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
             this.sendAllActionsInNextStep();
             this.stepList.push(this.getMasterQueuePosition(this.nextStep, this.nextStepTimeInSec));
             this.nextStepTimeInSec += this.timePerStepInSec;
+            // console.log(this.nextStep);
+            // console.log(this.nextStepTimeInSec);
             this.increaseQueuePointer();
         }
     }
@@ -317,9 +322,10 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
             if (part.pointer === part.length - 1) {
                 markForDelete.unshift(index);
             } else {
+                console.log(this.nextStep);
                 const nextStepActions = part.getActionsAtPointerPosition();
                 let action: IAction;
-                if (nextStepActions.length === 1) {
+                if (nextStepActions.length === 1) {  // it's faster to to test for length than a foreach loop
                     action = this.prepareActionForDispatching(nextStepActions[0], this.nextStepTimeInSec);
                     this.sendAction(action);
                 } else {

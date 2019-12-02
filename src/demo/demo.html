@@ -15,6 +15,7 @@
         <button id="stop">stop</button>
         <button id="setbpm">set bpm to 180</button>
         <button id="getstate">get current state</button>
+        <button id="getPattern">get Pattern</button>
         <div id="blink"></div>
     </body>
     <script>
@@ -22,6 +23,23 @@
         let synthUID = "";
         let seqUID = "";
         let seqActionCreators = {};
+
+        const part = intermix.getNewPart();
+
+        function getNote(value, steps, uid) {
+            const velocity = 1;
+            const duration = 0;
+            return {
+                type: "NOTE",
+                dest: uid,
+                payload: {
+                    value,
+                    velocity,
+                    steps,
+                    duration,
+                }
+            }
+        }
 
         function init() {
             for (const uid in allActionCreators) {
@@ -52,13 +70,30 @@
                 payload: { value: 0.3 },
             }
 
-            const part = intermix.getNewPart();
-            part.addAction(noteAction, 3)
-                // .addAction(attackAction, 5)
-                .addAction(noteAction, 7)
-                .addAction(noteAction, 11);
+            const note1 = getNote(32, 4, synthUID);
+            const note2 = getNote(33, 4, synthUID);
+            const note3 = getNote(44, 4, synthUID);
+            const note4 = getNote(33, 8, synthUID);
+
+            part.addAction(note1, 0)
+                .addAction(note1, 1)
+                .addAction(note1, 2)
+                .addAction(note1, 3)
+                .addAction(note2, 4)
+                .addAction(note3, 5)
+                .addAction(note1, 6)
+                .addAction(note1, 7)
+                .addAction(note1, 8)
+                .addAction(note1, 9)
+                .addAction(note1, 10)
+                .addAction(note1, 11)
+                .addAction(note2, 12)
+                .addAction(note3, 13)
+                .addAction(note4, 14)
+
 
             seqActionCreators["ADD_PART"]({ part, position: 0 });
+            seqActionCreators["LOOP_ACTIVE"](true);
 
             const animeTest = (step) => {
                 let blinker = document.getElementById("blink");
@@ -90,6 +125,10 @@
 
         document.getElementById("setbpm").addEventListener('click', () => {
             seqActionCreators["BPM"](180);
+        })
+
+        document.getElementById("getPattern").addEventListener('click', () => {
+            console.log(part.seqPattern);
         })
     </script>
 </html>

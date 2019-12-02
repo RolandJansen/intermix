@@ -9,6 +9,8 @@ export interface IPlugin  {
     actionDefs: IActionDef[];
     actionCreators: ActionCreatorsMapObject;
     frequencyLookup: number[];
+    outputs: AudioNode[];
+    inputs: AudioNode[];
     [propName: string]: any;
 }
 

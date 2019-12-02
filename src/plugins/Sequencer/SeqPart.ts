@@ -63,7 +63,8 @@ export default class SeqPart {
      * Get the length of the pattern in stepsPerBar
      */
     public get length() {
-        return this.pattern.length / this.stepMultiplier;
+        // return this.pattern.length / this.stepMultiplier;
+        return this.pattern.length;
     }
 
     /**
@@ -169,6 +170,7 @@ export default class SeqPart {
     private initPattern(lengthInStepsPerBar: number): Pattern {
         const pattern: Pattern = [];
         const patternLength = lengthInStepsPerBar * this.stepMultiplier;
+        console.log("default pattern length: " + patternLength);
         for (let i = 0; i < patternLength; i++) {
             pattern[i] = [];
         }

@@ -156,7 +156,7 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
         const osc = this.ac.createOscillator();
         osc.type = "sawtooth";
         osc.frequency.value = freq;
-        // osc.connect(this.filter);
+        osc.connect(this.filter);
         return osc;
     }
 
