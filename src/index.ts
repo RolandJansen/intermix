@@ -19,7 +19,7 @@ const registry: Registry = new Registry(audioContext);
 
 // plugins
 const defaultSequencer: Sequencer = registry.registerPlugin(Sequencer);
-// const defaultSampler: DemoSampler = registry.registerPlugin(DemoSampler);
+const defaultSampler: DemoSampler = registry.registerPlugin(DemoSampler);
 const defaultSynth: DemoSynth = registry.registerPlugin(DemoSynth);
 
 export function getState(): any {

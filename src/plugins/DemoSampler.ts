@@ -24,7 +24,7 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
 
     private gainNode: GainNode;
     private audioData: AudioBuffer;
-    private queue: AudioBufferSourceNode[] = [];
+    private queue: AudioBufferSourceNode[] = [];  // list of polyphonic voices
 
     constructor(private ac: AudioContext) {
         super();
@@ -34,7 +34,7 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
         this.gainNode.gain.value = 1;
 
         // create an empty audio buffer to prevent potential errors
-        this.audioData = ac.createBuffer(1, 0, ac.sampleRate);
+        this.audioData = ac.createBuffer(1, 1, ac.sampleRate);
     }
 
     // list of all audio output nodes
