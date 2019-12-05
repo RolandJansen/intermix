@@ -272,6 +272,7 @@ export default class Registry {
     private getInitialState(pInstance: IPlugin): IState {
         const iState: IState = {};
 
+        iState.uid = pInstance.uid;  // read only field
         pInstance.actionDefs.forEach((actionDef) => {
             iState[actionDef.type] = actionDef.defVal;
         });
@@ -342,7 +343,7 @@ export default class Registry {
      */
     private createReducer(initialState: IState, handlers: IActionHandlerMap): Reducer {
         return (state = initialState, action: AnyAction | IAction) => {
-            if (handlers.hasOwnProperty(action.type)) {
+            if (state.uid === action.dest && handlers.hasOwnProperty(action.type)) {
                 const handler = handlers[action.type];
                 const newState = handler(state, action);
                 return newState;

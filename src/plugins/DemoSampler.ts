@@ -20,6 +20,11 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
             defVal: { value: 127 },
             steps: 128,
         },
+        {
+            type: "AUDIODATA",
+            desc: "audio data",
+            defVal: [],
+        },
     ];
 
     private gainNode: GainNode;
@@ -52,6 +57,7 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
     // onChange gets called
     // on every state change
     public onChange(changed: Tuple) {
+        console.log(changed);
         switch (changed[0]) {
             case "NOTE":
                 const note: IDelayedNote = changed[1];
@@ -64,7 +70,7 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
                 this.stop();
                 return true;
             case "AUDIODATA":
-                const buffer: AudioBuffer = changed[1];
+                const buffer: AudioBuffer = changed[1].payload;
                 this.handleAudioData(buffer);
                 return true;
             default:
@@ -94,10 +100,12 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
      * and even stop them all at a given time.
      */
     private start(note: IDelayedNote) {
-        const frequency = this.frequencyLookup[note.value];
+        // const frequency = this.frequencyLookup[note.value];
+        const playbackRate = this.getPlaybackRate(note.value);
+
         const bufferSrcNode = this.createBufferSrcNode();
 
-        bufferSrcNode.playbackRate.value = frequency;
+        bufferSrcNode.playbackRate.value = playbackRate;
         bufferSrcNode.connect(this.gainNode);
 
         this.queue.push(bufferSrcNode);
@@ -123,12 +131,23 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
     private createBufferSrcNode(): AudioBufferSourceNode {
         const bufferSrc: AudioBufferSourceNode = this.ac.createBufferSource();
         bufferSrc.buffer = this.audioData;
-        bufferSrc.connect(this.gainNode);
         bufferSrc.onended = () => {
             this.destroyBufferSrcNode(bufferSrc);
         };
 
         return bufferSrc;
+    }
+
+    /**
+     * This is not really note-acurate at the moment,
+     * it just computes a value between 0-2 (1=default playback rate)
+     * See: AudioBufferSourceNode.playbackRate at MDN
+     * @param noteValue midi note number (0-127)
+     */
+    private getPlaybackRate(noteValue: number): number {
+        const normalized = (noteValue - 64) / 64;
+        const normalizedShifted = normalized + 1;
+        return normalizedShifted;
     }
 
     /**

@@ -7,7 +7,7 @@ module.exports = {
     mode: 'development',
     entry: {
         intermix: './src/index.ts',
-        // demo: './src/demo/demo.ts'
+        demo: './src/demo/demo.ts'
     },
     output: {
         devtoolModuleFilenameTemplate: '[absolute-resource-path]',  // for vs debugger
@@ -30,6 +30,10 @@ module.exports = {
                 test: /\.tsx?$/,
                 use: 'ts-loader',
                 exclude: /(node-modules|bower_components)/
+            },
+            {
+                test: /\.(wav|mp3|ogg)$/,
+                use: 'file-loader'
             }
         ]
     },

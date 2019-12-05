@@ -128,12 +128,12 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
                 this.setBpmAndTimePerStep(changed[1]);
                 return true;
             case "ADD_PART":
-                const addPart: ISeqPartLoad = changed[1];
-                this.addPart(addPart.part, addPart.position);
+                const addPartMsg: ISeqPartLoad = changed[1];
+                this.addPart(addPartMsg.part, addPartMsg.position);
                 return true;
             case "REMOVE_PART":
-                const rmPart: ISeqPartLoad = changed[1];
-                this.removePart(rmPart.part, rmPart.position);
+                const rmPartMsg: ISeqPartLoad = changed[1];
+                this.removePart(rmPartMsg.part, rmPartMsg.position);
                 return true;
             case "LOOP":
                 const loop: ILoop = changed[1];
@@ -322,7 +322,7 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
             if (part.pointer === part.length - 1) {
                 markForDelete.unshift(index);
             } else {
-                console.log(this.nextStep);
+                // console.log(this.nextStep);
                 const nextStepActions = part.getActionsAtPointerPosition();
                 let action: IAction;
                 if (nextStepActions.length === 1) {  // it's faster to to test for length than a foreach loop
