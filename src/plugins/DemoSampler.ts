@@ -69,7 +69,6 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
                 this.stop();
                 return true;
             case "AUDIODATA":
-                console.log(changed[1]);
                 const buffer: AudioBuffer = changed[1].payload;
                 this.handleAudioData(buffer);
                 return true;
