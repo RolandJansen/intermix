@@ -1,9 +1,25 @@
 language: node_js
-node_js: "4.2"
+
+node_js: "8.11.4"
+
+cache:
+  directories:
+    - node_modules
+
+branches:
+  only:
+    - master
+
 before_script:
-  - npm install jasmine -g
-  - npm install codeclimate-test-reporter -g
-after_success: codeclimate-test-reporter < coverage/lcov.info
-addons:
-  code_climate:
-    repo_token: e82b025db5ef5738b8907e886c7da7f980136e58c63557b40e5da6a9602aa274
+  - npm update
+
+install:
+  - npm install
+
+script:
+  - npm test
+
+#after_success: codeclimate-test-reporter < coverage/lcov.info
+#addons:
+#  code_climate:
+#    repo_token: e82b025db5ef5738b8907e886c7da7f980136e58c63557b40e5da6a9602aa274
