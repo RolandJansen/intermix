@@ -1,5 +1,5 @@
 import AbstractPlugin from "../registry/AbstractPlugin";
-import { IActionDef, IDelayedNote, IPlugin, IPluginMetaData, Tuple, IAudioController } from "../registry/interfaces";
+import { IActionDef, IAudioController, IDelayedNote, IPlugin, IPluginMetaData, Tuple } from "../registry/interfaces";
 /**
  * An example synthesizer plugin for intermix.js
  *
@@ -80,7 +80,7 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
     // onChange gets called
     // on every state change
     public onChange(changed: Tuple) {
-        console.log(changed);
+        // console.log(changed);
         switch (changed[0]) {
             case "NOTE":
                 const note: IDelayedNote = changed[1];

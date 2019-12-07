@@ -1,6 +1,13 @@
 import { IAction } from "../../../registry/interfaces";
 import SeqPart from "../SeqPart";
 
+// tslint:disable: no-string-literal
+// We use string-literals to test private functions like:
+// objectName["privateMethod"](parameters)
+// Normally this could be considered as bad style ("test API only")
+// but here we want to check the values of private fields to
+// check the result of certain api calls.
+
 describe("SeqPart", () => {
     let part: SeqPart;
 
@@ -43,12 +50,13 @@ describe("SeqPart", () => {
     });
 
     test("has one bar pattern-length", () => {
-        expect(part.length).toEqual(16);
+        expect(part).toHaveLength(64);
     });
 
     test("can have another pattern-length", () => {
         const otherPart = new SeqPart(224);
-        expect(otherPart.length).toEqual(224);
+        const partLength = 224 * otherPart["stepMultiplier"];
+        expect(otherPart).toHaveLength(partLength);
     });
 
     describe(".addAction", () => {
@@ -168,12 +176,12 @@ describe("SeqPart", () => {
         it("extends the pattern on top", () => {
             const newSteps = 23;
             const oldPatternLength = part.length;
-            const oldPatternZero = newSteps * (64 / part.stepsPerBar);
+            const oldPatternZero = newSteps * part["stepMultiplier"];
 
             part.addAction(action1, 0);
             part.extendOnTop(newSteps);
 
-            expect(part.length).toEqual(newSteps + oldPatternLength);
+            expect(part).toHaveLength(newSteps * part["stepMultiplier"] + oldPatternLength);
             expect(part.seqPattern[oldPatternZero][0]).toEqual(action1);
         });
 
@@ -188,7 +196,7 @@ describe("SeqPart", () => {
             part.addAction(action1, 0);
             part.extendOnEnd(newSteps);
 
-            expect(part.length).toEqual(newSteps + oldPatternLength);
+            expect(part).toHaveLength(newSteps * part["stepMultiplier"] + oldPatternLength);
             expect(part.seqPattern[0][0]).toEqual(action1);
         });
 

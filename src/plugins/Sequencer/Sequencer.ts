@@ -166,7 +166,6 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
             this.clock.postMessage("start");
             this.isRunning = true;
             window.requestAnimationFrame(this.draw.bind(this));
-            console.log("sequencer started");
         }
     }
 
@@ -178,7 +177,6 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         this.nextStepTimeInSec = 0;
         this.resetQueuePointer();
         this.isRunning = false;
-        console.log("sequencer stopped");
     }
 
     /**

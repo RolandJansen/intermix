@@ -34,7 +34,7 @@ describe("DemoSynth", () => {
             desc: "Envelope Attack",
             minVal: 0,
             maxVal: 1,
-            defVal: 0,
+            defVal: { value: 0 },
             steps: 128,
         };
         expect(synth.actionDefs).toContainEqual(actionDef);
@@ -107,13 +107,13 @@ describe("DemoSynth", () => {
 
         test("should handle envelope attack", () => {
             // there's no check if value is within range (covered by actionDef)
-            synth.onChange(["ENV_ATTACK", 0.23]);
+            synth.onChange(["ENV_ATTACK", { value: 0.23 }]);
             expect(synth["attack"]).toEqual(0.23);
         });
 
         test("should handle envelope decay", () => {
             // there's no check if value is within range (covered by actionDef)
-            synth.onChange(["ENV_DECAY", 0.23]);
+            synth.onChange(["ENV_DECAY", { value: 0.23 }]);
             expect(synth["decay"]).toEqual(0.23);
         });
 

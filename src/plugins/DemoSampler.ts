@@ -23,7 +23,7 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
         {
             type: "AUDIODATA",
             desc: "audio data",
-            defVal: [],
+            defVal: {},
         },
     ];
 
@@ -57,7 +57,6 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
     // onChange gets called
     // on every state change
     public onChange(changed: Tuple) {
-        console.log(changed);
         switch (changed[0]) {
             case "NOTE":
                 const note: IDelayedNote = changed[1];
@@ -70,6 +69,7 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
                 this.stop();
                 return true;
             case "AUDIODATA":
+                console.log(changed[1]);
                 const buffer: AudioBuffer = changed[1].payload;
                 this.handleAudioData(buffer);
                 return true;

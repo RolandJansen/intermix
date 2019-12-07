@@ -1,6 +1,6 @@
 /// <reference path="../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
-import { IDelayedNote } from "../../registry/interfaces";
+import { IDelayedNote, IAction } from "../../registry/interfaces";
 import DemoSampler from "../DemoSampler";
 
 // tslint:disable: no-string-literal
@@ -34,7 +34,7 @@ describe("DemoSampler", () => {
             desc: "loudness",
             minVal: 0,
             maxVal: 127,
-            defVal: 127,
+            defVal: { value: 127 },
             steps: 128,
         };
         expect(sampler.actionDefs).toContainEqual(actionDef);
@@ -54,13 +54,14 @@ describe("DemoSampler", () => {
 
     test("has an empty audio buffer by default", () => {
         const buffer = sampler["audioData"];
-        expect(buffer.length).toEqual(0);
+        expect(buffer).toHaveLength(1);
         expect(buffer.sampleRate).toEqual(ac.sampleRate);
     });
 
     describe("onChange", () => {
         let note: IDelayedNote;
         let buffer: AudioBuffer;
+        let audioDataAction: IAction;
 
         beforeEach(() => {
             note = {
@@ -71,6 +72,12 @@ describe("DemoSampler", () => {
                 startTime: 1,
             };
             buffer = ac.createBuffer(1, 22050, 44100);  // create a buffer of 0.5s length
+            audioDataAction = {
+                type: "AUDIODATA",
+                dest: sampler.uid,
+                payload: buffer,
+            };
+
             sampler["ac"].$processTo("00:00.000");
         });
 
@@ -80,7 +87,7 @@ describe("DemoSampler", () => {
         });
 
         test("should replace the default audio buffer", () => {
-            sampler.onChange(["AUDIODATA", buffer]);
+            sampler.onChange(["AUDIODATA", audioDataAction]);
             expect(sampler["audioData"]).toBe(buffer);
         });
 
@@ -92,7 +99,7 @@ describe("DemoSampler", () => {
         });
 
         test("should start a BufferSourceNode at a given time", () => {
-            sampler.onChange(["AUDIODATA", buffer]);
+            sampler.onChange(["AUDIODATA", audioDataAction]);
             sampler.onChange(["NOTE", note]);
 
             const node = sampler["queue"][0];
@@ -104,7 +111,7 @@ describe("DemoSampler", () => {
         });
 
         test("should stop a BufferSourceNode immediately", () => {
-            sampler.onChange(["AUDIODATA", buffer]);
+            sampler.onChange(["AUDIODATA", audioDataAction]);
             sampler.onChange(["NOTE", note]);
             expect(sampler["queue"][0].$stateAtTime("00:01.000")).toBe("PLAYING");
 
@@ -113,7 +120,7 @@ describe("DemoSampler", () => {
         });
 
         test("should stop a BufferSourceNode even if it\'s just scheduled.", () => {
-            sampler.onChange(["AUDIODATA", buffer]);
+            sampler.onChange(["AUDIODATA", audioDataAction]);
             sampler.onChange(["NOTE", note]);
             expect(sampler["queue"][0].$stateAtTime("00:00.500")).toBe("SCHEDULED");
 

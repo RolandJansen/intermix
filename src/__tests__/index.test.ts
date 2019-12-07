@@ -54,11 +54,18 @@ describe("Intermix", () => {
 
     test("provides the global state", () => {
         const globalState: IState = getState();
-        const partialState = JSON.stringify({ ENV_ATTACK: 0, ENV_DECAY: 0.5});
+        const getPartialState = (uid: string) => {
+            return JSON.stringify({
+                uid,
+                ENV_ATTACK: { value: 0 },
+                ENV_DECAY: { value: 0.5 },
+                NOTE: { value: 0, velocity: 1, steps: 0, duration: 0 },
+            });
+        };
         let gsContainsPs = false;
 
         for (const uid in globalState) {
-            if (partialState === JSON.stringify(globalState[uid])) {
+            if (getPartialState(uid) === JSON.stringify(globalState[uid])) {
                 gsContainsPs = true;
             }
         }

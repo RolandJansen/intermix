@@ -12,8 +12,11 @@ jest.mock("../../store/store");
 let registry: Registry;
 let globalState: IState;
 let plug: IPlugin;
+let plugUID: string;
 const ac = new AudioContext();
 const pluginInitState: IState = { ACTION1: 0, ACTION2: 1 };
+let plugStaticState: IState;
+let plugCompleteState: IState;
 
 beforeEach(() => {
     globalState = {};
@@ -36,6 +39,13 @@ beforeEach(() => {
     registry = new Registry(ac);
     registry.registerPlugin(TestPlugin);
     plug = registry.pluginStore[0];
+    plugUID = plug.uid;
+
+    plugStaticState = {
+        uid: plugUID,
+        NOTE: { value: 0, velocity: 1, steps: 0, duration: 0 },
+    };
+    plugCompleteState = Object.assign({}, plugStaticState, pluginInitState);
 });
 
 test("registry has a public member 'pluginStore'", () => {
@@ -74,7 +84,7 @@ describe("registerPlugin", () => {
     });
 
     test("adds the initial state object to the plugin", () => {
-        expect(plug.initState).toEqual(pluginInitState);
+        expect(plug.initState).toEqual(plugCompleteState);
     });
 
     test("plugin subscribes to store changes", () => {
@@ -115,10 +125,10 @@ describe("unregisterPlugin", () => {
     });
 
     test("removes the plugin state from the global state", () => {
-        const initState = { [plug.uid]: pluginInitState };
+        const startState = { [plug.uid]: plugCompleteState };
         const removeAction = { type: "REMOVE", payload: plug.uid };
         (store.dispatch as jest.Mock).mock.calls = []; // reset call history
-        expect(store.getState()).toEqual(initState);
+        expect(store.getState()).toEqual(startState);
         registry.unregisterPlugin(plug.uid);
         expect(store.dispatch).toBeCalledTimes(1);
         expect(store.dispatch).toBeCalledWith(removeAction);
