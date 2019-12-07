@@ -14,6 +14,7 @@ before_script:
   - npm update
 
 install:
+  - npm uninstall typescript --no-save
   - npm install
 
 script:
