@@ -1,26 +1,20 @@
 {
   "name": "intermix",
   "version": "0.3.0",
-  "description": "Javascript library for building sequencers",
-  "main": "dist/intermix.min.js",
+  "description": "Javascript library for building music apps",
+  "main": "dist/intermix.js",
+  "types": "dist/intermix.d.ts",
   "scripts": {
-    "lint": "eslint src/",
+    "lint": "tslint -p ./tsconfig.json",
     "clean": "rimraf dist/*",
     "docgen": "jsdoc -c conf.json --verbose",
     "docgen:md": "jsdoc2md src/**/*.js > doc/api.md",
-    "prebuild": "npm run prebuild:js",
-    "build": "npm run build:js && npm run build:js:mini",
-    "watch": "npm run test:karma && npm run watch:js &",
-    "watch:cmd": "start cmd /k npm run test:karma && npm run watch:js",
-    "test": "npm run test:node",
-    "test:cmd": "npm run test:node:cmd",
-    "prebuild:js": "npm run clean && npm run lint",
-    "build:js": "browserify src/main.js -o dist/intermix.js -v -p browserify-derequire -s intermix",
-    "build:js:mini": "browserify src/main.js -o dist/intermix.min.js -d -v -s intermix -p browserify-derequire -p [minifyify --no-map]",
-    "watch:js": "watchify src/main.js -o dist/intermix.js -v -d -p browserify-derequire -s intermix",
-    "test:node": "istanbul cover --include-all-sources jasmine JASMINE_CONFIG_PATH=test/jasmine.json",
-    "test:node:cmd": "istanbul cover --include-all-sources node_modules/jasmine/bin/jasmine.js JASMINE_CONFIG_PATH=test/jasmine.json",
-    "test:karma": "karma start"
+    "prebuild": "npm run lint && npm run clean",
+    "build": "webpack",
+    "compile": "tsc",
+    "watch": "webpack-dev-server",
+    "test": "jest --watch",
+    "test:all": "jest"
   },
   "repository": {
     "type": "git",
@@ -43,29 +37,53 @@
     "url": "https://github.com/RolandJansen/intermix.js/issues"
   },
   "homepage": "https://github.com/RolandJansen/intermix.js#readme",
+  "eslintConfig": {
+    "env": {
+      "es6": true
+    }
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.(t|j)sx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ],
+    "testURL": "http://localhost/"
+  },
   "devDependencies": {
+    "@types/benchmark": "^1.0.31",
+    "@types/jest": "^23.3.1",
     "atob": "^2.0.3",
-    "browserify": "^13.0.0",
-    "browserify-derequire": "^0.9.4",
-    "eslint": "^6.5.1",
-    "eslintify": "^1.1.1",
-    "ink-docstrap": "^1.2.1",
-    "istanbul": "^0.4.3",
-    "jasmine": "^2.4.1",
+
+    "benchmark": "^2.1.4",
+    "dts-bundle-webpack": "^1.0.2",
+    "expect-more-jest": "^2.3.0",
+    "file-loader": "^5.0.2",
+    "html-webpack-plugin": "^3.2.0",
+    "jest": "^23.4.2",
+    "jest-extended": "^0.11.0",
     "jsdoc": "^3.4.0",
     "jsdoc-to-markdown": "^1.3.6",
-    "karma": "^0.13.19",
-    "karma-browserify": "^4.4.2",
-    "karma-chrome-launcher": "^0.2.2",
-    "karma-jasmine": "^0.3.6",
-    "minifyify": "^7.1.0",
-    "proxyquire": "^1.7.4",
-    "proxyquire-universal": "^1.0.8",
-    "proxyquireify": "^3.1.1",
     "rimraf": "^2.5.0",
-    "sinon": "^1.17.3",
-    "watchify": "^3.7.0",
+    "source-map-loader": "^0.2.3",
+    "ts-jest": "^23.0.1",
+    "ts-loader": "^6.1.2",
+    "tslint": "^5.10.0",
+    "typescript": "^3.3.0",
     "web-audio-test-api": "^0.5.2",
-    "webworkify": "^1.1.0"
+    "webpack": "^4.40.2",
+    "webpack-cli": "^3.3.9",
+    "webpack-dev-server": "^3.8.1",
+    "worker-loader": "^2.0.0"
+  },
+  "dependencies": {
+    "redux": "^4.0.0"
   }
 }
