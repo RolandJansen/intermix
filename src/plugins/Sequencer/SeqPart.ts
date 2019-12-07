@@ -1,4 +1,4 @@
-import { IAction } from "../../registry/interfaces";
+import { IAction } from "../../Registry/interfaces";
 
 type Pattern = IAction[][];
 

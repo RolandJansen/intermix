@@ -1,5 +1,5 @@
-import AbstractPlugin from "../registry/AbstractPlugin";
-import { IActionDef, IDelayedNote, IPlugin, IPluginMetaData, Tuple } from "../registry/interfaces";
+import AbstractPlugin from "../Registry/AbstractPlugin";
+import { IActionDef, IDelayedNote, IPlugin, IPluginMetaData, Tuple } from "../Registry/interfaces";
 
 export default class DemoSampler extends AbstractPlugin implements IPlugin {
 

@@ -1,5 +1,5 @@
-import AbstractPlugin from "../registry/AbstractPlugin";
-import { IActionDef, IAudioController, IDelayedNote, IPlugin, IPluginMetaData, Tuple } from "../registry/interfaces";
+import AbstractPlugin from "../Registry/AbstractPlugin";
+import { IActionDef, IAudioController, IDelayedNote, IPlugin, IPluginMetaData, Tuple } from "../Registry/interfaces";
 /**
  * An example synthesizer plugin for intermix.js
  *
