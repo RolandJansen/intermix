@@ -11,6 +11,7 @@
         // "experimentalDecorators": true,  //should be experimental no more
         "strict": true,
         "lib": [ "dom", "es7" ],  // used to get es7 lang features like [].includes()
+        "esModuleInterop": true,
     },
     "files": [
         "./src/index.ts",
