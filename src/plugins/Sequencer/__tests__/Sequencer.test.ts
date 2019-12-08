@@ -1,6 +1,6 @@
 /// <reference path="../../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
-import { IAction, ILoop, ISeqPartLoad } from "../../../Registry/interfaces";
+import { IAction, ILoop, ISeqPartLoad } from "../../../registry/interfaces";
 import ClockWorker from "../clock.worker";
 import SeqPart from "../SeqPart";
 import Sequencer from "../Sequencer";

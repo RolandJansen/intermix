@@ -3,8 +3,8 @@ import DemoSampler from "./plugins/DemoSampler";
 import DemoSynth from "./plugins/DemoSynth";
 import SeqPart from "./plugins/Sequencer/SeqPart";
 import Sequencer from "./plugins/Sequencer/Sequencer";
-import { IGlobalActionCreators, IPlugin } from "./Registry/interfaces";
-import Registry from "./Registry/Registry";
+import { IGlobalActionCreators, IPlugin } from "./registry/interfaces";
+import Registry from "./registry/Registry";
 import { store } from "./store/store";
 
 // In vscode, go to File->Preferences->Settings

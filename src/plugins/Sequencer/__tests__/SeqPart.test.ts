@@ -1,4 +1,4 @@
-import { IAction } from "../../../Registry/interfaces";
+import { IAction } from "../../../registry/interfaces";
 import SeqPart from "../SeqPart";
 
 // tslint:disable: no-string-literal

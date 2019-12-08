@@ -1,4 +1,4 @@
-import AbstractPlugin from "../../Registry/AbstractPlugin";
+import AbstractPlugin from "../../registry/AbstractPlugin";
 import {
     IAction,
     IActionDef,
@@ -9,7 +9,7 @@ import {
     IPlugin,
     ISeqPartLoad,
     Tuple,
-} from "../../Registry/interfaces";
+} from "../../registry/interfaces";
 import ClockWorker from "./clock.worker";
 import seqActionDefs from "./SeqActionDefs";
 import SeqPart from "./SeqPart";

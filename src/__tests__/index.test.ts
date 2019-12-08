@@ -3,7 +3,7 @@ import { ActionCreatorsMapObject } from "redux";
 import "web-audio-test-api";
 import { dispatch, getActionCreators, getAudioContext, getState, resumeAudioContext } from "../index";
 import ClockWorker from "../plugins/Sequencer/clock.worker";
-import { IAction, IGlobalActionCreators, IState } from "../Registry/interfaces";
+import { IAction, IGlobalActionCreators, IState } from "../registry/interfaces";
 
 /**
  * Integration tests for the intermix API

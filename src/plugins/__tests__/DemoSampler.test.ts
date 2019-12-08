@@ -1,6 +1,6 @@
 /// <reference path="../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
-import { IDelayedNote, IAction } from "../../Registry/interfaces";
+import { IAction, IDelayedNote } from "../../registry/interfaces";
 import DemoSampler from "../DemoSampler";
 
 // tslint:disable: no-string-literal

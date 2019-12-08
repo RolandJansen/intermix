@@ -1,6 +1,6 @@
 import { ActionCreatorsMapObject } from "redux";
-import AbstractPlugin from "../Registry/AbstractPlugin";
-import { IActionDef, IPlugin, IPluginMetaData, Tuple } from "../Registry/interfaces";
+import AbstractPlugin from "../registry/AbstractPlugin";
+import { IActionDef, IPlugin, IPluginMetaData, Tuple } from "../registry/interfaces";
 
 /**
  * This class will be used to indirectly
