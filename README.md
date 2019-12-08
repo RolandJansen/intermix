@@ -1,6 +1,6 @@
 # Intermix
 
-[![Build Status](https://travis-ci.org/RolandJansen/intermix.js.svg?branch=master)](https://travis-ci.org/RolandJansen/intermix.js)
+![](https://github.com/RolandJansen/intermix.js/workflows/build\/test/badge.svg)
 [![Code Climate](https://codeclimate.com/github/RolandJansen/intermix.js/badges/gpa.svg)](https://codeclimate.com/github/RolandJansen/intermix.js)
 [![Test Coverage](https://codeclimate.com/github/RolandJansen/intermix.js/badges/coverage.svg)](https://codeclimate.com/github/RolandJansen/intermix.js/coverage)
 
