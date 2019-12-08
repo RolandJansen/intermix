@@ -6,6 +6,7 @@
 # local files
 /node_modules/
 /dist
+#package-lock.json
 
 # istanbul reports
 /coverage/
