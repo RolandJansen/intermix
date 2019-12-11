@@ -4,7 +4,6 @@ const DtsBundleWebpack = require('dts-bundle-webpack');
 const webpack = require('webpack');
 
 module.exports = {
-    mode: 'development',
     entry: {
         intermix: './src/index.ts',
         demo: './src/demo/demo.ts'
@@ -37,7 +36,6 @@ module.exports = {
             }
         ]
     },
-    devtool: 'cheap-module-source-map',  // eval based sm doesn't work with vs debugger
     plugins: [
         new DtsBundleWebpack({
             // see dts-bundle-webpack npm page for options
@@ -53,8 +51,5 @@ module.exports = {
         }),  // use a html template for the demo
         new webpack.HotModuleReplacementPlugin()  // use hot resync
     ],
-    devServer: {
-        contentBase: path.resolve(__dirname, './dist'),
-        hot: true
-    }
+
 };
