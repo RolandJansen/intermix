@@ -12,7 +12,7 @@ Intermix comes with a sequencer with rock solid timing and simple synth- and sam
 
 ## Warning
 
-This software is in a very early stage and the API is under constant development. The current release (0.4.0) is just a milestone and not ment to be used in other projects.
+This software is in a very early stage and the API is under constant development. The current release (0.4.0) is just a milestone and not ment to be used in production environments.
 
 ## Dependencies
 
