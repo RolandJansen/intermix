@@ -1,6 +1,6 @@
 {
   "name": "intermix",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Javascript library for building music apps",
   "main": "dist/intermix.js",
   "types": "dist/intermix.d.ts",
