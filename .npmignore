@@ -10,4 +10,5 @@ test/distTest/
 # local stuff
 .tmp
 doc/
+docs/
 coverage/

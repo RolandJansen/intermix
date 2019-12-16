@@ -2,10 +2,10 @@
 .DS_Store
 .tmp
 /doc/
+/**/.jekyll-cache
 
 # local files
 /node_modules/
 /dist
-
-# istanbul reports
+/**/_site
 /coverage/

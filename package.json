@@ -7,7 +7,7 @@
   "scripts": {
     "lint": "tslint -p ./tsconfig.json",
     "clean": "rimraf dist/*",
-    "docgen": "jsdoc -c conf.json --verbose",
+    "doc": "typedoc",
     "docgen:md": "jsdoc2md src/**/*.js > doc/api.md",
     "prebuild": "npm run lint && npm run clean",
     "build": "webpack --config webpack.prod.js",
@@ -15,7 +15,8 @@
     "watch": "webpack-dev-server --config webpack.dev.js",
     "watch-test": "jest --watch",
     "test": "jest --coverage",
-    "test:all": "jest"
+    "test:all": "jest",
+    "bashtest": "bash ./docs/assets/copySourceFiles.sh"
   },
   "repository": {
     "type": "git",
@@ -77,6 +78,7 @@
     "ts-jest": "^23.0.1",
     "ts-loader": "^6.1.2",
     "tslint": "^5.10.0",
+    "typedoc": "^0.15.4",
     "typescript": "^3.3.0",
     "web-audio-test-api": "^0.5.2",
     "webpack": "^4.40.2",
