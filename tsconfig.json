@@ -19,6 +19,7 @@
         "mode": "modules",
         "out": "doc",
         "excludePrivate": true,
-        "json": "docs/_data/apidoc.json",
+        "excludeProtected": true,
+        "json": "docs/_data/apidoc.json"
     }
 }

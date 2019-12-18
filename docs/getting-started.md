@@ -1,5 +1,5 @@
 ---
-title: Tutorials
+title: Getting Started
 ---
 short introduction to the concepts of intermix
 
