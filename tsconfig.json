@@ -25,5 +25,9 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx"
-  ]
+  ],
+  "typedocOptions": {
+    "mode": "modules",
+    "json": "./apidoc.json"
+  }
 }
