@@ -14,5 +14,8 @@
   "bugs": {
     "url": "https://github.com/RolandJansen/intermix.js/issues"
   },
-  "homepage": "https://github.com/RolandJansen/intermix.js#readme"
+  "homepage": "https://github.com/RolandJansen/intermix.js#readme",
+  "devDependencies": {
+    "typedoc": "^0.15.6"
+  }
 }
