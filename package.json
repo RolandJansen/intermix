@@ -2,92 +2,17 @@
   "name": "intermix",
   "version": "0.4.0",
   "description": "Javascript library for building music apps",
-  "main": "dist/intermix.js",
-  "types": "dist/intermix.d.ts",
   "scripts": {
-    "lint": "tslint -p ./tsconfig.json",
-    "clean": "rimraf dist/*",
-    "doc": "typedoc",
-    "docgen:md": "jsdoc2md src/**/*.js > doc/api.md",
-    "prebuild": "npm run lint && npm run clean",
-    "build": "webpack --config webpack.prod.js",
-    "compile": "tsc",
-    "watch": "webpack-dev-server --config webpack.dev.js",
-    "watch-test": "jest --watch",
-    "test": "jest --coverage",
-    "test:all": "jest",
-    "bashtest": "bash ./docs/assets/copySourceFiles.sh"
+    "doc": "typedoc"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/RolandJansen/intermix.js.git"
   },
-  "keywords": [
-    "intermix.js",
-    "sound",
-    "audio",
-    "web audio",
-    "sequencer",
-    "sequencing",
-    "synthesizer",
-    "synthesis",
-    "music"
-  ],
   "author": "Roland Jansen",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/RolandJansen/intermix.js/issues"
   },
-  "homepage": "https://github.com/RolandJansen/intermix.js#readme",
-  "eslintConfig": {
-    "env": {
-      "es6": true
-    }
-  },
-  "jest": {
-    "transform": {
-      "^.+\\.(t|j)sx?$": "ts-jest"
-    },
-    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "json",
-      "node"
-    ],
-    "testURL": "http://localhost/"
-  },
-  "devDependencies": {
-    "@types/benchmark": "^1.0.31",
-    "@types/jest": "^23.3.1",
-    "@types/node": "^12.12.14",
-    "atob": "^2.0.3",
-    "benchmark": "^2.1.4",
-    "dts-bundle-webpack": "^1.0.2",
-    "expect-more-jest": "^2.3.0",
-    "file-loader": "^5.0.2",
-    "html-webpack-plugin": "^3.2.0",
-    "jest": "^25.0.0",
-    "jest-extended": "^0.11.0",
-    "jsdoc": "^3.4.0",
-    "jsdoc-to-markdown": "^5.0.3",
-    "rimraf": "^2.5.0",
-    "source-map-loader": "^0.2.3",
-    "ts-jest": "^23.0.1",
-    "ts-loader": "^6.1.2",
-    "tslint": "^5.10.0",
-    "typedoc": "^0.15.4",
-    "typescript": "^3.3.0",
-    "web-audio-test-api": "^0.5.2",
-    "webpack": "^4.40.2",
-    "webpack-cli": "^3.3.9",
-    "webpack-dev-server": "^3.8.1",
-    "webpack-merge": "^4.2.2",
-    "worker-loader": "^2.0.0"
-  },
-  "dependencies": {
-    "redux": "^4.0.0"
-  }
+  "homepage": "https://github.com/RolandJansen/intermix.js#readme"
 }
