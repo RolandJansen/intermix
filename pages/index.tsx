@@ -1,12 +1,12 @@
 import { NextPage } from 'next';
 
-const Home: NextPage<{ userAgent: string }> = ({ userAgent }) => (
-    <h1>Hello world! - user agent: {userAgent}</h1>
-);
-
-Home.getInitialProps = async ({ req }) => {
-    const userAgent = req ? req.headers['user-agent'] || '' : navigator.userAgent;
-    return { userAgent };
-};
+const Home: NextPage = () => {
+    return (
+        <div>
+            <h1>Hello</h1>
+            <p>This is the intermix homepage on github. It is currently just a stub and will be extended in the next few days.</p>
+        </div>
+    )
+}
 
 export default Home;
