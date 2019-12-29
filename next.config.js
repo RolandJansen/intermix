@@ -5,5 +5,5 @@ module.exports = {
             '/': { page: '/' }
         };
     },
-    assetPrefix: process.env.NODE_ENV === 'production' ? '/{intermix.js}' : ''
+    assetPrefix: process.env.NODE_ENV === 'production' ? '/intermix.js' : ''
 };
