@@ -2,7 +2,7 @@
 .DS_Store
 .tmp
 /doc/
-/**/.jekyll-cache
+/docs/
 
 # local files
 /node_modules/
