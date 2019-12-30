@@ -20,6 +20,6 @@
         "out": "doc",
         "excludePrivate": true,
         "excludeProtected": true,
-        "json": "docs/_data/apidoc.json"
+        "json": "data/api.json"
     }
 }

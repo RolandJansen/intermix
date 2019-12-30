@@ -8,7 +8,6 @@
     "lint": "tslint -p ./tsconfig.json",
     "clean": "rimraf dist/*",
     "doc": "typedoc",
-    "docgen:md": "jsdoc2md src/**/*.js > doc/api.md",
     "prebuild": "npm run lint && npm run clean",
     "build": "webpack --config webpack.prod.js",
     "compile": "tsc",
