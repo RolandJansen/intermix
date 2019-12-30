@@ -26,6 +26,4 @@ This software is in a very early stage and the API is under constant development
 \* Sample accurate pause/resume of sounds not supported.
 
 ## License
-Copyright (C) 2019 Roland Jansen
-
 Licensed under the [Apache Public License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
