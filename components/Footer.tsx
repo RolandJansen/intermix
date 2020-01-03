@@ -5,8 +5,13 @@ interface Props {
 const Footer: React.FunctionComponent<Props> = ({
     year,
 }) => (
-    <footer>
-        <span>Copyright (C), Roland Jansen {year}</span>
+    <footer className="footer">
+        <span>Copyright (C) {year} Roland Jansen</span>
+        <style jsx>{`
+            .footer {
+                background: #1e1e1e;
+            }
+        `}</style>
     </footer>
 )
 
