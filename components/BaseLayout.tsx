@@ -23,9 +23,11 @@ const BaseLayout: React.FunctionComponent<Props> = ({
     children,
     title = "intermix",
 }) => (
-    <main>
+    <div>
         <Toolbar title={title} links={pages} />
-        {children}
+        <main>
+            {children}
+        </main>
         <Footer  year={fullYear.toString()}/>
         <style jsx global>{`
             html {
@@ -39,10 +41,10 @@ const BaseLayout: React.FunctionComponent<Props> = ({
                 font-family: sans-serif;
             }
             main {
-                height: 100%;
+                /* height: 100%; */
             }
         `}</style>
-    </main>
+    </div>
 )
 
 export default BaseLayout;

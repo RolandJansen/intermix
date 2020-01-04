@@ -30,13 +30,6 @@ const drawerToggleButton: React.FunctionComponent<Props> = ({
                 height: 2px;
                 background: white;
             }
-            /*
-            @media (min-width: 769px) {
-                .toggle-button {
-                    display: none;
-                }
-            }
-            */
         `}</style>
     </button>
 );
