@@ -1,5 +1,11 @@
-const drawerToggleButton: React.FunctionComponent = props => (
-    <button className="toggle-button">
+interface Props {
+    click: () => any;
+}
+
+const drawerToggleButton: React.FunctionComponent<Props> = ({
+    click,
+}) => (
+    <button className="toggle-button" onClick={click}>
         <div className="toggle-button__line" />
         <div className="toggle-button__line" />
         <div className="toggle-button__line" />
@@ -24,6 +30,13 @@ const drawerToggleButton: React.FunctionComponent = props => (
                 height: 2px;
                 background: white;
             }
+            /*
+            @media (min-width: 769px) {
+                .toggle-button {
+                    display: none;
+                }
+            }
+            */
         `}</style>
     </button>
 );

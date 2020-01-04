@@ -1,5 +1,11 @@
-const backDrop: React.FunctionComponent = props => (
-    <div className="backdrop">
+interface Props {
+    click: () => any;
+}
+
+const backDrop: React.FunctionComponent<Props> = ({
+    click,
+}) => (
+    <div className="backdrop" onClick={click}>
         <style jsx>{`
             .backdrop {
                 z-index: 100;

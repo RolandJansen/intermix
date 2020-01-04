@@ -3,12 +3,20 @@ import { NavItem } from "../interfaces";
 
 interface Props {
     links: NavItem[];
+    show: boolean;
 }
 
 const sideDrawer: React.FunctionComponent<Props> = ({
     links,
-}) => (
-        <nav className="side-drawer">
+    show,
+}) => {
+    let drawerClasses = "side-drawer";
+    if (show) {
+        drawerClasses = "side-drawer open";
+    }
+
+    return (
+        <nav className={drawerClasses}>
             <ul>
                 {
                     links.map(link => (
@@ -31,6 +39,12 @@ const sideDrawer: React.FunctionComponent<Props> = ({
                     max-width: 400px;
                     background: white;
                     box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.5);
+                    transform: translateX(-110%);
+                    transition: transform 0.3s ease-in;
+                }
+                .side-drawer.open {
+                    transform: translateX(0);
+                    transition: transform 0.3s ease-out;
                 }
                 .side-drawer ul {
                     height: 100%;
@@ -51,9 +65,14 @@ const sideDrawer: React.FunctionComponent<Props> = ({
                 .side-drawer a:active {
                     color: red;
                 }
-
+                @media (min-width: 769px) {
+                    .side-drawer {
+                        display: none;
+                    }
+                }
             `}</style>
         </nav>
-    );
+    )
+}
 
 export default sideDrawer;

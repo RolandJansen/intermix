@@ -1,8 +1,6 @@
 import { NavItem } from "./interfaces";
-import Header from "./Header";
+import Toolbar from "./Toolbar";
 import Footer from "./Footer";
-import SideDrawer from "./SideDrawer/SideDrawer";
-import Backdrop from "./Backdrop";
 
 interface Props {
     title?: string;
@@ -26,12 +24,7 @@ const BaseLayout: React.FunctionComponent<Props> = ({
     title = "intermix",
 }) => (
     <main>
-        <Header title={title} links={pages} />
-        {/*
-        <SideDrawer links={pages} />
-        <Backdrop />
-
-        */}
+        <Toolbar title={title} links={pages} />
         {children}
         <Footer  year={fullYear.toString()}/>
         <style jsx global>{`
