@@ -38,8 +38,9 @@ const BaseLayout: React.FunctionComponent<Props> = ({
                 height: 100%;
                 margin: 0;
                 padding: 0;
+                /*box-sizing: border-box;*/
                 background: white;
-                font-family: sans-serif;
+                font-family: 'Lato', sans-serif;
             }
             /* __next is a div added by next.js that holds the content
                so we have to style it to full height. */
@@ -49,7 +50,7 @@ const BaseLayout: React.FunctionComponent<Props> = ({
             .container {
                 height: 100%;
                 display: flex;
-                flex-flow: column wrap;
+                flex-direction: column;
                 /*align-items: space-between;*/
             }
             Toolbar {
