@@ -6,6 +6,9 @@
 SRCDIR="https://raw.githubusercontent.com/RolandJansen/intermix.js/master"
 OUTDIR="./docs"
 
+WIKISRC="https://raw.githubusercontent.com/wiki/RolandJansen/intermix.js"
+#WIKISRC="https://raw.githubusercontent.com/wiki/RolandJansen/intermix.js/"
+
 # create OUTDIR if needed
 if [ ! -d  "$OUTDIR" ]; then
     mkdir "$OUTDIR"
@@ -18,4 +21,5 @@ curl $SRCDIR/CHANGELOG.md --output $OUTDIR/CHANGELOG.md
 echo ""
 
 echo "Copying markdown from wiki ..."
-curl $SRCDIR/Getting-Started.md --output $OUTDIR/Getting-Started.md
+#curl $WIKISRCDIR/Getting-Started.md --output $OUTDIR/Getting-Started.md
+curl https://raw.githubusercontent.com/wiki/RolandJansen/intermix.js/Getting-Started.md --output $OUTDIR/Getting-Started.md

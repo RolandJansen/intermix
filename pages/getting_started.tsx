@@ -6,10 +6,9 @@ interface Props {
     content: any;
 }
 
-const Home: NextPage<Props> = (props) => {
+const gettingStarted: NextPage<Props> = (props) => {
     return (
         <BaseLayout>
-            <p><b>This page is under construction! New content/style will be added within the next few days...</b></p>
             <div>
                 <Markdown source={props.content.default} />
             </div>
@@ -17,9 +16,9 @@ const Home: NextPage<Props> = (props) => {
     )
 }
 
-Home.getInitialProps = async () => {
-    const content = await require("../docs/README.md");
+gettingStarted.getInitialProps = async () => {
+    const content = await require("../docs/Getting-Started.md");
     return { content };
 }
 
-export default Home;
+export default gettingStarted;

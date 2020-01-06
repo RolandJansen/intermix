@@ -6,7 +6,7 @@ interface Props {
     title?: string;
 }
 
-const pages: NavItem[] = [
+const sections: NavItem[] = [
     {
         name: "Getting Started",
         href: "/getting_started",
@@ -23,14 +23,15 @@ const BaseLayout: React.FunctionComponent<Props> = ({
     children,
     title = "intermix",
 }) => (
-    <div>
-        <Toolbar title={title} links={pages} />
+    <div className="container">
+        <Toolbar title={title} links={sections} />
         <main>
-            {children}
+            { children }
         </main>
-        <Footer  year={fullYear.toString()}/>
+        <Footer title={title} sections={sections} year={fullYear.toString()}/>
         <style jsx global>{`
             html {
+                height: 100%;
                 background: #1e1e1e;
             }
             body {
@@ -40,8 +41,26 @@ const BaseLayout: React.FunctionComponent<Props> = ({
                 background: white;
                 font-family: sans-serif;
             }
+            /* __next is a div added by next.js that holds the content
+               so we have to style it to full height. */
+            #__next {
+                height: 100%;
+            }
+            .container {
+                height: 100%;
+                display: flex;
+                flex-flow: column wrap;
+                /*align-items: space-between;*/
+            }
+            Toolbar {
+            }
             main {
-                /* height: 100%; */
+                flex: 1 0 auto;
+                padding: 0 1rem;
+                background: white;
+                /*height: 100%;*/
+            }
+            Footer {
             }
         `}</style>
     </div>

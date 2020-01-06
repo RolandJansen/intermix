@@ -49,9 +49,9 @@ class Toolbar extends React.Component<Props> {
                 {backdrop}
                 <style jsx>{`
                     .toolbar {
-                        position: fixed;
+                        /*position: fixed;
                         top: 0;
-                        left: 0;
+                        left: 0;*/
                         width: 100%;
                         #background: #008080;
                         #background: #150080;
