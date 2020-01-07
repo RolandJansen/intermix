@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { NavItem } from "./interfaces";
+import { link } from "fs";
 
 interface Props {
     title: string;
@@ -24,7 +25,7 @@ const Footer: React.FunctionComponent<Props> = ({
                     </li>
                     {
                         sections.map(section => (
-                            <li>
+                            <li key={section.href}>
                                 <Link href={section.href}>
                                     <a>{section.name}</a>
                                 </Link>
@@ -36,21 +37,9 @@ const Footer: React.FunctionComponent<Props> = ({
             <div className="footer-main-item">
                 <h2 className="footer-main-item__title">dev</h2>
                 <ul>
-                    <li>
-                        <Link href="https://github.com/RolandJansen/intermix.js">
-                            <a>Intermix on Github</a>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link href="https://github.com/RolandJansen/intermix.js/issues">
-                            <a>Tickets</a>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link href="https://github.com/RolandJansen/intermix.js/wiki">
-                            <a>Wiki</a>
-                        </Link>
-                    </li>
+                    <li><a href="https://github.com/RolandJansen/intermix.js/">Intermix on Github</a></li>
+                    <li><a href="https://github.com/RolandJansen/intermix.js/issues">Tickets</a></li>
+                    <li><a href="https://github.com/RolandJansen/intermix.js/wiki">Wiki</a></li>
                 </ul>
             </div>
         </section>

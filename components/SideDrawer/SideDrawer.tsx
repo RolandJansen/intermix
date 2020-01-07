@@ -20,7 +20,7 @@ const sideDrawer: React.FunctionComponent<Props> = ({
             <ul>
                 {
                     links.map(link => (
-                        <li>
+                        <li key={link.href}>
                             <Link href={link.href}>
                                 <a>{link.name}</a>
                             </Link>

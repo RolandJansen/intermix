@@ -27,7 +27,7 @@ const mainNav: React.FunctionComponent<Props> = ({
             <ul className="main-nav__links">
                 {
                     links.map(link => (
-                        <li>
+                        <li key={link.href}>
                             <Link href={link.href}>
                                 <a>{link.name}</a>
                             </Link>
