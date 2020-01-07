@@ -9,7 +9,7 @@ interface Props {
 const Home: NextPage<Props> = (props) => {
     return (
         <BaseLayout>
-            <p><b>This page is under construction! New content/style will be added within the next few days...</b></p>
+            <p><b>This page is under construction! New content/style will be added regularly...</b></p>
             <div>
                 <Markdown source={props.content.default} />
             </div>

@@ -7,7 +7,6 @@ SRCDIR="https://raw.githubusercontent.com/RolandJansen/intermix.js/master"
 OUTDIR="./docs"
 
 WIKISRC="https://raw.githubusercontent.com/wiki/RolandJansen/intermix.js"
-#WIKISRC="https://raw.githubusercontent.com/wiki/RolandJansen/intermix.js/"
 
 # create OUTDIR if needed
 if [ ! -d  "$OUTDIR" ]; then
@@ -17,6 +16,7 @@ fi
 echo "Copying files from master ..."
 curl $SRCDIR/README.md --output $OUTDIR/README.md
 curl $SRCDIR/CHANGELOG.md --output $OUTDIR/CHANGELOG.md
+curl $SRCDIR/data/api.json --output $OUTDIR/api.json
 
 echo ""
 
