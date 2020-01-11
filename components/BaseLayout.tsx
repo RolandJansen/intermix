@@ -13,7 +13,7 @@ const sections: NavItem[] = [
     },
     {
         name: "API",
-        href: "/api",
+        href: "/api_test",
     }
 ];
 
