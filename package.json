@@ -14,8 +14,7 @@
     "watch": "webpack-dev-server --config webpack.dev.js",
     "watch-test": "jest --watch",
     "test": "jest --coverage",
-    "test:all": "jest",
-    "bashtest": "bash ./docs/assets/copySourceFiles.sh"
+    "test:all": "jest"
   },
   "repository": {
     "type": "git",

@@ -51,8 +51,11 @@ export default class Registry {
             pInstance.actionDefs = [...pInstance.actionDefs, ...commonActionDefs];
         }
 
+        // add unbound action creators to the plugin (useful in react)
+        pInstance.actionCreators = this.getActionCreators(pInstance.actionDefs, pInstance.uid);
+
         // generate action creator functions and bind them to the dispatcher
-        pInstance.actionCreators = this.getBoundActionCreators(pInstance);
+        pInstance.boundActionCreators = this.getBoundActionCreators(pInstance);
 
         // if the plugin is a controller, it needs a sendAction method
         this.bindSendActionMethod(pInstance);
@@ -207,10 +210,7 @@ export default class Registry {
      * @param pInstance The plugin instance
      */
     private getBoundActionCreators(pInstance: IPlugin): ActionCreatorsMapObject {
-        const creators = this.getActionCreators(
-            [...commonActionDefs, ...pInstance.actionDefs],
-            pInstance.uid,
-        );
+        const creators = this.getActionCreators(pInstance.actionDefs, pInstance.uid);
         return bindActionCreators(creators, store.dispatch);
     }
 

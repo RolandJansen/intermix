@@ -7,12 +7,6 @@ import { IGlobalActionCreators, IPlugin } from "./registry/interfaces";
 import Registry from "./registry/Registry";
 import { store } from "./store/store";
 
-// In vscode, go to File->Preferences->Settings
-// search for "experimental decorators" and enable
-// the corresponding setting to disable warnings
-// in the editor.
-// TODO: put this in the readme.
-
 // system components
 const audioContext: AudioContext = new AudioContext();
 const registry: Registry = new Registry(audioContext);
@@ -39,14 +33,17 @@ export function getAudioContext(): AudioContext {
     return audioContext;
 }
 
-export function getActionCreators(): IGlobalActionCreators {
+export function getActionCreators(bound?: string): IGlobalActionCreators {
     const pluginList = registry.pluginStore;
     const actionCreators: IGlobalActionCreators = {};
+    let actionCreatorsType: string;
+
+    actionCreatorsType = bound === "unbound" ? "actionCreators" : "boundActionCreators";
 
     pluginList.forEach((plugin: IPlugin) => {
         const pluginAC = {
             metadata: plugin.metaData,
-            actionCreators: plugin.actionCreators,
+            actionCreators: plugin[actionCreatorsType],
         };
         actionCreators[plugin.uid] = pluginAC;
     });
@@ -60,5 +57,9 @@ export function getNewPart(): SeqPart {
 
 export function animate(animeFunc: (lastPlayedStep: number) => void) {
     defaultSequencer.updateFrame = animeFunc;
-    // defaultSequencer.updateFrame(23);
 }
+
+export const react = {
+    store,
+    actionCreators: getActionCreators("unbound"),
+};

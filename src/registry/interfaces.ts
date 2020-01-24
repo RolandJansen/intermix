@@ -8,6 +8,7 @@ export interface IPlugin  {
     readonly metaData: IPluginMetaData;
     actionDefs: IActionDef[];
     actionCreators: ActionCreatorsMapObject;
+    boundActionCreators: ActionCreatorsMapObject<any>;
     frequencyLookup: number[];
     outputs: AudioNode[];
     inputs: AudioNode[];
