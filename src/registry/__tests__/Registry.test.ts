@@ -69,13 +69,18 @@ describe("registerPlugin", () => {
         expect(acKeys).toContain("NOTE");
     });
 
-    test("action creators are bound to store.dispatch()", () => {
+    test("adds bound action creators to the plugin instance", () => {
+        const acKeys = Object.keys(plug.boundActionCreators);
+        expect(acKeys).toContain("NOTE");
+    })
+
+    test("bound action creators are bound to store.dispatch()", () => {
         const action = {
             type: "ACTION1",
             payload: 23,
             dest: plug.uid,
         };
-        plug.actionCreators.ACTION1(23);
+        plug.boundActionCreators.ACTION1(23);
         expect((store.dispatch as jest.Mock)).toBeCalledWith(action);
     });
 
