@@ -69,6 +69,22 @@ export default abstract class AbstractPlugin implements IPlugin {
     }
 
     /**
+     * Generates a random string.
+     * @param length Length of the output string in digits
+     * @returns      random string
+     */
+    protected getRandomString(length: number): string {
+        const randomChars: string[] = [];
+        const input = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        for (let i = 0; i < length; i++) {
+            randomChars[i] = input.charAt(Math.floor(Math.random() * input.length));
+        }
+
+        return randomChars.join("");
+    }
+
+    /**
      * Computes the frequencies of all midi notes and returns
      * them as an array. Used for frequency lookup.
      * @see https://newt.phys.unsw.edu.au/jw/notes.html
@@ -84,19 +100,4 @@ export default abstract class AbstractPlugin implements IPlugin {
         return frequencies;
     }
 
-    /**
-     * Generates a random string.
-     * @param length Length of the output string in digits
-     * @returns      random string
-     */
-    private getRandomString(length: number): string {
-        const randomChars: string[] = [];
-        const input = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-        for (let i = 0; i < length; i++) {
-            randomChars[i] = input.charAt(Math.floor(Math.random() * input.length));
-        }
-
-        return randomChars.join("");
-    }
 }

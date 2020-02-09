@@ -20,13 +20,29 @@ export default [
     },
     {
         type: "ADD_PART",
-        desc: "adds a part to the sequencer queue",
+        desc: "adds a part to the sequencer",
         defVal: {},
     },
     {
         type: "REMOVE_PART",
-        desc: "removes a part from the sequencer queue",
-        defVal: {},
+        desc: "removes a part from the sequencer",
+        defVal: "",
+    },
+    {
+        type: "ADD_TO_SCORE",
+        desc: "adds a part-reference to the score",
+        defVal: {
+            partID: "",
+            position: 0,
+        },
+    },
+    {
+        type: "REMOVE_FROM_SCORE",
+        desc: "removes a part-reference from the score",
+        defVal: {
+            partID: "",
+            position: 0,
+        },
     },
     {
         type: "QUEUE",

@@ -1,8 +1,16 @@
 /// <reference path="../../typings/web-audio-test-api.d.ts" />
 import { ActionCreatorsMapObject } from "redux";
 import "web-audio-test-api";
-import { dispatch, getActionCreators, getAudioContext, getState, resumeAudioContext } from "../index";
+import {
+    animate,
+    dispatch,
+    getActionCreators,
+    getAudioContext,
+    getNewPart,
+    getState,
+    resumeAudioContext } from "../index";
 import ClockWorker from "../plugins/Sequencer/clock.worker";
+import SeqPart from "../plugins/Sequencer/SeqPart";
 import { IAction, IGlobalActionCreators, IState } from "../registry/interfaces";
 
 /**
@@ -103,6 +111,32 @@ describe("Intermix", () => {
         globalState = getState();
         expect(globalState[seqUID].BPM).toEqual(180);
     });
+
+    test("getNewPart returns a part object", () => {
+        // this test is kinda dump in typescript
+        const part: SeqPart = getNewPart();
+        expect(part).toBeInstanceOf(SeqPart);
+    });
+
+    // test("animate forwards a callback to sequencer.updateFrame", () => {
+    //     const audioContext: AudioContext = getAudioContext();
+    //     const boundActionCreators = getActionCreators();
+    //     const animeCallback = jest.fn();
+    //     let seqActionCreators: ActionCreatorsMapObject = {};
+
+    //     for (const uid in allActionCreators) {
+    //         if (allActionCreators[uid].metadata.name === "Intermix Sequencer") {
+    //             // seqUID = uid;
+    //             seqActionCreators = allActionCreators[uid].actionCreators;
+    //         }
+    //     }
+    //     animate(animeCallback);
+    //     audioContext.$processTo("00:00.000");
+    //     seqActionCreators.STATE(1);
+    //     audioContext.$processTo("00:01.000");
+    //     seqActionCreators.STATE(0);
+    //     expect(animeCallback).toBeCalled();
+    // });
 
     // This raf mock doesn't work.
     // It works in the browser and I'm sick of it spending hours on this test.

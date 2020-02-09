@@ -57,10 +57,10 @@ export interface IDelayedNote extends INote, IDelayedAudioController {
 
 export type Payload = any;
 
-export interface ISeqPartLoad {
-    part: SeqPart;
-    position: number;
-}
+// export interface ISeqPartLoad {
+//     part: SeqPart;
+//     position: number;
+// }
 
 export interface IAction extends AnyAction {
     dest: string;
@@ -90,6 +90,11 @@ export interface IActionHandlerMap {
 export interface ILoop {
     start: number;
     end: number;
+}
+
+export interface IPartWithPosition {
+    partID: string;
+    position: number;
 }
 
 // registry functions
