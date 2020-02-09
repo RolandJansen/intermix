@@ -46,9 +46,10 @@ export default [
     },
     {
         type: "QUEUE",
-        desc: "saves the queue in the store - just for internal usage",
+        desc: "saves the queue in the store and distributes it to other plugins",
         defVal: [],
     },
+
     {
         type: "LOOP",
         desc: "sets the loop start- and endpoint in steps",

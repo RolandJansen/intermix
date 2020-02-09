@@ -6,22 +6,18 @@ import {
     IDelayedAudioController,
     IDelayedNote,
     ILoop,
-    // ISeqPartLoad,
+    IPartLookup,
     Tuple,
 } from "../../registry/interfaces";
 import ClockWorker from "./clock.worker";
+import PartList from "./PartList";
+import Score from "./Score";
 import seqActionDefs from "./SeqActionDefs";
 import SeqPart from "./SeqPart";
-
-type Score = string[][];
 
 interface IQueuePosition {
     position: number;
     timestamp: number;
-}
-
-interface IPartList {
-    [hashValue: string]: SeqPart;
 }
 
 /**
@@ -56,8 +52,8 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
     private readonly lookaheadInSec = 0.3;  // should be longer than interval.
 
     private bpm = Sequencer.bpmDefault;
-    private partList: IPartList = {};   // Lookup table with all available parts
-    private score: Score = [];          // List with references to parts that makes the score
+    private parts: PartList;   // Lookup table with all available parts
+    private score: Score;          // List with references to parts that makes the score
     private runqueue: SeqPart[] = [];   // list with copies of parts that are playing or will be played shortly
 
     private timePerStepInSec: number;   // period of time between two steps
@@ -75,6 +71,9 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
     constructor(private ac: AudioContext) {
         super();
         this.timePerStepInSec = this.getTimePerStep();
+
+        this.parts = new PartList();
+        this.score = new Score();
 
         // Initialize the timer
         this.clock = new ClockWorker();
@@ -109,7 +108,6 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
      * The implementation will be injected by the registry so we just have to
      * provide an empty method here. It has to be public so the registry can see it.
      * @param action An action object that normally holds data for an audio device
-     * @param startTime time in seconds when the audio event should start
      */
     public sendAction(action: IAction) { /* nothing */ }
 
@@ -131,15 +129,23 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
                 return true;
             case "ADD_PART":
                 const newPart: SeqPart = changed[1];
-                this.addPart(newPart);
+                this.parts.addToPartList(newPart);
                 return true;
             case "REMOVE_PART":
                 const partID: string = changed[1];
-                this.removePart(partID);
+                this.parts.removeFromPartList(partID);
                 return true;
             case "ADD_TO_SCORE":
+                const toBeAdded: string = changed[1].partID;
+                const newPosition: number = changed[1].position;
+                this.score.addToScore(toBeAdded, newPosition);
+                this.actionCreators.QUEUE(this.score.queue);
                 return true;
             case "REMOVE_FROM_SCORE":
+                const toBeRemoved: string = changed[1].partID;
+                const oldPosition: number = changed[1].position;
+                this.score.removeFromScore(toBeRemoved, oldPosition);
+                this.actionCreators.QUEUE(this.score.queue);
                 return true;
             case "LOOP":
                 const loop: ILoop = changed[1];
@@ -201,10 +207,6 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         }
     }
 
-    /**
-     * Set beats per minute
-     * @param  bpm beats per minute
-     */
     private setBpmAndTimePerStep(bpm: number): void {
         this.bpm = bpm;
         this.timePerStepInSec = this.getTimePerStep();
@@ -222,9 +224,6 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         return timePerStep;
     }
 
-    /**
-     * Sets the loop start- and endpoint in steps
-     */
     private setLoop(loop: ILoop) {
         if (loop.start < loop.end) {
             this.loopStart = loop.start;
@@ -288,15 +287,16 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
      * copies of them to the runqueue.
      */
     private addPartsToRunqueue(): void {
-        if (typeof this.score[this.nextStep] !== "undefined") {
-            if (this.score[this.nextStep].length === 1) {
-                const partID = this.score[this.nextStep][0];
-                const part = this.partList[partID];
+        const queue = this.score.queue;
+        if (typeof queue[this.nextStep] !== "undefined") {
+            if (queue[this.nextStep].length === 1) {
+                const partID = queue[this.nextStep][0];
+                const part = this.parts.getPart(partID);
                 part.pointer = 0;
                 this.runqueue.push(part);
             } else {
-                this.score[this.nextStep].forEach((partID) => {
-                    const part = this.partList[partID];
+                queue[this.nextStep].forEach((partID) => {
+                    const part = this.parts.getPart(partID);
                     part.pointer = 0;
                     this.runqueue.push(part);
                 });
@@ -396,50 +396,6 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
             position: step,
             timestamp,
         };
-    }
-
-    private addPart(part: SeqPart): string {
-        let key = this.getRandomString(4);
-        while (!this.isPartKeyUnique(key)) {
-            key = this.getRandomString(4);
-        }
-        this.partList[key] = part;
-        return key;
-    }
-
-    private isPartKeyUnique(partKey: string): boolean {
-        let key: string;
-        for (key in this.partList) {
-            if (key === partKey) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private removePart(partKey: string) {
-        if (this.partList.hasOwnProperty(partKey)) {
-            delete this.partList[partKey];
-        }
-    }
-
-    private addToScore(partKey: string, position: number) {
-        if (!this.score[position]) {
-            this.score[position] = [];
-        }
-        this.score[position].push(partKey);
-        this.actionCreators.QUEUE(this.score);
-    }
-
-    private removeFromScore(partKey: string, position: number) {
-        if (this.score[position] instanceof Array &&
-            this.score[position].length > 0) {
-                const index = this.score[position].indexOf(partKey);
-                if (index >= 0) {
-                    this.score[position].splice(index, 1);
-                    this.actionCreators.QUEUE(this.score);
-                }
-        }
     }
 
     /**

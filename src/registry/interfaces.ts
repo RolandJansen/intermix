@@ -92,6 +92,10 @@ export interface ILoop {
     end: number;
 }
 
+export interface IPartLookup {
+    [hashValue: string]: SeqPart;
+}
+
 export interface IPartWithPosition {
     partID: string;
     position: number;

@@ -1,4 +1,5 @@
 import { ActionCreatorsMapObject } from "redux";
+import { getRandomString } from "../helper";
 import { IActionDef, IPlugin, IPluginMetaData, IState, Tuple } from "./interfaces";
 
 // in plugins müssen actionsCreators in
@@ -68,20 +69,8 @@ export default abstract class AbstractPlugin implements IPlugin {
         }
     }
 
-    /**
-     * Generates a random string.
-     * @param length Length of the output string in digits
-     * @returns      random string
-     */
     protected getRandomString(length: number): string {
-        const randomChars: string[] = [];
-        const input = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-        for (let i = 0; i < length; i++) {
-            randomChars[i] = input.charAt(Math.floor(Math.random() * input.length));
-        }
-
-        return randomChars.join("");
+        return getRandomString(length);
     }
 
     /**
