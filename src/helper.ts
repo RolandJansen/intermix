@@ -1,6 +1,4 @@
 
-
-
 export const getRandomString = (length: number): string => {
     const randomChars: string[] = [];
     const input = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
