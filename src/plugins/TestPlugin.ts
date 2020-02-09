@@ -14,7 +14,7 @@ export default class TestPlugin extends AbstractPlugin implements IPlugin {
         type:    "instrument",
         name:    "Testplugin",
         version: "1.0.0",
-        author:  "Roland Jansen",
+        authors:  "Roland Jansen",
         desc:    "The simplest possible plugin to be used in tests",
     };
     public readonly actionDefs: IActionDef[] = [

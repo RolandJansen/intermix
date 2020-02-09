@@ -7,7 +7,7 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
         type: "instrument",
         name: "Demo Sampler",
         version: "1.0.0",
-        author: "R. Jansen",
+        authors: "R. Jansen",
         desc: "A sample player demo",
     };
 

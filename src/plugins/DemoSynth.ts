@@ -21,7 +21,7 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
         type: "instrument",
         name: "Demo Synth",
         version: "1.0.0",
-        author: "R. Jansen",
+        authors: "R. Jansen",
         desc: "A simple synthesizer demo",
     };
 

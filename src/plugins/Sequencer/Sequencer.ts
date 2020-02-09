@@ -40,7 +40,7 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         type: "controller",
         name: "Intermix Sequencer",
         version: "1.0.0-alpha",
-        author: "R. Jansen",
+        authors: "R. Jansen",
         desc: "The Intermix buildin sequencer",
     };
 

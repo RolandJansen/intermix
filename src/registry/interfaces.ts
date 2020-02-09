@@ -25,7 +25,7 @@ export interface IPluginMetaData {
     type: string;
     name: string;
     version: string;
-    author: string;
+    authors: string;
     desc: string;
 }
 
