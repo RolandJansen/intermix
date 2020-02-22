@@ -1,5 +1,5 @@
 import { ActionCreatorsMapObject, AnyAction } from "redux";
-import SeqPart from "../plugins/Sequencer/SeqPart";
+import SeqPart from "../seqpart/SeqPart";
 
 export interface IPlugin  {
     unsubscribe: any;

@@ -1,5 +1,5 @@
-import { getRandomString } from "../../helper";
-import { IPartLookup } from "../../registry/interfaces";
+import { getRandomString } from "../helper";
+import { IPartLookup } from "../registry/interfaces";
 import SeqPart from "./SeqPart";
 
 export default class PartList {

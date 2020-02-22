@@ -63,7 +63,7 @@ export default class Registry {
         // add plugin instance to the plugin store
         this.pluginStore.push(pInstance);
 
-        // build a new root reducers that handles the
+        // build a new root reducer that handles the
         // plugin state and replace the current one.
         this.replaceReducer(this.getRootReducer());
 

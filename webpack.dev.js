@@ -5,7 +5,8 @@ module.exports = merge(common, {
     mode: 'development',
     devtool: 'cheap-module-source-map',  // eval based sm doesn't work with vs debugger
     devServer: {
-        contentBase: path.resolve(__dirname, './dist'),
+        // contentBase: path.resolve(__dirname, './dist'),
+        contentBase: common.output.path,
         hot: true
     }
 });

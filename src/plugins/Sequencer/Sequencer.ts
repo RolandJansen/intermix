@@ -9,11 +9,11 @@ import {
     IPartLookup,
     Tuple,
 } from "../../registry/interfaces";
+import SeqPart from "../../seqpart/SeqPart";
+import PartList from "../../seqpart/SeqPartList";
 import ClockWorker from "./clock.worker";
-import PartList from "./PartList";
 import Score from "./Score";
 import seqActionDefs from "./SeqActionDefs";
-import SeqPart from "./SeqPart";
 
 interface IQueuePosition {
     position: number;

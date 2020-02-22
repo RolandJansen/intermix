@@ -1,5 +1,5 @@
-import { IAction } from "../../../registry/interfaces";
-import SeqPart from "../SeqPart";
+import { IAction } from "../registry/interfaces";
+import SeqPart from "./SeqPart";
 
 // tslint:disable: no-string-literal
 // We use string-literals to test private functions like:

@@ -1,8 +1,8 @@
 /// <reference path="../../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
+import SeqPart from "../../../parts/SeqPart";
 import { IAction, ILoop, IPartWithPosition } from "../../../registry/interfaces";
 import ClockWorker from "../clock.worker";
-import SeqPart from "../SeqPart";
 import Sequencer from "../Sequencer";
 
 // tslint:disable: no-string-literal
