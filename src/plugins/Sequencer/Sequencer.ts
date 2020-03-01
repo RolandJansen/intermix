@@ -6,10 +6,10 @@ import {
     IDelayedAudioController,
     IDelayedNote,
     ILoop,
-    IPartLookup,
+    IRegistryItemLookup,
     Tuple,
 } from "../../registry/interfaces";
-import SeqPartList from "../../registry/SeqPartList";
+import RegistryItemList from "../../registry/RegistryItemList";
 import SeqPart from "../../seqpart/SeqPart";
 import ClockWorker from "./clock.worker";
 import Score from "./Score";
@@ -52,7 +52,7 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
     private readonly lookaheadInSec = 0.3;  // should be longer than interval.
 
     private bpm = Sequencer.bpmDefault;
-    private parts: SeqPartList;   // Lookup table with all available parts
+    private parts: RegistryItemList;   // Lookup table with all available parts
     private score: Score;          // List with references to parts that makes the score
     private runqueue: SeqPart[] = [];   // list with copies of parts that are playing or will be played shortly
 
@@ -72,7 +72,7 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         super();
         this.timePerStepInSec = this.getTimePerStep();
 
-        this.parts = new SeqPartList();
+        this.parts = new RegistryItemList();
         this.score = new Score();
 
         // Initialize the timer
@@ -291,12 +291,12 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         if (typeof queue[this.nextStep] !== "undefined") {
             if (queue[this.nextStep].length === 1) {
                 const partID = queue[this.nextStep][0];
-                const part = this.parts.getPart(partID);
+                const part = this.parts.getItem(partID);
                 part.pointer = 0;
                 this.runqueue.push(part);
             } else {
                 queue[this.nextStep].forEach((partID) => {
-                    const part = this.parts.getPart(partID);
+                    const part = this.parts.getItem(partID);
                     part.pointer = 0;
                     this.runqueue.push(part);
                 });

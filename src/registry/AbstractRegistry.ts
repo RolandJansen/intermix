@@ -1,6 +1,119 @@
+import { ActionCreatorsMapObject, AnyAction, Reducer } from "redux";
+import SeqPart from "../seqpart/SeqPart";
+import { IAction, IActionDef, IActionHandlerMap, IPlugin, IState, Payload, Tuple } from "./interfaces";
+import RegistryItemList from "./RegistryItemList";
+
 export default abstract class AbstractRegistry {
 
-    public abstract add(newItem: any): void;
+    protected abstract itemList: RegistryItemList<IPlugin | SeqPart>;
+
+    public abstract add(): string;
     public abstract remove(itemId: string): void;
+
+    /**
+     * Returns the sub state of a plugin from the global state object
+     * @param globalState The global state object from redux store
+     * @param uid Unique id of the item
+     */
+    protected selectSubState(globalState: IState, uid: string) {
+        if (globalState.hasOwnProperty(uid)) {
+            return globalState[uid];
+        }
+        throw new Error(`Item with ID ${uid} not found in state object.`);
+    }
+
+    /**
+     * Determines which value has been changed between
+     * two successive states. Only works with flat states.
+     * @param currentState Original item state
+     * @param nextState Changed item state
+     */
+    protected getChanged(currentState: IState, nextState: IState): Tuple {
+        let prop: string;
+        let change: Tuple = ["", ""];
+        for (prop in currentState) {
+            if (currentState[prop] !== nextState[prop]) {
+                change = [prop, nextState[prop]];
+            }
+        }
+        return change;
+    }
+
+    /**
+     * Creates action creator functions from an object with
+     * action definitions.
+     * @param actionDefs Object with action definitions
+     * @param uid The unique id of the item that gets registered
+     */
+    protected getActionCreators(actionDefs: IActionDef[], uid: string): ActionCreatorsMapObject {
+        const actionCreators: ActionCreatorsMapObject = {};
+
+        actionDefs.forEach((actionDef) => {
+            actionCreators[actionDef.type] = (payload: Payload): IAction => {
+                return {
+                    type: actionDef.type,
+                    dest: uid,
+                    payload,
+                };
+            };
+        });
+        return actionCreators;
+    }
+
+    /**
+     * A generic way to build a reducer with pre-defined handlers.
+     * These handlers get called according to a lookup table and
+     * they do the real work.
+     * This approach is explained in detail in the redux doc section
+     * "Reducing Boilerplate".
+     * @param initialState Initial state of the sub-state-tree for this reducer
+     * @param handlers Lookup table: action-types -> handlers
+     */
+    protected getNewReducer(actionDefs: IActionDef[], initialState: IState): Reducer {
+        const actionHandlers: IActionHandlerMap = this.getActionHandlers(actionDefs);
+
+        return (state = initialState, action: AnyAction | IAction) => {
+            if (state.uid === action.dest && actionHandlers.hasOwnProperty(action.type)) {
+                const handler = actionHandlers[action.type];
+                const newState = handler(state, action);
+                return newState;
+            }
+            return state;
+        };
+    }
+
+    /**
+     * Generates an object mapping from action-types to the handlers
+     * that will be used to auto-generate reducers. See:
+     * https://redux.js.org/recipes/reducingboilerplate#generating-reducers
+     * @param actionDefs An array of action definitions (see IActionDef)
+     */
+    protected getActionHandlers(actionDefs: IActionDef[]): IActionHandlerMap {
+        const handlers: IActionHandlerMap = {};
+
+        actionDefs.forEach((actionDef) => {
+            handlers[actionDef.type] = (state: IState, action: AnyAction | IAction): IState => {
+                return Object.assign({}, state, {
+                    [action.type]: action.payload,
+                });
+            };
+        });
+        return handlers;
+    }
+
+    /**
+     * Generates the initial state for a registry item from
+     * its ActionDef object.
+     */
+    protected getInitialState(actionDefs: IActionDef[], uid: string): IState {
+        const iState: IState = {};
+
+        iState.uid = uid;  // readonly field
+        actionDefs.forEach((actionDef) => {
+            iState[actionDef.type] = actionDef.defVal;
+        });
+
+        return iState;
+    }
 
 }

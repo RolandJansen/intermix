@@ -1,5 +1,5 @@
-import { IAction, Tuple } from "../registry/interfaces";
 import { ActionCreatorsMapObject } from "redux";
+import { IAction, Tuple } from "../registry/interfaces";
 
 type Pattern = IAction[][];
 

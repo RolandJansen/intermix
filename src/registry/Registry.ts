@@ -186,10 +186,9 @@ export default class Registry {
 
     /**
      * Determines which value has been changed between
-     * two successive states. Only works with flat
-     * plugin states.
-     * @param currentState Original plugin state
-     * @param nextState Changed plugin state
+     * two successive states. Only works with flat states.
+     * @param currentState Original item state
+     * @param nextState Changed item state
      */
     private getChanged(currentState: IState, nextState: IState): Tuple {
         let prop: string;
