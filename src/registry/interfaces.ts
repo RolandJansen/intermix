@@ -1,6 +1,9 @@
 import { ActionCreatorsMapObject, AnyAction } from "redux";
 import SeqPart from "../seqpart/SeqPart";
 
+// A generic type for a function, which returns something
+export type ReturnFunction<ValueType> = () => ValueType;
+
 export interface IPlugin  {
     unsubscribe: any;
     initState: IState;

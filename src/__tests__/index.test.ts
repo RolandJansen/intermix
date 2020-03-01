@@ -10,8 +10,8 @@ import {
     getState,
     resumeAudioContext } from "../index";
 import ClockWorker from "../plugins/Sequencer/clock.worker";
-import SeqPart from "../plugins/Sequencer/SeqPart";
 import { IAction, IGlobalActionCreators, IState } from "../registry/interfaces";
+import SeqPart from "../seqpart/SeqPart";
 
 /**
  * Integration tests for the intermix API

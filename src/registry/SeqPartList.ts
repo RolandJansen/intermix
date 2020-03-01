@@ -1,13 +1,20 @@
 import { getRandomString } from "../helper";
-import { IPartLookup } from "../registry/interfaces";
-import SeqPart from "./SeqPart";
+import SeqPart from "../seqpart/SeqPart";
+import { IPartLookup } from "./interfaces";
 
-export default class PartList {
+export default class SeqPartList {
 
     private partLookupTable: IPartLookup = {};
 
-    public get partList(): IPartLookup {
-        return this.partLookupTable;
+    public getUidList(): string[] {
+        const uidList: string[] = [];
+        let uid: string;
+        for (uid in this.partLookupTable) {
+            if (this.partLookupTable.hasOwnProperty(uid)) {
+                uidList.push(uid);
+            }
+        }
+        return uidList;
     }
 
     public getPart(key: string): SeqPart {
@@ -17,27 +24,25 @@ export default class PartList {
         return new SeqPart();
     }
 
-    public addToPartList(part: SeqPart) {
+    public add(part: SeqPart) {
         let key = getRandomString(4);
         while (!this.isPartKeyUnique(key)) {
             key = getRandomString(4);
         }
+        part.uid = key;
         this.partLookupTable[key] = part;
         return key;
     }
 
-    public removeFromPartList(partKey: string) {
+    public remove(partKey: string) {
         if (this.partLookupTable.hasOwnProperty(partKey)) {
             delete this.partLookupTable[partKey];
         }
     }
 
     private isPartKeyUnique(partKey: string): boolean {
-        let key: string;
-        for (key in this.partLookupTable) {
-            if (key === partKey) {
-                return false;
-            }
+        if (this.partLookupTable.hasOwnProperty(partKey)) {
+            return false;
         }
         return true;
     }

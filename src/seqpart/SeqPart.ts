@@ -1,4 +1,5 @@
-import { IAction } from "../registry/interfaces";
+import { IAction, Tuple } from "../registry/interfaces";
+import { ActionCreatorsMapObject } from "redux";
 
 type Pattern = IAction[][];
 
@@ -31,9 +32,15 @@ export default class SeqPart {
     public static partName = "Part";        // global default name
 
     public name = SeqPart.partName;
+    public uid: string = "";            // will be set by the registry
     public pointer: number = 0;         // can be set to a specific point in the pattern (by the sequencer)
+
+    /* will both be populated by the registry */
+    public actionCreators: ActionCreatorsMapObject = {};
+    public boundActionCreators: ActionCreatorsMapObject = {};
+
     private stepMultiplier: number; // 64 = stepsPerBar * stepMultiplier
-    private pattern: Pattern;       // holds the sequence data
+    private pattern: Pattern;       // holds the sequence
 
     /**
      * Initializes the pattern
@@ -48,6 +55,10 @@ export default class SeqPart {
         } else {
             throw new Error("stepsPerBar must be a divisor of 64.");
         }
+    }
+
+    public unsubscribe() {
+        // will be overridden by the registry
     }
 
     /**
@@ -65,6 +76,17 @@ export default class SeqPart {
     public get length() {
         // return this.pattern.length / this.stepMultiplier;
         return this.pattern.length;
+    }
+
+    public onChange(changed: Tuple) {
+        switch (changed[0]) {
+            case "ADD_ACTION":
+                return true;
+            case "REMOVE_ACTION":
+            default:
+                return false;
+
+        }
     }
 
     /**

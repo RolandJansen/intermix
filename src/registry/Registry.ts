@@ -80,7 +80,6 @@ export default class Registry {
 
         this.wireAudioOutputs(pInstance);
 
-        // console.log(store.getState());
         return pInstance;
     }
 
@@ -264,15 +263,12 @@ export default class Registry {
 
     /**
      * Generates the initial state for a plugin from
-     * its ActionDef object. Plugin state is represented
-     * as a Map (instead of a generic object) for better
-     * performance and ease of use.
-     * @param pInstance Instance of a plugin
+     * its ActionDef object.
      */
     private getInitialState(pInstance: IPlugin): IState {
         const iState: IState = {};
 
-        iState.uid = pInstance.uid;  // read only field
+        iState.uid = pInstance.uid;  // readonly field
         pInstance.actionDefs.forEach((actionDef) => {
             iState[actionDef.type] = actionDef.defVal;
         });
@@ -286,11 +282,11 @@ export default class Registry {
      * and replaces the reducer in the redux store.
      * @param rootReducer A redux reducer that handles root state
      */
-    private replaceReducer(rootReducer: Reducer): void {
+    private replaceReducer(rootReducer: Reducer) {
         const subReducers: ReducersMapObject = {};
 
         this.pluginStore.forEach((plugin) => {
-            subReducers[plugin.uid] = this.getPluginReducer(plugin);
+            subReducers[plugin.uid] = this.getNewPluginReducer(plugin);
         });
 
         const reducer = combineReducersWithRoot(
@@ -305,11 +301,11 @@ export default class Registry {
      * Builds a top-level reducer for a plugin.
      * @param actionDefs ActionDef object from plugin instance
      */
-    private getPluginReducer(pInstance: IPlugin) {
+    private getNewPluginReducer(pInstance: IPlugin) {
         const actionDefs = pInstance.actionDefs;
-        const handlers = this.getActionHandlerMappings(actionDefs);
+        const handlers = this.getActionHandlers(actionDefs);
         const initState: IState = this.getInitialState(pInstance);
-        return this.createReducer(initState, handlers);
+        return this.getNewReducer(initState, handlers);
     }
 
     /**
@@ -318,7 +314,7 @@ export default class Registry {
      * https://redux.js.org/recipes/reducingboilerplate#generating-reducers
      * @param actionDefs An array of action definitions (see IActionDef)
      */
-    private getActionHandlerMappings(actionDefs: IActionDef[]): IActionHandlerMap {
+    private getActionHandlers(actionDefs: IActionDef[]): IActionHandlerMap {
         const handlers: IActionHandlerMap = {};
 
         actionDefs.forEach((actionDef) => {
@@ -341,7 +337,7 @@ export default class Registry {
      * @param initialState Initial state of the sub-state-tree for this reducer
      * @param handlers Lookup table: action-types -> handlers
      */
-    private createReducer(initialState: IState, handlers: IActionHandlerMap): Reducer {
+    private getNewReducer(initialState: IState, handlers: IActionHandlerMap): Reducer {
         return (state = initialState, action: AnyAction | IAction) => {
             if (state.uid === action.dest && handlers.hasOwnProperty(action.type)) {
                 const handler = handlers[action.type];

@@ -9,8 +9,8 @@ import {
     IPartLookup,
     Tuple,
 } from "../../registry/interfaces";
+import SeqPartList from "../../registry/SeqPartList";
 import SeqPart from "../../seqpart/SeqPart";
-import PartList from "../../seqpart/SeqPartList";
 import ClockWorker from "./clock.worker";
 import Score from "./Score";
 import seqActionDefs from "./SeqActionDefs";
@@ -52,7 +52,7 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
     private readonly lookaheadInSec = 0.3;  // should be longer than interval.
 
     private bpm = Sequencer.bpmDefault;
-    private parts: PartList;   // Lookup table with all available parts
+    private parts: SeqPartList;   // Lookup table with all available parts
     private score: Score;          // List with references to parts that makes the score
     private runqueue: SeqPart[] = [];   // list with copies of parts that are playing or will be played shortly
 
@@ -72,7 +72,7 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         super();
         this.timePerStepInSec = this.getTimePerStep();
 
-        this.parts = new PartList();
+        this.parts = new SeqPartList();
         this.score = new Score();
 
         // Initialize the timer
@@ -129,11 +129,11 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
                 return true;
             case "ADD_PART":
                 const newPart: SeqPart = changed[1];
-                this.parts.addToPartList(newPart);
+                this.parts.add(newPart);
                 return true;
             case "REMOVE_PART":
                 const partID: string = changed[1];
-                this.parts.removeFromPartList(partID);
+                this.parts.remove(partID);
                 return true;
             case "ADD_TO_SCORE":
                 const toBeAdded: string = changed[1].partID;
