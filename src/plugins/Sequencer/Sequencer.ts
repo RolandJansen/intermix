@@ -6,7 +6,6 @@ import {
     IDelayedAudioController,
     IDelayedNote,
     ILoop,
-    IRegistryItemLookup,
     Tuple,
 } from "../../registry/interfaces";
 import RegistryItemList from "../../registry/RegistryItemList";
@@ -52,7 +51,7 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
     private readonly lookaheadInSec = 0.3;  // should be longer than interval.
 
     private bpm = Sequencer.bpmDefault;
-    private parts: RegistryItemList;   // Lookup table with all available parts
+    private parts: RegistryItemList<SeqPart>;   // Lookup table with all available parts
     private score: Score;          // List with references to parts that makes the score
     private runqueue: SeqPart[] = [];   // list with copies of parts that are playing or will be played shortly
 

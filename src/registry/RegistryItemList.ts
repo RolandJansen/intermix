@@ -47,7 +47,6 @@ export default class RegistryItemList<T extends IRegistryItem> {
         } else {
             throw new Error(`Cannot remove item. No item with id ${itemKey} in stock.`);
         }
-
     }
 
     private isKeyUnique(itemKey: string): boolean {
