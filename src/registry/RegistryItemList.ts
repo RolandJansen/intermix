@@ -1,8 +1,5 @@
 import { getRandomString } from "../helper";
-
-interface IRegistryItem {
-    uid: string;
-}
+import { IRegistryItem } from "./interfaces";
 
 interface IRegistryItemLookup<itemType> {
     [hashValue: string]: itemType;

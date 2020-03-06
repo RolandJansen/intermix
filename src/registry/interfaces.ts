@@ -4,14 +4,18 @@ import SeqPart from "../seqpart/SeqPart";
 // A generic type for a function, which returns something
 export type ReturnFunction<ValueType> = () => ValueType;
 
-export interface IPlugin  {
-    unsubscribe: any;
-    initState: IState;
+export interface IRegistryItem {
     uid: string;
-    readonly metaData: IPluginMetaData;
     actionDefs: IActionDef[];
     actionCreators: ActionCreatorsMapObject;
-    boundActionCreators: ActionCreatorsMapObject<any>;
+    unboundActionCreators: ActionCreatorsMapObject;
+    onChange: (changed: Tuple) => boolean;
+    unsubscribe: () => void;
+}
+
+export interface IPlugin extends IRegistryItem  {
+    initState: IState;
+    readonly metaData: IPluginMetaData;
     frequencyLookup: number[];
     outputs: AudioNode[];
     inputs: AudioNode[];

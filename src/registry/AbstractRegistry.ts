@@ -1,14 +1,57 @@
-import { ActionCreatorsMapObject, AnyAction, Reducer } from "redux";
+import { ActionCreatorsMapObject, AnyAction, Reducer, Store } from "redux";
 import SeqPart from "../seqpart/SeqPart";
-import { IAction, IActionDef, IActionHandlerMap, IPlugin, IState, Payload, Tuple } from "./interfaces";
+import { store } from "../store/store";
+import {
+    IAction,
+    IActionDef,
+    IActionHandlerMap,
+    IRegistryItem,
+    IState,
+    Payload,
+    Tuple,
+} from "./interfaces";
 import RegistryItemList from "./RegistryItemList";
 
 export default abstract class AbstractRegistry {
 
-    protected abstract itemList: RegistryItemList<IPlugin | SeqPart>;
+    protected abstract itemList: RegistryItemList<IRegistryItem>;
 
     public abstract add(): string;
     public abstract remove(itemId: string): void;
+
+    /**
+     * Subscribes an item to the store. The function that will
+     * be called by the store invokes the onChange handler of the registered item.
+     * This should be the only intermix function that subscribes to the store.
+     * For details see:
+     * https://github.com/reduxjs/redux/issues/303#issuecomment-125184409
+     * @param st Instance of the store that keeps the state
+     * @param newObserver The item to be registered
+     */
+    protected observeStore<T extends IRegistryItem>(st: Store, newObserver: T): () => void {
+        const selectSubState = this.selectSubState;
+        const getChanged = this.getChanged;
+
+        const uid = newObserver.uid;
+        const onChange = newObserver.onChange.bind(newObserver);
+        let currentState: IState = {};
+
+        function handleChange() {
+            const nextState: IState = selectSubState(st.getState(), uid);
+
+            // check by reference that
+            // both objects are different
+            if (nextState !== currentState) {
+                const changed = getChanged(currentState, nextState);
+                currentState = nextState;
+                onChange(changed);
+            }
+        }
+
+        const unsubscribe = store.subscribe(handleChange);
+        handleChange();  // invoke the function once to set currentState
+        return unsubscribe;
+    }
 
     /**
      * Returns the sub state of a plugin from the global state object

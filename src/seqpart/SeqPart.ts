@@ -1,5 +1,6 @@
 import { ActionCreatorsMapObject } from "redux";
-import { IAction, Tuple } from "../registry/interfaces";
+import { IAction, IActionDef, IRegistryItem, Tuple } from "../registry/interfaces";
+import seqPartActionDefs from "./SeqPartActionDefs";
 
 type Pattern = IAction[][];
 
@@ -26,18 +27,20 @@ type Pattern = IAction[][];
  * @constructor
  * @param  pLength       Length of the part in 64th notes (default: 64)
  */
-export default class SeqPart {
+export default class SeqPart implements IRegistryItem {
 
     public static stepsPerBarDefault = 16;  // global pattern resolution: 1bar = 1 full note
     public static partName = "Part";        // global default name
 
-    public name = SeqPart.partName;
-    public uid: string = "";            // will be set by the registry
-    public pointer: number = 0;         // can be set to a specific point in the pattern (by the sequencer)
+    public readonly actionDefs: IActionDef[] = seqPartActionDefs;
 
     /* will both be populated by the registry */
     public actionCreators: ActionCreatorsMapObject = {};
-    public boundActionCreators: ActionCreatorsMapObject = {};
+    public unboundActionCreators: ActionCreatorsMapObject = {};
+
+    public name = SeqPart.partName;
+    public uid: string = "";            // will be set by the registry
+    public pointer: number = 0;         // can be set to a specific point in the pattern (by the sequencer)
 
     private stepMultiplier: number; // 64 = stepsPerBar * stepMultiplier
     private pattern: Pattern;       // holds the sequence

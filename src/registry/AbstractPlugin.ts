@@ -22,7 +22,7 @@ export default abstract class AbstractPlugin implements IPlugin {
     public readonly uid: string;
 
     public actionCreators: ActionCreatorsMapObject = {};
-    public boundActionCreators: ActionCreatorsMapObject = {};
+    public unboundActionCreators: ActionCreatorsMapObject = {};
     public initState: IState = {};
 
     constructor() {

@@ -1,9 +1,5 @@
-import RegistryItemList from "../RegistryItemList";
 import SeqPart from "../../seqpart/SeqPart";
-import { IPlugin } from "../interfaces";
-import { strictEqual } from "assert";
-
-// let itemList: RegistryItemList;
+import RegistryItemList from "../RegistryItemList";
 
 describe("RegistryItemList", () => {
 
@@ -21,7 +17,7 @@ describe("RegistryItemList", () => {
         key2 = itemList.add(item2);
     });
 
-    test("has a default keylength of 5 digits", () => {
+    test("has a default keylength of 5", () => {
         expect(key1).toHaveLength(5);
     });
 

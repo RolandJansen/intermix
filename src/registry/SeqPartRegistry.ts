@@ -30,10 +30,10 @@ export default class SeqPartRegistry extends AbstractRegistry {
 
         // build action creators
         const actionCreators = this.getActionCreators(SeqPartActionDefs, uid);
-        newPart.actionCreators = actionCreators;
+        newPart.unboundActionCreators = actionCreators;
 
         // bind action creators to dispatch
-        newPart.boundActionCreators = bindActionCreators(actionCreators, store.dispatch);
+        newPart.actionCreators = bindActionCreators(actionCreators, store.dispatch);
 
         // build a new root reducer that handles the
         // plugin state and replace the current one.
@@ -42,8 +42,6 @@ export default class SeqPartRegistry extends AbstractRegistry {
         // make it observe the store
         newPart.unsubscribe = this.observeStore(
             store,
-            this.selectSubState,
-            this.getChanged,
             newPart,
         );
 
@@ -67,27 +65,27 @@ export default class SeqPartRegistry extends AbstractRegistry {
     }
 
     /* basically the same as in Registry */
-    private observeStore(st: Store, selectSubState: Select, getChanged: GetChanged, newPart: SeqPart): () => void {
-        const uid = newPart.uid;
-        const onChange = newPart.onChange.bind(newPart);
-        let currentState: IState = {};
+    // private observeStore(st: Store, selectSubState: Select, getChanged: GetChanged, newPart: SeqPart): () => void {
+    //     const uid = newPart.uid;
+    //     const onChange = newPart.onChange.bind(newPart);
+    //     let currentState: IState = {};
 
-        function handleChange() {
-            const nextState: IState = selectSubState(st.getState(), uid);
+    //     function handleChange() {
+    //         const nextState: IState = selectSubState(st.getState(), uid);
 
-            // check by reference that
-            // both objects are different
-            if (nextState !== currentState) {
-                const changed = getChanged(currentState, nextState);
-                currentState = nextState;
-                onChange(changed);
-            }
-        }
+    //         // check by reference that
+    //         // both objects are different
+    //         if (nextState !== currentState) {
+    //             const changed = getChanged(currentState, nextState);
+    //             currentState = nextState;
+    //             onChange(changed);
+    //         }
+    //     }
 
-        const unsubscribe = store.subscribe(handleChange);
-        handleChange();  // invoke the function once to set currentState
-        return unsubscribe;
-    }
+    //     const unsubscribe = store.subscribe(handleChange);
+    //     handleChange();  // invoke the function once to set currentState
+    //     return unsubscribe;
+    // }
 
     /* same idea like Registry but changed code */
     private replaceReducer(rootReducer: Reducer) {
