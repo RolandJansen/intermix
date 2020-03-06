@@ -59,20 +59,20 @@ describe("registerPlugin", () => {
     });
 
     test("adds action creator functions to the plugin instance", () => {
-        const acKeys = Object.keys(plug.actionCreators);
+        const acKeys = Object.keys(plug.unboundActionCreators);
         expect(acKeys).toContain("ACTION1");
         expect(acKeys).toContain("ACTION2");
     });
 
     test("adds action creators for common actions to the plugin instance", () => {
-        const acKeys = Object.keys(plug.actionCreators);
+        const acKeys = Object.keys(plug.unboundActionCreators);
         expect(acKeys).toContain("NOTE");
     });
 
     test("adds bound action creators to the plugin instance", () => {
-        const acKeys = Object.keys(plug.boundActionCreators);
+        const acKeys = Object.keys(plug.actionCreators);
         expect(acKeys).toContain("NOTE");
-    })
+    });
 
     test("bound action creators are bound to store.dispatch()", () => {
         const action = {
@@ -80,7 +80,7 @@ describe("registerPlugin", () => {
             payload: 23,
             dest: plug.uid,
         };
-        plug.boundActionCreators.ACTION1(23);
+        plug.actionCreators.ACTION1(23);
         expect((store.dispatch as jest.Mock)).toBeCalledWith(action);
     });
 
@@ -97,6 +97,7 @@ describe("registerPlugin", () => {
     });
 
     test("adds an unsubscribe function to the plugin", () => {
+        // this test is completely useless and passes always
         expect(plug.unsubscribe).toBeDefined();
         expect(typeof plug.unsubscribe).toBe("function");
     });

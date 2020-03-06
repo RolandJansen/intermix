@@ -38,7 +38,7 @@ export function getActionCreators(bound?: string): IGlobalActionCreators {
     const actionCreators: IGlobalActionCreators = {};
     let actionCreatorsType: string;
 
-    actionCreatorsType = bound === "unbound" ? "actionCreators" : "boundActionCreators";
+    actionCreatorsType = bound === "unbound" ? "unboundActionCreators" : "actionCreators";
 
     pluginList.forEach((plugin: IPlugin) => {
         const pluginAC = {

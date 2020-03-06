@@ -115,7 +115,7 @@ export default abstract class AbstractRegistry {
     protected getNewReducer(actionDefs: IActionDef[], initialState: IState): Reducer {
         const actionHandlers: IActionHandlerMap = this.getActionHandlers(actionDefs);
 
-        return (state = initialState, action: AnyAction | IAction) => {
+        return (state: IState = initialState, action: AnyAction | IAction) => {
             if (state.uid === action.dest && actionHandlers.hasOwnProperty(action.type)) {
                 const handler = actionHandlers[action.type];
                 const newState = handler(state, action);

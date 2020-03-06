@@ -1,4 +1,4 @@
-import { ActionCreatorsMapObject, Reducer, Store } from "redux";
+import { ActionCreatorsMapObject, Reducer, Store, createStore } from "redux";
 import AbstractRegistry from "../AbstractRegistry";
 import { IAction, IActionDef, IActionHandlerMap, IRegistryItem, IState, Tuple } from "../interfaces";
 import RegistryItemList from "../RegistryItemList";
@@ -102,35 +102,6 @@ beforeEach(() => {
     testItem = registry.itemList.getItem(testItemUid);
 });
 
-test("selectSubState throws if uid is not in state", () => {
-    expect(() => {
-        registry.selectSubState_Test(testState, "abcd");
-    }).toThrow();
-});
-
-test("selectSubState returns the corresponding sub-state", () => {
-    const subState = registry.selectSubState_Test(testState, "ACTION1");
-    expect(subState).toEqual(5);
-});
-
-test("getChanged diffs two states and returns the changed value", () => {
-    const nextState = Object.assign({}, testState, { ACTION2: { uid: 23 } });
-    const changed = registry.getChanged_Test(testState, nextState);
-    expect(changed[0]).toMatch("ACTION2");
-    expect(changed[1]).toEqual({ uid: 23 });
-});
-
-test("getChanged returns an emtpy tuple if no change happened", () => {
-    const nextState = Object.assign({}, testState);
-    const changed = registry.getChanged_Test(testState, nextState);
-    expect(changed[0]).toMatch("");
-    expect(changed[1]).toMatch("");
-});
-
-test("observeStore", () => {
-    // nothing yet
-});
-
 test("creates action creators from action defs", () => {
     const adefs = testItem.actionDefs;
     const actionCreators = registry.getActionCreators_Test(adefs, testItemUid);
@@ -157,6 +128,99 @@ test("creates action handlers (sub reducers)", () => {
     expect(testState.ACTION1).toEqual(5);  // old state shouldn't be altered
 });
 
-test("creates a reducer for the sub-state", () => {
-    // nothing yet
+describe("getNewReducer -> reducer", () => {
+
+    let iniState: IState;
+    let adefs: IActionDef[];
+    let testReducer: Reducer;
+
+    beforeEach(() => {
+        iniState = Object.assign({}, testState, { uid: testItemUid });
+        adefs = testItem.actionDefs;
+        testReducer = registry.getNewReducer_Test(adefs, iniState);
+    });
+
+    test("returns the initial state if called with no args", () => {
+        const returnedState = testReducer(undefined, { type: "" });
+        expect(returnedState).toEqual(iniState);
+    });
+
+    test("returns the original state if called with unknown action", () => {
+        expect(testReducer(iniState, { type: "" })).toEqual(iniState);
+    });
+
+    test("returns the original state if action.dest doesn't match", () => {
+        expect(testReducer(iniState, {
+            dest: "123",
+            type: "ACTION1",
+            payload: 23,
+        })).toEqual(iniState);
+    });
+
+    test("should handle ACTION1", () => {
+        expect(testReducer([], {
+            type: "ACTION1",
+            payload: 23,
+        })).toEqual({ ACTION1: 23 });
+    });
+
+    test("should handle ACTION2", () => {
+        expect(testReducer([], {
+            type: "ACTION2",
+            payload: 23,
+        })).toEqual({ ACTION2: 23 });
+    });
+
+    test("returns a new state if action is valid (copy by val)", () => {
+        const newState = testReducer(iniState, {
+            dest: testItemUid,
+            type: "ACTION1",
+            payload: 23,
+        });
+        expect(newState.ACTION1).toEqual(23);
+        expect(iniState.ACTION1).toEqual(5);
+    });
+
 });
+
+test("selectSubState throws if uid is not in state", () => {
+    expect(() => {
+        registry.selectSubState_Test(testState, "abcd");
+    }).toThrow();
+});
+
+test("selectSubState returns the corresponding sub-state", () => {
+    const subState = registry.selectSubState_Test(testState, "ACTION1");
+    expect(subState).toEqual(5);
+});
+
+test("getChanged diffs two states and returns the changed value", () => {
+    const nextState = Object.assign({}, testState, { ACTION2: { uid: 23 } });
+    const changed = registry.getChanged_Test(testState, nextState);
+    expect(changed[0]).toMatch("ACTION2");
+    expect(changed[1]).toEqual({ uid: 23 });
+});
+
+test("getChanged returns an emtpy tuple if no change happened", () => {
+    const nextState = Object.assign({}, testState);
+    const changed = registry.getChanged_Test(testState, nextState);
+    expect(changed[0]).toMatch("");
+    expect(changed[1]).toMatch("");
+});
+
+describe("observeStore", () => {
+
+    let testStore: Store;
+
+    beforeEach(() => {
+        const iniState = registry.getInitialState_Test(testItem.actionDefs, testItemUid);
+        const reducer = registry.getNewReducer_Test(testItem.actionDefs, iniState);
+        testStore = createStore(reducer);
+    });
+
+    test("adds an unsubscribe function to the plugin", () => {
+        expect(testItem.unsubscribe).toBeDefined();
+        expect(typeof testItem.unsubscribe).toBe("function");
+    });
+
+})
