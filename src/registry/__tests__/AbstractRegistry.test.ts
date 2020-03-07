@@ -1,9 +1,13 @@
-import { ActionCreatorsMapObject, Reducer, Store, createStore } from "redux";
+import { ActionCreatorsMapObject, Reducer, Store } from "redux";
+import { store } from "../../store/store";
+// tslint:disable: max-classes-per-file
 import AbstractRegistry from "../AbstractRegistry";
 import { IAction, IActionDef, IActionHandlerMap, IRegistryItem, IState, Tuple } from "../interfaces";
 import RegistryItemList from "../RegistryItemList";
 
-// tslint:disable: max-classes-per-file
+// instruct Jest to use the mock class
+// instead of the real one globaly.
+jest.mock("../../store/store");
 
 /**
  * A bare RegistryItem so we don't depend on
@@ -210,17 +214,29 @@ test("getChanged returns an emtpy tuple if no change happened", () => {
 
 describe("observeStore", () => {
 
-    let testStore: Store;
-
     beforeEach(() => {
         const iniState = registry.getInitialState_Test(testItem.actionDefs, testItemUid);
-        const reducer = registry.getNewReducer_Test(testItem.actionDefs, iniState);
-        testStore = createStore(reducer);
+
+        // tslint:disable-next-line: variable-name
+        const globalState_Test = {
+            [testItemUid]: iniState,
+        };
+
+        (store.getState as jest.Mock).mockImplementation(() => globalState_Test);
+        (store.subscribe as jest.Mock).mockImplementation(() => {
+            return () => true;
+        });
+        (store.subscribe as jest.Mock).mock.calls = []; // reset call history
     });
 
-    test("adds an unsubscribe function to the plugin", () => {
-        expect(testItem.unsubscribe).toBeDefined();
-        expect(typeof testItem.unsubscribe).toBe("function");
+    test("subscribes to the store", () => {
+        expect(store.subscribe).not.toHaveBeenCalled();
+        registry.observeStore_Test(store, testItem);
+        expect(store.subscribe).toHaveBeenCalled();
     });
 
-})
+    test("returns an unsubscribe function", () => {
+        const unsubscribe = registry.observeStore_Test(store, testItem);
+        expect(unsubscribe()).toBeTruthy();
+    });
+});
