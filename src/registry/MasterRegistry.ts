@@ -4,6 +4,7 @@ import AbstractRegistry from "./AbstractRegistry";
 import combineReducersWithRoot from "./combineReducersWithRoot";
 import Registry from "./Registry";
 import SeqPartRegistry from "./SeqPartRegistry";
+import SeqPart from "../seqpart/SeqPart";
 
 /**
  * Calls the appropriate sub-registry
@@ -37,16 +38,25 @@ export default class MasterRegistry {
 
     public addSeqPart(lengthInStepsPerBar?: number): string {
         try {
-            let uid: string;
+            let newPart: SeqPart;
 
+            // add new item to the seqPart Registry
             if (lengthInStepsPerBar) {
-                uid = this.seqParts.add(lengthInStepsPerBar);
+                newPart = this.seqParts.add(lengthInStepsPerBar);
             } else {
-                uid = this.seqParts.add();
+                newPart = this.seqParts.add();
             }
+
+            // build a new root reducer and replace the current one
             this.replaceReducer(this.seqParts);
 
-            return uid;
+            // make it observe the store
+            newPart.unsubscribe = this.seqParts.observeStore(
+                store,
+                newPart,
+            );
+
+            return newPart.uid;
         } catch (error) {
             // not implemented yet
         }

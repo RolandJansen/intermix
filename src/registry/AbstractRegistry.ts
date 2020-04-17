@@ -16,7 +16,7 @@ export default abstract class AbstractRegistry {
     protected abstract itemList: RegistryItemList<IRegistryItem>;
     protected abstract itemActionDefs: IActionDef[];
 
-    public abstract add(): string;
+    public abstract add(): IRegistryItem;
     public abstract remove(itemId: string): void;
 
     public getItemReducers(): ReducersMapObject {
@@ -40,7 +40,7 @@ export default abstract class AbstractRegistry {
      * @param st Instance of the store that keeps the state
      * @param newObserver The item to be registered
      */
-    protected observeStore<T extends IRegistryItem>(st: Store, newObserver: T): () => void {
+    public observeStore<T extends IRegistryItem>(st: Store, newObserver: T): () => void {
         const selectSubState = this.selectSubState;
         const getChanged = this.getChanged;
 

@@ -17,7 +17,7 @@ export default class SeqPartRegistry extends AbstractRegistry {
         this.itemActionDefs = SeqPartActionDefs;
     }
 
-    public add(lengthInStepsPerBar?: number): string {
+    public add(lengthInStepsPerBar?: number): SeqPart {
         // create the new part
         let newPart: SeqPart;
         if (lengthInStepsPerBar) {
@@ -36,13 +36,7 @@ export default class SeqPartRegistry extends AbstractRegistry {
         // bind action creators to dispatch
         newPart.actionCreators = bindActionCreators(actionCreators, store.dispatch);
 
-        // make it observe the store
-        newPart.unsubscribe = this.observeStore(
-            store,
-            newPart,
-        );
-
-        return uid;
+        return newPart;
     }
 
     public remove(uid: string) {

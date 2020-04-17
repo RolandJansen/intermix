@@ -1,5 +1,5 @@
 // tslint:disable: max-classes-per-file
-import { ActionCreatorsMapObject, Reducer, Store, ReducersMapObject } from "redux";
+import { ActionCreatorsMapObject, Reducer, ReducersMapObject, Store } from "redux";
 import { store } from "../../store/store";
 import AbstractRegistry from "../AbstractRegistry";
 import { IAction, IActionDef, IActionHandlerMap, IRegistryItem, IState, Tuple } from "../interfaces";
@@ -57,10 +57,10 @@ class TestRegistry extends AbstractRegistry {
         this.itemActionDefs = testActionDefs;
     }
 
-    public add(): string {
+    public add(): TestItem {
         const newItem = new TestItem();
-        const uid = this.itemList.add(newItem);
-        return uid;
+        this.itemList.add(newItem);
+        return newItem;
     }
 
     public remove(uid: string) {
@@ -75,10 +75,6 @@ class TestRegistry extends AbstractRegistry {
 
     public getChanged_Test(currentState: IState, nextState: IState): Tuple {
         return this.getChanged(currentState, nextState);
-    }
-
-    public observeStore_Test(st: Store, newObserver: TestItem): () => void {
-        return this.observeStore(st, newObserver);
     }
 
     public getActionCreators_Test(adefs: IActionDef[], uid: string): ActionCreatorsMapObject {
@@ -108,8 +104,8 @@ let testItemUid: string;
 
 beforeEach(() => {
     registry = new TestRegistry();
-    testItemUid = registry.add();
-    testItem = registry.itemList.getItem(testItemUid);
+    testItem = registry.add();
+    testItemUid = testItem.uid;
 });
 
 test("creates action creators from action defs", () => {
@@ -237,12 +233,12 @@ describe("observeStore", () => {
 
     test("subscribes to the store", () => {
         expect(store.subscribe).not.toHaveBeenCalled();
-        registry.observeStore_Test(store, testItem);
+        registry.observeStore(store, testItem);
         expect(store.subscribe).toHaveBeenCalled();
     });
 
     test("returns an unsubscribe function", () => {
-        const unsubscribe = registry.observeStore_Test(store, testItem);
+        const unsubscribe = registry.observeStore(store, testItem);
         expect(unsubscribe()).toBeTruthy();
     });
 });
@@ -266,15 +262,11 @@ describe("getItemReducers", () => {
     };
 
     beforeEach(() => {
-        anotherUid = registry.add();
+        const anotherItem = registry.add();
+        anotherUid = anotherItem.uid;
         reducerMap = registry.getItemReducers();
         allUids = Object.keys(reducerMap);
     });
-
-    // afterEach(() => {
-    //     testState.ACTION1 = 5;
-    //     testState.ACTION2 = 6;
-    // });
 
     test("returns a map that has one property for every uid", () => {
         expect(allUids).toHaveLength(2);
