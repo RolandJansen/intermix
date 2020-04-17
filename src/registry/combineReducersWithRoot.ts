@@ -10,7 +10,7 @@ import { IAction, IState } from "./interfaces";
  * Notice that the function doesn't support deep nesting of reducers
  * so you have to do this manually (if desired).
  *
- * This is basically the same as what Chris Nitchie posted:
+ * This is based on a post by Chris Nitchie:
  * https://stackoverflow.com/questions/39261092/redux-create-root-reducer-from-combinereducers-and-loose-properties?answertab=active#tab-top
  */
 // tslint:enable:max-line-length

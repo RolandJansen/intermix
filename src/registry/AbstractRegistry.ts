@@ -1,5 +1,4 @@
 import { ActionCreatorsMapObject, AnyAction, Reducer, Store } from "redux";
-import SeqPart from "../seqpart/SeqPart";
 import { store } from "../store/store";
 import {
     IAction,
@@ -112,7 +111,7 @@ export default abstract class AbstractRegistry {
      * @param initialState Initial state of the sub-state-tree for this reducer
      * @param handlers Lookup table: action-types -> handlers
      */
-    protected getNewReducer(actionDefs: IActionDef[], initialState: IState): Reducer {
+    protected getSubReducer(actionDefs: IActionDef[], initialState: IState): Reducer {
         const actionHandlers: IActionHandlerMap = this.getActionHandlers(actionDefs);
 
         return (state: IState = initialState, action: AnyAction | IAction) => {

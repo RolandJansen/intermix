@@ -1,6 +1,6 @@
+// tslint:disable: max-classes-per-file
 import { ActionCreatorsMapObject, Reducer, Store } from "redux";
 import { store } from "../../store/store";
-// tslint:disable: max-classes-per-file
 import AbstractRegistry from "../AbstractRegistry";
 import { IAction, IActionDef, IActionHandlerMap, IRegistryItem, IState, Tuple } from "../interfaces";
 import RegistryItemList from "../RegistryItemList";
@@ -63,6 +63,8 @@ class TestRegistry extends AbstractRegistry {
         this.itemList.remove(uid);
     }
 
+    // from here on downwards are methods
+    // to make private methods public to make them testable
     public selectSubState_Test(globalState: IState, uid: string): IState {
         return this.selectSubState(globalState, uid);
     }
@@ -87,8 +89,8 @@ class TestRegistry extends AbstractRegistry {
         return this.getActionHandlers(actionDefs);
     }
 
-    public getNewReducer_Test(actionDefs: IActionDef[], initialState: IState): Reducer {
-        return this.getNewReducer(actionDefs, initialState);
+    public getSubReducer_Test(actionDefs: IActionDef[], initialState: IState): Reducer {
+        return this.getSubReducer(actionDefs, initialState);
     }
 }
 
@@ -132,7 +134,7 @@ test("creates action handlers (sub reducers)", () => {
     expect(testState.ACTION1).toEqual(5);  // old state shouldn't be altered
 });
 
-describe("getNewReducer -> reducer", () => {
+describe("getSubReducer -> reducer", () => {
 
     let iniState: IState;
     let adefs: IActionDef[];
@@ -141,7 +143,7 @@ describe("getNewReducer -> reducer", () => {
     beforeEach(() => {
         iniState = Object.assign({}, testState, { uid: testItemUid });
         adefs = testItem.actionDefs;
-        testReducer = registry.getNewReducer_Test(adefs, iniState);
+        testReducer = registry.getSubReducer_Test(adefs, iniState);
     });
 
     test("returns the initial state if called with no args", () => {
