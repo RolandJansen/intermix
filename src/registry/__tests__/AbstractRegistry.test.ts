@@ -1,5 +1,5 @@
 // tslint:disable: max-classes-per-file
-import { ActionCreatorsMapObject, Reducer, Store } from "redux";
+import { ActionCreatorsMapObject, Reducer, Store, ReducersMapObject } from "redux";
 import { store } from "../../store/store";
 import AbstractRegistry from "../AbstractRegistry";
 import { IAction, IActionDef, IActionHandlerMap, IRegistryItem, IState, Tuple } from "../interfaces";
@@ -9,6 +9,19 @@ import RegistryItemList from "../RegistryItemList";
 // instead of the real one globaly.
 jest.mock("../../store/store");
 
+const testActionDefs: IActionDef[] = [
+    {
+        type: "ACTION1",
+        desc: "Does nothing",
+        defVal: 23,
+    },
+    {
+        type: "ACTION2",
+        desc: "Does nothing also",
+        defVal: 42,
+    },
+];
+
 /**
  * A bare RegistryItem so we don't depend on
  * real world code
@@ -16,18 +29,7 @@ jest.mock("../../store/store");
 class TestItem implements IRegistryItem {
     public uid: string = "";
 
-    public readonly actionDefs: IActionDef[] = [
-        {
-            type: "ACTION1",
-            desc: "Does nothing",
-            defVal: 23,
-        },
-        {
-            type: "ACTION2",
-            desc: "Does nothing also",
-            defVal: 42,
-        },
-    ];
+    public readonly actionDefs: IActionDef[] = testActionDefs;
     public actionCreators: ActionCreatorsMapObject = {};
     public unboundActionCreators: ActionCreatorsMapObject = {};
 
@@ -47,10 +49,12 @@ class TestItem implements IRegistryItem {
  */
 class TestRegistry extends AbstractRegistry {
     public itemList: RegistryItemList<TestItem>;
+    public itemActionDefs: IActionDef[];
 
     constructor() {
         super();
         this.itemList = new RegistryItemList();
+        this.itemActionDefs = testActionDefs;
     }
 
     public add(): string {
@@ -240,5 +244,54 @@ describe("observeStore", () => {
     test("returns an unsubscribe function", () => {
         const unsubscribe = registry.observeStore_Test(store, testItem);
         expect(unsubscribe()).toBeTruthy();
+    });
+});
+
+describe("getItemReducers", () => {
+
+    let anotherUid: string;
+    let reducerMap: ReducersMapObject;
+    let allUids: string[];
+
+    const actionOne: IAction = {
+        type: "ACTION1",
+        dest: testItemUid,
+        payload: 23,
+    };
+
+    const actionTwo: IAction = {
+        type: "ACTION2",
+        dest: testItemUid,
+        payload: 42,
+    };
+
+    beforeEach(() => {
+        anotherUid = registry.add();
+        reducerMap = registry.getItemReducers();
+        allUids = Object.keys(reducerMap);
+    });
+
+    // afterEach(() => {
+    //     testState.ACTION1 = 5;
+    //     testState.ACTION2 = 6;
+    // });
+
+    test("returns a map that has one property for every uid", () => {
+        expect(allUids).toHaveLength(2);
+        expect(allUids).toContain(testItemUid);
+        // expect(allUids).toContain(someOtherUid);
+    });
+
+    test("map entries contain reducers", () => {
+        const oneState: IState = reducerMap[testItemUid](testState, actionOne);
+        const anotherState: IState = reducerMap[anotherUid](testState, actionTwo);
+        expect(oneState.ACTION1).toEqual(23);
+        expect(anotherState.ACTION2).toEqual(42);
+    });
+
+    test("reducers don't mutate the state", () => {
+        const nextState: IState = reducerMap[testItemUid](testState, actionOne);
+        expect(nextState.ACTION1).toEqual(23);
+        expect(testState.ACTION1).toEqual(5);
     });
 });
