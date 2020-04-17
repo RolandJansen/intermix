@@ -1,5 +1,6 @@
 import { AnyAction, Reducer, ReducersMapObject } from "redux";
 import { store } from "../store/store";
+import AbstractRegistry from "./AbstractRegistry";
 import combineReducersWithRoot from "./combineReducersWithRoot";
 import Registry from "./Registry";
 import SeqPartRegistry from "./SeqPartRegistry";
@@ -43,7 +44,7 @@ export default class MasterRegistry {
             } else {
                 uid = this.seqParts.add();
             }
-            this.replaceReducer();
+            this.replaceReducer(this.seqParts);
 
             return uid;
         } catch (error) {
@@ -54,7 +55,7 @@ export default class MasterRegistry {
     public removeSeqPart(uid: string) {
         try {
             this.seqParts.remove(uid);
-            this.replaceReducer();
+            this.replaceReducer(this.seqParts);
             store.dispatch({ type: "REMOVE", payload: uid });
         } catch (error) {
             // not implemented yet
@@ -65,14 +66,18 @@ export default class MasterRegistry {
      * Combines all sub reducers with the root reducer
      * and replaces the current reducer
      */
-    protected replaceReducer() {
-        const seqPartReducer: ReducersMapObject = this.seqParts.getAllSubReducers();
+    protected replaceReducer<T extends AbstractRegistry>(itemRegistry: T) {
+        const seqPartReducer: ReducersMapObject = itemRegistry.getItemReducers();
 
-        const subReducer: ReducersMapObject = this.getSubReducer(seqPartReducer);
+        const subReducers: ReducersMapObject = this.getSubReducer(seqPartReducer);
         const rootReducer: Reducer = this.getRootReducer();
-        const reducerTree: Reducer = this.getCompleteReducer(rootReducer, subReducer);
+        const reducerTree: Reducer = this.getCompleteReducer(rootReducer, subReducers);
 
         store.replaceReducer(reducerTree);
+    }
+
+    protected getSubReducer(...subReducers: ReducersMapObject[]): ReducersMapObject {
+        return Object.assign({}, ...subReducers);
     }
 
     /**
@@ -89,10 +94,6 @@ export default class MasterRegistry {
             }
             return state;
         };
-    }
-
-    protected getSubReducer(...subReducers: ReducersMapObject[]): ReducersMapObject {
-        return Object.assign({}, ...subReducers);
     }
 
     private getCompleteReducer(rootReducer: Reducer, subReducers: ReducersMapObject): Reducer {

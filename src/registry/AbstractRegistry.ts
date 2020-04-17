@@ -1,4 +1,4 @@
-import { ActionCreatorsMapObject, AnyAction, Reducer, Store } from "redux";
+import { ActionCreatorsMapObject, AnyAction, Reducer, ReducersMapObject, Store } from "redux";
 import { store } from "../store/store";
 import {
     IAction,
@@ -14,9 +14,22 @@ import RegistryItemList from "./RegistryItemList";
 export default abstract class AbstractRegistry {
 
     protected abstract itemList: RegistryItemList<IRegistryItem>;
+    protected abstract itemActionDefs: IActionDef[];
 
     public abstract add(): string;
     public abstract remove(itemId: string): void;
+
+    public getItemReducers(): ReducersMapObject {
+        const subReducers: ReducersMapObject = {};
+        const allSeqPartUids = this.itemList.getUidList();
+
+        allSeqPartUids.forEach((uid: string) => {
+            const initState: IState = this.getInitialState(this.itemActionDefs, uid);
+            subReducers[uid] = this.getSubReducer(this.itemActionDefs, initState);
+        });
+
+        return subReducers;
+    }
 
     /**
      * Subscribes an item to the store. The function that will

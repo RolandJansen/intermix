@@ -3,16 +3,18 @@ import SeqPart from "../seqpart/SeqPart";
 import SeqPartActionDefs from "../seqpart/SeqPartActionDefs";
 import { store } from "../store/store";
 import AbstractRegistry from "./AbstractRegistry";
-import { IState } from "./interfaces";
+import { IActionDef } from "./interfaces";
 import RegistryItemList from "./RegistryItemList";
 
 export default class SeqPartRegistry extends AbstractRegistry {
 
     protected itemList: RegistryItemList<SeqPart>;
+    protected itemActionDefs: IActionDef[];
 
     public constructor() {
         super();
         this.itemList = new RegistryItemList<SeqPart>();
+        this.itemActionDefs = SeqPartActionDefs;
     }
 
     public add(lengthInStepsPerBar?: number): string {
@@ -51,18 +53,6 @@ export default class SeqPartRegistry extends AbstractRegistry {
 
         // remove from partList
         this.itemList.remove(uid);
-    }
-
-    public getAllSubReducers(): ReducersMapObject {
-        const subReducers: ReducersMapObject = {};
-        const allSeqPartUids = this.itemList.getUidList();
-
-        allSeqPartUids.forEach((uid: string) => {
-            const initState: IState = this.getInitialState(SeqPartActionDefs, uid);
-            subReducers[uid] = this.getSubReducer(SeqPartActionDefs, initState);
-        });
-
-        return subReducers;
     }
 
 }
