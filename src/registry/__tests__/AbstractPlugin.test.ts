@@ -1,5 +1,5 @@
 import "web-audio-test-api";
-import TestPlugin from "../../plugins/TestPlugin";
+import TestPlugin from "../../plugins/TestInstrument";
 
 // Tests the implemented public and
 // protected methods of the AbstractPlugin class.

@@ -1,6 +1,6 @@
 import { Reducer } from "redux";
 import "web-audio-test-api";
-import TestPlugin from "../../plugins/TestPlugin";
+import TestPlugin from "../../plugins/TestInstrument";
 import { store } from "../../store/store";
 import { IPlugin, IState } from "../interfaces";
 import Registry from "../Registry";

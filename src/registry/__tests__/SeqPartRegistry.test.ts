@@ -56,10 +56,26 @@ describe("add", () => {
 
     test("action creators are bound to store.dispatch()", () => {
         const testPayload = { msg: "hello" };
-        const action = testPart.unboundActionCreators.ADD_ACTION(testPayload);
+        const action = {
+            dest: testPart.uid,
+            type: "ADD_ACTION",
+            payload: testPayload,
+        }
 
         testPart.actionCreators.ADD_ACTION(testPayload);
         expect((store.dispatch as jest.Mock)).toHaveBeenCalledWith(action);
+    });
+
+    test("unbound action creators are not bound to store.dispatch()", () => {
+        const testPayload = 23;
+        const action = {
+            dest: testPart.uid,
+            type: "ADD_ACTION",
+            payload: testPayload,
+        }
+
+        testPart.unboundActionCreators.ADD_ACTION(testPayload);
+        expect((store.dispatch as jest.Mock)).not.toHaveBeenCalledWith(action);
     });
 
 });

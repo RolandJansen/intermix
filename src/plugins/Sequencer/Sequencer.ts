@@ -110,8 +110,10 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
      */
     public sendAction(action: IAction) { /* nothing */ }
 
-    // onChange gets called
-    // on every state change
+    /**
+     * onChange gets called on every state change
+     * @param changed A tuple with actiontype and payload
+     */
     public onChange(changed: Tuple) {
         switch (changed[0]) {
             case "STATE":
