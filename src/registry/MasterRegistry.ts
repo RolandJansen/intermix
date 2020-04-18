@@ -5,6 +5,7 @@ import combineReducersWithRoot from "./combineReducersWithRoot";
 import Registry from "./Registry";
 import SeqPartRegistry from "./SeqPartRegistry";
 import SeqPart from "../seqpart/SeqPart";
+import PluginRegistry from "./PluginRegistry";
 
 /**
  * Calls the appropriate sub-registry
@@ -12,11 +13,11 @@ import SeqPart from "../seqpart/SeqPart";
  */
 export default class MasterRegistry {
 
-    private plugins: Registry;
+    private plugins: PluginRegistry;
     private seqParts: SeqPartRegistry;
 
     public constructor(ac: AudioContext) {
-        this.plugins = new Registry(ac);
+        this.plugins = new PluginRegistry(ac);
         this.seqParts = new SeqPartRegistry();
     }
 
@@ -77,7 +78,7 @@ export default class MasterRegistry {
      * and replaces the current reducer
      */
     protected replaceReducer<T extends AbstractRegistry>(itemRegistry: T) {
-        const seqPartReducer: ReducersMapObject = itemRegistry.getItemReducers();
+        const seqPartReducer: ReducersMapObject = itemRegistry.getAllSubReducers();
 
         const subReducers: ReducersMapObject = this.getSubReducer(seqPartReducer);
         const rootReducer: Reducer = this.getRootReducer();

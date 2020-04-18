@@ -8,24 +8,25 @@ import {
     IState,
     Payload,
     Tuple,
+    IPlugin,
 } from "./interfaces";
 import RegistryItemList from "./RegistryItemList";
 
 export default abstract class AbstractRegistry {
 
     protected abstract itemList: RegistryItemList<IRegistryItem>;
-    protected abstract itemActionDefs: IActionDef[];
 
-    public abstract add(): IRegistryItem;
+    public abstract add(optionalParameter?: any): IRegistryItem;
     public abstract remove(itemId: string): void;
 
-    public getItemReducers(): ReducersMapObject {
+    public getAllSubReducers(): ReducersMapObject {
         const subReducers: ReducersMapObject = {};
-        const allSeqPartUids = this.itemList.getUidList();
+        const allUids = this.itemList.getUidList();
 
-        allSeqPartUids.forEach((uid: string) => {
-            const initState: IState = this.getInitialState(this.itemActionDefs, uid);
-            subReducers[uid] = this.getSubReducer(this.itemActionDefs, initState);
+        allUids.forEach((uid: string) => {
+            const item: IRegistryItem = this.itemList.getItem(uid);
+            const initState: IState = this.getInitialState(item.actionDefs, uid);
+            subReducers[uid] = this.getSubReducer(item.actionDefs, initState);
         });
 
         return subReducers;

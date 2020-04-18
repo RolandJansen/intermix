@@ -1,20 +1,16 @@
-import { bindActionCreators, ReducersMapObject } from "redux";
+import { bindActionCreators } from "redux";
 import SeqPart from "../seqpart/SeqPart";
-import SeqPartActionDefs from "../seqpart/SeqPartActionDefs";
 import { store } from "../store/store";
 import AbstractRegistry from "./AbstractRegistry";
-import { IActionDef } from "./interfaces";
 import RegistryItemList from "./RegistryItemList";
 
 export default class SeqPartRegistry extends AbstractRegistry {
 
     protected itemList: RegistryItemList<SeqPart>;
-    protected itemActionDefs: IActionDef[];
 
     public constructor() {
         super();
         this.itemList = new RegistryItemList<SeqPart>();
-        this.itemActionDefs = SeqPartActionDefs;
     }
 
     public add(lengthInStepsPerBar?: number): SeqPart {
@@ -26,11 +22,11 @@ export default class SeqPartRegistry extends AbstractRegistry {
             newPart = new SeqPart();
         }
 
-        // add to partList
-        const uid = this.itemList.add(newPart);
+        // add to item list
+        const itemId = this.itemList.add(newPart);
 
         // build action creators
-        const actionCreators = this.getActionCreators(SeqPartActionDefs, uid);
+        const actionCreators = this.getActionCreators(newPart.actionDefs, itemId);
         newPart.unboundActionCreators = actionCreators;
 
         // bind action creators to dispatch
@@ -39,14 +35,14 @@ export default class SeqPartRegistry extends AbstractRegistry {
         return newPart;
     }
 
-    public remove(uid: string) {
-        const oldPart: SeqPart = this.itemList.getItem(uid);
+    public remove(itemId: string): void {
+        const oldItem: SeqPart = this.itemList.getItem(itemId);
 
-        // trigger the parts unsubscribe method (decouple from dispatch)
-        oldPart.unsubscribe();
+        // trigger the items unsubscribe method (decouple from dispatch)
+        oldItem.unsubscribe();
 
-        // remove from partList
-        this.itemList.remove(uid);
+        // remove from item list
+        this.itemList.remove(itemId);
     }
 
 }

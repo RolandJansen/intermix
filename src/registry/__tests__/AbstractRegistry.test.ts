@@ -243,7 +243,7 @@ describe("observeStore", () => {
     });
 });
 
-describe("getItemReducers", () => {
+describe("getAllSubReducers", () => {
 
     let anotherUid: string;
     let reducerMap: ReducersMapObject;
@@ -264,7 +264,7 @@ describe("getItemReducers", () => {
     beforeEach(() => {
         const anotherItem = registry.add();
         anotherUid = anotherItem.uid;
-        reducerMap = registry.getItemReducers();
+        reducerMap = registry.getAllSubReducers();
         allUids = Object.keys(reducerMap);
     });
 
