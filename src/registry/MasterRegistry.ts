@@ -1,11 +1,10 @@
 import { AnyAction, Reducer, ReducersMapObject } from "redux";
 import { store } from "../store/store";
-import AbstractRegistry from "./AbstractRegistry";
 import combineReducersWithRoot from "./combineReducersWithRoot";
-import Registry from "./Registry";
 import SeqPartRegistry from "./SeqPartRegistry";
 import SeqPart from "../seqpart/SeqPart";
 import PluginRegistry from "./PluginRegistry";
+import { IPlugin } from "./interfaces";
 
 /**
  * Calls the appropriate sub-registry
@@ -21,17 +20,30 @@ export default class MasterRegistry {
         this.seqParts = new SeqPartRegistry();
     }
 
-    public addPlugin() {
+    public addPlugin<P extends IPlugin>(pluginClass: new (ac: AudioContext) => P): string {
         try {
-            // not implemented yet
+            const newPlugin: IPlugin = this.plugins.add(pluginClass);
+
+            // build a new root reducer and replace the current one
+            this.replaceReducer();
+
+            // make the new item observe the store
+            newPlugin.unsubscribe = this.seqParts.observeStore(
+                store,
+                newPlugin,
+            );
+
+            return newPlugin.uid;
         } catch (error) {
             // not implemented yet
         }
     }
 
-    public removePlugin() {
+    public removePlugin(itemId: string) {
         try {
-            // not implemented yet
+            this.plugins.remove(itemId);
+            this.replaceReducer();
+            store.dispatch({ type: "REMOVE", payload: itemId});
         } catch (error) {
             // not implemented yet
         }
@@ -49,9 +61,9 @@ export default class MasterRegistry {
             }
 
             // build a new root reducer and replace the current one
-            this.replaceReducer(this.seqParts);
+            this.replaceReducer();
 
-            // make it observe the store
+            // make the new item observe the store
             newPart.unsubscribe = this.seqParts.observeStore(
                 store,
                 newPart,
@@ -63,11 +75,11 @@ export default class MasterRegistry {
         }
     }
 
-    public removeSeqPart(uid: string) {
+    public removeSeqPart(itemId: string) {
         try {
-            this.seqParts.remove(uid);
-            this.replaceReducer(this.seqParts);
-            store.dispatch({ type: "REMOVE", payload: uid });
+            this.seqParts.remove(itemId);
+            this.replaceReducer();
+            store.dispatch({ type: "REMOVE", payload: itemId });
         } catch (error) {
             // not implemented yet
         }
@@ -77,10 +89,11 @@ export default class MasterRegistry {
      * Combines all sub reducers with the root reducer
      * and replaces the current reducer
      */
-    protected replaceReducer<T extends AbstractRegistry>(itemRegistry: T) {
-        const seqPartReducer: ReducersMapObject = itemRegistry.getAllSubReducers();
+    protected replaceReducer() {
+        const pluginReducer: ReducersMapObject = this.plugins.getAllSubReducers();
+        const seqPartReducer: ReducersMapObject = this.seqParts.getAllSubReducers();
 
-        const subReducers: ReducersMapObject = this.getSubReducer(seqPartReducer);
+        const subReducers: ReducersMapObject = this.getSubReducer(pluginReducer, seqPartReducer);
         const rootReducer: Reducer = this.getRootReducer();
         const reducerTree: Reducer = this.getCompleteReducer(rootReducer, subReducers);
 
