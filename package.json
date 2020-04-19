@@ -5,7 +5,7 @@
   "main": "dist/intermix.js",
   "types": "dist/intermix.d.ts",
   "scripts": {
-    "lint": "tslint -p ./tsconfig.json",
+    "lint": "eslint src/**/*.ts",
     "clean": "rimraf dist/*",
     "doc": "typedoc",
     "prebuild": "npm run lint && npm run clean",
@@ -37,11 +37,6 @@
     "url": "https://github.com/RolandJansen/intermix.js/issues"
   },
   "homepage": "https://github.com/RolandJansen/intermix.js#readme",
-  "eslintConfig": {
-    "env": {
-      "es6": true
-    }
-  },
   "jest": {
     "transform": {
       "^.+\\.(t|j)sx?$": "ts-jest"
@@ -61,9 +56,17 @@
     "@types/benchmark": "^1.0.31",
     "@types/jest": "^23.3.1",
     "@types/node": "^12.12.14",
+    "@typescript-eslint/eslint-plugin": "^2.28.0",
+    "@typescript-eslint/parser": "^2.28.0",
     "atob": "^2.1.2",
     "benchmark": "^2.1.4",
     "dts-bundle-webpack": "^1.0.2",
+    "eslint": "^6.8.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
     "expect-more-jest": "^4.0.0",
     "file-loader": "^6.0.0",
     "html-webpack-plugin": "^4.2.0",
@@ -73,7 +76,6 @@
     "source-map-loader": "^0.2.4",
     "ts-jest": "^25.0.0",
     "ts-loader": "^7.0.0",
-    "tslint": "^6.1.1",
     "typedoc": "^0.17.4",
     "typescript": "^3.8.3",
     "web-audio-test-api": "^0.5.2",

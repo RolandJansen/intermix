@@ -36,9 +36,7 @@ export function getAudioContext(): AudioContext {
 export function getActionCreators(bound?: string): IGlobalActionCreators {
     const pluginList = registry.pluginStore;
     const actionCreators: IGlobalActionCreators = {};
-    let actionCreatorsType: string;
-
-    actionCreatorsType = bound === "unbound" ? "unboundActionCreators" : "actionCreators";
+    const actionCreatorsType = bound === "unbound" ? "unboundActionCreators" : "actionCreators";
 
     pluginList.forEach((plugin: IPlugin) => {
         const pluginAC = {

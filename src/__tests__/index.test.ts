@@ -29,7 +29,7 @@ WebAudioTestAPI.setState({
 describe("Intermix", () => {
     let allActionCreators: IGlobalActionCreators = {};
     let seqAC: ActionCreatorsMapObject = {};
-    let seqUID: string = "";
+    let seqUID = "";
 
     beforeEach(() => {
         allActionCreators = getActionCreators();

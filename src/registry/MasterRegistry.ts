@@ -43,14 +43,13 @@ export default class MasterRegistry {
         }
     }
 
-    public removePlugin(itemId: string) {
+    public removePlugin(itemId: string): void {
         try {
             this.plugins.remove(itemId);
             this.replaceReducer();
             store.dispatch({ type: "REMOVE", payload: itemId});
         } catch (error) {
             // not implemented yet
-            return "";
         }
     }
 
@@ -81,14 +80,13 @@ export default class MasterRegistry {
         }
     }
 
-    public removeSeqPart(itemId: string) {
+    public removeSeqPart(itemId: string): void {
         try {
             this.seqParts.remove(itemId);
             this.replaceReducer();
             store.dispatch({ type: "REMOVE", payload: itemId });
         } catch (error) {
             // not implemented yet
-            return "";
         }
     }
 
@@ -96,7 +94,7 @@ export default class MasterRegistry {
      * Combines all sub reducers with the root reducer
      * and replaces the current reducer
      */
-    private replaceReducer() {
+    private replaceReducer(): void {
         const pluginReducer: ReducersMapObject = this.plugins.getAllSubReducers();
         const seqPartReducer: ReducersMapObject = this.seqParts.getAllSubReducers();
 
@@ -116,7 +114,7 @@ export default class MasterRegistry {
      * on the root state. Use with combineReducersWithRoot().
      */
     private getRootReducer(): Reducer {
-        return (state = {}, action: AnyAction) => {
+        return (state = {}, action: AnyAction): void => {
             if (action.type === "REMOVE" &&
                 state.hasOwnProperty(action.payload)) {
                 const newState = JSON.parse(JSON.stringify(state));
