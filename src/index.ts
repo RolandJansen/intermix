@@ -20,12 +20,12 @@ export function getState(): any {
     return store.getState();
 }
 
-export function dispatch(action: Action) {
+export function dispatch(action: Action): void {
     store.dispatch(action);
 }
 
 // useful if the browser doesn't allow ac to start
-export function resumeAudioContext() {
+export function resumeAudioContext(): void {
     audioContext.resume();
 }
 
@@ -53,7 +53,7 @@ export function getNewPart(): SeqPart {
     return new SeqPart();
 }
 
-export function animate(animeFunc: (lastPlayedStep: number) => void) {
+export function animate(animeFunc: (lastPlayedStep: number) => void): void {
     defaultSequencer.updateFrame = animeFunc;
 }
 

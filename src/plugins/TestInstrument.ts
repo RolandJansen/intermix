@@ -1,4 +1,3 @@
-import { ActionCreatorsMapObject } from "redux";
 import AbstractPlugin from "../registry/AbstractPlugin";
 import { IActionDef, IPlugin, IPluginMetaData, Tuple } from "../registry/interfaces";
 
@@ -34,11 +33,11 @@ export default class TestPlugin extends AbstractPlugin implements IPlugin {
         },
     ];
 
-    public get inputs() {
+    public get inputs(): AudioNode[] {
         return [];
     }
 
-    public get outputs() {
+    public get outputs(): AudioNode[] {
         return [];
     }
 
@@ -46,7 +45,8 @@ export default class TestPlugin extends AbstractPlugin implements IPlugin {
         super();
     }
 
-    public onChange(changed: Tuple) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public onChange(changed: Tuple): boolean {
         return true;
     }
 }

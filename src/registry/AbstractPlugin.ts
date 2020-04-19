@@ -40,7 +40,7 @@ export default abstract class AbstractPlugin implements IPlugin {
      */
     public abstract onChange(changed: Tuple): boolean;
 
-    public unsubscribe() {
+    public unsubscribe(): void {
         // will be overridden by the registry
     }
 

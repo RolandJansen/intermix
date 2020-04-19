@@ -1,5 +1,6 @@
 import { AnyAction, Reducer } from "redux";
 import combineReducersWithRoot from "../combineReducersWithRoot";
+import { IState } from "../interfaces";
 
 // test-reducers are also from the posting by Chris Nitchi
 // see combineReducersWithRoot.ts
@@ -13,7 +14,7 @@ const testState = {
     },
 };
 
-function rootReducer(state = { loading: false, loaded: false }, action: AnyAction) {
+function rootReducer(state = { loading: false, loaded: false }, action: AnyAction): IState {
     switch (action.type) {
         case "STARTED_LOADING":
             return { ...state, loading: true, loaded: false };
@@ -24,7 +25,7 @@ function rootReducer(state = { loading: false, loaded: false }, action: AnyActio
     }
 }
 
-function dataReducer(state = { filter: "", arr: [] }, action: AnyAction) {
+function dataReducer(state = { filter: "", arr: [] }, action: AnyAction): IState {
     switch (action.type) {
         case "SET_FILTER":
             return { ...state, filter: action.value };

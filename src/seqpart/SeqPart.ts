@@ -39,8 +39,8 @@ export default class SeqPart implements IRegistryItem {
     public unboundActionCreators: ActionCreatorsMapObject = {};
 
     public name = SeqPart.partName;
-    public uid: string = "";            // will be set by the registry
-    public pointer: number = 0;         // can be set to a specific point in the pattern (by the sequencer)
+    public uid = "";            // will be set by the registry
+    public pointer = 0;         // can be set to a specific point in the pattern (by the sequencer)
 
     private stepMultiplier: number; // 64 = stepsPerBar * stepMultiplier
     private pattern: Pattern;       // holds the sequence
@@ -60,6 +60,7 @@ export default class SeqPart implements IRegistryItem {
         }
     }
 
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     public unsubscribe() {
         // will be overridden by the registry
     }
@@ -69,19 +70,19 @@ export default class SeqPart implements IRegistryItem {
      * You should use higher order API unless you
      * know exactly what you're doing.
      */
-    public get seqPattern() {
+    public get seqPattern(): Pattern {
         return this.pattern;
     }
 
     /**
      * Get the length of the pattern in stepsPerBar
      */
-    public get length() {
+    public get length(): number {
         // return this.pattern.length / this.stepMultiplier;
         return this.pattern.length;
     }
 
-    public onChange(changed: Tuple) {
+    public onChange(changed: Tuple): boolean {
         switch (changed[0]) {
             case "ADD_ACTION":
                 return true;
@@ -133,7 +134,7 @@ export default class SeqPart implements IRegistryItem {
      * });
      * @return List with all non-empty pattern entries
      */
-    public getNotePositions() {
+    public getNotePositions(): number[] {
         const positions: number[] = [];
         this.pattern.forEach((actions, index) => {
             if (actions.length > 0) {
@@ -173,7 +174,7 @@ export default class SeqPart implements IRegistryItem {
      * Extends a part at the top/start.
      * @param  extLength Length in stepsPerBar
      */
-    public extendOnTop(extLength: number) {
+    public extendOnTop(extLength: number): void {
         const extension = this.initPattern(extLength);
         this.pattern = [ ...extension, ...this.pattern];
     }
@@ -182,7 +183,7 @@ export default class SeqPart implements IRegistryItem {
      * Extends a part at the end
      * @param  extLength Length in stepsPerBar
      */
-    public extendOnEnd(extLength: number) {
+    public extendOnEnd(extLength: number): void {
         const extension = this.initPattern(extLength);
         this.pattern = this.pattern.concat(extension);
     }

@@ -2,14 +2,12 @@
 import { ActionCreatorsMapObject } from "redux";
 import "web-audio-test-api";
 import {
-    animate,
     dispatch,
     getActionCreators,
     getAudioContext,
     getNewPart,
     getState,
     resumeAudioContext } from "../index";
-import ClockWorker from "../plugins/Sequencer/clock.worker";
 import { IAction, IGlobalActionCreators, IState } from "../registry/interfaces";
 import SeqPart from "../seqpart/SeqPart";
 
@@ -62,7 +60,7 @@ describe("Intermix", () => {
 
     test("provides the global state", () => {
         const globalState: IState = getState();
-        const getPartialState = (uid: string) => {
+        const getPartialState = (uid: string): string => {
             return JSON.stringify({
                 uid,
                 ENV_ATTACK: { value: 0 },

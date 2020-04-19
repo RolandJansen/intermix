@@ -48,7 +48,7 @@ export default abstract class AbstractRegistry {
         const onChange = newObserver.onChange.bind(newObserver);
         let currentState: IState = {};
 
-        function handleChange() {
+        function handleChange(): void {
             const nextState: IState = selectSubState(st.getState(), uid);
 
             // check by reference that
@@ -70,7 +70,7 @@ export default abstract class AbstractRegistry {
      * @param globalState The global state object from redux store
      * @param uid Unique id of the item
      */
-    protected selectSubState(globalState: IState, uid: string) {
+    protected selectSubState(globalState: IState, uid: string): IState {
         if (globalState.hasOwnProperty(uid)) {
             return globalState[uid];
         }
@@ -127,7 +127,7 @@ export default abstract class AbstractRegistry {
     protected getSubReducer(actionDefs: IActionDef[], initialState: IState): Reducer {
         const actionHandlers: IActionHandlerMap = this.getActionHandlers(actionDefs);
 
-        return (state: IState = initialState, action: AnyAction | IAction) => {
+        return (state: IState = initialState, action: AnyAction | IAction): IState => {
             if (state.uid === action.dest && actionHandlers.hasOwnProperty(action.type)) {
                 const handler = actionHandlers[action.type];
                 const newState = handler(state, action);

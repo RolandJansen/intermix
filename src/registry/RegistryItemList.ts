@@ -28,7 +28,7 @@ export default class RegistryItemList<T extends IRegistryItem> {
         throw new Error(`No item with id ${itemKey} in stock.`);
     }
 
-    public add(item: T) {
+    public add(item: T): string {
         let itemKey = getRandomString(this.keyLength);
         while (!this.isKeyUnique(itemKey)) {
             itemKey = getRandomString(this.keyLength);
@@ -38,7 +38,7 @@ export default class RegistryItemList<T extends IRegistryItem> {
         return itemKey;
     }
 
-    public remove(itemKey: string) {
+    public remove(itemKey: string): void {
         if (this.itemLookupTable.hasOwnProperty(itemKey)) {
             delete this.itemLookupTable[itemKey];
         } else {

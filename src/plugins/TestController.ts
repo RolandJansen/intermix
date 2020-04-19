@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ActionCreatorsMapObject } from "redux";
 import AbstractPlugin from "../registry/AbstractPlugin";
 import { IActionDef, IPlugin, IPluginMetaData, Tuple, IControllerPlugin, IAction } from "../registry/interfaces";
@@ -34,11 +35,11 @@ export default class TestPlugin extends AbstractPlugin implements IControllerPlu
         },
     ];
 
-    public get inputs() {
+    public get inputs(): AudioNode[] {
         return [];
     }
 
-    public get outputs() {
+    public get outputs(): AudioNode[] {
         return [];
     }
 
@@ -53,13 +54,13 @@ export default class TestPlugin extends AbstractPlugin implements IControllerPlu
      * provide an empty method here. It has to be public so the registry can see it.
      * @param action An action object that normally holds data for an audio device
      */
-    public sendAction(action: IAction) { /* nothing */ }
+    public sendAction(action: IAction): void { /* nothing */ }
 
     /**
      * onChange gets called on every state change
      * @param changed A tuple with actiontype and payload
      */
-    public onChange(changed: Tuple) {
+    public onChange(changed: Tuple): boolean {
         return true;
     }
 }

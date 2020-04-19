@@ -1,4 +1,5 @@
 import { Action, createStore, Store } from "redux";
+import { IState } from "../registry/interfaces";
 
 /**
  * The main reducer that's called by the store every time an action
@@ -8,7 +9,8 @@ import { Action, createStore, Store } from "redux";
  * @param state The state object. If undefined, an empty object will be assigned
  * @param action An action object that alters the state
  */
-export function rootReducer(state = {}, action: Action) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function rootReducer(state = {}, action: Action): IState {
     return state;
 }
 

@@ -49,14 +49,15 @@ export default class PluginRegistry extends AbstractRegistry {
      * If the plugin is a controller, bind the sendAction method
      * to the dispatcher so it emmits actions when called.
      */
-    private bindSendActionMethod(pInstance: IPlugin) {
+    private bindSendActionMethod(pInstance: IPlugin): void {
         if (this.isInstanceOfIControllerPlugin(pInstance)) {
             const actionRelay = this.getActionRelay();
-            pInstance.sendAction = (action: IAction) => store.dispatch(actionRelay(action));
+            pInstance.sendAction = (action: IAction): IAction => store.dispatch(actionRelay(action));
         }
     }
 
     // type guard for IControllerPlugin
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private isInstanceOfIControllerPlugin(obj: any): obj is IControllerPlugin {
         return "sendAction" in obj;
     }
@@ -70,7 +71,7 @@ export default class PluginRegistry extends AbstractRegistry {
      * Will be wrapped in a dispatch and serves as a generic action creator.
      */
     private getActionRelay(): (action: IAction) => IAction {
-        return (action: IAction) => {
+        return (action: IAction): IAction => {
             return action;
         };
     }
@@ -81,7 +82,7 @@ export default class PluginRegistry extends AbstractRegistry {
      * plugin with the audio destination.
      * @param pInstance The plugin to be wired
      */
-    private wireAudioOutputs(pInstance: IPlugin) {
+    private wireAudioOutputs(pInstance: IPlugin): void {
         const outputs = pInstance.outputs;
         if (outputs.length !== 0) {
             outputs[0].connect(this.ac.destination);

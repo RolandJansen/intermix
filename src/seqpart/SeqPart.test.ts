@@ -45,6 +45,7 @@ describe("SeqPart", () => {
 
     test("throws if 64 is not divisible by stepsPerBar", () => {
         expect(() => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const sp = new SeqPart(undefined, 23);
         }).toThrow();
     });

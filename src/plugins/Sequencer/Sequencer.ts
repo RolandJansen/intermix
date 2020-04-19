@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import AbstractPlugin from "../../registry/AbstractPlugin";
 import {
     IAction,
@@ -77,7 +78,7 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         // Initialize the timer
         this.clock = new ClockWorker();
         this.clock.postMessage({ interval: this.schedulerIntervalInMili });
-        this.clock.onmessage = (e: MessageEvent) => {
+        this.clock.onmessage = (e: MessageEvent): void => {
             if (e.data === "tick") {
                 this.scheduler();
             }
@@ -108,13 +109,13 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
      * provide an empty method here. It has to be public so the registry can see it.
      * @param action An action object that normally holds data for an audio device
      */
-    public sendAction(action: IAction) { /* nothing */ }
+    public sendAction(action: IAction): void { /* nothing */ }
 
     /**
      * onChange gets called on every state change
      * @param changed A tuple with actiontype and payload
      */
-    public onChange(changed: Tuple) {
+    public onChange(changed: Tuple): boolean {
         switch (changed[0]) {
             case "STATE":
                 if (changed[1] === 1) {
@@ -225,7 +226,7 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         return timePerStep;
     }
 
-    private setLoop(loop: ILoop) {
+    private setLoop(loop: ILoop): void {
         if (loop.start < loop.end) {
             this.loopStart = loop.start;
             this.loopEnd = loop.end;
@@ -236,7 +237,7 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
      * Activates or deactivates looped playback
      * @param isActive True=active, false=inactive
      */
-    private setLoopActive(isActive: boolean) {
+    private setLoopActive(isActive: boolean): void {
         this.isLooped = isActive;
     }
 

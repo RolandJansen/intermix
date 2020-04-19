@@ -1,5 +1,5 @@
-// tslint:disable: max-classes-per-file
-import { ActionCreatorsMapObject, Reducer, ReducersMapObject, Store } from "redux";
+/* eslint-disable @typescript-eslint/camelcase */
+import { ActionCreatorsMapObject, Reducer, ReducersMapObject } from "redux";
 import { store } from "../../store/store";
 import AbstractRegistry from "../AbstractRegistry";
 import { IAction, IActionDef, IActionHandlerMap, IRegistryItem, IState, Tuple } from "../interfaces";
@@ -27,17 +27,18 @@ const testActionDefs: IActionDef[] = [
  * real world code
  */
 class TestItem implements IRegistryItem {
-    public uid: string = "";
+    public uid = "";
 
     public readonly actionDefs: IActionDef[] = testActionDefs;
     public actionCreators: ActionCreatorsMapObject = {};
     public unboundActionCreators: ActionCreatorsMapObject = {};
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public onChange(changed: Tuple): boolean {
         return true;
     }
 
-    public unsubscribe() {
+    public unsubscribe(): void {
         // will be overridden by the registry
     }
 }
@@ -63,7 +64,7 @@ class TestRegistry extends AbstractRegistry {
         return newItem;
     }
 
-    public remove(uid: string) {
+    public remove(uid: string): void {
         this.itemList.remove(uid);
     }
 
@@ -226,7 +227,7 @@ describe("observeStore", () => {
 
         (store.getState as jest.Mock).mockImplementation(() => globalState_Test);
         (store.subscribe as jest.Mock).mockImplementation(() => {
-            return () => true;
+            return (): boolean => true;
         });
         (store.subscribe as jest.Mock).mock.calls = []; // reset call history
     });

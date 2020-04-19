@@ -4,7 +4,6 @@ describe("getRandomString()", () => {
 
     test("returns a random string of variable length", () => {
         const five = getRandomString(5);
-        const twentythree = getRandomString(23);
 
         expect(five).toHaveLength(5);
     });

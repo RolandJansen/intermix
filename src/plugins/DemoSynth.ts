@@ -79,7 +79,7 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
 
     // onChange gets called
     // on every state change
-    public onChange(changed: Tuple) {
+    public onChange(changed: Tuple): boolean {
         // console.log(changed);
         switch (changed[0]) {
             case "NOTE":
@@ -142,7 +142,7 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
         this.startEnvelope(note.startTime);
     }
 
-    private stop() {
+    private stop(): void {
         this.queue.forEach((node) => {
             // we can't stop a node twice so we just disconnect
             node.disconnect();

@@ -56,7 +56,7 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
 
     // onChange gets called
     // on every state change
-    public onChange(changed: Tuple) {
+    public onChange(changed: Tuple): boolean {
         switch (changed[0]) {
             case "NOTE":
                 const note: IDelayedNote = changed[1];
@@ -77,19 +77,19 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
         }
     }
 
-    private handleNote(note: IDelayedNote) {
+    private handleNote(note: IDelayedNote): void {
         if (note.value >= 0 && note.value <= 127) {
             this.start(note);
         }
     }
 
-    private handleVolume(volume: number) {
+    private handleVolume(volume: number): void {
         if (volume >= 0 && volume <= 127) {
             this.gainNode.gain.value = volume / 128;
         }
     }
 
-    private handleAudioData(buffer: AudioBuffer) {
+    private handleAudioData(buffer: AudioBuffer): void {
         this.audioData = buffer;
     }
 
@@ -98,7 +98,7 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
      * in a queue. This enables you to play multiple sounds at once
      * and even stop them all at a given time.
      */
-    private start(note: IDelayedNote) {
+    private start(note: IDelayedNote): void {
         // const frequency = this.frequencyLookup[note.value];
         const playbackRate = this.getPlaybackRate(note.value);
 
@@ -115,7 +115,7 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
      * Stops all audio stream, even the ones that are just scheduled.
      * It also cleans the queue so that the sound object is ready for another round.
      */
-    private stop() {
+    private stop(): void {
         this.queue.forEach((node) => {
             node.stop();
             node.disconnect();
@@ -130,7 +130,7 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
     private createBufferSrcNode(): AudioBufferSourceNode {
         const bufferSrc: AudioBufferSourceNode = this.ac.createBufferSource();
         bufferSrc.buffer = this.audioData;
-        bufferSrc.onended = () => {
+        bufferSrc.onended = (): void => {
             this.destroyBufferSrcNode(bufferSrc);
         };
 
@@ -154,7 +154,7 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
      * from the sourceNode queue. This is used in the onended
      * callback of all BufferSourceNodes to avoid dead references.
      */
-    private destroyBufferSrcNode(bufferSrc: AudioBufferSourceNode) {
+    private destroyBufferSrcNode(bufferSrc: AudioBufferSourceNode): void {
         bufferSrc.disconnect();
 
         this.queue.forEach((node, index) => {
