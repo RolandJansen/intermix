@@ -8,7 +8,6 @@ import {
     IState,
     Payload,
     Tuple,
-    IPlugin,
 } from "./interfaces";
 import RegistryItemList from "./RegistryItemList";
 

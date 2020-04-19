@@ -9,6 +9,9 @@ import { IPlugin } from "./interfaces";
 /**
  * Calls the appropriate sub-registry
  * and builds the new state and reducer
+ *
+ * This is not derived from AbstractRegistry,
+ * it's more like an orchestrator class.
  */
 export default class MasterRegistry {
 
@@ -36,6 +39,7 @@ export default class MasterRegistry {
             return newPlugin.uid;
         } catch (error) {
             // not implemented yet
+            return "";
         }
     }
 
@@ -46,6 +50,7 @@ export default class MasterRegistry {
             store.dispatch({ type: "REMOVE", payload: itemId});
         } catch (error) {
             // not implemented yet
+            return "";
         }
     }
 
@@ -72,6 +77,7 @@ export default class MasterRegistry {
             return newPart.uid;
         } catch (error) {
             // not implemented yet
+            return "";
         }
     }
 
@@ -82,6 +88,7 @@ export default class MasterRegistry {
             store.dispatch({ type: "REMOVE", payload: itemId });
         } catch (error) {
             // not implemented yet
+            return "";
         }
     }
 
@@ -89,7 +96,7 @@ export default class MasterRegistry {
      * Combines all sub reducers with the root reducer
      * and replaces the current reducer
      */
-    protected replaceReducer() {
+    private replaceReducer() {
         const pluginReducer: ReducersMapObject = this.plugins.getAllSubReducers();
         const seqPartReducer: ReducersMapObject = this.seqParts.getAllSubReducers();
 
@@ -100,7 +107,7 @@ export default class MasterRegistry {
         store.replaceReducer(reducerTree);
     }
 
-    protected getSubReducer(...subReducers: ReducersMapObject[]): ReducersMapObject {
+    private getSubReducer(...subReducers: ReducersMapObject[]): ReducersMapObject {
         return Object.assign({}, ...subReducers);
     }
 
@@ -108,7 +115,7 @@ export default class MasterRegistry {
      * Builds the root reducer with handlers that can operate
      * on the root state. Use with combineReducersWithRoot().
      */
-    protected getRootReducer(): Reducer {
+    private getRootReducer(): Reducer {
         return (state = {}, action: AnyAction) => {
             if (action.type === "REMOVE" &&
                 state.hasOwnProperty(action.payload)) {
