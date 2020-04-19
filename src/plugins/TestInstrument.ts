@@ -33,6 +33,9 @@ export default class TestPlugin extends AbstractPlugin implements IPlugin {
         },
     ];
 
+    // here we can check if onChange was called correctly
+    public testValue: Tuple = ["", 0];
+
     public get inputs(): AudioNode[] {
         return [];
     }
@@ -47,6 +50,7 @@ export default class TestPlugin extends AbstractPlugin implements IPlugin {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public onChange(changed: Tuple): boolean {
+        this.testValue = changed;
         return true;
     }
 }
