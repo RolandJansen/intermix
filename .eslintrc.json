@@ -24,6 +24,7 @@
         "@typescript-eslint/no-inferrable-types": 1,
         "@typescript-eslint/no-empty-function": 1,
         "@typescript-eslint/camelcase": 1,
-        "@typescript-eslint/interface-name-prefix": 0
+        "@typescript-eslint/interface-name-prefix": 0,
+        "@typescript-eslint/no-explicit-any": 0
     }
 }

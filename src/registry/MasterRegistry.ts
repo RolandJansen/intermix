@@ -1,10 +1,10 @@
-import { AnyAction, Reducer, ReducersMapObject } from "redux";
+import { AnyAction, Reducer, ReducersMapObject, ActionCreatorsMapObject } from "redux";
 import { store } from "../store/store";
 import combineReducersWithRoot from "./combineReducersWithRoot";
 import SeqPartRegistry from "./SeqPartRegistry";
 import SeqPart from "../seqpart/SeqPart";
 import PluginRegistry from "./PluginRegistry";
-import { IPlugin } from "./interfaces";
+import { IPlugin, IRegistryItem } from "./interfaces";
 
 /**
  * Calls the appropriate sub-registry
@@ -88,6 +88,23 @@ export default class MasterRegistry {
         } catch (error) {
             // not implemented yet
         }
+    }
+
+    public getActionCreators(itemId: string, bound?: string): ActionCreatorsMapObject {
+        const pluginKeys = this.plugins.itemList.getUidList();
+        const seqPartKeys = this.seqParts.itemList.getUidList();
+        const actionCreatorsType = bound === "unbound" ? "unboundActionCreators" : "actionCreators";
+        let actionCreators: ActionCreatorsMapObject = {};
+
+        if (pluginKeys.includes(itemId)) {
+            const item = this.plugins.itemList.getItem(itemId);
+            actionCreators = Object.assign({}, item[actionCreatorsType]);
+        } else if (seqPartKeys.includes(itemId)) {
+            const item = this.seqParts.itemList.getItem(itemId);
+            actionCreators = Object.assign({}, item[actionCreatorsType]);
+        }
+
+        return actionCreators;
     }
 
     /**

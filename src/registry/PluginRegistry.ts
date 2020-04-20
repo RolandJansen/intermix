@@ -6,7 +6,7 @@ import { bindActionCreators } from "redux";
 
 export default class PluginRegistry extends AbstractRegistry {
 
-    protected itemList: RegistryItemList<IPlugin>;
+    public itemList: RegistryItemList<IPlugin>;
 
     public constructor(private ac: AudioContext) {
         super();

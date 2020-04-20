@@ -33,73 +33,73 @@ beforeEach(() => {
  * sub-state for the current test.
  */
 
- describe("PluginRegistry", () => {
-     let plugin: IPlugin;
-     let pluginId: string;
+describe("PluginRegistry", () => {
+    let plugin: IPlugin;
+    let pluginId: string;
 
-     beforeEach(() => {
-         pluginId = registry.addPlugin(TestInstrument);
-         plugin = registry["plugins"]["itemList"].getItem(pluginId);
-     })
+    beforeEach(() => {
+        pluginId = registry.addPlugin(TestInstrument);
+        plugin = registry["plugins"]["itemList"].getItem(pluginId);
+    })
 
-     describe("addPlugin", () => {
+    describe("addPlugin", () => {
 
-         test("creates a new plugin instance from a given class", () => {
-             expect(plugin.metaData.name).toMatch("Test-Instrument");
-         })
+        test("creates a new plugin instance from a given class", () => {
+            expect(plugin.metaData.name).toMatch("Test-Instrument");
+        })
 
-         test("returns the instance id", () => {
-             expect(pluginId).toMatch(plugin.uid);
-         })
+        test("returns the instance id", () => {
+            expect(pluginId).toMatch(plugin.uid);
+        })
 
-         test("adds an entry to the store", () => {
-             const state = store.getState();
-             expect(state[pluginId]).toBeDefined();
-         })
+        test("adds an entry to the store", () => {
+            const state = store.getState();
+            expect(state[pluginId]).toBeDefined();
+        })
 
-         test("store entry contains the properties of the plugin", () => {
-             const state = store.getState();
-             expect(state[pluginId].ACTION1).toBe(0);
-             expect(state[pluginId].ACTION2).toBe(1);
-         })
+        test("store entry contains the properties of the plugin", () => {
+            const state = store.getState();
+            expect(state[pluginId].ACTION1).toBe(0);
+            expect(state[pluginId].ACTION2).toBe(1);
+        })
 
-         test("adds reducers for the plugin to the store", () => {
-             const action1 = {
-                 dest: pluginId,
-                 type: "ACTION1",
-                 payload: 23,
-             }
-             const action2 = {
-                 dest: pluginId,
-                 type: "ACTION2",
-                 payload: 42,
-             }
+        test("adds reducers for the plugin to the store", () => {
+            const action1 = {
+                dest: pluginId,
+                type: "ACTION1",
+                payload: 23,
+            }
+            const action2 = {
+                dest: pluginId,
+                type: "ACTION2",
+                payload: 42,
+            }
 
-             store.dispatch(action1);
-             store.dispatch(action2);
+            store.dispatch(action1);
+            store.dispatch(action2);
 
-             const state = store.getState();
-             expect(state[pluginId].ACTION1).toBe(23);
-             expect(state[pluginId].ACTION2).toBe(42);
-         })
+            const state = store.getState();
+            expect(state[pluginId].ACTION1).toBe(23);
+            expect(state[pluginId].ACTION2).toBe(42);
+        })
 
-         test("adds action creators to the plugin", () => {
-             plugin.actionCreators.ACTION1(5);
+        test("adds action creators to the plugin", () => {
+            plugin.actionCreators.ACTION1(5);
 
-             const state = store.getState();
-             expect(state[pluginId].ACTION1).toBe(5);
-         })
+            const state = store.getState();
+            expect(state[pluginId].ACTION1).toBe(5);
+        })
 
-         test("subscribes the plugin to dispatch", () => {
-             // we cannot spy on plugin.onChange as the
-             // dispatcher would use the original method anyway.
-             // Instead, testValue in the plugin can be checked.
-             plugin.actionCreators.ACTION1(2342);
-             expect(plugin.testValue[1]).toBe(2342);
-         })
-     })
+        test("subscribes the plugin to dispatch", () => {
+            // we cannot spy on plugin.onChange as the
+            // dispatcher would use the original method anyway.
+            // Instead, testValue in the plugin can be checked.
+            plugin.actionCreators.ACTION1(2342);
+            expect(plugin.testValue[1]).toBe(2342);
+        })
+    })
 
-     describe("removePlugin", () => {
+    describe("removePlugin", () => {
 
         beforeEach(() => {
             jest.spyOn(plugin, "unsubscribe");
@@ -131,8 +131,8 @@ beforeEach(() => {
             expect(state[pluginId]).not.toBeDefined();
         })
 
-     })
- })
+    })
+})
 
 describe("SeqPart Registry", () => {
 
@@ -232,6 +232,65 @@ describe("SeqPart Registry", () => {
             expect(state[partId]).not.toBeDefined();
         })
 
+    })
+
+    describe("getActionCreators", () => {
+        let plugin: IPlugin;
+        let pluginId: string;
+        let part: SeqPart;
+        let partId: string;
+
+        beforeEach(() => {
+            pluginId = registry.addPlugin(TestInstrument);
+            plugin = registry["plugins"]["itemList"].getItem(pluginId);
+            partId = registry.addSeqPart();
+            part = registry["seqParts"]["itemList"].getItem(partId);
+        })
+
+        test("returns an empty object if id was not found", () => {
+            const ac = registry.getActionCreators("wasdas");
+            expect(ac).toEqual({});
+        })
+
+        test("takes a plugin id and returns its action creators", () => {
+            const ac = registry.getActionCreators(pluginId);
+            const oldState = store.getState();
+            expect(oldState[pluginId].ACTION1).toBe(0);
+            expect(oldState[pluginId].ACTION2).toBe(1);
+            ac.ACTION1(23);
+            ac.ACTION2(42);
+            const nextState = store.getState();
+            expect(nextState[pluginId].ACTION1).toBe(23);
+            expect(nextState[pluginId].ACTION2).toBe(42);
+        })
+
+        test("takes a plugin id and returns its unbound action creators", () => {
+            const ac = registry.getActionCreators(pluginId, "unbound");
+            const oldState = store.getState();
+            ac.ACTION1(23);
+            const nextState = store.getState();
+            expect(oldState).toEqual(nextState);  // nothing changed = action was not dispatched
+        })
+
+        test("takes a seqPart id and returns its action creators", () => {
+            const ac = registry.getActionCreators(partId);
+            const oldState = store.getState();
+            expect(oldState[partId].ADD_ACTION).toEqual({});
+            expect(oldState[partId].REMOVE_ACTION).toEqual({});
+            ac.ADD_ACTION(23);
+            ac.REMOVE_ACTION(42);
+            const nextState = store.getState();
+            expect(nextState[partId].ADD_ACTION).toBe(23);
+            expect(nextState[partId].REMOVE_ACTION).toBe(42);
+        })
+
+        test("takes a seqPart id and returns its unbound action creators", () => {
+            const ac = registry.getActionCreators(partId, "unbound");
+            const oldState = store.getState();
+            ac.ADD_ACTION(23);
+            const nextState = store.getState();
+            expect(oldState).toEqual(nextState);  // nothing changed = action was not dispatched
+        })
     })
 
 })

@@ -13,7 +13,7 @@ import RegistryItemList from "./RegistryItemList";
 
 export default abstract class AbstractRegistry {
 
-    protected abstract itemList: RegistryItemList<IRegistryItem>;
+    public abstract itemList: RegistryItemList<IRegistryItem>;
 
     public abstract add(optionalParameter?: any): IRegistryItem;
     public abstract remove(itemId: string): void;

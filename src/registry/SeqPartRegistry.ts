@@ -6,7 +6,7 @@ import RegistryItemList from "./RegistryItemList";
 
 export default class SeqPartRegistry extends AbstractRegistry {
 
-    protected itemList: RegistryItemList<SeqPart>;
+    public itemList: RegistryItemList<SeqPart>;
 
     public constructor() {
         super();

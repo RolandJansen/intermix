@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * This is a fake implementation of a generic dedicated worker.
  * The implementation of the worker should be in a seperate
@@ -15,11 +16,11 @@ export default class GenericWorkerMock {
         this.internal = new InternalWorker(this);
     }
 
-    public onmessage(event: MessageEvent) {
+    public onmessage(event: MessageEvent): void {
         // should be overwritten by the code using the worker
     }
 
-    public postMessage(msg: any) {
+    public postMessage(msg: any): void {
         this.internal.onmessage(msg, this.internal);
     }
 }
@@ -35,7 +36,7 @@ class InternalWorker {
         return true;
     }
 
-    public postMessage(msg: any) {
+    public postMessage(msg: any): void {
         const e: MessageEvent = new MessageEvent("worker", {
             data: msg,
         });

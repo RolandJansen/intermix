@@ -5,10 +5,10 @@
  * Since the whole worker thing seems terribly broken in ts/webpack
  * we have to use a worker of type any.
  */
-let timer: number = 0;
-let interval: number = 0;
+let timer = 0;
+let interval = 0;
 
-export default function clock(data: any, worker: any) {
+export default function clock(data: any, worker: any): void {
     // "sendMessage" is a workaround for a bug in webpack-dev-server 3.8.1.
     // Type "onMessage" expects two arguments which doesn't match with the api.
     const sendMessage: any = worker.postMessage.bind(worker);

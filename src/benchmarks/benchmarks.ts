@@ -5,18 +5,18 @@ const suites: Suite[] = [
     copyArrayBench,
 ];
 
-(function runAllTests() {
+(function runAllTests(): void {
     setupBenchmarks();
     runNextTest();
 })();
 
-function setupBenchmarks() {
+function setupBenchmarks(): void {
     suites.forEach((suite) => {
         createBenchmark(suite);
     });
 }
 
-function createBenchmark(suite: Suite) {
+function createBenchmark(suite: Suite): void {
     suite.on("cycle", (event: Event) => {
         // tslint:disable-next-line:no-console
         console.log(String(event.target));
@@ -31,7 +31,7 @@ function createBenchmark(suite: Suite) {
     });
 }
 
-function runNextTest() {
+function runNextTest(): void {
     // tslint:disable-next-line:no-console
     console.log("Starting test");
     const suite = suites.pop();
