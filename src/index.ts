@@ -32,8 +32,24 @@ export function getAudioContext(): AudioContext {
     return audioContext;
 }
 
-export function addPlugin<P extends IPlugin>(pluginClass: new (ac: AudioContext) => P): string {
-    return registry.addPlugin(pluginClass);
+type GenericPluginClass = new (ac: AudioContext) => IPlugin;
+
+/**
+ * Tries to find a class (prototype) with the name of a given string (reflection),
+ * then tries to cast it to a valid plugin class.
+ * If both worked, a plugin instance will be created, registered etc.
+ * and the item-id will be returned
+ * @param pluginClassName The name of the class from which a plugin instance should be created
+ */
+export function addPlugin(pluginClassName: string): string {
+    try {
+        const possibleClass: any = (window as any)[pluginClassName].prototype;
+        const pluginClass: GenericPluginClass = (possibleClass as GenericPluginClass);
+        return registry.addPlugin(pluginClass);
+    } catch (error) {
+        // not implemented yet
+        return "";
+    }
 }
 
 export function removePlugin(itemId: string): void {

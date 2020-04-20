@@ -235,16 +235,12 @@ describe("SeqPart Registry", () => {
     })
 
     describe("getActionCreators", () => {
-        let plugin: IPlugin;
         let pluginId: string;
-        let part: SeqPart;
         let partId: string;
 
         beforeEach(() => {
             pluginId = registry.addPlugin(TestInstrument);
-            plugin = registry["plugins"]["itemList"].getItem(pluginId);
             partId = registry.addSeqPart();
-            part = registry["seqParts"]["itemList"].getItem(partId);
         })
 
         test("returns an empty object if id was not found", () => {
