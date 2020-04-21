@@ -9,12 +9,18 @@ export default [
     {
         type: "ADD_ACTION",
         desc: "Adds an action to a sequencer part object",
-        defVal: {},
+        defVal: {
+            step: 0,
+            action: {},
+        },
     },
     {
         type: "REMOVE_ACTION",
         desc: "Removes an action from a sequencer part object",
-        defVal: {},
+        defVal: {
+            step: 0,
+            action: {},
+        },
     },
 
 ];

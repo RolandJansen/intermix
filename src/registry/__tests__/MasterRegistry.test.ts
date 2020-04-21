@@ -2,7 +2,7 @@
 import "web-audio-test-api";
 import MasterRegistry from "../MasterRegistry";
 import TestInstrument from "../../plugins/TestInstrument";
-import { IPlugin } from "../interfaces";
+import { IPlugin, IAction } from "../interfaces";
 import { store } from "../../store/store";
 import SeqPart from "../../seqpart/SeqPart";
 
@@ -136,6 +136,14 @@ describe("PluginRegistry", () => {
 
 describe("SeqPart Registry", () => {
 
+    const payload = {
+        step: 5,
+        action: {
+            type: "FANTASYACTION",
+            payload: 23,
+        }
+    }
+
     let part: SeqPart;
     let partId: string;
 
@@ -145,6 +153,22 @@ describe("SeqPart Registry", () => {
     })
 
     describe("addSeqPart", () => {
+
+        let action1: IAction;
+        let action2: IAction;
+
+        beforeEach(() => {
+            action1 = {
+                dest: partId,
+                type: "ADD_ACTION",
+                payload,
+            }
+            action2 = {
+                dest: partId,
+                type: "REMOVE_ACTION",
+                payload,
+            }
+        })
 
         test("returns the instance id", () => {
             expect(partId).toMatch(part.uid);
@@ -157,26 +181,11 @@ describe("SeqPart Registry", () => {
 
         test("store entry contains sequencer part properties", () => {
             const state = store.getState();
-            expect(state[partId].ACTION1).toBeDefined;
-            expect(state[partId].ACTION2).toBeDefined;
+            expect(state[partId].ADD_ACTION.step).toBe(0);
+            expect(state[partId].REMOVE_ACTION.step).toBe(0);
         })
 
         test("adds reducers for the seqpart to the store", () => {
-            const payload = {
-                type: "FANTASYACTION",
-                payload: 23,
-            }
-            const action1 = {
-                dest: partId,
-                type: "ADD_ACTION",
-                payload,
-            }
-            const action2 = {
-                dest: partId,
-                type: "REMOVE_ACTION",
-                payload,
-            }
-
             store.dispatch(action1);
             store.dispatch(action2);
 
@@ -186,10 +195,10 @@ describe("SeqPart Registry", () => {
         })
 
         test("adds action creators to the part", () => {
-            part.actionCreators.ADD_ACTION(5);
+            part.actionCreators.ADD_ACTION(payload);
 
             const state = store.getState();
-            expect(state[partId].ADD_ACTION).toBe(5);
+            expect(state[partId].ADD_ACTION).toBe(payload);
         })
 
         test("subscribes the part to dispatch", () => {
@@ -269,15 +278,19 @@ describe("SeqPart Registry", () => {
         })
 
         test("takes a seqPart id and returns its action creators", () => {
+            const expected = {
+                step: 0,
+                action: {},
+            }
             const ac = registry.getActionCreators(partId);
             const oldState = store.getState();
-            expect(oldState[partId].ADD_ACTION).toEqual({});
-            expect(oldState[partId].REMOVE_ACTION).toEqual({});
-            ac.ADD_ACTION(23);
-            ac.REMOVE_ACTION(42);
+            expect(oldState[partId].ADD_ACTION).toEqual(expected);
+            expect(oldState[partId].REMOVE_ACTION).toEqual(expected);
+            ac.ADD_ACTION(payload);
+            ac.REMOVE_ACTION(payload);
             const nextState = store.getState();
-            expect(nextState[partId].ADD_ACTION).toBe(23);
-            expect(nextState[partId].REMOVE_ACTION).toBe(42);
+            expect(nextState[partId].ADD_ACTION).toBe(payload);
+            expect(nextState[partId].REMOVE_ACTION).toBe(payload);
         })
 
         test("takes a seqPart id and returns its unbound action creators", () => {

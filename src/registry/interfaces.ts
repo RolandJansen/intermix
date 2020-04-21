@@ -72,7 +72,7 @@ export type Payload = any;
 export interface IAction extends AnyAction {
     dest: string;
     payload: Payload;
-    meta?: string;
+    additional?: string;
     error?: Error;
 }
 

@@ -85,8 +85,15 @@ export default class SeqPart implements IRegistryItem {
     public onChange(changed: Tuple): boolean {
         switch (changed[0]) {
             case "ADD_ACTION":
+                const addStep: number = changed[1].step;
+                const addAction: IAction = changed[1].action;
+                this.addAction(addAction, addStep);
                 return true;
             case "REMOVE_ACTION":
+                const removeStep: number = changed[1].step;
+                const removeAction: IAction = changed[1].action;
+                this.removeAction(removeAction, removeStep);
+                return true;
             default:
                 return false;
 
@@ -100,11 +107,12 @@ export default class SeqPart implements IRegistryItem {
      * @return The part object to make the function chainable.
      */
     public addAction(action: IAction, step: number): SeqPart {
-        if (step <= this.pattern.length) {
+        const maxStepValue = this.pattern.length / this.stepMultiplier - 1;
+        if (step <= maxStepValue) {
             const pos = step * this.stepMultiplier;
             this.pattern[pos].push(action);
         } else {
-            throw new Error("Position out of pattern bounds.");
+            throw new Error(`Position out of pattern bounds. Step is ${step} but should be within 0 and ${maxStepValue}`);
         }
         return this;
     }

@@ -4,7 +4,7 @@ import combineReducersWithRoot from "./combineReducersWithRoot";
 import SeqPartRegistry from "./SeqPartRegistry";
 import SeqPart from "../seqpart/SeqPart";
 import PluginRegistry from "./PluginRegistry";
-import { IPlugin, IRegistryItem } from "./interfaces";
+import { IPlugin } from "./interfaces";
 
 /**
  * Calls the appropriate sub-registry
