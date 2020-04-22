@@ -15,7 +15,7 @@ import ClockWorker from "./clock.worker";
 import Score from "./Score";
 import seqActionDefs from "./SeqActionDefs";
 
-interface IQueuePosition {
+export interface IQueuePosition {
     position: number;
     timestamp: number;
 }
@@ -159,7 +159,8 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
                 return true;
             case "JUMP_TO_POSITION":
                 const step: number = changed[1];
-                this.setScorePointer(step);
+                this.score.setScorePointerTo(step);
+                this.runqueue = [];
                 return true;
             default:
                 return false;
@@ -175,7 +176,7 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
                 this.ac.resume();
             }
             if (this.triggeredSteps.length === 0) {
-                this.triggeredSteps.push(this.getScorePosition(0, this.ac.currentTime + 0.1));
+                this.triggeredSteps.push(this.score.getScorePosition(0, this.ac.currentTime + 0.1));
             }
             this.clock.postMessage("start");
             this.isRunning = true;
@@ -189,7 +190,8 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
     private stop(): void {
         this.clock.postMessage("stop");
         this.nextStepTimeInSec = 0;
-        this.resetScorePointer();
+        this.score.resetScorePointer();
+        this.runqueue = [];
         this.isRunning = false;
     }
 
@@ -259,11 +261,11 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         while (this.nextStepTimeInSec < limit) {
             this.addPartsToRunqueue();
             this.sendAllActionsInNextStep();
-            this.triggeredSteps.push(this.getScorePosition(this.nextStep, this.nextStepTimeInSec));
+            this.triggeredSteps.push(this.score.getScorePosition(this.nextStep, this.nextStepTimeInSec));
             this.nextStepTimeInSec += this.timePerStepInSec;
             // console.log(this.nextStep);
             // console.log(this.nextStepTimeInSec);
-            this.increaseScorePointer();
+            this.score.increaseScorePointer(this.runqueue);
         }
     }
 
@@ -375,30 +377,30 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         return steps * this.timePerStepInSec;
     }
 
-    private increaseScorePointer(): void {
-        if (this.isLooped && this.nextStep >= this.loopEnd) {
-            this.nextStep = this.loopStart;
-            this.runqueue = [];
-        } else {
-            this.nextStep++;
-        }
-    }
+    // private increaseScorePointer(): void {
+    //     if (this.isLooped && this.nextStep >= this.loopEnd) {
+    //         this.nextStep = this.loopStart;
+    //         this.runqueue = [];
+    //     } else {
+    //         this.nextStep++;
+    //     }
+    // }
 
-    private setScorePointer(position: number): void {
-        this.nextStep = position;
-        this.runqueue = [];
-    }
+    // private setScorePointer(position: number): void {
+    //     this.nextStep = position;
+    //     this.runqueue = [];
+    // }
 
-    private resetScorePointer(): void {
-        this.setScorePointer(0);
-    }
+    // private resetScorePointer(): void {
+    //     this.setScorePointer(0);
+    // }
 
-    private getScorePosition(step: number, timestamp: number): IQueuePosition {
-        return {
-            position: step,
-            timestamp,
-        };
-    }
+    // private getScorePosition(step: number, timestamp: number): IQueuePosition {
+    //     return {
+    //         position: step,
+    //         timestamp,
+    //     };
+    // }
 
     /**
      * Makes a copy of a flat array.
