@@ -5,6 +5,24 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 ### Added
+
+### Changed
+- Sequencer refactoring ()
+- Score refactoring (new, memory efficient datastructure)
+- Runqueue completely rewritten (new datastructure and pointer management)
+- Sequencer parts (SeqPart) are now redux objects
+-
+
+### Removed
+- Bower
+- TSLint
+
+## [0.4.0]
+
+### Added
+- Webpack
+- Typescript
+- Redux
 - An event bus instance is now available by default at "window.intermix.eventBus".
 - Helper functions available at "window.intermix.helper".
 - Sequencer: Frame animation stall/resume when user switches browser tab.

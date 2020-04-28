@@ -52,18 +52,15 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
     private readonly lookaheadInSec = 0.3;  // should be longer than interval.
 
     private bpm = Sequencer.bpmDefault;
-    private parts: RegistryItemList<SeqPart>;   // Lookup table with all available parts
+    // private parts: RegistryItemList<SeqPart>;   // Lookup table with all available parts
     private score: Score;          // List with references to parts that makes the score
-    private runqueue: SeqPart[] = [];   // list with copies of parts that are playing or will be played shortly
+    // private runqueue: SeqPart[] = [];   // list with copies of parts that are playing or will be played shortly
 
     private timePerStepInSec: number;   // period of time between two steps
     private nextStepTimeInSec = 0;      // time relative to ac.currentTime until the next sequencer step
     private nextStep = 0;               // position in the queue that will get triggered next
     private triggeredSteps: IQueuePosition[] = [];    // list of steps that were triggered but are still ahead of time
     private lastPlayedStep = 0;         // step in queue that was played (not triggered) recently (used for drawing).
-    private isLooped = false;           // play a section of the queue in a loop
-    private loopStart = 0;              // first step of the loop
-    private loopEnd = 63;               // last step of the loop
     private isRunning = false;          // true if sequencer is running, otherwise false
 
     private clock: Worker;
@@ -72,7 +69,7 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         super();
         this.timePerStepInSec = this.getTimePerStep();
 
-        this.parts = new RegistryItemList();
+        // this.parts = new RegistryItemList();
         this.score = new Score();
 
         // Initialize the timer
@@ -131,45 +128,41 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
                 return true;
             case "ADD_PART":
                 const newPart: SeqPart = changed[1];
-                this.parts.add(newPart);
+                this.score.parts.add(newPart);
                 return true;
             case "REMOVE_PART":
                 const partID: string = changed[1];
-                this.parts.remove(partID);
+                this.score.parts.remove(partID);
                 return true;
             case "ADD_TO_SCORE":
                 const toBeAdded: string = changed[1].partID;
                 const newPosition: number = changed[1].position;
-                this.score.addToScore(toBeAdded, newPosition);
+                this.score.addPartToScore(toBeAdded, newPosition);
                 this.actionCreators.QUEUE(this.score.queue);
                 return true;
             case "REMOVE_FROM_SCORE":
                 const toBeRemoved: string = changed[1].partID;
                 const oldPosition: number = changed[1].position;
-                this.score.removeFromScore(toBeRemoved, oldPosition);
+                this.score.removePartFromScore(toBeRemoved, oldPosition);
                 this.actionCreators.QUEUE(this.score.queue);
                 return true;
             case "LOOP":
                 const loop: ILoop = changed[1];
-                this.setLoop(loop);
+                this.score.loop = loop;
                 return true;
             case "LOOP_ACTIVE":
                 const isActive: boolean = changed[1];
-                this.setLoopActive(isActive);
+                this.score.activateLoop();
                 return true;
             case "JUMP_TO_POSITION":
                 const step: number = changed[1];
-                this.score.setScorePointerTo(step);
-                this.runqueue = [];
+                this.score.moveScorePointerTo(step);
                 return true;
             default:
                 return false;
         }
     }
 
-    /**
-     * Starts the sequencer
-     */
     private start(): void {
         if (!this.isRunning) {
             if (this.ac.state === "suspended") {
@@ -184,14 +177,10 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         }
     }
 
-    /**
-     * Stops the sequencer (halts at the current position)
-     */
     private stop(): void {
         this.clock.postMessage("stop");
         this.nextStepTimeInSec = 0;
         this.score.resetScorePointer();
-        this.runqueue = [];
         this.isRunning = false;
     }
 
@@ -228,21 +217,6 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         return timePerStep;
     }
 
-    private setLoop(loop: ILoop): void {
-        if (loop.start < loop.end) {
-            this.loopStart = loop.start;
-            this.loopEnd = loop.end;
-        }
-    }
-
-    /**
-     * Activates or deactivates looped playback
-     * @param isActive True=active, false=inactive
-     */
-    private setLoopActive(isActive: boolean): void {
-        this.isLooped = isActive;
-    }
-
     /**
      * Reads events from the master queue and fires them.
      * It gets called at a constant rate, looks ahead in
@@ -259,13 +233,11 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         }
 
         while (this.nextStepTimeInSec < limit) {
-            this.addPartsToRunqueue();
+            this.score.addPartsToRunqueue();
             this.sendAllActionsInNextStep();
             this.triggeredSteps.push(this.score.getScorePosition(this.nextStep, this.nextStepTimeInSec));
             this.nextStepTimeInSec += this.timePerStepInSec;
-            // console.log(this.nextStep);
-            // console.log(this.nextStepTimeInSec);
-            this.score.increaseScorePointer(this.runqueue);
+            this.score.increaseScorePointer();
         }
     }
 
@@ -290,23 +262,23 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
      * Looks in the master queue for parts and adds
      * copies of them to the runqueue.
      */
-    private addPartsToRunqueue(): void {
-        const queue = this.score.queue;
-        if (typeof queue[this.nextStep] !== "undefined") {
-            if (queue[this.nextStep].length === 1) {
-                const partID = queue[this.nextStep][0];
-                const part = this.parts.getItem(partID);
-                part.pointer = 0;
-                this.runqueue.push(part);
-            } else {
-                queue[this.nextStep].forEach((partID) => {
-                    const part = this.parts.getItem(partID);
-                    part.pointer = 0;
-                    this.runqueue.push(part);
-                });
-            }
-        }
-    }
+    // private addPartsToRunqueue(): void {
+    //     const queue = this.score.queue;
+    //     if (typeof queue[this.nextStep] !== "undefined") {
+    //         if (queue[this.nextStep].length === 1) {
+    //             const partID = queue[this.nextStep][0];
+    //             const part = this.parts.getItem(partID);
+    //             part.pointer = 0;
+    //             this.runqueue.push(part);
+    //         } else {
+    //             queue[this.nextStep].forEach((partID) => {
+    //                 const part = this.parts.getItem(partID);
+    //                 part.pointer = 0;
+    //                 this.runqueue.push(part);
+    //             });
+    //         }
+    //     }
+    // }
 
     /**
      * Deletes parts from runqueue. It is important, that the indices
@@ -314,36 +286,41 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
      * loop won't work.
      * @param  indices  Indices of the parts in the runqueue
      */
-    private deletePartsFromRunqueue(indices: number[]): void {
-        if (indices.length > 0) {
-            indices.forEach((id) => {
-                delete this.runqueue[id].pointer;
-                this.runqueue.splice(id, 1);
-            }, this);
-        }
-    }
+    // private deletePartsFromRunqueue(indices: number[]): void {
+    //     if (indices.length > 0) {
+    //         indices.forEach((id) => {
+    //             delete this.runqueue[id].pointer;
+    //             this.runqueue.splice(id, 1);
+    //         }, this);
+    //     }
+    // }
 
     private sendAllActionsInNextStep(): void {
-        const markForDelete: number[] = [];
-        this.runqueue.forEach((part, index) => {
-            if (part.pointer === part.length - 1) {
-                markForDelete.unshift(index);
-            } else {
-                const nextStepActions = part.getActionsAtPointerPosition();
-                let action: IAction;
-                if (nextStepActions.length === 1) {  // if we test for length we can sometimes skip the foreach loop
-                    action = this.prepareActionForDispatching(nextStepActions[0], this.nextStepTimeInSec);
-                    this.sendAction(action);
-                } else {
-                    nextStepActions.forEach((actionEvent) => {
-                        action = this.prepareActionForDispatching(actionEvent, this.nextStepTimeInSec);
-                        this.sendAction(action);
-                    });
-                }
-            }
-            part.pointer++;
+        // const markForDelete: number[] = [];
+        // this.runqueue.forEach((part, index) => {
+        //     if (part.pointer === part.length - 1) {
+        //         markForDelete.unshift(index);
+        //     } else {
+        //         const nextStepActions = part.getActionsAtPointerPosition();
+        //         let action: IAction;
+        //         if (nextStepActions.length === 1) {  // if we test for length we can sometimes skip the foreach loop
+        //             action = this.prepareActionForDispatching(nextStepActions[0], this.nextStepTimeInSec);
+        //             this.sendAction(action);
+        //         } else {
+        //             nextStepActions.forEach((actionEvent) => {
+        //                 action = this.prepareActionForDispatching(actionEvent, this.nextStepTimeInSec);
+        //                 this.sendAction(action);
+        //             });
+        //         }
+        //     }
+        //     part.pointer++;
+        // });
+
+        const nextStepActions = this.score.getAllActionsInNextStep();
+        nextStepActions.forEach((actionEvent) => {
+            const action = this.prepareActionForDispatching(actionEvent, this.nextStepTimeInSec);
+            this.sendAction(action);
         });
-        this.deletePartsFromRunqueue(markForDelete);
     }
 
     /**
@@ -377,31 +354,6 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         return steps * this.timePerStepInSec;
     }
 
-    // private increaseScorePointer(): void {
-    //     if (this.isLooped && this.nextStep >= this.loopEnd) {
-    //         this.nextStep = this.loopStart;
-    //         this.runqueue = [];
-    //     } else {
-    //         this.nextStep++;
-    //     }
-    // }
-
-    // private setScorePointer(position: number): void {
-    //     this.nextStep = position;
-    //     this.runqueue = [];
-    // }
-
-    // private resetScorePointer(): void {
-    //     this.setScorePointer(0);
-    // }
-
-    // private getScorePosition(step: number, timestamp: number): IQueuePosition {
-    //     return {
-    //         position: step,
-    //         timestamp,
-    //     };
-    // }
-
     /**
      * Makes a copy of a flat array.
      * Uses a pre-allocated while-loop
@@ -412,12 +364,12 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
      * @param   sourceArray Array that should be copied.
      * @return  Copy of the source array.
      */
-    private copyArray(sourceArray: any[]): any[] {
-        const destArray: any[] = new Array(sourceArray.length);
-        let i = sourceArray.length;
-        while (i--) {
-            destArray[i] = sourceArray[i];
-        }
-        return destArray;
-    }
+    // private copyArray(sourceArray: any[]): any[] {
+    //     const destArray: any[] = new Array(sourceArray.length);
+    //     let i = sourceArray.length;
+    //     while (i--) {
+    //         destArray[i] = sourceArray[i];
+    //     }
+    //     return destArray;
+    // }
 }

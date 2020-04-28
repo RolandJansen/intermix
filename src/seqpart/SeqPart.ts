@@ -4,6 +4,10 @@ import seqPartActionDefs from "./SeqPartActionDefs";
 
 type Pattern = IAction[][];
 
+interface IPointerTable {
+    [pointerId: string]: number;
+}
+
 /**
  * Represents a part of a sequence. It can be
  * used in many ways:
@@ -40,7 +44,7 @@ export default class SeqPart implements IRegistryItem {
 
     public name = SeqPart.partName;
     public uid = "";            // will be set by the registry
-    public pointer = 0;         // can be set to a specific point in the pattern (by the sequencer)
+    public pointers: IPointerTable;         // can be set to a specific point in the pattern (by the sequencer)
 
     private stepMultiplier: number; // 64 = stepsPerBar * stepMultiplier
     private pattern: Pattern;       // holds the sequence
@@ -58,6 +62,8 @@ export default class SeqPart implements IRegistryItem {
         } else {
             throw new Error("stepsPerBar must be a divisor of 64.");
         }
+
+        this.pointers = {};
     }
 
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -78,6 +84,11 @@ export default class SeqPart implements IRegistryItem {
      * Get the length of the pattern in stepsPerBar
      */
     public get length(): number {
+        // return this.pattern.length / this.stepMultiplier;
+        return this.pattern.length;
+    }
+
+    public get lengtha(): number {
         // return this.pattern.length / this.stepMultiplier;
         return this.pattern.length;
     }
@@ -170,11 +181,17 @@ export default class SeqPart implements IRegistryItem {
      * This is very close to getActionsAtStep and
      * can probably be simplified.
      */
-    public getActionsAtPointerPosition(): IAction[] {
+    public getActionsAtPointerPosition(pointerId: string): IAction[] {
         let actionsAtPointerPosition: IAction[] = [];
-        if (this.pointer < this.pattern.length) {
-            actionsAtPointerPosition = this.pattern[this.pointer];
+
+        if (this.pointers.hasOwnProperty(pointerId)) {
+            const pointer = this.pointers[pointerId];
+
+            if (pointer < this.pattern.length) {
+                actionsAtPointerPosition = this.pattern[pointer];
+            }
         }
+
         return actionsAtPointerPosition;
     }
 

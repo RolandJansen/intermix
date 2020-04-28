@@ -1,7 +1,5 @@
 /// <reference path="../../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
-import { ILoop } from "../../../registry/interfaces";
-import SeqPart from "../../../seqpart/SeqPart";
 import Sequencer from "../Sequencer";
 
 // tslint:disable: no-string-literal
@@ -86,6 +84,8 @@ describe("Sequencer", () => {
     describe("playback", () => {
 
         beforeEach(() => {
+            const score = sequencer["score"];
+            score.resetScorePointer = jest.fn();
             window.requestAnimationFrame = jest.fn();
         });
 
@@ -101,7 +101,7 @@ describe("Sequencer", () => {
             expect(sequencer["clock"].postMessage).toBeCalledWith("stop");
             expect(sequencer["isRunning"]).toBeFalsy();
             expect(sequencer["nextStep"]).toEqual(0);
-            expect(sequencer["runqueue"]).toHaveLength(0);
+            expect(sequencer["score"].resetScorePointer).toHaveBeenCalled();
         });
 
         test("pauses", () => {
@@ -128,173 +128,11 @@ describe("Sequencer", () => {
 
     });
 
-    describe("Loop Mode", () => {
-        let part1: SeqPart;
-        let part2: SeqPart;
-
-        beforeEach(() => {
-            part1 = new SeqPart();
-            part2 = new SeqPart();
-        });
-
-        test("activates looped playback", () => {
-            sequencer.onChange(["LOOP_ACTIVE", true]);
-            expect(sequencer["isLooped"]).toBeTruthy();
-        });
-
-        test("sets loop start- and endpoint", () => {
-            const loop: ILoop = { start: 23, end: 42 };
-            sequencer.onChange(["LOOP", loop]);
-            expect(sequencer["loopStart"]).toEqual(23);
-            expect(sequencer["loopEnd"]).toEqual(42);
-        });
-
-        test("ignores a loop action if it makes no sense", () => {
-            const loop: ILoop = { start: 42, end: 23 }; // loop ends before it starts
-            sequencer.onChange(["LOOP", loop]);
-            expect(sequencer["loopStart"]).toEqual(0);
-            expect(sequencer["loopEnd"]).toEqual(63);
-        });
-
-        test("sets the pointer back to start when end of loop is reached", () => {
-            const loop: ILoop = { start: 23, end: 42 };
-            const runqueue: SeqPart[] = sequencer["runqueue"];
-            sequencer.onChange(["LOOP", loop]);
-            sequencer.onChange(["LOOP_ACTIVE", true]);
-
-            sequencer["score"].setScorePointerTo(42);
-            expect(sequencer["score"]["nextStep"]).toEqual(42);
-            sequencer["score"].increaseScorePointer(runqueue);
-            expect(sequencer["score"]["nextStep"]).toEqual(43);
-        });
-
-        test("cleans the runqueue when the pointer jumps", () => {
-            const runqueue: SeqPart[] = sequencer["runqueue"];
-            sequencer.onChange(["LOOP_ACTIVE", true]);
-            sequencer["score"].setScorePointerTo(63);
-            runqueue.push(part1, part2);
-            sequencer["score"].increaseScorePointer(runqueue);
-            // this is currently not valid after refactoring of score
-            // expect(sequencer["runqueue"]).toHaveLength(0);
-        });
-    });
-
-    // describe("PartList", () => {
-    //     let part1: SeqPart;
-    //     let part2: SeqPart;
-    //     let part1ID: string;
-    //     let part2ID: string;
-
-    //     beforeEach(() => {
-    //         part1 = new SeqPart();
-    //         part2 = new SeqPart();
-    //     })
-
-
-    // });
-
-    // describe("Score", () => {
-    //     let part1: SeqPart;
-    //     let part2: SeqPart;
-    //     let partObject1: IPartWithPosition;
-    //     let partObject2: IPartWithPosition;
-
-    //     const action1: IAction = {
-    //         type: "NOTE",
-    //         dest: "abcd",
-    //         payload: {
-    //             noteNumber: 0,
-    //             velocity: 0,
-    //             startTime: 0,
-    //             duration: 0,
-    //         },
-    //     };
-    //     const action2: IAction = {
-    //         type: "SYSEX",
-    //         dest: "abcd",
-    //         payload: 0x14a70f,
-    //     };
-
-    //     beforeEach(() => {
-    //         // object under test didn't pass registry so there
-    //         // are no action creators
-    //         sequencer.actionCreators.QUEUE = jest.fn();
-
-    //         part1 = new SeqPart();
-    //         part2 = new SeqPart();
-
-    //         part1.addAction(action1, 2)
-    //             .addAction(action1, 4);
-
-    //         part2.addAction(action2, 1)
-    //             .addAction(action2, 3);
-
-    //         partObject1 = {
-    //             part: part1,
-    //             position: 5,
-    //         };
-    //         partObject2 = {
-    //             part: part2,
-    //             position: 5,
-    //         };
-    //     });
-
-    //     test("adds a part", () => {
-    //         sequencer.onChange(["ADD_PART", partObject1]);
-    //         expect(sequencer["queue"][5][0]).toBe(part1);
-    //     });
-
-    //     test("sends a QUEUE action when part is added", () => {
-    //         sequencer.onChange(["ADD_PART", partObject1]);
-    //         expect(sequencer.actionCreators.QUEUE).toHaveBeenCalledTimes(1);
-    //     });
-
-    //     test("adds many parts to the same position", () => {
-    //         sequencer.onChange(["ADD_PART", partObject1]);
-    //         sequencer.onChange(["ADD_PART", partObject2]);
-    //         expect(sequencer["queue"][5][1]).toBe(part2);
-    //     });
-
-    //     test("removes a part", () => {
-    //         sequencer.onChange(["ADD_PART", partObject1]);
-    //         sequencer.onChange(["ADD_PART", partObject2]);
-    //         sequencer.onChange(["ADD_PART", partObject2]);
-    //         sequencer.onChange(["REMOVE_PART", partObject2]);
-    //         expect(sequencer["queue"][5][0]).toBe(part1);
-    //         expect(sequencer["queue"][5][1]).toBe(part2);
-    //         expect(sequencer["queue"][5]).toHaveLength(2);
-    //     });
-
-    //     test("sends a QUEUE action when part is removed", () => {
-    //         sequencer.onChange(["ADD_PART", partObject2]);
-    //         sequencer.onChange(["REMOVE_PART", partObject2]);
-    //         expect(sequencer.actionCreators.QUEUE).toHaveBeenCalledTimes(2);
-    //     });
-
-    //     test("removes nothing if part not found", () => {
-    //         sequencer.onChange(["ADD_PART", partObject1]);
-    //         sequencer.onChange(["ADD_PART", partObject1]);
-    //         sequencer.onChange(["REMOVE_PART", partObject2]);
-    //         expect(sequencer["queue"][5]).toHaveLength(2);
-    //     });
-
-    //     test("set the pointer to a given position", () => {
-    //         sequencer.onChange(["JUMP_TO_POSITION", 23]);
-    //         expect(sequencer["nextStep"]).toEqual(23);
-    //     });
-
-    //     test("cleans the runqueue when the pointer jumps", () => {
-    //         sequencer["runqueue"].push(part1, part2);
-    //         sequencer.onChange(["JUMP_TO_POSITION", 23]);
-    //         expect(sequencer["runqueue"]).toHaveLength(0);
-    //     });
-    // });
-
     describe("scheduler", () => {
 
         beforeEach(() => {
             // sequencer["increaseScorePointer"] = jest.fn();
-            sequencer["addPartsToRunqueue"] = jest.fn();
+            sequencer["score"].addPartsToRunqueue = jest.fn();
             sequencer["sendAllActionsInNextStep"] = jest.fn();
             sequencer["ac"].$processTo("00:01.000");
         });
@@ -311,7 +149,7 @@ describe("Sequencer", () => {
 
         test("adds parts to runqueue", () => {
             sequencer["scheduler"]();
-            expect(sequencer["addPartsToRunqueue"]).toHaveBeenCalled();
+            expect(sequencer["score"].addPartsToRunqueue).toHaveBeenCalled();
         });
 
         test("fires all actions", () => {
