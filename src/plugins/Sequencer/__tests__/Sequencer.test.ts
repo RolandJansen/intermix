@@ -1,8 +1,9 @@
 /// <reference path="../../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
 import Sequencer from "../Sequencer";
+import SeqPart from "../../../seqpart/SeqPart";
+import { ILoop } from "../../../registry/interfaces";
 
-// tslint:disable: no-string-literal
 // We use string-literals to test private functions like:
 // objectName["privateMethod"](parameters)
 // Normally this could be considered as bad style ("test API only")
@@ -21,14 +22,6 @@ WebAudioTestAPI.setState({
 describe("Sequencer", () => {
     let ac: AudioContext;
     let sequencer: Sequencer;
-
-    function createPattern(length: number): number[] {
-        const arr = [];
-        for (let i = 0; i < length; i++) {
-            arr[i] = i + 1;
-        }
-        return arr;
-    }
 
     beforeEach(() => {
         ac = new AudioContext();
@@ -64,6 +57,10 @@ describe("Sequencer", () => {
 
     describe("onChange", () => {
 
+        beforeEach(() => {
+            sequencer.actionCreators["QUEUE"] = (): boolean => true;
+        })
+
         test("returns true when called with a recognized value", () => {
             const expected = sequencer.onChange(["STATE", 0]);
             expect(expected).toBeTruthy();
@@ -79,6 +76,72 @@ describe("Sequencer", () => {
             expect(sequencer["bpm"]).toEqual(160);
             expect(sequencer["timePerStepInSec"]).toEqual(0.0234375);
         });
+
+        test("adds a SeqPart object", () => {
+            const testPart = new SeqPart();
+            testPart.uid = "abcd";
+            sequencer.onChange(["ADD_PART", testPart]);
+            const partList = sequencer["score"]["parts"].getUidList();
+            expect(partList).toContain("abcd");
+        })
+
+        test("removes a SeqPart object", () => {
+            const testPart = new SeqPart();
+            testPart.uid = "abcd";
+            const parts = sequencer["score"]["parts"];
+            parts.add(testPart);
+
+            sequencer.onChange(["REMOVE_PART", "abcd"]);
+            expect(parts.getUidList()).toHaveLength(0);
+        })
+
+        test("puts a seq part on the score", () => {
+            const testPart = new SeqPart();
+            const partID = sequencer["score"]["parts"].add(testPart);
+            sequencer.onChange(["ADD_TO_SCORE", {
+                partID,
+                position: 23,
+            }]);
+            expect(sequencer["score"]["queue"][23]).toContain(partID);
+        })
+
+        test("removes a seq part from score", () => {
+            const testPart = new SeqPart();
+            testPart.uid = "abcd";
+            sequencer["score"]["queue"][23] = [ testPart.uid ];
+            sequencer.onChange(["REMOVE_FROM_SCORE", {
+                partID: testPart.uid,
+                position: 23,
+            }]);
+            expect(sequencer["score"]["queue"][23]).toHaveLength(0);
+        })
+
+        test("sets the loop interval", () => {
+            const loop: ILoop = {
+                start: 23,
+                end: 42,
+            };
+            sequencer.onChange(["LOOP", loop]);
+            expect(sequencer["score"]["loopStart"]).toEqual(23);
+            expect(sequencer["score"]["loopEnd"]).toEqual(42);
+        })
+
+        test("activates loop mode", () => {
+            sequencer["score"]["loopActivated"] = false;
+            sequencer.onChange(["LOOP_ACTIVE", true]);
+            expect(sequencer["score"]["loopActivated"]).toBeTruthy();
+        })
+
+        test("deactivates loop mode", () => {
+            sequencer["score"]["loopActivated"] = true;
+            sequencer.onChange(["LOOP_ACTIVE", false]);
+            expect(sequencer["score"]["loopActivated"]).toBeFalsy();
+        })
+
+        test("moves the score pointer to a certain position", () => {
+            sequencer.onChange(["JUMP_TO_POSITION", 23]);
+            expect(sequencer["score"]["nextStep"]).toEqual(23);
+        })
     });
 
     describe("playback", () => {
@@ -168,91 +231,6 @@ describe("Sequencer", () => {
     describe("process Actions from queue", () => {
         // test sendAllActionsInNextStep() to sendAction() (scheduled for 0.5.0 #107)
     });
-
-    // describe(".addPartsToRunqueue", function () {
-
-    //     beforeEach(function () {
-    //         sequencer.addPart(part1, 3);
-    //         sequencer.addPart(part2, 3);
-    //         sequencer.nextStep = 3;
-    //         sequencer.addPartsToRunqueue();
-    //     });
-
-    //     it("copys parts from the master queue to the runqueue", function () {
-    //         expect(sequencer.runqueue).toContain(part1);
-    //         expect(sequencer.runqueue).toContain(part2);
-    //     });
-
-    //     it("adds a pointer to the part when copied to the runqueue", function () {
-    //         expect(sequencer.runqueue[0].pointer).toEqual(0);
-    //         expect(sequencer.runqueue[1].pointer).toEqual(0);
-    //     });
-
-    // });
-
-    // describe(".deletePartsFromRunqueue", function () {
-
-    //     beforeEach(function () {
-    //         part1.pointer = part2.pointer = 64;
-    //         sequencer.runqueue.push(part1, part2);
-    //         sequencer.deletePartsFromRunqueue([1, 0]);
-    //     });
-
-    //     it("should remove parts from runqueue", function () {
-    //         expect(sequencer.runqueue.length).toEqual(0);
-    //     });
-
-    //     it("should delete the pointer from removed parts", function () {
-    //         expect(part1.pointer).not.toBeDefined();
-    //         expect(part2.pointer).not.toBeDefined();
-    //     });
-
-    // });
-
-    // describe(".fireEvents", function () {
-
-    //     beforeEach(function () {
-    //         sequencer.processSeqEvent = jasmine.createSpy("processSeqEvent");
-    //         part1.pointer = part2.pointer = 0;
-    //         sequencer.runqueue.push(part1, part2);
-    //         sequencer.fireEvents();
-    //     });
-
-    //     it("calls .processSeqEvent for every processed event", function () {
-    //         expect(sequencer.processSeqEvent).toHaveBeenCalledTimes(7);
-    //     });
-
-    //     it("calls .processSeqEvent with the current event as parameter", function () {
-    //         expect(sequencer.processSeqEvent.calls.allArgs())
-    //             .toEqual([[1, 0], [2, 0], [3, 0], [4, 0], [1, 0], [2, 0], [3, 0]]);
-    //     });
-
-    // });
-
-    // describe(".processSeqEvent", function () {
-
-    //     it("sends an event to an eventBus relay endpoint", function () {
-    //         sequencer.processSeqEvent(seqEvent);
-    //         expect(window.intermix.eventBus.sendToRelayEndpoint)
-    //             .toHaveBeenCalledWith(seqEvent.uid, seqEvent);
-    //     });
-
-    //     it("adds a delay parameter to the event msg if given", function () {
-    //         sequencer.processSeqEvent(seqEvent, 0.2342);
-    //         expect(seqEvent.msg.delay).toEqual(0.2342);
-    //     });
-
-    //     it('adds an "undefined" delay parameter if no delay given', function () {
-    //         sequencer.processSeqEvent(seqEvent);
-    //         expect(seqEvent.msg.delay).toBeUndefined();
-    //     });
-
-    //     it("adds a duration property with tone duration in seconds", function () {
-    //         sequencer.processSeqEvent(seqEvent);
-    //         expect(seqEvent.msg.duration).toEqual(0.125);
-    //     });
-
-    // });
 
     // describe(".getDurationTime", function () {
     //     it("calculates the duration time from 64th steps", function () {
@@ -370,15 +348,6 @@ describe("Sequencer", () => {
     //         expect(typeof sequencer.updateFrame).toBe("function");
     //     });
 
-    // });
-
-    // it("should copy an array by value", function () {
-    //     var src = createArray(32);
-    //     var dest = sequencer.copyArray(src);
-    //     dest[5] = "brzz";
-    //     expect(dest.length).toEqual(32);
-    //     expect(dest[5]).toMatch("brzz");
-    //     expect(src[5]).toEqual(6);
     // });
 
 });

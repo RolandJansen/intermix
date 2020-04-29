@@ -9,7 +9,6 @@ import {
     ILoop,
     Tuple,
 } from "../../registry/interfaces";
-import RegistryItemList from "../../registry/RegistryItemList";
 import SeqPart from "../../seqpart/SeqPart";
 import ClockWorker from "./clock.worker";
 import Score from "./Score";
@@ -22,15 +21,8 @@ export interface IQueuePosition {
 
 /**
  * The main class of the sequencer. It does the queuing of
- * parts and events and runs the schedulers that fire events
+ * parts, runs the scheduler that fires actions
  * and draws to the screen.
- * @example
- * var part = new intermix.Part();
- * var seq = new intermix.Sequencer();
- * part.addEvent(someNote, 0);
- * seq.addPart(part, 0);
- * seq.start();
- * @constructor
  */
 export default class Sequencer extends AbstractPlugin implements IControllerPlugin {
 
@@ -39,7 +31,7 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
     public readonly metaData = {
         type: "controller",
         name: "Intermix Sequencer",
-        version: "1.0.0-alpha",
+        version: "1.0.0-beta",
         authors: "R. Jansen",
         desc: "The Intermix buildin sequencer",
     };
@@ -48,19 +40,17 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
 
     // constants
     private readonly resolution = 64;       // shortest possible note.
-    private readonly schedulerIntervalInMili = 100;
+    private readonly intervalInMili = 100;  // time between two scheduler invocations
     private readonly lookaheadInSec = 0.3;  // should be longer than interval.
 
     private bpm = Sequencer.bpmDefault;
-    // private parts: RegistryItemList<SeqPart>;   // Lookup table with all available parts
     private score: Score;          // List with references to parts that makes the score
-    // private runqueue: SeqPart[] = [];   // list with copies of parts that are playing or will be played shortly
 
     private timePerStepInSec: number;   // period of time between two steps
     private nextStepTimeInSec = 0;      // time relative to ac.currentTime until the next sequencer step
     private nextStep = 0;               // position in the queue that will get triggered next
     private triggeredSteps: IQueuePosition[] = [];    // list of steps that were triggered but are still ahead of time
-    private lastPlayedStep = 0;         // step in queue that was played (not triggered) recently (used for drawing).
+    // private lastPlayedStep = 0;         // step in queue that was played (not triggered) recently (used for drawing).
     private isRunning = false;          // true if sequencer is running, otherwise false
 
     private clock: Worker;
@@ -68,13 +58,11 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
     constructor(private ac: AudioContext) {
         super();
         this.timePerStepInSec = this.getTimePerStep();
-
-        // this.parts = new RegistryItemList();
         this.score = new Score();
 
         // Initialize the timer
         this.clock = new ClockWorker();
-        this.clock.postMessage({ interval: this.schedulerIntervalInMili });
+        this.clock.postMessage({ interval: this.intervalInMili });
         this.clock.onmessage = (e: MessageEvent): void => {
             if (e.data === "tick") {
                 this.scheduler();
@@ -100,7 +88,7 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
     }
 
     /**
-     * This is where you just drop in actions that should be dispatched for
+     * This is where you drop in actions that should be dispatched for
      * other plugins (not in this plugins actionCreators list).
      * The implementation will be injected by the registry so we just have to
      * provide an empty method here. It has to be public so the registry can see it.
@@ -152,7 +140,11 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
                 return true;
             case "LOOP_ACTIVE":
                 const isActive: boolean = changed[1];
-                this.score.activateLoop();
+                if (isActive) {
+                    this.score.activateLoop();
+                } else {
+                    this.score.deactivateLoop();
+                }
                 return true;
             case "JUMP_TO_POSITION":
                 const step: number = changed[1];
@@ -258,43 +250,6 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         }
     }
 
-    /**
-     * Looks in the master queue for parts and adds
-     * copies of them to the runqueue.
-     */
-    // private addPartsToRunqueue(): void {
-    //     const queue = this.score.queue;
-    //     if (typeof queue[this.nextStep] !== "undefined") {
-    //         if (queue[this.nextStep].length === 1) {
-    //             const partID = queue[this.nextStep][0];
-    //             const part = this.parts.getItem(partID);
-    //             part.pointer = 0;
-    //             this.runqueue.push(part);
-    //         } else {
-    //             queue[this.nextStep].forEach((partID) => {
-    //                 const part = this.parts.getItem(partID);
-    //                 part.pointer = 0;
-    //                 this.runqueue.push(part);
-    //             });
-    //         }
-    //     }
-    // }
-
-    /**
-     * Deletes parts from runqueue. It is important, that the indices
-     * of the parts are sorted from max to min. Otherwise the forEach
-     * loop won't work.
-     * @param  indices  Indices of the parts in the runqueue
-     */
-    // private deletePartsFromRunqueue(indices: number[]): void {
-    //     if (indices.length > 0) {
-    //         indices.forEach((id) => {
-    //             delete this.runqueue[id].pointer;
-    //             this.runqueue.splice(id, 1);
-    //         }, this);
-    //     }
-    // }
-
     private sendAllActionsInNextStep(): void {
         // const markForDelete: number[] = [];
         // this.runqueue.forEach((part, index) => {
@@ -354,22 +309,4 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         return steps * this.timePerStepInSec;
     }
 
-    /**
-     * Makes a copy of a flat array.
-     * Uses a pre-allocated while-loop
-     * which seems to be the fasted way
-     * (by far) of doing this:
-     * http://jsperf.com/new-array-vs-splice-vs-slice/113
-     * @private
-     * @param   sourceArray Array that should be copied.
-     * @return  Copy of the source array.
-     */
-    // private copyArray(sourceArray: any[]): any[] {
-    //     const destArray: any[] = new Array(sourceArray.length);
-    //     let i = sourceArray.length;
-    //     while (i--) {
-    //         destArray[i] = sourceArray[i];
-    //     }
-    //     return destArray;
-    // }
 }

@@ -1,5 +1,5 @@
 import Score, { IRunqueue } from "../Score"
-import { ILoop, IAction } from "../../../registry/interfaces";
+import { ILoop } from "../../../registry/interfaces";
 import SeqPart from "../../../seqpart/SeqPart";
 
 let testScore: Score;

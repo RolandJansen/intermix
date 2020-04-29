@@ -29,11 +29,16 @@ export default class RegistryItemList<T extends IRegistryItem> {
     }
 
     public add(item: T): string {
-        let itemKey = getRandomString(this.keyLength);
-        while (!this.isKeyUnique(itemKey)) {
+        let itemKey = item.uid;
+
+        if (item.uid === "") {
             itemKey = getRandomString(this.keyLength);
+            while (!this.isKeyUnique(itemKey)) {
+                itemKey = getRandomString(this.keyLength);
+            }
+            item.uid = itemKey;
         }
-        item.uid = itemKey;
+
         this.itemLookupTable[itemKey] = item;
         return itemKey;
     }
