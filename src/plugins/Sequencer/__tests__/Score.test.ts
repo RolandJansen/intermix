@@ -1,5 +1,5 @@
 import Score, { IRunqueue } from "../Score"
-import { ILoop } from "../../../registry/interfaces";
+import { ILoop, IAction } from "../../../registry/interfaces";
 import SeqPart from "../../../seqpart/SeqPart";
 
 let testScore: Score;
@@ -129,7 +129,16 @@ describe("main queue", () => {
 })
 
 describe("runqueue", () => {
-
+    const action1: IAction = {
+        dest: "abcd",
+        type: "SOME_TYPE",
+        payload: 23,
+    }
+    const action2: IAction = {
+        dest: "efgh",
+        type: "SOME_TYPE",
+        payload: 42,
+    }
     let part1: SeqPart;
     let part2: SeqPart;
     let part1Uid: string;
@@ -140,6 +149,10 @@ describe("runqueue", () => {
         // add parts to the part-list
         part1 = new SeqPart();
         part2 = new SeqPart();
+        part1.addAction(action1, 0);
+        part1.addAction(action2, 1);
+        part2.addAction(action2, 0);
+        part2.addAction(action1, 1);
         part1Uid = testScore.parts.add(part1);
         part2Uid = testScore.parts.add(part2);
 

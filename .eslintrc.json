@@ -19,6 +19,7 @@
         "@typescript-eslint"
     ],
     "rules": {
+        "no-console": 1,
         "@typescript-eslint/no-use-before-define": 0,
         "@typescript-eslint/triple-slash-reference": 0,
         "@typescript-eslint/no-inferrable-types": 1,

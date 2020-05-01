@@ -2,7 +2,7 @@
 import "web-audio-test-api";
 import Sequencer from "../Sequencer";
 import SeqPart from "../../../seqpart/SeqPart";
-import { ILoop } from "../../../registry/interfaces";
+import { ILoop, IAction } from "../../../registry/interfaces";
 
 // We use string-literals to test private functions like:
 // objectName["privateMethod"](parameters)
@@ -108,7 +108,7 @@ describe("Sequencer", () => {
         test("removes a seq part from score", () => {
             const testPart = new SeqPart();
             testPart.uid = "abcd";
-            sequencer["score"]["queue"][23] = [ testPart.uid ];
+            sequencer["score"]["queue"][23] = [testPart.uid];
             sequencer.onChange(["REMOVE_FROM_SCORE", {
                 partID: testPart.uid,
                 position: 23,
@@ -193,11 +193,31 @@ describe("Sequencer", () => {
 
     describe("scheduler", () => {
 
+        const action1: IAction = {
+            dest: "abcd",
+            type: "SOME_TYPE",
+            payload: 23,
+        }
+        const action2: IAction = {
+            dest: "efgh",
+            type: "SOME_TYPE",
+            payload: 42,
+        }
+        let part: SeqPart;
+
         beforeEach(() => {
-            // sequencer["increaseScorePointer"] = jest.fn();
+            part = new SeqPart();
+            part.addAction(action1, 0);
+            part.addAction(action2, 1);
+
+            const partId = sequencer["score"].parts.add(part);
+            sequencer["score"].addPartToScore(partId, 1);
+
+            sequencer["score"].increaseScorePointer = jest.fn();
             sequencer["score"].addPartsToRunqueue = jest.fn();
             sequencer["sendAllActionsInNextStep"] = jest.fn();
             sequencer["ac"].$processTo("00:01.000");
+            sequencer["scheduler"]();
         });
 
         afterEach(() => {
@@ -206,65 +226,107 @@ describe("Sequencer", () => {
 
         test("runs until all steps in lookahead are processed", () => {
             // runs 10 times with lookahead=0.3 and bpm=120
-            sequencer["scheduler"]();
-            // expect(sequencer["increaseScorePointer"]).toHaveBeenCalledTimes(10);
+            expect(sequencer["score"].increaseScorePointer).toHaveBeenCalledTimes(10);
         });
 
         test("adds parts to runqueue", () => {
-            sequencer["scheduler"]();
             expect(sequencer["score"].addPartsToRunqueue).toHaveBeenCalled();
-        });
-
-        test("fires all actions", () => {
-            sequencer["scheduler"]();
-            expect(sequencer["sendAllActionsInNextStep"]).toHaveBeenCalled();
         });
 
         test("increases nextStepTime on every step", () => {
             const expected = 1.3125;  // 10 x timePerStep + timestamp
-            sequencer["scheduler"]();
             expect(sequencer["nextStepTimeInSec"]).toEqual(expected);
         });
 
+        test("fires all actions", () => {
+            expect(sequencer["sendAllActionsInNextStep"]).toHaveBeenCalled();
+        });
     });
 
     describe("process Actions from queue", () => {
-        // test sendAllActionsInNextStep() to sendAction() (scheduled for 0.5.0 #107)
+        // probably more mocks needed. we're testing against
+        // real score object (which effects other tests, too)
+
+        const action1: IAction = {
+            dest: "abcd",
+            type: "SOME_TYPE",
+            payload: 23,
+        }
+        const action2: IAction = {
+            dest: "efgh",
+            type: "SOME_TYPE",
+            payload: 42,
+        }
+        const brokenPayload = {
+            value: 23,
+            velocity: 1,
+            steps: 4,
+        }
+        const sanePayload = Object.assign({}, brokenPayload, { duration: 0 });
+        const brokenNoteAction: IAction = {
+            dest: "ijkl",
+            type: "NOTE",
+            payload: brokenPayload,
+        }
+        const saneNoteAction = {
+            dest: "ijkl",
+            type: "NOTE",
+            payload: brokenPayload,
+        }
+        let part: SeqPart;
+
+        beforeEach(() => {
+            part = new SeqPart();
+            part.addAction(action1, 0);
+            part.addAction(action2, 1);
+            part.addAction(saneNoteAction, 2)
+            part.addAction(brokenNoteAction, 2);
+
+            const partId = sequencer["score"].parts.add(part);
+            sequencer["score"].addPartToScore(partId, 1);
+            sequencer.sendAction = jest.fn();
+
+            sequencer["ac"].$processTo("00:01.000");
+            sequencer["scheduler"]();
+        })
+
+        afterEach(() => {
+            sequencer["ac"].$processTo("00:00.000");
+            (sequencer.sendAction as jest.Mock).mock.calls = []; // reset call history
+        })
+
+        test("sends all actions from the score to dispatch", () => {
+            expect(sequencer.sendAction).toHaveBeenCalledTimes(4);
+        })
+
+        test("adds delay to the actions payload", () => {
+            const sendAction = (sequencer.sendAction as jest.Mock);
+            const delayedAction1 = sendAction.mock.calls[0][0];
+            const delayedAction2 = sendAction.mock.calls[1][0];
+
+            expect(delayedAction1.payload.startTime).toEqual(1.03125);
+            expect(delayedAction2.payload.startTime).toEqual(1.15625);
+        })
+
+        test("adds delay to payload of NOTE actions", () => {
+            const sendAction = (sequencer.sendAction as jest.Mock);
+            const delayedNote = sendAction.mock.calls[2][0];
+            expect(delayedNote.payload.startTime).toEqual(1.28125)
+        })
+        test("changes duration for NOTE actions", () => {
+            const sendAction = (sequencer.sendAction as jest.Mock);
+            const delayedNoteAction = sendAction.mock.calls[2][0];
+
+            expect(delayedNoteAction.payload.duration).toEqual(0.125)
+        })
+
+        test("adds duration on NOTE actions if its not defined", () => {
+            const sendAction = (sequencer.sendAction as jest.Mock);
+            const delayedNoteAction = sendAction.mock.calls[3][0];
+
+            expect(delayedNoteAction.payload.duration).toEqual(0.125)
+        })
     });
-
-    // describe(".getDurationTime", function () {
-    //     it("calculates the duration time from 64th steps", function () {
-    //         var duration = sequencer.getDurationTime(8);
-    //         expect(duration).toEqual(0.25);
-    //     });
-    // });
-
-    // describe(".getMasterQueuePosition", function () {
-
-    //     beforeEach(function () {
-    //         this.step = sequencer.getMasterQueuePosition(5, 23.5);
-    //     });
-
-    //     it("returns an object", function () {
-    //         expect(typeof this.step).toBe("object");
-    //     });
-
-    //     it("sets the position to the value of its 1st parameter", function () {
-    //         expect(this.step.position).toEqual(5);
-    //     });
-
-    //     it("sets the time to the value of its 2nd parameter", function () {
-    //         expect(this.step.time).toEqual(23.5);
-    //     });
-
-    // });
-
-    // describe(".start", function () {
-
-    //     it("adds an entry to the stepList as a start delay for .draw ", function () {
-    //         expect(sequencer.stepList[0].time).toEqual(sequencer.ac.currentTime + 0.1);
-    //     });
-    // });
 
     // describe(".draw", function () {
 

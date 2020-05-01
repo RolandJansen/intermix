@@ -161,7 +161,7 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
                 this.ac.resume();
             }
             if (this.triggeredSteps.length === 0) {
-                this.triggeredSteps.push(this.score.getScorePosition(0, this.ac.currentTime + 0.1));
+                this.triggeredSteps.push(this.score.getScorePosition(this.ac.currentTime + 0.1));
             }
             this.clock.postMessage("start");
             this.isRunning = true;
@@ -227,7 +227,7 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         while (this.nextStepTimeInSec < limit) {
             this.score.addPartsToRunqueue();
             this.sendAllActionsInNextStep();
-            this.triggeredSteps.push(this.score.getScorePosition(this.nextStep, this.nextStepTimeInSec));
+            this.triggeredSteps.push(this.score.getScorePosition(this.nextStepTimeInSec));
             this.nextStepTimeInSec += this.timePerStepInSec;
             this.score.increaseScorePointer();
         }
@@ -272,6 +272,7 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         // });
 
         const nextStepActions = this.score.getAllActionsInNextStep();
+        // console.log(nextStepActions.length)
         nextStepActions.forEach((actionEvent) => {
             const action = this.prepareActionForDispatching(actionEvent, this.nextStepTimeInSec);
             this.sendAction(action);

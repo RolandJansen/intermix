@@ -73,9 +73,9 @@ export default class Score {
         this.runQueue = {};  // pointer jumps -> new runqueue
     }
 
-    public getScorePosition(step: number, preciseTime: number): IQueuePosition {
+    public getScorePosition(preciseTime: number): IQueuePosition {
         return {
-            position: step,
+            position: this.nextStep,
             timestamp: preciseTime,
         };
     }
@@ -102,12 +102,12 @@ export default class Score {
      * copies of them to the runqueue.
      */
     public addPartsToRunqueue(): void {
-        if (typeof this.mainQueue[this.nextStep] !== "undefined" ||
-            this.mainQueue[this.nextStep].length !== 0) {
-
-            this.mainQueue[this.nextStep].forEach((itemId) => {
-                this.addPartToRunqueue(itemId);
-            });
+        if (typeof this.mainQueue[this.nextStep] !== "undefined") {
+            if (this.mainQueue[this.nextStep].length !== 0) {
+                this.mainQueue[this.nextStep].forEach((itemId) => {
+                    this.addPartToRunqueue(itemId);
+                });
+            }
         }
     }
 
@@ -118,14 +118,8 @@ export default class Score {
         this.runQueue[this.seqPartPointerId] = part;
     }
 
-    // public deletePartFromRunqueue(pointerId: string): void {
-    //     if (this.runQueue.hasOwnProperty(pointerId)) {
-    //         delete this.runQueue[pointerId];
-    //     }
-    // }
-
     public getAllActionsInNextStep(): IAction[] {
-        const actionList: IAction[] = [];
+        let actionList: IAction[] = [];
         let pointerId: string;
 
         for (pointerId in this.runQueue) {
@@ -135,7 +129,7 @@ export default class Score {
             // could be refactored into a function
             if (pointer < part.length - 1) {
                 const partActions = part.getActionsAtPointerPosition(pointerId);
-                actionList.concat(partActions);
+                actionList = actionList.concat(partActions);
                 part.pointers[pointerId]++;
             } else {
                 delete part.pointers[pointerId];
