@@ -271,7 +271,7 @@ describe("Sequencer", () => {
         const saneNoteAction = {
             dest: "ijkl",
             type: "NOTE",
-            payload: brokenPayload,
+            payload: sanePayload,
         }
         let part: SeqPart;
 
