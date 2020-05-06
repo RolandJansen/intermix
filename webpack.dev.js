@@ -7,6 +7,7 @@ module.exports = merge(common, {
     devServer: {
         // contentBase: path.resolve(__dirname, './dist'),
         contentBase: common.output.path,
+        open: 'chrome',
         hot: true
     }
 });

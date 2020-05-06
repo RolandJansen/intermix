@@ -3,6 +3,14 @@
 <head>
     <title>Sequencer Demo</title>
     <style>
+        html {
+            font-family: Arial, Helvetica, sans-serif;
+
+        }
+        .button-group div {
+            /* float: left; */
+            display: inline-block;
+        }
         #blink {
             width: 20px;
             height: 20px;
@@ -13,30 +21,50 @@
 
 <body onload="init();">
     <button id="resumeAudioContext">resume audio context</button>
-    <button id="start">start</button>
-    <button id="stop">stop</button>
-    <button id="setbpm">set bpm to 180</button>
     <button id="getstate">get current state</button>
     <button id="getPattern">get Pattern</button>
-    <div id="blink"></div>
+    <div id="sequencer"></div>
+    <div class="button-group">
+        <div id="start-button"></div>
+        <div id="pause-button"></div>
+        <div id="stop-button"></div>
+        <div id="set-bpm"></div>
+    </div>
+    <!-- <div id="blink"></div> -->
 </body>
 <script>
-    const allActionCreators = intermix.getActionCreators();
+
+    const sequencer = new Nexus.Sequencer('#sequencer', {
+        size: [540, 200],
+        columns: 16,
+    })
+    const startButton = new Nexus.TextButton('#start-button', {
+        text: 'Start',
+    })
+    const pauseButton = new Nexus.TextButton('#pause-button', {
+        text: 'Pause',
+    })
+    const stopButton = new Nexus.TextButton('#stop-button', {
+        text: 'Stop',
+    })
+    const setBpm = new Nexus.Number('#set-bpm', {
+        size: [80, 50],
+        value: 120,
+        min: 0,
+        max: 240,
+    })
+
+    const ac = intermix.getAudioContext();
+    const samplerUID = [];
+    let sequencerUID = '';
+
     let synthUID = "";
-    let samplerUID = "";
-    let seqUID = "";
     let seqActionCreators = {};
     let samplerActionCreators = {};
 
-
-    const ac = intermix.getAudioContext();
-    const synthPart1 = intermix.getNewPart();
-    const synthPart2 = intermix.getNewPart();
-    const hhatPart = intermix.getNewPart();
-
     const loadFile = (url) => {
         return window.fetch(url)
-            .then(function (response) {
+            .then((response) => {
                 if (response.ok) {
                     return response.arrayBuffer();
                 } else {
@@ -45,126 +73,146 @@
             });
     };
 
-    function getNote(value, steps, uid) {
-        const velocity = 1;
-        const duration = 0;
-        return {
-            type: "NOTE",
-            dest: uid,
-            payload: {
-                value,
-                velocity,
-                steps,
-                duration,
-            }
-        }
-    }
-
-    function init() {
-
-        for (const uid in allActionCreators) {
-            if (allActionCreators[uid].metadata.name === "Intermix Sequencer") {
-                seqUID = uid;
-                seqActionCreators = allActionCreators[uid].actionCreators;
-            }
-            if (allActionCreators[uid].metadata.name === "Demo Synth") {
-                synthUID = uid;
-            }
-            if (allActionCreators[uid].metadata.name === "Demo Sampler") {
-                samplerUID = uid;
-                samplerActionCreators = allActionCreators[uid].actionCreators;
-            }
-        }
-
-        let hatSampleBuffer;
-
-        loadFile(demo.skophat.default).then((response) => {
+    const addAudioDataToSampler = (samplerUID, rawData) => {
+        loadFile(rawData).then((response) => {
             return ac.decodeAudioData(response);
         }).then((decoded) => {
-            hatSampleBuffer = decoded;
-            // send the audio buffer to the sampler
             const audioDataAction = {
                 type: "AUDIODATA",
                 dest: samplerUID,
-                payload: hatSampleBuffer,
+                payload: decoded,
             };
-            samplerActionCreators["AUDIODATA"](audioDataAction);
-        }).catch((err) => {
-            throw err;
+            // send the audio buffer to the sampler
+            const actionCreators = intermix.getActionCreators(samplerUID)
+            actionCreators.AUDIODATA(audioDataAction)
         })
-
-        // const testNote = getNote(64, 4, samplerUID);
-        // samplerActionCreators["NOTE"](testNote);
-
-        // make a part and add it to the sequencer
-        const note1 = getNote(32, 4, synthUID);
-        const note2 = getNote(33, 4, synthUID);
-        const note3 = getNote(44, 4, synthUID);
-        const note4 = getNote(33, 8, synthUID);
-
-        console.log(samplerUID);
-        const hhNote = getNote(40, 8, samplerUID);
-
-        synthPart1.addAction(note1, 0)
-            .addAction(note1, 1)
-            .addAction(note1, 2)
-            .addAction(note1, 3)
-            .addAction(note2, 4)
-            .addAction(note3, 5)
-            .addAction(note1, 6)
-            .addAction(note1, 7)
-            .addAction(note1, 8)
-            .addAction(note1, 9)
-            .addAction(note1, 10)
-            .addAction(note1, 11)
-            .addAction(note2, 12)
-            .addAction(note3, 13)
-            .addAction(note4, 14);
-
-        hhatPart.addAction(hhNote, 0)
-            .addAction(hhNote, 4)
-            .addAction(hhNote, 8)
-            .addAction(hhNote, 12);
-
-        seqActionCreators["ADD_PART"]({ part: synthPart1, position: 0 });
-        seqActionCreators["ADD_PART"]({ part: hhatPart, position: 0 });
-        seqActionCreators["LOOP_ACTIVE"](true);
-
-        const animeTest = (step) => {
-            let blinker = document.getElementById("blink");
-            if (step % 16 === 0) {
-                blinker.style.backgroundColor = "red";
-            } else {
-                blinker.style.backgroundColor = "white";
-            }
-        }
-        intermix.animate(animeTest);
     }
+
+    function init() {
+        sequencerUID = intermix.addPlugin('Sequencer');
+        samplerUID.push(intermix.addPlugin('DemoSampler'))
+        samplerUID.push(intermix.addPlugin('DemoSampler'))
+        samplerUID.push(intermix.addPlugin('DemoSampler'))
+        samplerUID.push(intermix.addPlugin('DemoSampler'))
+        samplerUID.push(intermix.addPlugin('DemoSampler'))
+
+        console.log(samplerUID)
+    }
+
+    // const ac = intermix.getAudioContext();
+    // const synthPart1 = intermix.getNewPart();
+    // const synthPart2 = intermix.getNewPart();
+    // const hhatPart = intermix.getNewPart();
+
+
+    // function getNote(value, steps, uid) {
+    //     const velocity = 1;
+    //     const duration = 0;
+    //     return {
+    //         type: "NOTE",
+    //         dest: uid,
+    //         payload: {
+    //             value,
+    //             velocity,
+    //             steps,
+    //             duration,
+    //         }
+    //     }
+    // }
+
+    // function init() {
+
+    //     for (const uid in allActionCreators) {
+    //         if (allActionCreators[uid].metadata.name === "Intermix Sequencer") {
+    //             seqUID = uid;
+    //             seqActionCreators = allActionCreators[uid].actionCreators;
+    //         }
+    //         if (allActionCreators[uid].metadata.name === "Demo Synth") {
+    //             synthUID = uid;
+    //         }
+    //         if (allActionCreators[uid].metadata.name === "Demo Sampler") {
+    //             samplerUID = uid;
+    //             samplerActionCreators = allActionCreators[uid].actionCreators;
+    //         }
+    //     }
+
+    //     let hatSampleBuffer;
+
+    //     loadFile(demo.skophat.default).then((response) => {
+    //         return ac.decodeAudioData(response);
+    //     }).then((decoded) => {
+    //         hatSampleBuffer = decoded;
+    //         // send the audio buffer to the sampler
+    //         const audioDataAction = {
+    //             type: "AUDIODATA",
+    //             dest: samplerUID,
+    //             payload: hatSampleBuffer,
+    //         };
+    //         samplerActionCreators["AUDIODATA"](audioDataAction);
+    //     }).catch((err) => {
+    //         throw err;
+    //     })
+
+    //     // const testNote = getNote(64, 4, samplerUID);
+    //     // samplerActionCreators["NOTE"](testNote);
+
+    //     // make a part and add it to the sequencer
+    //     const note1 = getNote(32, 4, synthUID);
+    //     const note2 = getNote(33, 4, synthUID);
+    //     const note3 = getNote(44, 4, synthUID);
+    //     const note4 = getNote(33, 8, synthUID);
+
+    //     console.log(samplerUID);
+    //     const hhNote = getNote(40, 8, samplerUID);
+
+    //     synthPart1.addAction(note1, 0)
+    //         .addAction(note1, 1)
+    //         .addAction(note1, 2)
+    //         .addAction(note1, 3)
+    //         .addAction(note2, 4)
+    //         .addAction(note3, 5)
+    //         .addAction(note1, 6)
+    //         .addAction(note1, 7)
+    //         .addAction(note1, 8)
+    //         .addAction(note1, 9)
+    //         .addAction(note1, 10)
+    //         .addAction(note1, 11)
+    //         .addAction(note2, 12)
+    //         .addAction(note3, 13)
+    //         .addAction(note4, 14);
+
+    //     hhatPart.addAction(hhNote, 0)
+    //         .addAction(hhNote, 4)
+    //         .addAction(hhNote, 8)
+    //         .addAction(hhNote, 12);
+
+    //     seqActionCreators["ADD_PART"]({ part: synthPart1, position: 0 });
+    //     seqActionCreators["ADD_PART"]({ part: hhatPart, position: 0 });
+    //     seqActionCreators["LOOP_ACTIVE"](true);
+
+    //     const animeTest = (step) => {
+    //         let blinker = document.getElementById("blink");
+    //         if (step % 16 === 0) {
+    //             blinker.style.backgroundColor = "red";
+    //         } else {
+    //             blinker.style.backgroundColor = "white";
+    //         }
+    //     }
+    //     intermix.animate(animeTest);
+    // }
 
     document.getElementById('resumeAudioContext').addEventListener('click', () => {
         intermix.resumeAudioContext();
         console.log("Audio Context Resumed");
     });
 
-    document.getElementById('start').addEventListener('click', () => {
-        seqActionCreators["STATE"](1);
-    })
-
-    document.getElementById('stop').addEventListener('click', () => {
-        seqActionCreators["STATE"](0);
-    })
-
     document.getElementById("getstate").addEventListener('click', () => {
         console.log(intermix.getState());
     })
 
-    document.getElementById("setbpm").addEventListener('click', () => {
-        seqActionCreators["BPM"](180);
-    })
-
-    document.getElementById("getPattern").addEventListener('click', () => {
-        console.log(part.seqPattern);
-    })
+    // document.getElementById("getPattern").addEventListener('click', () => {
+    //     console.log(part.seqPattern);
+    // })
 </script>
 
 </html>

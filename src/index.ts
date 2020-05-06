@@ -2,6 +2,9 @@ import { Action, ActionCreatorsMapObject } from "redux";
 import { IPlugin, IState } from "./registry/interfaces";
 import MasterRegistry from "./registry/MasterRegistry";
 import { store } from "./store/store";
+import Sequencer from "./plugins/Sequencer/Sequencer";
+import DemoSampler from "./plugins/DemoSampler";
+import DemoSynth from "./plugins/DemoSynth";
 
 // system components
 const audioContext: AudioContext = new AudioContext();
@@ -14,6 +17,12 @@ const registry: MasterRegistry = new MasterRegistry(audioContext);
 // const defaultSequencer: Sequencer = registry.registerPlugin(Sequencer);
 // const defaultSampler: DemoSampler = registry.registerPlugin(DemoSampler);
 // const defaultSynth: DemoSynth = registry.registerPlugin(DemoSynth);
+
+export const plugins = {
+    Sequencer,
+    DemoSampler,
+    DemoSynth,
+};
 
 export function getState(): IState {
     return store.getState();
@@ -43,11 +52,16 @@ type GenericPluginClass = new (ac: AudioContext) => IPlugin;
  */
 export function addPlugin(pluginClassName: string): string {
     try {
-        const possibleClass: any = (window as any)[pluginClassName].prototype;
-        const pluginClass: GenericPluginClass = (possibleClass as GenericPluginClass);
-        return registry.addPlugin(pluginClass);
+        if (plugins.hasOwnProperty(pluginClassName)) {
+            const possibleClass: any = (plugins as any)[pluginClassName];
+            const pluginClass: GenericPluginClass = (possibleClass as GenericPluginClass);
+
+            return registry.addPlugin(pluginClass);
+        }
+        return ""
     } catch (error) {
         // not implemented yet
+        console.log(error);
         return "";
     }
 }

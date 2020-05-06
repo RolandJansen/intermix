@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const HtmlWebpackExternalsPlugin = require('html-webpack-externals-plugin');
 const DtsBundleWebpack = require('dts-bundle-webpack');
 const webpack = require('webpack');
 
@@ -49,6 +50,15 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: './src/demo/demo.html'
         }),  // use a html template for the demo
+        new HtmlWebpackExternalsPlugin({
+            externals: [
+                {
+                    module: "Nexus",
+                    entry: "https://cdn.jsdelivr.net/npm/nexusui@2.0.13/dist/NexusUI.min.js",
+                    global: "Nexus",
+                },
+            ],
+        }),
         new webpack.HotModuleReplacementPlugin()  // use hot resync
     ],
 

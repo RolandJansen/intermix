@@ -24,6 +24,7 @@ export default class MasterRegistry {
     }
 
     public addPlugin<P extends IPlugin>(pluginClass: new (ac: AudioContext) => P): string {
+
         try {
             const newPlugin: IPlugin = this.plugins.add(pluginClass);
 
@@ -35,10 +36,10 @@ export default class MasterRegistry {
                 store,
                 newPlugin,
             );
-
             return newPlugin.uid;
         } catch (error) {
             // not implemented yet
+            console.log(error)
             return "";
         }
     }
@@ -49,6 +50,7 @@ export default class MasterRegistry {
             this.replaceReducer();
             store.dispatch({ type: "REMOVE", payload: itemId});
         } catch (error) {
+            console.log(error)
             // not implemented yet
         }
     }
@@ -76,6 +78,7 @@ export default class MasterRegistry {
             return newPart.uid;
         } catch (error) {
             // not implemented yet
+            console.log(error)
             return "";
         }
     }
@@ -86,6 +89,7 @@ export default class MasterRegistry {
             this.replaceReducer();
             store.dispatch({ type: "REMOVE", payload: itemId });
         } catch (error) {
+            console.log(error)
             // not implemented yet
         }
     }
