@@ -56,6 +56,7 @@
 
     const ac = intermix.getAudioContext();
     const samplerUID = [];
+    const seqPartUID = [];
     let sequencerUID = '';
 
     let synthUID = "";
@@ -90,11 +91,13 @@
 
     function init() {
         sequencerUID = intermix.addPlugin('Sequencer');
-        samplerUID.push(intermix.addPlugin('DemoSampler'))
-        samplerUID.push(intermix.addPlugin('DemoSampler'))
-        samplerUID.push(intermix.addPlugin('DemoSampler'))
-        samplerUID.push(intermix.addPlugin('DemoSampler'))
-        samplerUID.push(intermix.addPlugin('DemoSampler'))
+
+        // create 5 sampler plugins and 5 sequencer parts
+        for (let i = 0; i < 5; i++) {
+            samplerUID.push(intermix.addPlugin('DemoSampler'))
+            seqPartUID.push(intermix.addSeqPart())  // 16 steps if not stated otherwise
+        }
+
 
         console.log(samplerUID)
     }
