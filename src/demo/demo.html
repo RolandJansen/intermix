@@ -36,6 +36,7 @@
 
     const sequencer = new Nexus.Sequencer('#sequencer', {
         size: [540, 200],
+        rows: 4,
         columns: 16,
     })
     const startButton = new Nexus.TextButton('#start-button', {
@@ -54,7 +55,17 @@
         max: 240,
     })
 
-    const ac = intermix.getAudioContext();
+    startButton.on('change', (e) => {
+        // send a start action to the sequencer
+    })
+
+    const selectNextSeqRow = (step) => {
+            if (step % 16 === 0) {
+                sequencer.next();
+            }
+        }
+
+        const ac = intermix.getAudioContext();
     const samplerUID = [];
     const seqPartUID = [];
     let sequencerUID = '';
@@ -62,6 +73,13 @@
     let synthUID = "";
     let seqActionCreators = {};
     let samplerActionCreators = {};
+
+    let samples = [
+        demo.skkick,
+        demo.sksnare,
+        demo.skclhat,
+        demo.skophat,
+    ]
 
     const loadFile = (url) => {
         return window.fetch(url)
@@ -72,10 +90,10 @@
                     throw new Error('Server error. Couldn\'t load file: ' + url);
                 }
             });
-    };
+        };
 
-    const addAudioDataToSampler = (samplerUID, rawData) => {
-        loadFile(rawData).then((response) => {
+        const addAudioDataToSampler = (samplerUID, rawData) => {
+            loadFile(rawData).then((response) => {
             return ac.decodeAudioData(response);
         }).then((decoded) => {
             const audioDataAction = {
@@ -89,17 +107,35 @@
         })
     }
 
+    function getNote(value, steps, uid) {
+        const velocity = 1;
+        const duration = 0;
+        return {
+            type: "NOTE",
+            dest: uid,
+            payload: {
+                value,
+                velocity,
+                steps,
+                duration,
+            }
+        }
+    }
+
     function init() {
         sequencerUID = intermix.addPlugin('Sequencer');
 
         // create 5 sampler plugins and 5 sequencer parts
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 4; i++) {
             samplerUID.push(intermix.addPlugin('DemoSampler'))
             seqPartUID.push(intermix.addSeqPart())  // 16 steps if not stated otherwise
         }
 
+        samples.forEach((sample, index) => {
+            addAudioDataToSampler(samplerUID[index], sample["default"]);
+        })
 
-        console.log(samplerUID)
+        intermix.animate(selectNextSeqRow);  // animate the sequencer
     }
 
     // const ac = intermix.getAudioContext();
@@ -107,54 +143,7 @@
     // const synthPart2 = intermix.getNewPart();
     // const hhatPart = intermix.getNewPart();
 
-
-    // function getNote(value, steps, uid) {
-    //     const velocity = 1;
-    //     const duration = 0;
-    //     return {
-    //         type: "NOTE",
-    //         dest: uid,
-    //         payload: {
-    //             value,
-    //             velocity,
-    //             steps,
-    //             duration,
-    //         }
-    //     }
-    // }
-
     // function init() {
-
-    //     for (const uid in allActionCreators) {
-    //         if (allActionCreators[uid].metadata.name === "Intermix Sequencer") {
-    //             seqUID = uid;
-    //             seqActionCreators = allActionCreators[uid].actionCreators;
-    //         }
-    //         if (allActionCreators[uid].metadata.name === "Demo Synth") {
-    //             synthUID = uid;
-    //         }
-    //         if (allActionCreators[uid].metadata.name === "Demo Sampler") {
-    //             samplerUID = uid;
-    //             samplerActionCreators = allActionCreators[uid].actionCreators;
-    //         }
-    //     }
-
-    //     let hatSampleBuffer;
-
-    //     loadFile(demo.skophat.default).then((response) => {
-    //         return ac.decodeAudioData(response);
-    //     }).then((decoded) => {
-    //         hatSampleBuffer = decoded;
-    //         // send the audio buffer to the sampler
-    //         const audioDataAction = {
-    //             type: "AUDIODATA",
-    //             dest: samplerUID,
-    //             payload: hatSampleBuffer,
-    //         };
-    //         samplerActionCreators["AUDIODATA"](audioDataAction);
-    //     }).catch((err) => {
-    //         throw err;
-    //     })
 
     //     // const testNote = getNote(64, 4, samplerUID);
     //     // samplerActionCreators["NOTE"](testNote);
@@ -213,9 +202,6 @@
         console.log(intermix.getState());
     })
 
-    // document.getElementById("getPattern").addEventListener('click', () => {
-    //     console.log(part.seqPattern);
-    // })
 </script>
 
 </html>
