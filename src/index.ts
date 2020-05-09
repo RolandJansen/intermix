@@ -5,6 +5,7 @@ import { store } from "./store/store";
 import Sequencer from "./plugins/Sequencer/Sequencer";
 import DemoSampler from "./plugins/DemoSampler";
 import DemoSynth from "./plugins/DemoSynth";
+import SeqPart from "./seqpart/SeqPart";
 
 // system components
 const audioContext: AudioContext = new AudioContext();
@@ -90,6 +91,9 @@ export function getUnboundActionCreators(itemId: string): ActionCreatorsMapObjec
     return registry.getActionCreators(itemId, "unbound");
 }
 
+export function getSeqPart(itemId: string): SeqPart {
+    return registry.getSeqPart(itemId);
+}
 // export function getNewPart(): SeqPart {
 //     return new SeqPart();
 // }

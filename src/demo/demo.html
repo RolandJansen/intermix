@@ -7,10 +7,12 @@
             font-family: Arial, Helvetica, sans-serif;
 
         }
+
         .button-group div {
             /* float: left; */
             display: inline-block;
         }
+
         #blink {
             width: 20px;
             height: 20px;
@@ -55,17 +57,28 @@
         max: 240,
     })
 
-    startButton.on('change', (e) => {
-        // send a start action to the sequencer
+    startButton.on('change', () => {
+        seqActionCreators.STATE(1);
+    })
+
+    pauseButton.on('change', () => {
+        seqActionCreators.STATE(2);
+    })
+
+    stopButton.on('change', () => {
+        seqActionCreators.STATE(0);
+        // const counter = new Nexus.Counter(0, 1);
+        // counter.value = 0;
+        // sequencer.stepper(counter);
     })
 
     const selectNextSeqRow = (step) => {
-            if (step % 16 === 0) {
-                sequencer.next();
-            }
+        if (step % 4 === 0) {
+            sequencer.next();
         }
+    }
 
-        const ac = intermix.getAudioContext();
+    const ac = intermix.getAudioContext();
     const samplerUID = [];
     const seqPartUID = [];
     let sequencerUID = '';
@@ -81,6 +94,49 @@
         demo.skophat,
     ]
 
+    function init() {
+
+        // create sampler plugins and a sequencer part for each one
+        for (let i = 0; i < 4; i++) {
+            samplerUID.push(intermix.addPlugin('DemoSampler'))
+            seqPartUID.push(intermix.addSeqPart())  // 16 steps if not stated otherwise
+        }
+
+        console.log(samplerUID)
+
+        // add a sample to each sampler
+        samples.forEach((sample, index) => {
+            addAudioDataToSampler(samplerUID[index], sample["default"]);
+        })
+
+        // setup the sequencer
+        sequencerUID = intermix.addPlugin('Sequencer');
+        seqActionCreators = intermix.getActionCreators(sequencerUID);
+        seqActionCreators.ANIMATE(selectNextSeqRow);  // animate the sequencer
+
+        // setup a basic sequence
+        sequencer.matrix.populate.row(0, [1, 0, 0, 0, 0, 0, 0, 0]);
+        sequencer.matrix.populate.row(1, [0, 0, 0, 0, 1, 0, 0, 0]);
+        sequencer.matrix.populate.row(2, [0, 0, 1, 0]);
+
+        // add notes to the seqParts
+        populateSeqParts(sequencer.matrix.pattern);
+
+        // add parts to sequencer and to the score
+        seqPartUID.forEach((seqPartId, index) => {
+            const part = intermix.getSeqPart(seqPartId);
+            seqActionCreators.ADD_PART(part);
+            seqActionCreators.ADD_TO_SCORE({
+                partID: seqPartId,
+                position: 0,
+            })
+        })
+
+        // play in loop mode
+        seqActionCreators.LOOP_ACTIVE(true);
+
+    }
+
     const loadFile = (url) => {
         return window.fetch(url)
             .then((response) => {
@@ -90,10 +146,10 @@
                     throw new Error('Server error. Couldn\'t load file: ' + url);
                 }
             });
-        };
+    };
 
-        const addAudioDataToSampler = (samplerUID, rawData) => {
-            loadFile(rawData).then((response) => {
+    const addAudioDataToSampler = (samplerUID, rawData) => {
+        loadFile(rawData).then((response) => {
             return ac.decodeAudioData(response);
         }).then((decoded) => {
             const audioDataAction = {
@@ -107,7 +163,26 @@
         })
     }
 
-    function getNote(value, steps, uid) {
+    const populateSeqParts = (matrix) => {
+        console.log("matrix has " + matrix.length + " rows")
+        matrix.forEach((seqRow, rowIndex) => {
+            const seqPartId = seqPartUID[rowIndex];
+            const samplerId = samplerUID[rowIndex];
+            const seqPartActionCreators = intermix.getActionCreators(seqPartId);
+            const note = getNote(40, 1, samplerId);
+
+            seqRow.forEach((seqStep, stepIndex) => {
+                if (seqRow[stepIndex] === true) {
+                    seqPartActionCreators.ADD_ACTION({
+                        step: stepIndex,
+                        action: note,
+                    });
+                }
+            })
+        })
+    }
+
+    const getNote = (value, steps, uid) => {
         const velocity = 1;
         const duration = 0;
         return {
@@ -122,21 +197,14 @@
         }
     }
 
-    function init() {
-        sequencerUID = intermix.addPlugin('Sequencer');
+    document.getElementById('resumeAudioContext').addEventListener('click', () => {
+        intermix.resumeAudioContext();
+        console.log("Audio Context Resumed");
+    });
 
-        // create 5 sampler plugins and 5 sequencer parts
-        for (let i = 0; i < 4; i++) {
-            samplerUID.push(intermix.addPlugin('DemoSampler'))
-            seqPartUID.push(intermix.addSeqPart())  // 16 steps if not stated otherwise
-        }
-
-        samples.forEach((sample, index) => {
-            addAudioDataToSampler(samplerUID[index], sample["default"]);
-        })
-
-        intermix.animate(selectNextSeqRow);  // animate the sequencer
-    }
+    document.getElementById("getstate").addEventListener('click', () => {
+        console.log(intermix.getState());
+    })
 
     // const ac = intermix.getAudioContext();
     // const synthPart1 = intermix.getNewPart();
@@ -193,14 +261,6 @@
     //     intermix.animate(animeTest);
     // }
 
-    document.getElementById('resumeAudioContext').addEventListener('click', () => {
-        intermix.resumeAudioContext();
-        console.log("Audio Context Resumed");
-    });
-
-    document.getElementById("getstate").addEventListener('click', () => {
-        console.log(intermix.getState());
-    })
 
 </script>
 

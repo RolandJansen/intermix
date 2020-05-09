@@ -94,6 +94,11 @@ export default class MasterRegistry {
         }
     }
 
+    // this is probably not the best idea
+    public getSeqPart(itemId: string): SeqPart {
+        return this.seqParts.itemList.getItem(itemId);
+    }
+
     public getActionCreators(itemId: string, bound?: string): ActionCreatorsMapObject {
         const pluginKeys = this.plugins.itemList.getUidList();
         const seqPartKeys = this.seqParts.itemList.getUidList();
@@ -110,6 +115,7 @@ export default class MasterRegistry {
 
         return actionCreators;
     }
+
 
     /**
      * Combines all sub reducers with the root reducer

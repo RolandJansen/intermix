@@ -65,4 +65,9 @@ export default [
         desc: "jump to a specific step in the masterqueue",
         defVal: 0,
     },
+    {
+        type: "ANIMATE",
+        desc: "a function that should be invoked by the sequencer at every step",
+        defVal: (): boolean => true,
+    },
 ];

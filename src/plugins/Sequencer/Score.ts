@@ -136,7 +136,6 @@ export default class Score {
                 delete this.runQueue[pointerId];
             }
         }
-
         return actionList;
     }
 

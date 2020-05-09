@@ -1,7 +1,7 @@
 /// <reference path="../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
 import PluginRegistry from "../PluginRegistry";
-import { IPlugin, IState } from "../interfaces";
+import { IPlugin, IState, IActionDef } from "../interfaces";
 import TestController from "../../plugins/TestController";
 import TestInstrument from "../../plugins/TestInstrument";
 import { store } from "../../store/store";
@@ -42,6 +42,21 @@ describe("add", () => {
 
     test("creates a plugin instance", () => {
         expect(testPlugin.metaData.name).toMatch("Test-Instrument");
+    });
+
+    test("adds action defs for common actions to the plugin instance", () => {
+        let noteDef: IActionDef = {
+            type: "NONE",
+            desc: "nothing",
+            defVal: 0,
+        };
+        testPlugin.actionDefs.forEach((actionDef: IActionDef) => {
+            if (actionDef.type === "NOTE") {
+                noteDef = actionDef;
+            }
+        })
+
+        expect(noteDef.type).toEqual("NOTE");
     });
 
     test("adds action creator functions to the plugin instance", () => {

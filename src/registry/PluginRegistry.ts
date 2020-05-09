@@ -3,6 +3,7 @@ import RegistryItemList from "./RegistryItemList";
 import { IPlugin, IControllerPlugin, IAction } from "./interfaces";
 import { store } from "../store/store";
 import { bindActionCreators } from "redux";
+import { commonActionDefs } from "./commonActionDefs";
 
 export default class PluginRegistry extends AbstractRegistry {
 
@@ -18,6 +19,11 @@ export default class PluginRegistry extends AbstractRegistry {
 
         // add to item list
         const itemId = this.itemList.add(newItem);
+
+        // add commonActionDefs to the plugin if its an instrument
+        if (newItem.metaData.type === "instrument") {
+            newItem.actionDefs = [...newItem.actionDefs, ...commonActionDefs];
+        }
 
         // build action creators
         const actionCreators = this.getActionCreators(newItem.actionDefs, itemId);

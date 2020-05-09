@@ -8,6 +8,7 @@ import {
     IDelayedNote,
     ILoop,
     Tuple,
+    ReturnFunction,
 } from "../../registry/interfaces";
 import SeqPart from "../../seqpart/SeqPart";
 import ClockWorker from "./clock.worker";
@@ -150,6 +151,9 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
                 const step: number = changed[1];
                 this.score.moveScorePointerTo(step);
                 return true;
+            case "ANIMATE":
+                const animeFunc: ReturnFunction<void> = changed[1]
+                this.updateFrame = animeFunc;
             default:
                 return false;
         }
@@ -272,7 +276,6 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         // });
 
         const nextStepActions = this.score.getAllActionsInNextStep();
-        // console.log(nextStepActions.length)
         nextStepActions.forEach((actionEvent) => {
             const action = this.prepareActionForDispatching(actionEvent, this.nextStepTimeInSec);
             this.sendAction(action);
