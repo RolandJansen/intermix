@@ -24,7 +24,6 @@
 <body onload="init();">
     <button id="resumeAudioContext">resume audio context</button>
     <button id="getstate">get current state</button>
-    <button id="getPattern">get Pattern</button>
     <div id="sequencer"></div>
     <div class="button-group">
         <div id="start-button"></div>
@@ -66,10 +65,35 @@
     })
 
     stopButton.on('change', () => {
+
         seqActionCreators.STATE(0);
+        sequencer.stop();
         // const counter = new Nexus.Counter(0, 1);
         // counter.value = 0;
         // sequencer.stepper(counter);
+    })
+
+    sequencer.on('change', (e) => {
+        console.log(e);
+        const partId = seqPartUID[e.row];
+        const samplerId = samplerUID[e.row];
+        console.log("seqpart id is: " + partId)
+        const actionCreators = intermix.getActionCreators(partId);
+        if (e.state) {
+            // send an "ADD_ACTION" action with a note as payload to the according part
+            const note = getNote(40, 1, samplerId);
+            actionCreators.ADD_ACTION({
+                step: e.column,
+                note
+            });
+        } else {
+            // send a "REMOVE_ACTION" action with the exact position to the according part
+            action = {
+                type: "REMOVE_ACTION",
+                dest: samplerId,
+                payload: {}
+            }
+        }
     })
 
     const selectNextSeqRow = (step) => {
@@ -164,7 +188,6 @@
     }
 
     const populateSeqParts = (matrix) => {
-        console.log("matrix has " + matrix.length + " rows")
         matrix.forEach((seqRow, rowIndex) => {
             const seqPartId = seqPartUID[rowIndex];
             const samplerId = samplerUID[rowIndex];
@@ -250,15 +273,6 @@
     //     seqActionCreators["ADD_PART"]({ part: hhatPart, position: 0 });
     //     seqActionCreators["LOOP_ACTIVE"](true);
 
-    //     const animeTest = (step) => {
-    //         let blinker = document.getElementById("blink");
-    //         if (step % 16 === 0) {
-    //             blinker.style.backgroundColor = "red";
-    //         } else {
-    //             blinker.style.backgroundColor = "white";
-    //         }
-    //     }
-    //     intermix.animate(animeTest);
     // }
 
 
