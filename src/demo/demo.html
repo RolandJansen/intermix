@@ -67,7 +67,7 @@
     stopButton.on('change', () => {
 
         seqActionCreators.STATE(0);
-        sequencer.stop();
+        sequencer.stepper.value = 0;
         // const counter = new Nexus.Counter(0, 1);
         // counter.value = 0;
         // sequencer.stepper(counter);
@@ -140,8 +140,8 @@
 
         // setup a basic sequence
         sequencer.matrix.populate.row(0, [1, 0, 0, 0, 0, 0, 0, 0]);
-        sequencer.matrix.populate.row(1, [0, 0, 0, 0, 1, 0, 0, 0]);
-        sequencer.matrix.populate.row(2, [0, 0, 1, 0]);
+        // sequencer.matrix.populate.row(1, [0, 0, 0, 0, 1, 0, 0, 0]);
+        // sequencer.matrix.populate.row(2, [0, 0, 1, 0]);
 
         // add notes to the seqParts
         populateSeqParts(sequencer.matrix.pattern);

@@ -98,7 +98,10 @@ export default class SeqPart implements IRegistryItem {
             case "ADD_ACTION":
                 const addStep: number = changed[1].step;
                 const addAction: IAction = changed[1].action;
-                this.addAction(addAction, addStep);
+                // write test with step<0 and addAction=undefined
+                if (addStep >= 0 && addAction) {
+                    this.addAction(addAction, addStep);
+                }
                 return true;
             case "REMOVE_ACTION":
                 const removeStep: number = changed[1].step;

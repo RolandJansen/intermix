@@ -276,6 +276,7 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         // });
 
         const nextStepActions = this.score.getAllActionsInNextStep();
+        console.log(nextStepActions)
         nextStepActions.forEach((actionEvent) => {
             const action = this.prepareActionForDispatching(actionEvent, this.nextStepTimeInSec);
             this.sendAction(action);
