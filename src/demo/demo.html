@@ -57,6 +57,7 @@
     })
 
     startButton.on('change', () => {
+        sequencer.stepper.value = -1;
         seqActionCreators.STATE(1);
     })
 
@@ -67,32 +68,30 @@
     stopButton.on('change', () => {
 
         seqActionCreators.STATE(0);
-        sequencer.stepper.value = 0;
+        // sequencer.stepper.value = -1;
         // const counter = new Nexus.Counter(0, 1);
         // counter.value = 0;
         // sequencer.stepper(counter);
     })
 
     sequencer.on('change', (e) => {
-        console.log(e);
+        // console.log(e);
         const partId = seqPartUID[e.row];
         const samplerId = samplerUID[e.row];
-        console.log("seqpart id is: " + partId)
         const actionCreators = intermix.getActionCreators(partId);
+        const action = getNote(40, 1, samplerId);
         if (e.state) {
             // send an "ADD_ACTION" action with a note as payload to the according part
-            const note = getNote(40, 1, samplerId);
             actionCreators.ADD_ACTION({
                 step: e.column,
-                note
+                action,
             });
         } else {
             // send a "REMOVE_ACTION" action with the exact position to the according part
-            action = {
-                type: "REMOVE_ACTION",
-                dest: samplerId,
-                payload: {}
-            }
+            actionCreators.REMOVE_ACTION({
+                step: e.column,
+                action,
+            })
         }
     })
 
@@ -140,8 +139,8 @@
 
         // setup a basic sequence
         sequencer.matrix.populate.row(0, [1, 0, 0, 0, 0, 0, 0, 0]);
-        // sequencer.matrix.populate.row(1, [0, 0, 0, 0, 1, 0, 0, 0]);
-        // sequencer.matrix.populate.row(2, [0, 0, 1, 0]);
+        sequencer.matrix.populate.row(1, [0, 0, 0, 0, 1, 0, 0, 0]);
+        sequencer.matrix.populate.row(2, [0, 0, 1, 0]);
 
         // add notes to the seqParts
         populateSeqParts(sequencer.matrix.pattern);

@@ -276,7 +276,6 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         // });
 
         const nextStepActions = this.score.getAllActionsInNextStep();
-        console.log(nextStepActions)
         nextStepActions.forEach((actionEvent) => {
             const action = this.prepareActionForDispatching(actionEvent, this.nextStepTimeInSec);
             this.sendAction(action);
@@ -291,19 +290,25 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
      * @param startTime time in seconds when the audio event should start
      */
     private prepareActionForDispatching(action: IAction, startTime: number): IAction {
-        const payload = action.payload;
-        let delayedPayload;
+        const delayedAction = Object.assign({}, action, { payload: action.payload });
+        delayedAction.payload.startTime = startTime;
+        // const payload = action.payload;
+        // let delayedPayload;
+
         if (action.type === "NOTE") {
             const duration = this.getDurationTime(action.payload.steps);
-            delayedPayload = Object.assign({}, payload, {
-                startTime,
-                duration,
-            }) as IDelayedNote;
-        } else {
-            delayedPayload = Object.assign({}, payload, { startTime }) as IDelayedAudioController;
-        }
-        action.payload = delayedPayload;
-        return action;
+            // delayedPayload = Object.assign({}, payload, {
+            //     startTime,
+            //     duration,
+            // }) as IDelayedNote;
+            // delayedAction.payload.startTime = startTime;
+            delayedAction.payload.duration = duration;
+        } //else {
+            // delayedPayload = Object.assign({}, payload, { startTime }) as IDelayedAudioController;
+            // delayedAction.payload
+        // }
+        // action.payload = delayedPayload;
+        return delayedAction;
     }
 
     /**

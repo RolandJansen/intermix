@@ -4,6 +4,22 @@ export const commonActionTypes: string[] = [
     "NOTE",
 ];
 
+const testnote = {
+    address: "/intermix/plugin/<UID>/note",
+    valueName: "lastPlayedNote",
+    valueType: "iiff",
+    value: [0, 0, 0.0, 0.0],
+    description: "note-value, velocity, duration, starttime",
+}
+
+const testSeqNote = {
+    address: "/intermix/seqpart/<UID>/addNote",
+    valueName: "lastAddedNote",
+    valueType: "iiff",
+    value: [0, 0, 0.0, 0.0],
+    description: "note-value, velocity, duration, starttime",
+}
+
 /**
  * Definitions of actions that every
  * plugin can handle (but don't need to).

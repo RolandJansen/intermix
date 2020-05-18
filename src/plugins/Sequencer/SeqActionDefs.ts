@@ -5,7 +5,23 @@
 // You can also set minVal/maxVal fields if it's a numeric value.
 // Your plugin can compute addtional actions not defined here
 // but they will not get recognized by the store.
+
+const PREFIX = "/intermix/plugin/<UID>";
+
+const STATE = {
+    STOP: 0,
+    START: 1,
+    PAUSE: 2,
+}
+
 export default [
+    // {
+    //     address: PREFIX + "/start",
+    //     dataType: "i",
+    //     target: "state",
+    //     defVal: STATE.STOP,
+    //     desc: "starts the sequencer",
+    // },
     {
         type: "STATE",
         desc: "0=stop, 1=start, 2=pause",

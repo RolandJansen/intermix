@@ -140,6 +140,9 @@ export default class SeqPart implements IRegistryItem {
     public removeAction(action: IAction, step: number): SeqPart {
         const pos = step * this.stepMultiplier;
         const index = this.pattern[pos].indexOf(action);
+        console.log(action)
+        console.log(this.pattern[pos])
+        console.log(index)
         if (index >= 0) {
             this.pattern[pos].splice(index, 1);
         }
