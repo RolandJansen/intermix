@@ -17,9 +17,8 @@ const STATE = {
 export default [
     // {
     //     address: PREFIX + "/start",
-    //     dataType: "i",
+    //     typeTags: ",T",
     //     target: "state",
-    //     defVal: STATE.STOP,
     //     desc: "starts the sequencer",
     // },
     {
