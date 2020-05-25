@@ -1,27 +1,61 @@
-import { Action, createStore, Store } from "redux";
-import { IState } from "../registry/interfaces";
+import { Action, createStore, Store, AnyAction, Middleware, applyMiddleware } from "redux";
+import { IState, IOscAction, IOscBundleAction } from "../registry/interfaces";
 
-/**
- * The main reducer that's called by the store every time an action
- * gets dispatched. By default it just returns an empty state object
- * but will be hydrated with higher-order reducers at runtime as plugins
- * get loaded.
- * @param state The state object. If undefined, an empty object will be assigned
- * @param action An action object that alters the state
- */
+// We don't want to preprocess OSC actions in every
+// single reducer so we put it into this middleware
+const preprocessOSC: Middleware = (store) => (next) => (action): AnyAction => {
+    let toBeDispatched: AnyAction = action;
+
+    if (itsAnOscAction(action)) {
+        const address: string[] = action.address.split("/");
+        if (address[0] === "intermix") {
+            const type = address[3]; // there could be an explicit value type action.valueName
+            toBeDispatched = {
+                type,
+                listenerType: address[1],
+                listener: address[2],
+                payload: action.payload,
+            }
+        }
+    } else if (itsAnOscBundleAction(action)) {
+        // we send the whole package to the listener
+        // and let it decides what to do.
+        // In the store we just set "bundle" to the new timetag.
+        const address: string[] = action.elements[0].address.split("/");
+        if (address[0] === "intermix") {
+            toBeDispatched = {
+                type: "BUNDLE",
+                listenerType: address[1],
+                listener: address[2],
+                payload: action.timetag,
+                additional: action.elements,
+            }
+        }
+    }
+
+    return next(toBeDispatched);
+}
+
+// type guard for IOscAction
+const itsAnOscAction = (action: AnyAction): action is IOscAction => {
+    return (action as IOscAction).address !== undefined;
+}
+
+// type guard for IOscBundleAction
+const itsAnOscBundleAction = (action: AnyAction): action is IOscBundleAction => {
+    return (action as IOscBundleAction).timetag !== undefined;
+}
+
+// An empty root reducer. It will be hydrated with
+// more reducers at runtime as plugins get loaded.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function rootReducer(state = {}, action: Action): IState {
+const rootReducer = (state = {}, action: Action): IState => {
     return state;
 }
 
-/**
- * The store is empty and there are no reducers at startup.
- * Reducers will be attached as plugin instances are added.
- * That's why we use an enhanced "createStore" function to
- * attach reducers dynamically.
- *
- * In the future this could be done without an external
- * library. See:
- * https://tylergaw.com/articles/dynamic-redux-reducers/
- */
-export const store: Store = createStore(rootReducer);
+const store: Store = createStore(
+    rootReducer,
+    applyMiddleware(preprocessOSC)
+);
+
+export { store };

@@ -8,6 +8,7 @@ import {
     IState,
     Payload,
     Tuple,
+    IOscAction,
 } from "./interfaces";
 import RegistryItemList from "./RegistryItemList";
 
@@ -107,7 +108,7 @@ export default abstract class AbstractRegistry {
             actionCreators[actionDef.type] = (payload: Payload): IAction => {
                 return {
                     type: actionDef.type,
-                    dest: uid,
+                    listener: uid,
                     payload,
                 };
             };

@@ -8,10 +8,10 @@
 
 const PREFIX = "/intermix/plugin/<UID>";
 
-const STATE = {
-    STOP: 0,
-    START: 1,
-    PAUSE: 2,
+enum STATE {
+    STOP,
+    START,
+    PAUSE,
 }
 
 export default [
@@ -24,7 +24,7 @@ export default [
     {
         type: "STATE",
         desc: "0=stop, 1=start, 2=pause",
-        defVal: 0,
+        defVal: STATE.STOP,
     },
     {
         type: "BPM",

@@ -1,5 +1,4 @@
-import { ActionCreatorsMapObject, AnyAction } from "redux";
-import SeqPart from "../seqpart/SeqPart";
+import { ActionCreatorsMapObject, AnyAction, Action } from "redux";
 
 // A generic type for a function, which returns something
 export type ReturnFunction<ValueType> = () => ValueType;
@@ -70,9 +69,10 @@ export type Payload = any;
 // }
 
 export interface IAction extends AnyAction {
-    dest: string;
+    // listenerType: string;
+    listener: string;
     payload: Payload;
-    additional?: string;
+    additional?: any;
     error?: Error;
 }
 
@@ -83,6 +83,32 @@ export interface IActionDef {
     minVal?: number;
     maxVal?: number;
     steps?: number;
+}
+
+export interface IOscAction extends Action {
+    address: string;
+    typeTag: string;
+    payload?: number | string | (number|string)[];
+    valueName?: string;
+}
+
+export interface IOscActionDef {
+    address: string;
+    typeTag: string;
+    valueName?: string;
+    value?: number | string | (number|string)[];
+}
+
+/**
+ * An OSC timetag is a 64bit fixed point number
+ * like a NTP timestamp.
+ * The internal representation is a js number which
+ * represents the time in seconds since the audio context
+ * was started.
+ */
+export interface IOscBundleAction extends AnyAction {
+    timetag: number;
+    elements: IOscAction[];
 }
 
 export type Tuple = [string, any];

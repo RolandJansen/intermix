@@ -32,8 +32,60 @@
         <div id="set-bpm"></div>
     </div>
     <!-- <div id="blink"></div> -->
+    <button id="original-object">original Object</button>
+    <button id="copied-object">copied Object</button>
+    <button id="org-list">original list w/ objects</button>
+    <button id="copied-list">copied list w/ objects</button>
 </body>
 <script>
+
+    const originalObject = {
+        address: "hello",
+        name: "echo",
+        problem: {
+            dieses: "problem",
+            ist: "referentiell",
+        },
+        strangeArray: [1, 2, 3],
+    }
+
+    const copiedObject = Object.assign({}, originalObject, {
+        address: "olleh",
+    })
+
+    copiedObject.problem.dieses = "no problemo";
+    copiedObject.strangeArray = [3, 2, 1];
+    copiedObject.name = "oche";
+
+    const orgList = [
+        {
+            name: "obj nr1",
+        },
+        {
+            name: "obj nr2"
+        }
+    ]
+
+    // const copiedList = orgList.slice();
+    // const copiedList = [...orgList]
+    const copiedList = Array.from(orgList)
+    copiedList[1].name = "bums"
+
+    document.getElementById('org-list').addEventListener('click', () => {
+        console.log(orgList);
+    });
+
+    document.getElementById('copied-list').addEventListener('click', () => {
+        console.log(copiedList);
+    });
+
+    document.getElementById('original-object').addEventListener('click', () => {
+        console.log(originalObject);
+    });
+
+    document.getElementById('copied-object').addEventListener('click', () => {
+        console.log(copiedObject);
+    });
 
     const sequencer = new Nexus.Sequencer('#sequencer', {
         size: [540, 200],
