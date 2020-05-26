@@ -53,9 +53,11 @@ const rootReducer = (state = {}, action: Action): IState => {
     return state;
 }
 
-const store: Store = createStore(
-    rootReducer,
-    applyMiddleware(preprocessOSC)
-);
+// const store: Store = createStore(
+//     rootReducer,
+//     applyMiddleware(preprocessOSC)
+// );
+
+const store: Store = createStore(rootReducer);
 
 export { store };

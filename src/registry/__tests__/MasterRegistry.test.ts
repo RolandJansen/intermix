@@ -64,13 +64,13 @@ describe("PluginRegistry", () => {
         })
 
         test("adds reducers for the plugin to the store", () => {
-            const action1 = {
-                dest: pluginId,
+            const action1: IAction = {
+                listener: pluginId,
                 type: "ACTION1",
                 payload: 23,
             }
-            const action2 = {
-                dest: pluginId,
+            const action2: IAction = {
+                listener: pluginId,
                 type: "ACTION2",
                 payload: 42,
             }
@@ -159,12 +159,12 @@ describe("SeqPart Registry", () => {
 
         beforeEach(() => {
             action1 = {
-                dest: partId,
+                listener: partId,
                 type: "ADD_ACTION",
                 payload,
             }
             action2 = {
-                dest: partId,
+                listener: partId,
                 type: "REMOVE_ACTION",
                 payload,
             }

@@ -130,12 +130,12 @@ describe("main queue", () => {
 
 describe("runqueue", () => {
     const action1: IAction = {
-        dest: "abcd",
+        listener: "abcd",
         type: "SOME_TYPE",
         payload: 23,
     }
     const action2: IAction = {
-        dest: "efgh",
+        listener: "efgh",
         type: "SOME_TYPE",
         payload: 42,
     }

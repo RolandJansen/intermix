@@ -291,9 +291,14 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
      */
     private prepareActionForDispatching(action: IAction, startTime: number): IAction {
         const delayedAction = Object.assign({}, action, { payload: action.payload });
-        delayedAction.payload.startTime = startTime;
-        // const payload = action.payload;
-        // let delayedPayload;
+
+        if (Array.isArray(action.payload)) {
+            delayedAction.payload = action.payload;
+        } else {
+            delayedAction.payload = [action.payload]
+        }
+
+        delayedAction.payload.push(startTime);
 
         if (action.type === "NOTE") {
             const duration = this.getDurationTime(action.payload.steps);

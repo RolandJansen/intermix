@@ -74,7 +74,7 @@ describe("DemoSampler", () => {
             buffer = ac.createBuffer(1, 22050, 44100);  // create a buffer of 0.5s length
             audioDataAction = {
                 type: "AUDIODATA",
-                dest: sampler.uid,
+                listener: sampler.uid,
                 payload: buffer,
             };
 

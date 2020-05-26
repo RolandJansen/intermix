@@ -194,12 +194,12 @@ describe("Sequencer", () => {
     describe("scheduler", () => {
 
         const action1: IAction = {
-            dest: "abcd",
+            listener: "abcd",
             type: "SOME_TYPE",
             payload: 23,
         }
         const action2: IAction = {
-            dest: "efgh",
+            listener: "efgh",
             type: "SOME_TYPE",
             payload: 42,
         }
@@ -248,12 +248,12 @@ describe("Sequencer", () => {
         // real score object (which effects other tests, too)
 
         const action1: IAction = {
-            dest: "abcd",
+            listener: "abcd",
             type: "SOME_TYPE",
             payload: 23,
         }
         const action2: IAction = {
-            dest: "efgh",
+            listener: "efgh",
             type: "SOME_TYPE",
             payload: 42,
         }
@@ -264,12 +264,12 @@ describe("Sequencer", () => {
         }
         const sanePayload = Object.assign({}, brokenPayload, { duration: 0 });
         const brokenNoteAction: IAction = {
-            dest: "ijkl",
+            listener: "ijkl",
             type: "NOTE",
             payload: brokenPayload,
         }
         const saneNoteAction = {
-            dest: "ijkl",
+            listener: "ijkl",
             type: "NOTE",
             payload: sanePayload,
         }
@@ -304,14 +304,14 @@ describe("Sequencer", () => {
             const delayedAction1 = sendAction.mock.calls[0][0];
             const delayedAction2 = sendAction.mock.calls[1][0];
 
-            expect(delayedAction1.payload.startTime).toEqual(1.03125);
-            expect(delayedAction2.payload.startTime).toEqual(1.15625);
+            expect(delayedAction1.payload[delayedAction1.payload.length - 1]).toEqual(1.03125);
+            expect(delayedAction2.payload[delayedAction1.payload.length - 1]).toEqual(1.15625);
         })
 
         test("adds delay to payload of NOTE actions", () => {
             const sendAction = (sequencer.sendAction as jest.Mock);
             const delayedNote = sendAction.mock.calls[2][0];
-            expect(delayedNote.payload.startTime).toEqual(1.28125)
+            expect(delayedNote.payload[delayedNote.payload.length - 1]).toEqual(1.28125)
         })
         test("changes duration for NOTE actions", () => {
             const sendAction = (sequencer.sendAction as jest.Mock);

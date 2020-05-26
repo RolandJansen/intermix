@@ -1,7 +1,7 @@
 /// <reference path="../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
 import PluginRegistry from "../PluginRegistry";
-import { IPlugin, IState, IActionDef } from "../interfaces";
+import { IPlugin, IState, IActionDef, IAction } from "../interfaces";
 import TestController from "../../plugins/TestController";
 import TestInstrument from "../../plugins/TestInstrument";
 import { store } from "../../store/store";
@@ -73,8 +73,8 @@ describe("add", () => {
 
     test("action creators are bound to store.dispatch()", () => {
         const testPayload = 23;
-        const action = {
-            dest: testPlugin.uid,
+        const action: IAction = {
+            listener: testPlugin.uid,
             type: "ACTION1",
             payload: testPayload,
         }
@@ -85,8 +85,8 @@ describe("add", () => {
 
     test("unbound action creators are not bound to store.dispatch()", () => {
         const testPayload = 23;
-        const action = {
-            dest: testPlugin.uid,
+        const action: IAction = {
+            listener: testPlugin.uid,
             type: "ACTION1",
             payload: testPayload,
         }
@@ -97,8 +97,8 @@ describe("add", () => {
 
     test("implements the sendAction method for controller plugins", () => {
         const testController: IPlugin = registry.add(TestController);
-        const action = {
-            dest: testPlugin.uid,
+        const action: IAction = {
+            listener: testPlugin.uid,
             type: "ACTION_UNKNOWN",
             payload: 23,
         }

@@ -129,7 +129,7 @@ export default abstract class AbstractRegistry {
         const actionHandlers: IActionHandlerMap = this.getActionHandlers(actionDefs);
 
         return (state: IState = initialState, action: AnyAction | IAction): IState => {
-            if (state.uid === action.dest && actionHandlers.hasOwnProperty(action.type)) {
+            if (state.uid === action.listener && actionHandlers.hasOwnProperty(action.type)) {
                 const handler = actionHandlers[action.type];
                 const newState = handler(state, action);
                 return newState;

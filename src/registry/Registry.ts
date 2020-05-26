@@ -227,7 +227,7 @@ export default class Registry {
             actionCreators[actionDef.type] = (payload: Payload): IAction => {
                 return {
                     type: actionDef.type,
-                    dest: pluginUid,
+                    listener: pluginUid,
                     payload,
                 };
             };

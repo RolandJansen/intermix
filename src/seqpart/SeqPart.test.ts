@@ -13,16 +13,16 @@ describe("SeqPart", () => {
 
     const action1: IAction = {
         type: "NOTE",
-        dest: "abcd",
+        listener: "abcd",
         payload: {
             noteNumber: 0,
             velocity: 0,
             duration: 0,
         },
     };
-    const action2 = {
+    const action2: IAction = {
         type: "SYSEX",
-        dest: "abcd",
+        listener: "abcd",
         payload: 0x14a70f,
     };
 

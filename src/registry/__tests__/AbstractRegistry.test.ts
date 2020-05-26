@@ -114,7 +114,7 @@ test("creates action creators from action defs", () => {
     const actionCreators = registry.getActionCreators_Test(adefs, testItemUid);
     const action: IAction = actionCreators.ACTION1(555);
     expect(action.type).toMatch("ACTION1");
-    expect(action.dest).toMatch(testItemUid);
+    expect(action.listener).toMatch(testItemUid);
     expect(action.payload).toEqual(555);
 });
 
@@ -157,6 +157,7 @@ describe("getSubReducer -> reducer", () => {
     });
 
     test("returns the original state if action.dest doesn't match", () => {
+        // why doesn't this throw? "dest" should be "listener"!!!
         expect(testReducer(iniState, {
             dest: "123",
             type: "ACTION1",
@@ -180,7 +181,7 @@ describe("getSubReducer -> reducer", () => {
 
     test("returns a new state if action is valid (copy by val)", () => {
         const newState = testReducer(iniState, {
-            dest: testItemUid,
+            listener: testItemUid,
             type: "ACTION1",
             payload: 23,
         });
@@ -252,13 +253,13 @@ describe("getAllSubReducers", () => {
 
     const actionOne: IAction = {
         type: "ACTION1",
-        dest: testItemUid,
+        listener: testItemUid,
         payload: 23,
     };
 
     const actionTwo: IAction = {
         type: "ACTION2",
-        dest: testItemUid,
+        listener: testItemUid,
         payload: 42,
     };
 

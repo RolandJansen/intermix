@@ -1,6 +1,6 @@
 import SeqPart from "../../seqpart/SeqPart";
 import { store } from "../../store/store";
-import { IState } from "../interfaces";
+import { IState, IAction } from "../interfaces";
 import SeqPartRegistry from "../SeqPartRegistry";
 
 // tslint:disable: no-string-literal
@@ -56,8 +56,8 @@ describe("add", () => {
 
     test("action creators are bound to store.dispatch()", () => {
         const testPayload = { msg: "hello" };
-        const action = {
-            dest: testPart.uid,
+        const action: IAction = {
+            listener: testPart.uid,
             type: "ADD_ACTION",
             payload: testPayload,
         }
@@ -68,8 +68,8 @@ describe("add", () => {
 
     test("unbound action creators are not bound to store.dispatch()", () => {
         const testPayload = 23;
-        const action = {
-            dest: testPart.uid,
+        const action: IAction = {
+            listener: testPart.uid,
             type: "ADD_ACTION",
             payload: testPayload,
         }

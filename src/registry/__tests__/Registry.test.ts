@@ -2,7 +2,7 @@ import { Reducer } from "redux";
 import "web-audio-test-api";
 import TestPlugin from "../../plugins/TestInstrument";
 import { store } from "../../store/store";
-import { IPlugin, IState } from "../interfaces";
+import { IPlugin, IState, IAction } from "../interfaces";
 import Registry from "../Registry";
 
 // instruct Jest to use the mock class
@@ -75,10 +75,10 @@ describe("registerPlugin", () => {
     });
 
     test("bound action creators are bound to store.dispatch()", () => {
-        const action = {
+        const action: IAction = {
             type: "ACTION1",
             payload: 23,
-            dest: plug.uid,
+            listener: plug.uid,
         };
         plug.actionCreators.ACTION1(23);
         expect((store.dispatch as jest.Mock)).toBeCalledWith(action);
