@@ -9,6 +9,7 @@ import {
     Payload,
     Tuple,
     IOscAction,
+    IOscActionDef,
 } from "./interfaces";
 import RegistryItemList from "./RegistryItemList";
 
@@ -101,17 +102,39 @@ export default abstract class AbstractRegistry {
      * @param actionDefs Object with action definitions
      * @param uid The unique id of the item that gets registered
      */
-    protected getActionCreators(actionDefs: IActionDef[], uid: string): ActionCreatorsMapObject {
+    protected getActionCreators(actionDefs: IOscActionDef[], uid: string): ActionCreatorsMapObject {
         const actionCreators: ActionCreatorsMapObject = {};
 
         actionDefs.forEach((actionDef) => {
-            actionCreators[actionDef.type] = (payload: Payload): IAction => {
-                return {
-                    type: actionDef.type,
-                    listener: uid,
-                    payload,
+            actionDef.address = actionDef.address.replace("{UID}", uid);
+            const addressParts = actionDef.address.split("/");
+            const method = addressParts[addressParts.length - 1];
+
+            let type: string;
+            if (actionDef.valueName) {
+                type = actionDef.valueName;
+            } else {
+                type = method;
+            }
+
+            if (actionDef.typeTag === ",T" || actionDef.typeTag === ",F") {
+                actionCreators[method] = (): IOscAction => {
+                    return {
+                        address: actionDef.address,
+                        typeTag: actionDef.typeTag,
+                        type,
+                    };
                 };
-            };
+            } else {
+                actionCreators[method] = (payload: Payload): IOscAction => {
+                    return {
+                        address: actionDef.address,
+                        typeTag: actionDef.typeTag,
+                        type,
+                        payload,
+                    };
+                };
+            }
         });
         return actionCreators;
     }

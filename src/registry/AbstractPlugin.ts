@@ -1,6 +1,6 @@
 import { ActionCreatorsMapObject } from "redux";
 import { getRandomString } from "../helper";
-import { IActionDef, IPlugin, IPluginMetaData, IState, Tuple } from "./interfaces";
+import { IPlugin, IPluginMetaData, IState, Tuple, IOscActionDef } from "./interfaces";
 
 // in plugins müssen actionsCreators in
 // einem objekt gekapselt sein.
@@ -14,7 +14,7 @@ import { IActionDef, IPlugin, IPluginMetaData, IState, Tuple } from "./interface
 export default abstract class AbstractPlugin implements IPlugin {
 
     public abstract readonly metaData: IPluginMetaData;
-    public abstract readonly actionDefs: IActionDef[];
+    public abstract readonly actionDefs: IOscActionDef[];
     // public abstract actionCreators: ActionCreatorsMapObject;
 
     public readonly frequencyLookup: number[];

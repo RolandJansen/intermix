@@ -6,83 +6,106 @@
 // Your plugin can compute addtional actions not defined here
 // but they will not get recognized by the store.
 
-const PREFIX = "/intermix/plugin/<UID>";
+import { IOscActionDef } from "../../registry/interfaces";
+
 
 enum STATE {
     STOP,
     START,
-    PAUSE,
 }
 
-export default [
-    // {
-    //     address: PREFIX + "/start",
-    //     typeTags: ",T",
-    //     target: "state",
-    //     desc: "starts the sequencer",
-    // },
-    {
-        type: "STATE",
-        desc: "0=stop, 1=start, 2=pause",
-        defVal: STATE.STOP,
-    },
-    {
-        type: "BPM",
-        desc: "sets new BPM value",
-        minVal: 0,
-        maxVal: 240,
-        defVal: 120,
-    },
-    {
-        type: "ADD_PART",
-        desc: "adds a part to the sequencer",
-        defVal: {},
-    },
-    {
-        type: "REMOVE_PART",
-        desc: "removes a part from the sequencer",
-        defVal: "",
-    },
-    {
-        type: "ADD_TO_SCORE",
-        desc: "adds a part-reference to the score",
-        defVal: {
-            partID: "",
-            position: 0,
-        },
-    },
-    {
-        type: "REMOVE_FROM_SCORE",
-        desc: "removes a part-reference from the score",
-        defVal: {
-            partID: "",
-            position: 0,
-        },
-    },
-    {
-        type: "QUEUE",
-        desc: "saves the queue in the store and distributes it to other plugins",
-        defVal: [],
-    },
+const PREFIX = "/intermix/plugin/{UID}/";
 
+const actionDefs: IOscActionDef[] = [
     {
-        type: "LOOP",
-        desc: "sets the loop start- and endpoint in steps",
-        defVal: { start: 0, end: 63 },
+        address: PREFIX + "START",
+        typeTag: ",T",
+        valueName: "STATE",
+        description: "starts the sequencer",
     },
     {
-        type: "LOOP_ACTIVE",
-        desc: "sets the loop active/inactive",
-        defVal: false,
+        address: PREFIX + "STOP",
+        typeTag: ",F",
+        valueName: "STATE",
+        description: "stops the sequencer at the current position",
     },
     {
-        type: "JUMP_TO_POSITION",
-        desc: "jump to a specific step in the masterqueue",
-        defVal: 0,
+        address: PREFIX + "STATE",
+        typeTag: ",i",
+        range: [0, 1],
+        description: "starts or stops the sequencer",
     },
     {
-        type: "ANIMATE",
-        desc: "a function that should be invoked by the sequencer at every step",
-        defVal: (): boolean => true,
-    },
+        address: PREFIX + "BPM",
+        typeTag: ",i",
+        value: 120,
+        range: [0, 240],
+        description: "sets the BPM value",
+    }
+    // {
+    //     type: "STATE",
+    //     desc: "0=stop, 1=start, 2=pause",
+    //     defVal: STATE.STOP,
+    // },
+    // {
+    //     type: "BPM",
+    //     desc: "sets new BPM value",
+    //     minVal: 0,
+    //     maxVal: 240,
+    //     defVal: 120,
+    // },
+    // {
+    //     type: "ADD_PART",
+    //     desc: "adds a part to the sequencer",
+    //     defVal: {},
+    // },
+    // {
+    //     type: "REMOVE_PART",
+    //     desc: "removes a part from the sequencer",
+    //     defVal: "",
+    // },
+    // {
+    //     type: "ADD_TO_SCORE",
+    //     desc: "adds a part-reference to the score",
+    //     defVal: {
+    //         partID: "",
+    //         position: 0,
+    //     },
+    // },
+    // {
+    //     type: "REMOVE_FROM_SCORE",
+    //     desc: "removes a part-reference from the score",
+    //     defVal: {
+    //         partID: "",
+    //         position: 0,
+    //     },
+    // },
+    // {
+    //     type: "QUEUE",
+    //     desc: "saves the queue in the store and distributes it to other plugins",
+    //     defVal: [],
+    // },
+
+    // {
+    //     type: "LOOP",
+    //     desc: "sets the loop start- and endpoint in steps",
+    //     defVal: { start: 0, end: 63 },
+    // },
+    // {
+    //     type: "LOOP_ACTIVE",
+    //     desc: "sets the loop active/inactive",
+    //     defVal: false,
+    // },
+    // {
+    //     type: "JUMP_TO_POSITION",
+    //     desc: "jump to a specific step in the masterqueue",
+    //     defVal: 0,
+    // },
+    // {
+    //     type: "ANIMATE",
+    //     desc: "a function that should be invoked by the sequencer at every step",
+    //     defVal: (): boolean => true,
+    // },
 ];
+
+export default actionDefs;

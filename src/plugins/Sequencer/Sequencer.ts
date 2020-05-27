@@ -9,6 +9,7 @@ import {
     ILoop,
     Tuple,
     ReturnFunction,
+    IOscActionDef,
 } from "../../registry/interfaces";
 import SeqPart from "../../seqpart/SeqPart";
 import ClockWorker from "./clock.worker";
@@ -37,7 +38,7 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         desc: "The Intermix buildin sequencer",
     };
 
-    public readonly actionDefs: IActionDef[] = seqActionDefs;
+    public readonly actionDefs: IOscActionDef[] = seqActionDefs;
 
     // constants
     private readonly resolution = 64;       // shortest possible note.
