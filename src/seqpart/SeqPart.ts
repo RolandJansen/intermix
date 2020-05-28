@@ -1,5 +1,5 @@
 import { ActionCreatorsMapObject } from "redux";
-import { IAction, IActionDef, IRegistryItem, Tuple } from "../registry/interfaces";
+import { IAction, IActionDef, IRegistryItem, Tuple, IOscActionDef } from "../registry/interfaces";
 import seqPartActionDefs from "./SeqPartActionDefs";
 
 type Pattern = IAction[][];
@@ -36,7 +36,7 @@ export default class SeqPart implements IRegistryItem {
     public static stepsPerBarDefault = 16;  // global pattern resolution: 1bar = 1 full note
     public static partName = "Part";        // global default name
 
-    public readonly actionDefs: IActionDef[] = seqPartActionDefs;
+    public readonly actionDefs: IOscActionDef[] = seqPartActionDefs;
 
     /* will both be populated by the registry */
     public actionCreators: ActionCreatorsMapObject = {};

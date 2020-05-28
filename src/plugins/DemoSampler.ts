@@ -1,7 +1,9 @@
 import AbstractPlugin from "../registry/AbstractPlugin";
-import { IActionDef, IDelayedNote, IPlugin, IPluginMetaData, Tuple } from "../registry/interfaces";
+import { IDelayedNote, IPlugin, IPluginMetaData, Tuple, IOscActionDef } from "../registry/interfaces";
 
 export default class DemoSampler extends AbstractPlugin implements IPlugin {
+
+    private static readonly PREFIX = "/intermix/plugin/{UID}/"
 
     public readonly metaData: IPluginMetaData = {
         type: "instrument",
@@ -11,20 +13,18 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
         desc: "A sample player demo",
     };
 
-    public readonly actionDefs: IActionDef[] = [
+    public readonly actionDefs: IOscActionDef[] = [
         {
-            type: "VOLUME",
-            desc: "loudness",
-            minVal: 0,
-            maxVal: 127,
-            defVal: { value: 127 },
-            steps: 128,
+            address: DemoSampler.PREFIX + "volume",
+            typeTag: ",i",
+            range: [0, 127],
+            description: "Loudness of the output signal"
         },
-        {
-            type: "AUDIODATA",
-            desc: "audio data",
-            defVal: {},
-        },
+        // {
+        //     type: "AUDIODATA",
+        //     desc: "audio data",
+        //     defVal: {},
+        // },
     ];
 
     private gainNode: GainNode;

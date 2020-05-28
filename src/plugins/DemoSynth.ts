@@ -1,5 +1,5 @@
 import AbstractPlugin from "../registry/AbstractPlugin";
-import { IActionDef, IAudioController, IDelayedNote, IPlugin, IPluginMetaData, Tuple } from "../registry/interfaces";
+import { IAudioController, IDelayedNote, IPlugin, IPluginMetaData, Tuple, IOscActionDef } from "../registry/interfaces";
 /**
  * An example synthesizer plugin for intermix.js
  *
@@ -17,6 +17,8 @@ import { IActionDef, IAudioController, IDelayedNote, IPlugin, IPluginMetaData, T
  */
 export default class DemoSynth extends AbstractPlugin implements IPlugin {
 
+    private static readonly PREFIX = "/intermix/plugin/{UID}/"
+
     public readonly metaData: IPluginMetaData = {
         type: "instrument",
         name: "Demo Synth",
@@ -25,22 +27,18 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
         desc: "A simple synthesizer demo",
     };
 
-    public readonly actionDefs: IActionDef[] = [
+    public readonly actionDefs: IOscActionDef[] = [
         {
-            type: "ENV_ATTACK",
-            desc: "Envelope Attack",
-            minVal: 0,
-            maxVal: 1,
-            defVal: { value: 0 },
-            steps: 128,
+            address: DemoSynth.PREFIX + "envAttack",
+            typeTag: ",sff",
+            value: ["Envelope Attack", 0.0, 0.0],
+            description: "Filter-Envelope Attack",
         },
         {
-            type: "ENV_DECAY",
-            desc: "Envelope Decay",
-            minVal: 0,
-            maxVal: 1,
-            defVal: { value: 0.5 },
-            steps: 128,
+            address: DemoSynth.PREFIX + "envDecay",
+            typeTag: ",sff",
+            value: ["Envelope Decay", 0.0, 0.0],
+            description: "Filter-Envelope Decay",
         },
     ];
 

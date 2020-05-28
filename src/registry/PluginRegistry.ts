@@ -3,7 +3,7 @@ import RegistryItemList from "./RegistryItemList";
 import { IPlugin, IControllerPlugin, IAction } from "./interfaces";
 import { store } from "../store/store";
 import { bindActionCreators } from "redux";
-import { commonActionDefs } from "./commonActionDefs";
+import commonActionDefs from "./commonActionDefs";
 
 export default class PluginRegistry extends AbstractRegistry {
 

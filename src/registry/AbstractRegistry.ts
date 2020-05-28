@@ -2,7 +2,6 @@ import { ActionCreatorsMapObject, AnyAction, Reducer, ReducersMapObject, Store }
 import { store } from "../store/store";
 import {
     IAction,
-    IActionDef,
     IActionHandlerMap,
     IRegistryItem,
     IState,
@@ -148,7 +147,7 @@ export default abstract class AbstractRegistry {
      * @param initialState Initial state of the sub-state-tree for this reducer
      * @param handlers Lookup table: action-types -> handlers
      */
-    protected getSubReducer(actionDefs: IActionDef[], initialState: IState): Reducer {
+    protected getSubReducer(actionDefs: IOscActionDef[], initialState: IState): Reducer {
         const actionHandlers: IActionHandlerMap = this.getActionHandlers(actionDefs);
 
         return (state: IState = initialState, action: AnyAction | IAction): IState => {
@@ -167,13 +166,23 @@ export default abstract class AbstractRegistry {
      * https://redux.js.org/recipes/reducingboilerplate#generating-reducers
      * @param actionDefs An array of action definitions (see IActionDef)
      */
-    protected getActionHandlers(actionDefs: IActionDef[]): IActionHandlerMap {
+    protected getActionHandlers(actionDefs: IOscActionDef[]): IActionHandlerMap {
         const handlers: IActionHandlerMap = {};
 
         actionDefs.forEach((actionDef) => {
-            handlers[actionDef.type] = (state: IState, action: AnyAction | IAction): IState => {
+            const addressParts = actionDef.address.split("/");
+            const method = addressParts[addressParts.length - 1];
+            let type: string;
+
+            if (actionDef.valueName) {
+                type = actionDef.valueName;
+            } else {
+                type = method;
+            }
+
+            handlers[method] = (state: IState, action: AnyAction | IAction): IState => {
                 return Object.assign({}, state, {
-                    [action.type]: action.payload,
+                    [type]: action.payload,
                 });
             };
         });
@@ -184,12 +193,22 @@ export default abstract class AbstractRegistry {
      * Generates the initial state for a registry item from
      * its ActionDef object.
      */
-    protected getInitialState(actionDefs: IActionDef[], uid: string): IState {
+    protected getInitialState(actionDefs: IOscActionDef[], uid: string): IState {
         const iState: IState = {};
 
         iState.uid = uid;  // readonly field
         actionDefs.forEach((actionDef) => {
-            iState[actionDef.type] = actionDef.defVal;
+            const addressParts = actionDef.address.split("/");
+            const method = addressParts[addressParts.length - 1];
+            let type: string;
+
+            if (actionDef.valueName) {
+                type = actionDef.valueName;
+            } else {
+                type = method;
+            }
+
+            iState[type] = actionDef.value;
         });
 
         return iState;

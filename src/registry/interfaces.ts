@@ -5,7 +5,7 @@ export type ReturnFunction<ValueType> = () => ValueType;
 
 export interface IRegistryItem {
     uid: string;
-    actionDefs: IActionDef[] | IOscActionDef[];
+    actionDefs: IOscActionDef[];
     actionCreators: ActionCreatorsMapObject;
     unboundActionCreators: ActionCreatorsMapObject;
     onChange: (changed: Tuple) => boolean;
@@ -95,8 +95,8 @@ export interface IOscAction extends Action {
 export interface IOscActionDef {
     address: string;
     typeTag: string;
-    valueName?: string;
     value?: number | string | (number|string)[];
+    valueName?: string;
     range?: [number, number];
     description?: string;
 }
