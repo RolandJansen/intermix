@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ActionCreatorsMapObject } from "redux";
 import AbstractPlugin from "../registry/AbstractPlugin";
-import { IActionDef, IPlugin, IPluginMetaData, Tuple, IControllerPlugin, IAction } from "../registry/interfaces";
+import { IPluginMetaData, Tuple, IControllerPlugin, IAction, IOscActionDef } from "../registry/interfaces";
 
 /**
  * This class will be used to indirectly
@@ -18,20 +18,20 @@ export default class TestPlugin extends AbstractPlugin implements IControllerPlu
         authors:  "Roland Jansen",
         desc:    "The simplest possible controller plugin to be used in tests",
     };
-    public readonly actionDefs: IActionDef[] = [
+    public readonly actionDefs: IOscActionDef[] = [
         {
-            type: "ACTION1",
-            desc: "action one",
-            minVal: 0,
-            maxVal: 127,
-            defVal: 0,
+            address: "/intermix/plugin/{UID}/ACTION1",
+            typeTag: ",i",
+            value: 0,
+            range: [0, 127],
+            description: "action one",
         },
         {
-            type: "ACTION2",
-            desc: "action two",
-            minVal: 0,
-            maxVal: 127,
-            defVal: 1,
+            address: "/intermix/plugin/{UID}/ACTION2",
+            typeTag: ",i",
+            value: 1,
+            range: [0, 127],
+            description: "action two",
         },
     ];
 
