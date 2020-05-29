@@ -2,23 +2,25 @@
 import { ActionCreatorsMapObject, Reducer, ReducersMapObject } from "redux";
 import { store } from "../../store/store";
 import AbstractRegistry from "../AbstractRegistry";
-import { IAction, IActionDef, IActionHandlerMap, IRegistryItem, IState, Tuple } from "../interfaces";
+import { IAction, IActionDef, IActionHandlerMap, IRegistryItem, IState, Tuple, IOscActionDef } from "../interfaces";
 import RegistryItemList from "../RegistryItemList";
 
 // instruct Jest to use the mock class
 // instead of the real one globaly.
 jest.mock("../../store/store");
 
-const testActionDefs: IActionDef[] = [
+const testActionDefs: IOscActionDef[] = [
     {
-        type: "ACTION1",
-        desc: "Does nothing",
-        defVal: 23,
+        address: "/test/{UID}/ACTION1",
+        typeTag: "i",
+        value: 23,
+        description: "Does nothing",
     },
     {
-        type: "ACTION2",
-        desc: "Does nothing also",
-        defVal: 42,
+        address: "/ACTION2",
+        typeTag: "i",
+        value: 42,
+        description: "Does nothing also",
     },
 ];
 
@@ -29,7 +31,7 @@ const testActionDefs: IActionDef[] = [
 class TestItem implements IRegistryItem {
     public uid = "";
 
-    public readonly actionDefs: IActionDef[] = testActionDefs;
+    public readonly actionDefs: IOscActionDef[] = testActionDefs;
     public actionCreators: ActionCreatorsMapObject = {};
     public unboundActionCreators: ActionCreatorsMapObject = {};
 
@@ -50,7 +52,7 @@ class TestItem implements IRegistryItem {
  */
 class TestRegistry extends AbstractRegistry {
     public itemList: RegistryItemList<TestItem>;
-    public itemActionDefs: IActionDef[];
+    public itemActionDefs: IOscActionDef[];
 
     constructor() {
         super();
@@ -78,19 +80,19 @@ class TestRegistry extends AbstractRegistry {
         return this.getChanged(currentState, nextState);
     }
 
-    public getActionCreators_Test(adefs: IActionDef[], uid: string): ActionCreatorsMapObject {
-        return this.getActionCreators(adefs, uid);
+    public getActionCreators_Test(actionDefs: IOscActionDef[], uid: string): ActionCreatorsMapObject {
+        return this.getActionCreators(actionDefs, uid);
     }
 
-    public getInitialState_Test(actionDefs: IActionDef[], uid: string): IState {
+    public getInitialState_Test(actionDefs: IOscActionDef[], uid: string): IState {
         return this.getInitialState(actionDefs, uid);
     }
 
-    public getActionHandlers_Test(actionDefs: IActionDef[]): IActionHandlerMap {
+    public getActionHandlers_Test(actionDefs: IOscActionDef[]): IActionHandlerMap {
         return this.getActionHandlers(actionDefs);
     }
 
-    public getSubReducer_Test(actionDefs: IActionDef[], initialState: IState): Reducer {
+    public getSubReducer_Test(actionDefs: IOscActionDef[], initialState: IState): Reducer {
         return this.getSubReducer(actionDefs, initialState);
     }
 }
@@ -113,8 +115,8 @@ test("creates action creators from action defs", () => {
     const adefs = testItem.actionDefs;
     const actionCreators = registry.getActionCreators_Test(adefs, testItemUid);
     const action: IAction = actionCreators.ACTION1(555);
+    expect(action.address).toMatch(`/test/${testItemUid}/ACTION1`);
     expect(action.type).toMatch("ACTION1");
-    expect(action.listener).toMatch(testItemUid);
     expect(action.payload).toEqual(555);
 });
 
@@ -138,7 +140,7 @@ test("creates action handlers (sub reducers)", () => {
 describe("getSubReducer -> reducer", () => {
 
     let iniState: IState;
-    let adefs: IActionDef[];
+    let adefs: IOscActionDef[];
     let testReducer: Reducer;
 
     beforeEach(() => {

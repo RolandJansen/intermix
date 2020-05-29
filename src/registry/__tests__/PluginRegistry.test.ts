@@ -1,10 +1,11 @@
 /// <reference path="../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
 import PluginRegistry from "../PluginRegistry";
-import { IPlugin, IState, IActionDef, IAction } from "../interfaces";
+import { IPlugin, IState, IAction, IOscActionDef, IOscAction } from "../interfaces";
 import TestController from "../../plugins/TestController";
 import TestInstrument from "../../plugins/TestInstrument";
 import { store } from "../../store/store";
+import commonActionDefs from "../../registry/commonActionDefs";
 
 // tslint:disable: no-string-literal
 // We use string-literals to test private functions like:
@@ -45,18 +46,13 @@ describe("add", () => {
     });
 
     test("adds action defs for common actions to the plugin instance", () => {
-        let noteDef: IActionDef = {
-            type: "NONE",
-            desc: "nothing",
-            defVal: 0,
-        };
-        testPlugin.actionDefs.forEach((actionDef: IActionDef) => {
-            if (actionDef.type === "NOTE") {
-                noteDef = actionDef;
-            }
-        })
-
-        expect(noteDef.type).toEqual("NOTE");
+        // testPlugin.actionDefs.forEach((actionDef: IOscActionDef) => {
+        //     if (actionDef.address === "NOTE") {
+        //         noteDef = actionDef;
+        //     }
+        // })
+        const noteAction: IOscActionDef = commonActionDefs[0];
+        expect(testPlugin.actionDefs).toContainEqual(noteAction);
     });
 
     test("adds action creator functions to the plugin instance", () => {
@@ -73,8 +69,9 @@ describe("add", () => {
 
     test("action creators are bound to store.dispatch()", () => {
         const testPayload = 23;
-        const action: IAction = {
-            listener: testPlugin.uid,
+        const action: IOscAction = {
+            address: `/intermix/plugin/${testPlugin.uid}/ACTION1`,
+            typeTag: ",i",
             type: "ACTION1",
             payload: testPayload,
         }

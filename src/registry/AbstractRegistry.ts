@@ -103,20 +103,25 @@ export default abstract class AbstractRegistry {
      */
     protected getActionCreators(actionDefs: IOscActionDef[], uid: string): ActionCreatorsMapObject {
         const actionCreators: ActionCreatorsMapObject = {};
+        // console.log("uid in action creator (should be displaye before the other): " + uid);
 
         actionDefs.forEach((actionDef) => {
-            actionDef.address = actionDef.address.replace("{UID}", uid);
-            const addressParts = actionDef.address.split("/");
+            // make a physical copy of actionDef. If not, we would
+            // replace {UID} in the original and all following instances
+            // would have the same UID in its address.
+            const actionDefCopy = Object.assign({}, actionDef);
+            actionDefCopy.address = actionDefCopy.address.replace("{UID}", uid);
+            const addressParts = actionDefCopy.address.split("/");
             const method = addressParts[addressParts.length - 1];
 
             let type: string;
-            if (actionDef.valueName) {
-                type = actionDef.valueName;
+            if (actionDefCopy.valueName) {
+                type = actionDefCopy.valueName;
             } else {
                 type = method;
             }
 
-            if (actionDef.typeTag === ",T" || actionDef.typeTag === ",F") {
+            if (actionDefCopy.typeTag === ",T" || actionDefCopy.typeTag === ",F") {
                 actionCreators[method] = (): IOscAction => {
                     return {
                         address: actionDef.address,
@@ -127,8 +132,8 @@ export default abstract class AbstractRegistry {
             } else {
                 actionCreators[method] = (payload: Payload): IOscAction => {
                     return {
-                        address: actionDef.address,
-                        typeTag: actionDef.typeTag,
+                        address: actionDefCopy.address,
+                        typeTag: actionDefCopy.typeTag,
                         type,
                         payload,
                     };

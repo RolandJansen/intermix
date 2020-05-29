@@ -2,7 +2,7 @@
 import "web-audio-test-api";
 import Sequencer from "../Sequencer";
 import SeqPart from "../../../seqpart/SeqPart";
-import { ILoop, IAction } from "../../../registry/interfaces";
+import { ILoop, IAction, IOscActionDef } from "../../../registry/interfaces";
 
 // We use string-literals to test private functions like:
 // objectName["privateMethod"](parameters)
@@ -39,10 +39,11 @@ describe("Sequencer", () => {
     });
 
     test("has action definitions", () => {
-        const stateAction = {
-            type: "STATE",
-            desc: "0=stop, 1=start, 2=pause",
-            defVal: 0,
+        const stateAction: IOscActionDef = {
+            address: "/intermix/plugin/{UID}/STATE",
+            typeTag: ",i",
+            range: [0, 1],
+            description: "starts or stops the sequencer",
         };
         expect(sequencer.actionDefs).toContainEqual(stateAction);
     });

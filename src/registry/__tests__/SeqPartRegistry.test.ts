@@ -1,14 +1,7 @@
 import SeqPart from "../../seqpart/SeqPart";
 import { store } from "../../store/store";
-import { IState, IAction } from "../interfaces";
+import { IState, IOscAction } from "../interfaces";
 import SeqPartRegistry from "../SeqPartRegistry";
-
-// tslint:disable: no-string-literal
-// We use string-literals to test private functions like:
-// objectName["privateMethod"](parameters)
-// Normally this could be considered as bad style ("test API only")
-// but here we want to check the values of private fields to
-// check the result of certain api calls.
 
 // instruct Jest to use the mock class
 // instead of the real one globaly.
@@ -45,36 +38,38 @@ describe("add", () => {
 
     test("adds action creator functions to the SeqPart instance", () => {
         const acKeys = Object.keys(testPart.actionCreators);
-        expect(acKeys).toContain("ADD_ACTION");
-        expect(acKeys).toContain("REMOVE_ACTION");
+        expect(acKeys).toContain("addNote");
+        expect(acKeys).toContain("deleteNote");
     });
 
     test("adds unbound action creators to the plugin instance", () => {
         const acKeys = Object.keys(testPart.unboundActionCreators);
-        expect(acKeys).toContain("ADD_ACTION");
+        expect(acKeys).toContain("addNote");
     });
 
     test("action creators are bound to store.dispatch()", () => {
-        const testPayload = { msg: "hello" };
-        const action: IAction = {
-            listener: testPart.uid,
-            type: "ADD_ACTION",
+        const testPayload = [23, 5, 0.5, 0.5];
+        const action: IOscAction = {
+            address: `/intermix/seqpart/${testPart.uid}/addNote`,
+            typeTag: ",iiff",
+            type: "addNote",
             payload: testPayload,
         }
 
-        testPart.actionCreators.ADD_ACTION(testPayload);
+        testPart.actionCreators.addNote(testPayload);
         expect((store.dispatch as jest.Mock)).toHaveBeenCalledWith(action);
     });
 
     test("unbound action creators are not bound to store.dispatch()", () => {
-        const testPayload = 23;
-        const action: IAction = {
-            listener: testPart.uid,
-            type: "ADD_ACTION",
+        const testPayload = [23, 5, 0.5, 0.5];
+        const action: IOscAction = {
+            address: `/intermix/seqpart/${testPart.uid}/addNote`,
+            typeTag: ",iiff",
+            type: "addNote",
             payload: testPayload,
         }
 
-        testPart.unboundActionCreators.ADD_ACTION(testPayload);
+        testPart.unboundActionCreators.addNote(testPayload);
         expect((store.dispatch as jest.Mock)).not.toHaveBeenCalledWith(action);
     });
 

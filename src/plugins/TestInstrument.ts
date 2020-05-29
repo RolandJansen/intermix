@@ -1,5 +1,5 @@
 import AbstractPlugin from "../registry/AbstractPlugin";
-import { IActionDef, IPlugin, IPluginMetaData, Tuple } from "../registry/interfaces";
+import { IPlugin, IPluginMetaData, Tuple, IOscActionDef } from "../registry/interfaces";
 
 /**
  * This class will be used to indirectly
@@ -16,20 +16,20 @@ export default class TestPlugin extends AbstractPlugin implements IPlugin {
         authors:  "Roland Jansen",
         desc:    "The simplest possible plugin to be used in tests",
     };
-    public readonly actionDefs: IActionDef[] = [
+    public readonly actionDefs: IOscActionDef[] = [
         {
-            type: "ACTION1",
-            desc: "action one",
-            minVal: 0,
-            maxVal: 127,
-            defVal: 0,
+            address: "/intermix/plugin/{UID}/ACTION1",
+            typeTag: ",i",
+            value: 0,
+            range: [0, 127],
+            description: "action one",
         },
         {
-            type: "ACTION2",
-            desc: "action two",
-            minVal: 0,
-            maxVal: 127,
-            defVal: 1,
+            address: "/intermix/plugin/{UID}/ACTION2",
+            typeTag: ",i",
+            value: 1,
+            range: [0, 127],
+            description: "action two",
         },
     ];
 

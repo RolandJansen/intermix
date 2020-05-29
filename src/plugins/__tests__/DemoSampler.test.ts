@@ -1,6 +1,6 @@
 /// <reference path="../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
-import { IAction, IDelayedNote } from "../../registry/interfaces";
+import { IAction, IDelayedNote, IOscActionDef } from "../../registry/interfaces";
 import DemoSampler from "../DemoSampler";
 
 // tslint:disable: no-string-literal
@@ -29,13 +29,11 @@ describe("DemoSampler", () => {
     });
 
     test("has action definitions", () => {
-        const actionDef = {
-            type: "VOLUME",
-            desc: "loudness",
-            minVal: 0,
-            maxVal: 127,
-            defVal: { value: 127 },
-            steps: 128,
+        const actionDef: IOscActionDef = {
+            address: `/intermix/plugin/{UID}/volume`,
+            typeTag: ",i",
+            range: [0, 127],
+            description: "Loudness of the output signal"
         };
         expect(sampler.actionDefs).toContainEqual(actionDef);
     });

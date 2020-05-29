@@ -8,12 +8,13 @@ const preprocessOSC: Middleware = (store) => (next) => (action): AnyAction => {
 
     if (itsAnOscAction(action)) {
         const address: string[] = action.address.split("/");
-        if (address[0] === "intermix") {
-            const type = address[3]; // there could be an explicit value type action.valueName
+
+        if (address[1] === "intermix") {
+            const type = address[4]; // there could be an explicit value type action.valueName
             toBeDispatched = {
                 type,
-                listenerType: address[1],
-                listener: address[2],
+                listenerType: address[2],
+                listener: address[3],
                 payload: action.payload,
             }
         }
@@ -22,11 +23,11 @@ const preprocessOSC: Middleware = (store) => (next) => (action): AnyAction => {
         // and let it decides what to do.
         // In the store we just set "bundle" to the new timetag.
         const address: string[] = action.elements[0].address.split("/");
-        if (address[0] === "intermix") {
+        if (address[1] === "intermix") {
             toBeDispatched = {
                 type: "BUNDLE",
-                listenerType: address[1],
-                listener: address[2],
+                listenerType: address[2],
+                listener: address[3],
                 payload: action.timetag,
                 additional: action.elements,
             }

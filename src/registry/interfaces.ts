@@ -89,7 +89,6 @@ export interface IOscAction extends Action {
     address: string;
     typeTag: string;
     payload?: number | string | (number|string)[];
-    valueName?: string;
 }
 
 export interface IOscActionDef {

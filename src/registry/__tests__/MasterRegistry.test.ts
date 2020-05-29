@@ -2,16 +2,9 @@
 import "web-audio-test-api";
 import MasterRegistry from "../MasterRegistry";
 import TestInstrument from "../../plugins/TestInstrument";
-import { IPlugin, IAction } from "../interfaces";
+import { IPlugin, IAction, IOscAction } from "../interfaces";
 import { store } from "../../store/store";
 import SeqPart from "../../seqpart/SeqPart";
-
-// tslint:disable: no-string-literal
-// We use string-literals to test private functions like:
-// objectName["privateMethod"](parameters)
-// Normally this could be considered as bad style ("test API only")
-// but here we want to check the values of private fields to
-// check the result of certain api calls.
 
 // instruct Jest to use the mock class
 // instead of the real one globaly.
@@ -64,6 +57,8 @@ describe("PluginRegistry", () => {
         })
 
         test("adds reducers for the plugin to the store", () => {
+            // STOP: Why does this work? It should NOT work!!!
+            // or is it the middleware? -> Investigate!!!
             const action1: IAction = {
                 listener: pluginId,
                 type: "ACTION1",
@@ -136,13 +131,7 @@ describe("PluginRegistry", () => {
 
 describe("SeqPart Registry", () => {
 
-    const payload = {
-        step: 5,
-        action: {
-            type: "FANTASYACTION",
-            payload: 23,
-        }
-    }
+    const payload = [ 1, 2, 3, 5 ];
 
     let part: SeqPart;
     let partId: string;
@@ -154,18 +143,21 @@ describe("SeqPart Registry", () => {
 
     describe("addSeqPart", () => {
 
-        let action1: IAction;
-        let action2: IAction;
+        let action1: IOscAction;
+        let action2: IOscAction;
 
         beforeEach(() => {
+            // auch mit "konventionellen actions testen und mit type"
             action1 = {
-                listener: partId,
-                type: "ADD_ACTION",
+                address: `/intermix/seqpart/${partId}/addNote`,
+                typeTag: ",iiff",
+                type: "addNote",
                 payload,
             }
             action2 = {
-                listener: partId,
-                type: "REMOVE_ACTION",
+                address: `/intermix/seqpart/${partId}/deleteNote`,
+                typeTag: ",iiff",
+                type: ",deleteNote",
                 payload,
             }
         })
@@ -179,26 +171,20 @@ describe("SeqPart Registry", () => {
             expect(state[partId]).toBeDefined();
         })
 
-        test("store entry contains sequencer part properties", () => {
-            const state = store.getState();
-            expect(state[partId].ADD_ACTION.step).toBe(0);
-            expect(state[partId].REMOVE_ACTION.step).toBe(0);
-        })
-
         test("adds reducers for the seqpart to the store", () => {
             store.dispatch(action1);
             store.dispatch(action2);
 
             const state = store.getState();
-            expect(state[partId].ADD_ACTION).toEqual(payload);
-            expect(state[partId].REMOVE_ACTION).toEqual(payload);
+            expect(state[partId].addNote).toEqual(payload);
+            expect(state[partId].deleteNote).toEqual(payload);
         })
 
         test("adds action creators to the part", () => {
-            part.actionCreators.ADD_ACTION(payload);
+            part.actionCreators.addNote(payload);
 
             const state = store.getState();
-            expect(state[partId].ADD_ACTION).toBe(payload);
+            expect(state[partId].addNote).toBe(payload);
         })
 
         test("subscribes the part to dispatch", () => {
@@ -231,7 +217,7 @@ describe("SeqPart Registry", () => {
             // it doesn't alter the state, there is no
             // appropriate reducer present.
             const oldState = store.getState();
-            part.actionCreators.ADD_ACTION(237);
+            part.actionCreators.addNote(237);
             const nextState = store.getState();
             expect(oldState).toEqual(nextState);
         })
@@ -278,25 +264,22 @@ describe("SeqPart Registry", () => {
         })
 
         test("takes a seqPart id and returns its action creators", () => {
-            const expected = {
-                step: 0,
-                action: {},
-            }
+            const expected = [0, 0, 0, 0];
             const ac = registry.getActionCreators(partId);
             const oldState = store.getState();
-            expect(oldState[partId].ADD_ACTION).toEqual(expected);
-            expect(oldState[partId].REMOVE_ACTION).toEqual(expected);
-            ac.ADD_ACTION(payload);
-            ac.REMOVE_ACTION(payload);
+            expect(oldState[partId].addNote).toEqual(expected);
+            expect(oldState[partId].deleteNote).toEqual(expected);
+            ac.addNote(payload);
+            ac.deleteNote(payload);
             const nextState = store.getState();
-            expect(nextState[partId].ADD_ACTION).toBe(payload);
-            expect(nextState[partId].REMOVE_ACTION).toBe(payload);
+            expect(nextState[partId].addNote).toBe(payload);
+            expect(nextState[partId].deleteNote).toBe(payload);
         })
 
         test("takes a seqPart id and returns its unbound action creators", () => {
             const ac = registry.getActionCreators(partId, "unbound");
             const oldState = store.getState();
-            ac.ADD_ACTION(23);
+            ac.addNote(23);
             const nextState = store.getState();
             expect(oldState).toEqual(nextState);  // nothing changed = action was not dispatched
         })

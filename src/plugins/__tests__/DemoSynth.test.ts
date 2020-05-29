@@ -30,12 +30,10 @@ describe("DemoSynth", () => {
 
     test("has action definitions", () => {
         const actionDef = {
-            type: "ENV_ATTACK",
-            desc: "Envelope Attack",
-            minVal: 0,
-            maxVal: 1,
-            defVal: { value: 0 },
-            steps: 128,
+            address: "/intermix/plugin/{UID}/envAttack",
+            typeTag: ",sff",
+            value: ["Envelope Attack", 0.0, 0.0],
+            description: "Filter-Envelope Attack",
         };
         expect(synth.actionDefs).toContainEqual(actionDef);
     });
