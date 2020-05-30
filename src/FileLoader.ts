@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 // this is just a stub. File loader will be implemented in 0.5.0
 // here are some usefull links:
 // https://www.html5rocks.com/en/tutorials/file/dndfiles/
