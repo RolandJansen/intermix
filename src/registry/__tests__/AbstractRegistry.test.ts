@@ -2,7 +2,7 @@
 import { ActionCreatorsMapObject, Reducer, ReducersMapObject } from "redux";
 import { store } from "../../store/store";
 import AbstractRegistry from "../AbstractRegistry";
-import { IAction, IActionDef, IActionHandlerMap, IRegistryItem, IState, Tuple, IOscActionDef } from "../interfaces";
+import { IAction, IActionHandlerMap, IRegistryItem, IState, Tuple, IOscActionDef } from "../interfaces";
 import RegistryItemList from "../RegistryItemList";
 
 // instruct Jest to use the mock class

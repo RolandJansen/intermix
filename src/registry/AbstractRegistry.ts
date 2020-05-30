@@ -186,7 +186,7 @@ export default abstract class AbstractRegistry {
 
             if (actionDef.process) {
                 const newValue: object = actionDef.process();
-                handlers[method] = (state: IState, action: AnyAction | IAction): IState => {
+                handlers[method] = (state: IState): IState => {
                     return Object.assign({}, state, newValue);
                 };
             } else {

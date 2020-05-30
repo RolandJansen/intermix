@@ -15,7 +15,7 @@ beforeEach(() => {
     tickCounter = [];
     receivedInterval = 0;
 
-    clock.onmessage = async (e: MessageEvent) => {
+    clock.onmessage = async (e: MessageEvent): Promise<void> => {
         if (e.data === "tick") {
             tickCounter.push(e.data);
         } else if (e.data.interval) {

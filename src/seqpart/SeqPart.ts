@@ -1,5 +1,5 @@
 import { ActionCreatorsMapObject } from "redux";
-import { IAction, IActionDef, IRegistryItem, Tuple, IOscActionDef } from "../registry/interfaces";
+import { IAction, IRegistryItem, Tuple, IOscActionDef } from "../registry/interfaces";
 import seqPartActionDefs from "./SeqPartActionDefs";
 
 type Pattern = IAction[][];

@@ -3,7 +3,8 @@ import { IState, IOscAction, IOscBundleAction } from "../registry/interfaces";
 
 // We don't want to preprocess OSC actions in every
 // single reducer so we put it into this middleware
-const preprocessOSC: Middleware = (store) => (next) => (action): AnyAction => {
+
+const preprocessOSC: Middleware = () => (next) => (action): AnyAction => {
     let toBeDispatched: AnyAction = action;
 
     if (itsAnOscAction(action)) {
