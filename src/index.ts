@@ -3,8 +3,8 @@ import { IPlugin, IState } from "./registry/interfaces";
 import MasterRegistry from "./registry/MasterRegistry";
 import { store } from "./store/store";
 import Sequencer from "./plugins/Sequencer/Sequencer";
-import DemoSampler from "./plugins/DemoSampler";
-import DemoSynth from "./plugins/DemoSynth";
+import DemoSampler from "./plugins/Sampler";
+import DemoSynth from "./plugins/Synth";
 import SeqPart from "./seqpart/SeqPart";
 
 // system components

@@ -21,10 +21,10 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
 
     public readonly metaData: IPluginMetaData = {
         type: "instrument",
-        name: "Demo Synth",
+        name: "Intermix Synth",
         version: "1.0.0",
         authors: "R. Jansen",
-        desc: "A simple synthesizer demo",
+        desc: "A simple synthesizer",
     };
 
     public readonly actionDefs: IOscActionDef[] = [

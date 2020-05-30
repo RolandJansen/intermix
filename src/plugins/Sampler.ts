@@ -7,10 +7,10 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
 
     public readonly metaData: IPluginMetaData = {
         type: "instrument",
-        name: "Demo Sampler",
+        name: "Intermix Sampler",
         version: "1.0.0",
         authors: "R. Jansen",
-        desc: "A sample player demo",
+        desc: "A sample player",
     };
 
     public readonly actionDefs: IOscActionDef[] = [

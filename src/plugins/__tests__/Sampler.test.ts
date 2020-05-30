@@ -1,7 +1,7 @@
 /// <reference path="../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
 import { IAction, IDelayedNote, IOscActionDef } from "../../registry/interfaces";
-import DemoSampler from "../DemoSampler";
+import DemoSampler from "../Sampler";
 
 // tslint:disable: no-string-literal
 // We use string-literals to test private functions like:
@@ -25,7 +25,7 @@ describe("DemoSampler", () => {
 
     test("has a metadata section", () => {
         expect(sampler.metaData.type).toEqual("instrument");
-        expect(sampler.metaData.name).toEqual("Demo Sampler");
+        expect(sampler.metaData.name).toEqual("Intermix Sampler");
     });
 
     test("has action definitions", () => {
