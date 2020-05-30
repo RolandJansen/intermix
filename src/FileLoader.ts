@@ -5,14 +5,14 @@
 // https://developer.mozilla.org/en-US/docs/Web/API/File/Using_files_from_web_applications
 // in the last link see the section about object urls to load files without gui
 
-export default class FileLoader {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public loadPlugin(pluginSrcFile: Blob): void {
-        // not implemented yet
-    }
+// export default class FileLoader {
+//     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+//     public loadPlugin(pluginSrcFile: Blob): void {
+//         // not implemented yet
+//     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public loadAudio(audioFile: Blob): void {
-        // not implemented yet
-    }
-}
+//     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+//     public loadAudio(audioFile: Blob): void {
+//         // not implemented yet
+//     }
+// }
