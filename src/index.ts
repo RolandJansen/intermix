@@ -30,8 +30,7 @@ export function getState(): IState {
 }
 
 export function dispatch(action: Action): void {
-    const dispatched = store.dispatch(action);
-    console.log(dispatched);
+    store.dispatch(action);
 }
 
 // useful if the browser doesn't allow ac to start

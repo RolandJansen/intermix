@@ -1,9 +1,9 @@
 /// <reference path="../../typings/web-audio-test-api.d.ts" />
-import { ActionCreatorsMapObject } from "redux";
+// import { ActionCreatorsMapObject } from "redux";
 import "web-audio-test-api";
-import { dispatch, getActionCreators, getAudioContext, getState, resumeAudioContext } from "../index";
-import { IAction, IGlobalActionCreators, IState } from "../registry/interfaces";
-import SeqPart from "../seqpart/SeqPart";
+// import { dispatch, getActionCreators, getAudioContext, getState, resumeAudioContext } from "../index";
+// import { IAction, IGlobalActionCreators, IState } from "../registry/interfaces";
+// import SeqPart from "../seqpart/SeqPart";
 
 /**
  * Integration tests for the intermix API
