@@ -5,7 +5,6 @@ import AbstractRegistry from "./AbstractRegistry";
 import RegistryItemList from "./RegistryItemList";
 
 export default class SeqPartRegistry extends AbstractRegistry {
-
     public itemList: RegistryItemList<SeqPart>;
 
     public constructor() {
@@ -44,5 +43,4 @@ export default class SeqPartRegistry extends AbstractRegistry {
         // remove from item list
         this.itemList.remove(itemId);
     }
-
 }

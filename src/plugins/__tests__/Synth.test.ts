@@ -91,7 +91,7 @@ describe("DemoSynth", () => {
         test("should disconnect nodes on stop", () => {
             synth.onChange(["NOTE", note]);
             const oscNode = synth["queue"][0];
-            oscNode.disconnect = jest.fn();  // fake disconnect call
+            oscNode.disconnect = jest.fn(); // fake disconnect call
             synth.onChange(["STOP", true]);
             expect(oscNode.disconnect).toHaveBeenCalledTimes(1);
         });
@@ -114,7 +114,5 @@ describe("DemoSynth", () => {
             synth.onChange(["ENV_DECAY", { value: 0.23 }]);
             expect(synth["decay"]).toEqual(0.23);
         });
-
     });
-
 });

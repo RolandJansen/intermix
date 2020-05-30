@@ -36,11 +36,9 @@ beforeEach(() => {
     ac = new AudioContext();
     registry = new PluginRegistry(ac);
     testPlugin = registry.add(TestInstrument);
-
 });
 
 describe("add", () => {
-
     test("creates a plugin instance", () => {
         expect(testPlugin.metaData.name).toMatch("Test-Instrument");
     });
@@ -74,10 +72,10 @@ describe("add", () => {
             typeTag: ",i",
             type: "ACTION1",
             payload: testPayload,
-        }
+        };
 
         testPlugin.actionCreators.ACTION1(testPayload);
-        expect((store.dispatch as jest.Mock)).toHaveBeenCalledWith(action);
+        expect(store.dispatch as jest.Mock).toHaveBeenCalledWith(action);
     });
 
     test("unbound action creators are not bound to store.dispatch()", () => {
@@ -86,10 +84,10 @@ describe("add", () => {
             listener: testPlugin.uid,
             type: "ACTION1",
             payload: testPayload,
-        }
+        };
 
         testPlugin.unboundActionCreators.ACTION1(testPayload);
-        expect((store.dispatch as jest.Mock)).not.toHaveBeenCalledWith(action);
+        expect(store.dispatch as jest.Mock).not.toHaveBeenCalledWith(action);
     });
 
     test("implements the sendAction method for controller plugins", () => {
@@ -98,18 +96,16 @@ describe("add", () => {
             listener: testPlugin.uid,
             type: "ACTION_UNKNOWN",
             payload: 23,
-        }
+        };
 
         testController.sendAction(action);
-        expect((store.dispatch as jest.Mock)).toHaveBeenCalledWith(action);
+        expect(store.dispatch as jest.Mock).toHaveBeenCalledWith(action);
     });
 
     // skipping wireAudio tests because they will be obsolete by v0.6.0
-
 });
 
 describe("remove", () => {
-
     beforeEach(() => {
         jest.spyOn(testPlugin, "unsubscribe");
     });

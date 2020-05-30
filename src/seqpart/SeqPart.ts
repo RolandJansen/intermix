@@ -32,9 +32,8 @@ interface IPointerTable {
  * @param  pLength       Length of the part in 64th notes (default: 64)
  */
 export default class SeqPart implements IRegistryItem {
-
-    public static stepsPerBarDefault = 16;  // global pattern resolution: 1bar = 1 full note
-    public static partName = "Part";        // global default name
+    public static stepsPerBarDefault = 16; // global pattern resolution: 1bar = 1 full note
+    public static partName = "Part"; // global default name
 
     public readonly actionDefs: IOscActionDef[] = seqPartActionDefs;
 
@@ -43,20 +42,19 @@ export default class SeqPart implements IRegistryItem {
     public unboundActionCreators: ActionCreatorsMapObject = {};
 
     public name = SeqPart.partName;
-    public uid = "";            // will be set by the registry
-    public pointers: IPointerTable;         // can be set to a specific point in the pattern (by the sequencer)
+    public uid = ""; // will be set by the registry
+    public pointers: IPointerTable; // can be set to a specific point in the pattern (by the sequencer)
 
     private stepMultiplier: number; // 64 = stepsPerBar * stepMultiplier
-    private pattern: Pattern;       // holds the sequence
+    private pattern: Pattern; // holds the sequence
 
     /**
      * Initializes the pattern
      * @param length      length in stepsPerBar (if sPB=16: 16=1bar)
      * @param stepsPerBar pattern resolution: 1bar = 1 full note
      */
-    constructor(length: number = SeqPart.stepsPerBarDefault,
-                public stepsPerBar = SeqPart.stepsPerBarDefault) {
-        if ((64 % stepsPerBar) === 0) {
+    constructor(length: number = SeqPart.stepsPerBarDefault, public stepsPerBar = SeqPart.stepsPerBarDefault) {
+        if (64 % stepsPerBar === 0) {
             this.stepMultiplier = 64 / stepsPerBar;
             this.pattern = this.initPattern(length);
         } else {
@@ -110,7 +108,6 @@ export default class SeqPart implements IRegistryItem {
                 return true;
             default:
                 return false;
-
         }
     }
 
@@ -126,7 +123,9 @@ export default class SeqPart implements IRegistryItem {
             const pos = step * this.stepMultiplier;
             this.pattern[pos].push(action);
         } else {
-            throw new Error(`Position out of pattern bounds. Step is ${step} but should be within 0 and ${maxStepValue}`);
+            throw new Error(
+                `Position out of pattern bounds. Step is ${step} but should be within 0 and ${maxStepValue}`
+            );
         }
         return this;
     }
@@ -204,7 +203,7 @@ export default class SeqPart implements IRegistryItem {
      */
     public extendOnTop(extLength: number): void {
         const extension = this.initPattern(extLength);
-        this.pattern = [ ...extension, ...this.pattern];
+        this.pattern = [...extension, ...this.pattern];
     }
 
     /**
@@ -229,5 +228,4 @@ export default class SeqPart implements IRegistryItem {
         }
         return pattern;
     }
-
 }

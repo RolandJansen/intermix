@@ -61,7 +61,6 @@ describe("SeqPart", () => {
     });
 
     describe(".addAction", () => {
-
         it("is chainable", () => {
             const ctx = part.addAction(action1, 2);
             expect(ctx).toEqual(part);
@@ -82,11 +81,9 @@ describe("SeqPart", () => {
                 part.addAction(action1, 16);
             }).toThrow();
         });
-
     });
 
     describe(".getActionsAtStep", () => {
-
         it("returns an array with actions if any", () => {
             part.addAction(action1, 2);
             const actions = part.getActionsAtStep(2);
@@ -96,11 +93,9 @@ describe("SeqPart", () => {
         it("returns an empty array if step is out of bounds", () => {
             expect(part.getActionsAtStep(16)).toEqual([]);
         });
-
     });
 
     describe(".removeAction", () => {
-
         beforeEach(() => {
             part.addAction(action1, 4).addAction(action2, 4);
         });
@@ -131,24 +126,17 @@ describe("SeqPart", () => {
                 part.removeAction(action1, 16);
             }).toThrow();
         });
-
     });
 
     describe(".getNotePositions", () => {
-
         it("returns an array with all positions where note events are found", () => {
-            part.addAction(action1, 2)
-                .addAction(action2, 4)
-                .addAction(action2, 6)
-                .addAction(action1, 6);
+            part.addAction(action1, 2).addAction(action2, 4).addAction(action2, 6).addAction(action1, 6);
 
             expect(part.getNotePositions()).toEqual([2, 6]);
         });
-
     });
 
     describe(".getActionsAtStep", () => {
-
         it("returns an array with all actions at step", () => {
             part.addAction(action1, 4).addAction(action2, 4);
 
@@ -169,11 +157,9 @@ describe("SeqPart", () => {
             const actions = part.getActionsAtStep(23);
             expect(actions).toHaveLength(0);
         });
-
     });
 
     describe(".extendOnTop", () => {
-
         it("extends the pattern on top", () => {
             const newSteps = 23;
             const oldPatternLength = part.length;
@@ -185,11 +171,9 @@ describe("SeqPart", () => {
             expect(part).toHaveLength(newSteps * part["stepMultiplier"] + oldPatternLength);
             expect(part.seqPattern[oldPatternZero][0]).toEqual(action1);
         });
-
     });
 
     describe(".extendOnEnd", () => {
-
         it("extends the pattern on end", () => {
             const newSteps = 23;
             const oldPatternLength = part.length;
@@ -200,7 +184,5 @@ describe("SeqPart", () => {
             expect(part).toHaveLength(newSteps * part["stepMultiplier"] + oldPatternLength);
             expect(part.seqPattern[0][0]).toEqual(action1);
         });
-
     });
-
 });

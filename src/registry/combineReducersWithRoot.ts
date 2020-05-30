@@ -16,7 +16,6 @@ import { IAction, IState } from "./interfaces";
 // tslint:enable:max-line-length
 export default (reducers: ReducersMapObject, rootReducer: Reducer) => {
     return (prevState: IState, action: AnyAction | IAction): IState => {
-
         // create an object that contains the
         // return value of the root reducer ...
         const nextState: IState = { ...rootReducer(prevState, action) };

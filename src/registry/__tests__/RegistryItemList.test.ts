@@ -2,7 +2,6 @@ import SeqPart from "../../seqpart/SeqPart";
 import RegistryItemList from "../RegistryItemList";
 
 describe("RegistryItemList", () => {
-
     let itemList: RegistryItemList<SeqPart>;
     let item1: SeqPart;
     let item2: SeqPart;
@@ -73,5 +72,4 @@ describe("RegistryItemList", () => {
         expect(keyList).toHaveLength(1);
         expect(keyList[0]).toMatch(key2);
     });
-
 });

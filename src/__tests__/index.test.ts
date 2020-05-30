@@ -1,12 +1,7 @@
 /// <reference path="../../typings/web-audio-test-api.d.ts" />
 import { ActionCreatorsMapObject } from "redux";
 import "web-audio-test-api";
-import {
-    dispatch,
-    getActionCreators,
-    getAudioContext,
-    getState,
-    resumeAudioContext } from "../index";
+import { dispatch, getActionCreators, getAudioContext, getState, resumeAudioContext } from "../index";
 import { IAction, IGlobalActionCreators, IState } from "../registry/interfaces";
 import SeqPart from "../seqpart/SeqPart";
 
@@ -25,16 +20,14 @@ WebAudioTestAPI.setState({
 
 test("sdf", () => {
     // not implemented and won't ever be
-})
+});
 
 describe.skip("Intermix", () => {
     // let allActionCreators: IGlobalActionCreators = {};
     // let seqAC: ActionCreatorsMapObject = {};
     // let seqUID = "";
-
     // beforeEach(() => {
     //     allActionCreators = getActionCreators();
-
     //     for (const uid in allActionCreators) {
     //         if (allActionCreators[uid].metadata.name === "Intermix Sequencer") {
     //             seqUID = uid;
@@ -42,17 +35,14 @@ describe.skip("Intermix", () => {
     //         }
     //     }
     // });
-
     // test("provides an audioContext", () => {
     //     const audioContext: AudioContext = getAudioContext();
     //     expect(audioContext).toBeDefined();
     // });
-
     // test("ensure that we're testing against the WebAudioTestAPI", () => {
     //     const audioContext: AudioContext = getAudioContext();
     //     expect(audioContext.$name).toEqual("AudioContext");
     // });
-
     // test("provides a function to resume audio context", () => {
     //     const audioContext: AudioContext = getAudioContext();
     //     audioContext.suspend();
@@ -60,7 +50,6 @@ describe.skip("Intermix", () => {
     //     resumeAudioContext();
     //     expect(audioContext.state).toEqual("running");
     // });
-
     // test("provides the global state", () => {
     //     const globalState: IState = getState();
     //     const getPartialState = (uid: string): string => {
@@ -72,7 +61,6 @@ describe.skip("Intermix", () => {
     //         });
     //     };
     //     let gsContainsPs = false;
-
     //     for (const uid in globalState) {
     //         if (getPartialState(uid) === JSON.stringify(globalState[uid])) {
     //             gsContainsPs = true;
@@ -80,7 +68,6 @@ describe.skip("Intermix", () => {
     //     }
     //     expect(gsContainsPs).toBeTruthy();
     // });
-
     // test("provides action creators for all plugins", () => {
     //     // tslint:disable-next-line: forin
     //     for (const uid in allActionCreators) {
@@ -89,42 +76,34 @@ describe.skip("Intermix", () => {
     //         expect(pluginAC).toHaveProperty("actionCreators");
     //     }
     // });
-
     // test("action creators are bound to dispatch", () => {
     //     seqAC.BPM(90);  // calls dispatch
     //     const globalState = getState();
     //     expect(globalState[seqUID].BPM).toEqual(90);
     // });
-
     // test("provides a dispatch function", () => {
     //     let globalState = getState();
-
     //     // state is polluted from former test (not ideal but ok for now)
     //     expect(globalState[seqUID].BPM).toEqual(90);
-
     //     const bpmAction: IAction = {
     //         type: "BPM",
     //         dest: seqUID,
     //         payload: 180,
     //     };
     //     dispatch(bpmAction);
-
     //     globalState = getState();
     //     expect(globalState[seqUID].BPM).toEqual(180);
     // });
-
     // test("getNewPart returns a part object", () => {
     //     // this test is kinda dump in typescript
     //     const part: SeqPart = getNewPart();
     //     expect(part).toBeInstanceOf(SeqPart);
     // });
-
     // test("animate forwards a callback to sequencer.updateFrame", () => {
     //     const audioContext: AudioContext = getAudioContext();
     //     const boundActionCreators = getActionCreators();
     //     const animeCallback = jest.fn();
     //     let seqActionCreators: ActionCreatorsMapObject = {};
-
     //     for (const uid in allActionCreators) {
     //         if (allActionCreators[uid].metadata.name === "Intermix Sequencer") {
     //             // seqUID = uid;
@@ -138,32 +117,25 @@ describe.skip("Intermix", () => {
     //     seqActionCreators.STATE(0);
     //     expect(animeCallback).toBeCalled();
     // });
-
     // This raf mock doesn't work.
     // It works in the browser and I'm sick of it spending hours on this test.
     // describe("animate", () => {
-
     //     beforeAll(() => {
     //         // make raf synchronous (return value (23) doesn't matter here)
     //         jest.spyOn(window, "requestAnimationFrame").
     //             mockImplementation((cb) => 23);
     //     });
-
     //     afterAll(() => {
     //         // doesn't work, probably not needed
     //         // window.requestAnimationFrame.mockRestore();
     //     });
-
     //     test("provides an animation function", () => {
     //         const doSomething = jest.fn();
-
     //         animate(doSomething);
     //         seqAC.STATE(1);
     //         seqAC.STATE(0);
     //         expect(window.requestAnimationFrame).toBeCalled();
     //         expect(doSomething).toHaveBeenCalled();
     //     });
-
     // });
-
 });

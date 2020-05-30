@@ -2,8 +2,7 @@ import AbstractPlugin from "../registry/AbstractPlugin";
 import { IDelayedNote, IPlugin, IPluginMetaData, Tuple, IOscActionDef } from "../registry/interfaces";
 
 export default class DemoSampler extends AbstractPlugin implements IPlugin {
-
-    private static readonly PREFIX = "/intermix/plugin/{UID}/"
+    private static readonly PREFIX = "/intermix/plugin/{UID}/";
 
     public readonly metaData: IPluginMetaData = {
         type: "instrument",
@@ -18,7 +17,7 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
             address: DemoSampler.PREFIX + "volume",
             typeTag: ",i",
             range: [0, 127],
-            description: "Loudness of the output signal"
+            description: "Loudness of the output signal",
         },
         // {
         //     type: "AUDIODATA",
@@ -29,7 +28,7 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
 
     private gainNode: GainNode;
     private audioData: AudioBuffer;
-    private queue: AudioBufferSourceNode[] = [];  // list of polyphonic voices
+    private queue: AudioBufferSourceNode[] = []; // list of polyphonic voices
 
     constructor(private ac: AudioContext) {
         super();
@@ -44,9 +43,7 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
 
     // list of all audio output nodes
     public get outputs(): AudioNode[] {
-        return [
-            this.gainNode,
-        ];
+        return [this.gainNode];
     }
 
     // list of all input nodes, if no inputs, return an empty list
@@ -120,7 +117,7 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
             node.stop();
             node.disconnect();
         });
-        this.queue = [];  // release all references
+        this.queue = []; // release all references
     }
 
     /**
@@ -163,5 +160,4 @@ export default class DemoSampler extends AbstractPlugin implements IPlugin {
             }
         });
     }
-
 }

@@ -22,7 +22,6 @@ export function makePluginId(target: any, propertyKey: string | symbol): void {
  * @param actionDefs
  */
 export function makeActionCreators(actionDefs: IActionDef[]) {
-
     return (target: any, propertyKey: string | symbol) => {
         const actionCreators = {};
 
@@ -31,7 +30,6 @@ export function makeActionCreators(actionDefs: IActionDef[]) {
             const max = actionDef.maxVal;
 
             actionCreators[actionDef.type] = (payload: number): IAction => {
-
                 const action: IAction = {
                     type: actionDef.type,
                     payload,
@@ -40,8 +38,8 @@ export function makeActionCreators(actionDefs: IActionDef[]) {
                 if (payload >= min && payload <= max) {
                     return action;
                 }
-                action.error = new RangeError(`payload ${ payload } out of bounds.
-                    Must be within ${ min } and ${ max }`);
+                action.error = new RangeError(`payload ${payload} out of bounds.
+                    Must be within ${min} and ${max}`);
 
                 return action;
             };

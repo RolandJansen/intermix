@@ -1,4 +1,3 @@
-
 export function preAllocatedWhile(sourceArray: any[]): any[] {
     let i = sourceArray.length;
     const destArray: any[] = new Array(i);
@@ -17,5 +16,5 @@ export function forEachLambda(sourceArray: any[]): any[] {
 }
 
 export function spreadOperator(sourceArray: any[]): any[] {
-    return [ ...sourceArray ];
+    return [...sourceArray];
 }

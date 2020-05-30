@@ -1,9 +1,7 @@
 import { Event, Suite } from "benchmark";
 import copyArrayBench from "./copyArray.bench";
 
-const suites: Suite[] = [
-    copyArrayBench,
-];
+const suites: Suite[] = [copyArrayBench];
 
 (function runAllTests(): void {
     setupBenchmarks();
@@ -17,18 +15,19 @@ function setupBenchmarks(): void {
 }
 
 function createBenchmark(suite: Suite): void {
-    suite.on("cycle", (event: Event) => {
-        // tslint:disable-next-line:no-console
-        console.log(String(event.target));
-    })
-    .on("complete", () => {
-        // tslint:disable-next-line:no-console
-        console.log("Fastest is " + suite.filter("fastest"));
+    suite
+        .on("cycle", (event: Event) => {
+            // tslint:disable-next-line:no-console
+            console.log(String(event.target));
+        })
+        .on("complete", () => {
+            // tslint:disable-next-line:no-console
+            console.log("Fastest is " + suite.filter("fastest"));
 
-        // tests run async so next test will be triggered on completion
-        // so that they don't interfere.
-        runNextTest();
-    });
+            // tests run async so next test will be triggered on completion
+            // so that they don't interfere.
+            runNextTest();
+        });
 }
 
 function runNextTest(): void {

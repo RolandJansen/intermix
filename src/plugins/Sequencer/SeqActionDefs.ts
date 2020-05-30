@@ -8,8 +8,8 @@ const PREFIX = "/intermix/plugin/{UID}/";
 
 // to reset the sequencer we have to reset "state" and "pointer" at once
 const reset = (): IState => {
-    return { state: 0, pointer: 0 }
-}
+    return { state: 0, pointer: 0 };
+};
 
 const actionDefs: IOscActionDef[] = [
     {
@@ -42,7 +42,7 @@ const actionDefs: IOscActionDef[] = [
         value: 120,
         range: [0, 240],
         description: "sets the BPM value",
-    }
+    },
     // {
     //     type: "ADD_PART",
     //     desc: "adds a part to the sequencer",

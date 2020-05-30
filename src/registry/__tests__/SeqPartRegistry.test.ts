@@ -26,7 +26,6 @@ beforeEach(() => {
 });
 
 describe("add", () => {
-
     test("creates a seqPart with standard length (16)", () => {
         expect(testPart.length).toEqual(64);
     });
@@ -54,10 +53,10 @@ describe("add", () => {
             typeTag: ",iiff",
             type: "addNote",
             payload: testPayload,
-        }
+        };
 
         testPart.actionCreators.addNote(testPayload);
-        expect((store.dispatch as jest.Mock)).toHaveBeenCalledWith(action);
+        expect(store.dispatch as jest.Mock).toHaveBeenCalledWith(action);
     });
 
     test("unbound action creators are not bound to store.dispatch()", () => {
@@ -67,16 +66,14 @@ describe("add", () => {
             typeTag: ",iiff",
             type: "addNote",
             payload: testPayload,
-        }
+        };
 
         testPart.unboundActionCreators.addNote(testPayload);
-        expect((store.dispatch as jest.Mock)).not.toHaveBeenCalledWith(action);
+        expect(store.dispatch as jest.Mock).not.toHaveBeenCalledWith(action);
     });
-
 });
 
 describe("remove", () => {
-
     beforeEach(() => {
         jest.spyOn(testPart, "unsubscribe");
     });

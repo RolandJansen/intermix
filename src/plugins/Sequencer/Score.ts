@@ -15,15 +15,14 @@ export interface IRunqueue {
  * Think of it like a tape that plays beyond its recorded audio.
  */
 export default class Score {
-
-    public parts: RegistryItemList<SeqPart>;   // Lookup table with all available parts
+    public parts: RegistryItemList<SeqPart>; // Lookup table with all available parts
     private mainQueue: string[][] = []; // main queue that only holds part ids
-    private runQueue: IRunqueue = {};   // table with parts that are playing or will be played shortly
-    private seqPartPointerId = 0;       // every pointer in every part has a unique id
-    private nextStep = 0;               // position in the queue that will get triggered next
-    private loopActivated = false;      // play a section of the queue in a loop
-    private loopStart = 0;              // first step of the loop
-    private loopEnd = 63;               // last step of the loop
+    private runQueue: IRunqueue = {}; // table with parts that are playing or will be played shortly
+    private seqPartPointerId = 0; // every pointer in every part has a unique id
+    private nextStep = 0; // position in the queue that will get triggered next
+    private loopActivated = false; // play a section of the queue in a loop
+    private loopStart = 0; // first step of the loop
+    private loopEnd = 63; // last step of the loop
 
     public constructor() {
         this.parts = new RegistryItemList();
@@ -70,7 +69,7 @@ export default class Score {
 
     private setScorePointerTo(position: number): void {
         this.nextStep = position;
-        this.runQueue = {};  // pointer jumps -> new runqueue
+        this.runQueue = {}; // pointer jumps -> new runqueue
     }
 
     public getScorePosition(preciseTime: number): IQueuePosition {
@@ -88,8 +87,7 @@ export default class Score {
     }
 
     public removePartFromScore(seqPartKey: string, position: number): void {
-        if (this.mainQueue[position] instanceof Array &&
-            this.mainQueue[position].length > 0) {
+        if (this.mainQueue[position] instanceof Array && this.mainQueue[position].length > 0) {
             const index = this.mainQueue[position].indexOf(seqPartKey);
             if (index >= 0) {
                 this.mainQueue[position].splice(index, 1);
@@ -138,5 +136,4 @@ export default class Score {
         }
         return actionList;
     }
-
 }

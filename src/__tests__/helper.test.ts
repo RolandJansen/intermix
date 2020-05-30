@@ -1,7 +1,6 @@
 import { getRandomString, isKeyUnique } from "../helper";
 
 describe("getRandomString()", () => {
-
     test("returns a random string of variable length", () => {
         const five = getRandomString(5);
 
@@ -11,11 +10,9 @@ describe("getRandomString()", () => {
     test("throws if length is <= 0", () => {
         expect(getRandomString).toThrow();
     });
-
 });
 
 describe("isKeyUnique()", () => {
-
     const hashmap = {
         abc: "123",
         def: "456",
@@ -30,5 +27,4 @@ describe("isKeyUnique()", () => {
         const keyIsUnique = isKeyUnique("ghi", hashmap);
         expect(keyIsUnique).toBeTruthy();
     });
-
 });

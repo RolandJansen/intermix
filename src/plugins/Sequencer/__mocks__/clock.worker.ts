@@ -1,4 +1,3 @@
-
 export const mockOnmessage = jest.fn();
 export const mockPostMessage = jest.fn();
 

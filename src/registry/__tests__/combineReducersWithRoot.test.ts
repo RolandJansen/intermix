@@ -48,7 +48,6 @@ describe("combineReducersWithRoot", () => {
     });
 
     describe("the root reducer", () => {
-
         test("builds the initial state if the given state is undefined", () => {
             const state = reducer(undefined, { type: "init" });
             expect(state).toEqual(testState);
@@ -72,5 +71,4 @@ describe("combineReducersWithRoot", () => {
             expect(testState.data.filter).toBe("");
         });
     });
-
 });

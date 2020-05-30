@@ -22,7 +22,6 @@ beforeEach(() => {
             receivedInterval = e.data.interval;
         }
     };
-
 });
 
 it("set the clock interval", () => {
@@ -35,13 +34,13 @@ it("sends the inverval time on request", () => {
     expect(receivedInterval).toEqual(interval1);
 });
 
-it("calls setInterval when \"start\" is received", () => {
+it('calls setInterval when "start" is received', () => {
     clock.postMessage("start");
     expect(setInterval).toHaveBeenCalledTimes(1);
     expect(setInterval).toHaveBeenLastCalledWith(expect.any(Function), interval1);
 });
 
-it("calls clearInterval when \"stop\" is received", () => {
+it('calls clearInterval when "stop" is received', () => {
     clock.postMessage("stop");
     expect(clearInterval).toHaveBeenCalledTimes(1);
 });

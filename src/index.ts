@@ -31,7 +31,7 @@ export function getState(): IState {
 
 export function dispatch(action: Action): void {
     const dispatched = store.dispatch(action);
-    console.log(dispatched)
+    console.log(dispatched);
 }
 
 // useful if the browser doesn't allow ac to start
@@ -56,11 +56,11 @@ export function addPlugin(pluginClassName: string): string {
     try {
         if (plugins.hasOwnProperty(pluginClassName)) {
             const possibleClass: any = (plugins as any)[pluginClassName];
-            const pluginClass: GenericPluginClass = (possibleClass as GenericPluginClass);
+            const pluginClass: GenericPluginClass = possibleClass as GenericPluginClass;
 
             return registry.addPlugin(pluginClass);
         }
-        return ""
+        return "";
     } catch (error) {
         // not implemented yet
         console.log(error);

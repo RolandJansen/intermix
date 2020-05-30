@@ -6,7 +6,6 @@
 // in the last link see the section about object urls to load files without gui
 
 export default class FileLoader {
-
     public loadPlugin(pluginSrcFile: Blob): void {
         // not implemented yet
     }
@@ -14,6 +13,4 @@ export default class FileLoader {
     public loadAudio(audioFile: Blob): void {
         // not implemented yet
     }
-
-
 }

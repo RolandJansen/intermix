@@ -13,7 +13,6 @@ import {
 import RegistryItemList from "./RegistryItemList";
 
 export default abstract class AbstractRegistry {
-
     public abstract itemList: RegistryItemList<IRegistryItem>;
 
     public abstract add(optionalParameter?: any): IRegistryItem;
@@ -62,7 +61,7 @@ export default abstract class AbstractRegistry {
         }
 
         const unsubscribe = store.subscribe(handleChange);
-        handleChange();  // invoke the function once to set currentState
+        handleChange(); // invoke the function once to set currentState
         return unsubscribe;
     }
 
@@ -188,7 +187,7 @@ export default abstract class AbstractRegistry {
             if (actionDef.process) {
                 const newValue: object = actionDef.process();
                 handlers[method] = (state: IState, action: AnyAction | IAction): IState => {
-                    return Object.assign({}, state, newValue)
+                    return Object.assign({}, state, newValue);
                 };
             } else {
                 handlers[method] = (state: IState, action: AnyAction | IAction): IState => {
@@ -197,7 +196,6 @@ export default abstract class AbstractRegistry {
                     });
                 };
             }
-
         });
         return handlers;
     }
@@ -209,7 +207,7 @@ export default abstract class AbstractRegistry {
     protected getInitialState(actionDefs: IOscActionDef[], uid: string): IState {
         const iState: IState = {};
 
-        iState.uid = uid;  // readonly field
+        iState.uid = uid; // readonly field
         actionDefs.forEach((actionDef) => {
             const addressParts = actionDef.address.split("/");
             const method = addressParts[addressParts.length - 1];
@@ -226,5 +224,4 @@ export default abstract class AbstractRegistry {
 
         return iState;
     }
-
 }

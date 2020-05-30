@@ -14,7 +14,6 @@ import { IPlugin } from "./interfaces";
  * it's more like an orchestrator class.
  */
 export default class MasterRegistry {
-
     private plugins: PluginRegistry;
     private seqParts: SeqPartRegistry;
 
@@ -24,7 +23,6 @@ export default class MasterRegistry {
     }
 
     public addPlugin<P extends IPlugin>(pluginClass: new (ac: AudioContext) => P): string {
-
         try {
             const newPlugin: IPlugin = this.plugins.add(pluginClass);
 
@@ -32,14 +30,11 @@ export default class MasterRegistry {
             this.replaceReducer();
 
             // make the new item observe the store
-            newPlugin.unsubscribe = this.seqParts.observeStore(
-                store,
-                newPlugin,
-            );
+            newPlugin.unsubscribe = this.seqParts.observeStore(store, newPlugin);
             return newPlugin.uid;
         } catch (error) {
             // not implemented yet
-            console.log(error)
+            console.log(error);
             return "";
         }
     }
@@ -48,9 +43,9 @@ export default class MasterRegistry {
         try {
             this.plugins.remove(itemId);
             this.replaceReducer();
-            store.dispatch({ type: "REMOVE", payload: itemId});
+            store.dispatch({ type: "REMOVE", payload: itemId });
         } catch (error) {
-            console.log(error)
+            console.log(error);
             // not implemented yet
         }
     }
@@ -70,15 +65,12 @@ export default class MasterRegistry {
             this.replaceReducer();
 
             // make the new item observe the store
-            newPart.unsubscribe = this.seqParts.observeStore(
-                store,
-                newPart,
-            );
+            newPart.unsubscribe = this.seqParts.observeStore(store, newPart);
 
             return newPart.uid;
         } catch (error) {
             // not implemented yet
-            console.log(error)
+            console.log(error);
             return "";
         }
     }
@@ -89,7 +81,7 @@ export default class MasterRegistry {
             this.replaceReducer();
             store.dispatch({ type: "REMOVE", payload: itemId });
         } catch (error) {
-            console.log(error)
+            console.log(error);
             // not implemented yet
         }
     }
@@ -116,7 +108,6 @@ export default class MasterRegistry {
         return actionCreators;
     }
 
-
     /**
      * Combines all sub reducers with the root reducer
      * and replaces the current reducer
@@ -142,8 +133,7 @@ export default class MasterRegistry {
      */
     private getRootReducer(): Reducer {
         return (state = {}, action: AnyAction): void => {
-            if (action.type === "REMOVE" &&
-                state.hasOwnProperty(action.payload)) {
+            if (action.type === "REMOVE" && state.hasOwnProperty(action.payload)) {
                 const newState = JSON.parse(JSON.stringify(state));
                 delete newState[action.payload];
                 return newState;
@@ -153,10 +143,6 @@ export default class MasterRegistry {
     }
 
     private getCompleteReducer(rootReducer: Reducer, subReducers: ReducersMapObject): Reducer {
-        return combineReducersWithRoot(
-            subReducers,
-            rootReducer,
-        );
+        return combineReducersWithRoot(subReducers, rootReducer);
     }
-
 }

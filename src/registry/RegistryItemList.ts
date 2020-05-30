@@ -6,7 +6,6 @@ interface IRegistryItemLookup<itemType> {
 }
 
 export default class RegistryItemList<T extends IRegistryItem> {
-
     private keyLength = 5;
     private itemLookupTable: IRegistryItemLookup<T> = {};
 

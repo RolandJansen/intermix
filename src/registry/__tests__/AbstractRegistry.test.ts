@@ -134,11 +134,10 @@ test("creates action handlers (sub reducers)", () => {
         payload: 23,
     });
     expect(newState1.ACTION1).toEqual(23);
-    expect(testState.ACTION1).toEqual(5);  // old state shouldn't be altered
+    expect(testState.ACTION1).toEqual(5); // old state shouldn't be altered
 });
 
 describe("getSubReducer -> reducer", () => {
-
     let iniState: IState;
     let adefs: IOscActionDef[];
     let testReducer: Reducer;
@@ -160,25 +159,31 @@ describe("getSubReducer -> reducer", () => {
 
     test("returns the original state if action.dest doesn't match", () => {
         // why doesn't this throw? "dest" should be "listener"!!!
-        expect(testReducer(iniState, {
-            dest: "123",
-            type: "ACTION1",
-            payload: 23,
-        })).toEqual(iniState);
+        expect(
+            testReducer(iniState, {
+                dest: "123",
+                type: "ACTION1",
+                payload: 23,
+            })
+        ).toEqual(iniState);
     });
 
     test("should handle ACTION1", () => {
-        expect(testReducer([], {
-            type: "ACTION1",
-            payload: 23,
-        })).toEqual({ ACTION1: 23 });
+        expect(
+            testReducer([], {
+                type: "ACTION1",
+                payload: 23,
+            })
+        ).toEqual({ ACTION1: 23 });
     });
 
     test("should handle ACTION2", () => {
-        expect(testReducer([], {
-            type: "ACTION2",
-            payload: 23,
-        })).toEqual({ ACTION2: 23 });
+        expect(
+            testReducer([], {
+                type: "ACTION2",
+                payload: 23,
+            })
+        ).toEqual({ ACTION2: 23 });
     });
 
     test("returns a new state if action is valid (copy by val)", () => {
@@ -190,7 +195,6 @@ describe("getSubReducer -> reducer", () => {
         expect(newState.ACTION1).toEqual(23);
         expect(iniState.ACTION1).toEqual(5);
     });
-
 });
 
 test("selectSubState throws if uid is not in state", () => {
@@ -219,7 +223,6 @@ test("getChanged returns an emtpy tuple if no change happened", () => {
 });
 
 describe("observeStore", () => {
-
     beforeEach(() => {
         const iniState = registry.getInitialState_Test(testItem.actionDefs, testItemUid);
 
@@ -248,7 +251,6 @@ describe("observeStore", () => {
 });
 
 describe("getAllSubReducers", () => {
-
     let anotherUid: string;
     let reducerMap: ReducersMapObject;
     let allUids: string[];

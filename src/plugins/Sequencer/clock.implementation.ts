@@ -18,12 +18,16 @@ export default function clock(data: any, worker: any): void {
         sendMessage({ interval });
         if (timer) {
             clearInterval(timer);
-            timer = worker.setInterval(() => { sendMessage("tick"); }, interval);
+            timer = worker.setInterval(() => {
+                sendMessage("tick");
+            }, interval);
         }
     }
 
     if (data === "start") {
-        timer = worker.setInterval(() => { sendMessage("tick"); }, interval);
+        timer = worker.setInterval(() => {
+            sendMessage("tick");
+        }, interval);
     } else if (data === "stop") {
         clearInterval(timer);
     } else if (data === "getIntervalInMili") {

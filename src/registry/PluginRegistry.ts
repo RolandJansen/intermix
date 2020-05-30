@@ -6,7 +6,6 @@ import { bindActionCreators } from "redux";
 import commonActionDefs from "./commonActionDefs";
 
 export default class PluginRegistry extends AbstractRegistry {
-
     public itemList: RegistryItemList<IPlugin>;
 
     public constructor(private ac: AudioContext) {
@@ -94,5 +93,4 @@ export default class PluginRegistry extends AbstractRegistry {
             outputs[0].connect(this.ac.destination);
         }
     }
-
 }

@@ -1,14 +1,13 @@
 # things that are useless in the npm package
 *.yml
-bower.json
-conf.json
-karma.conf.js
+package-lock.json
 demo/
 node_modules/
 test/distTest/
 
 # local stuff
 .tmp
+coverage/
+data/
 doc/
 docs/
-coverage/

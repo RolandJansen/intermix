@@ -27,7 +27,6 @@ export interface IQueuePosition {
  * and draws to the screen.
  */
 export default class Sequencer extends AbstractPlugin implements IControllerPlugin {
-
     public static bpmDefault = 120;
 
     public readonly metaData = {
@@ -41,19 +40,19 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
     public readonly actionDefs: IOscActionDef[] = seqActionDefs;
 
     // constants
-    private readonly resolution = 64;       // shortest possible note.
-    private readonly intervalInMili = 100;  // time between two scheduler invocations
-    private readonly lookaheadInSec = 0.3;  // should be longer than interval.
+    private readonly resolution = 64; // shortest possible note.
+    private readonly intervalInMili = 100; // time between two scheduler invocations
+    private readonly lookaheadInSec = 0.3; // should be longer than interval.
 
     private bpm = Sequencer.bpmDefault;
-    private score: Score;          // List with references to parts that makes the score
+    private score: Score; // List with references to parts that makes the score
 
-    private timePerStepInSec: number;   // period of time between two steps
-    private nextStepTimeInSec = 0;      // time relative to ac.currentTime until the next sequencer step
-    private nextStep = 0;               // position in the queue that will get triggered next
-    private triggeredSteps: IQueuePosition[] = [];    // list of steps that were triggered but are still ahead of time
+    private timePerStepInSec: number; // period of time between two steps
+    private nextStepTimeInSec = 0; // time relative to ac.currentTime until the next sequencer step
+    private nextStep = 0; // position in the queue that will get triggered next
+    private triggeredSteps: IQueuePosition[] = []; // list of steps that were triggered but are still ahead of time
     // private lastPlayedStep = 0;         // step in queue that was played (not triggered) recently (used for drawing).
-    private isRunning = false;          // true if sequencer is running, otherwise false
+    private isRunning = false; // true if sequencer is running, otherwise false
 
     private clock: Worker;
 
@@ -77,7 +76,9 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
      * Gets called by the draw() method on every screen refresh.
      * @param  lastPlayedStep  The 64th step that was played recently
      */
-    public updateFrame(lastPlayedStep: number): void { /* nothing */ }
+    public updateFrame(lastPlayedStep: number): void {
+        /* nothing */
+    }
 
     // list of all audio input nodes, if no inputs, return an empty list
     public get inputs(): AudioNode[] {
@@ -96,7 +97,9 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
      * provide an empty method here. It has to be public so the registry can see it.
      * @param action An action object that normally holds data for an audio device
      */
-    public sendAction(action: IAction): void { /* nothing */ }
+    public sendAction(action: IAction): void {
+        /* nothing */
+    }
 
     /**
      * onChange gets called on every state change
@@ -153,7 +156,7 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
                 this.score.moveScorePointerTo(step);
                 return true;
             case "ANIMATE":
-                const animeFunc: ReturnFunction<void> = changed[1]
+                const animeFunc: ReturnFunction<void> = changed[1];
                 this.updateFrame = animeFunc;
             default:
                 return false;
@@ -295,12 +298,14 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
      * @param startTime time in seconds when the audio event should start
      */
     private prepareActionForDispatching(action: IAction, startTime: number): IAction {
-        const delayedAction = Object.assign({}, action, { payload: action.payload });
+        const delayedAction = Object.assign({}, action, {
+            payload: action.payload,
+        });
 
         if (Array.isArray(action.payload)) {
             delayedAction.payload = action.payload;
         } else {
-            delayedAction.payload = [action.payload]
+            delayedAction.payload = [action.payload];
         }
 
         delayedAction.payload.push(startTime);
@@ -328,5 +333,4 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
     private getDurationTime(steps: number): number {
         return steps * this.timePerStepInSec;
     }
-
 }

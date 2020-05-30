@@ -33,7 +33,7 @@ describe("DemoSampler", () => {
             address: `/intermix/plugin/{UID}/volume`,
             typeTag: ",i",
             range: [0, 127],
-            description: "Loudness of the output signal"
+            description: "Loudness of the output signal",
         };
         expect(sampler.actionDefs).toContainEqual(actionDef);
     });
@@ -69,7 +69,7 @@ describe("DemoSampler", () => {
                 duration: 1,
                 startTime: 1,
             };
-            buffer = ac.createBuffer(1, 22050, 44100);  // create a buffer of 0.5s length
+            buffer = ac.createBuffer(1, 22050, 44100); // create a buffer of 0.5s length
             audioDataAction = {
                 type: "AUDIODATA",
                 listener: sampler.uid,
@@ -117,7 +117,7 @@ describe("DemoSampler", () => {
             expect(sampler["queue"][0]).not.toBeDefined();
         });
 
-        test("should stop a BufferSourceNode even if it\'s just scheduled.", () => {
+        test("should stop a BufferSourceNode even if it's just scheduled.", () => {
             sampler.onChange(["AUDIODATA", audioDataAction]);
             sampler.onChange(["NOTE", note]);
             expect(sampler["queue"][0].$stateAtTime("00:00.500")).toBe("SCHEDULED");
@@ -130,7 +130,5 @@ describe("DemoSampler", () => {
             sampler.onChange(["VOLUME", 64]);
             expect(sampler["gainNode"].gain.value).toEqual(0.5);
         });
-
     });
-
 });

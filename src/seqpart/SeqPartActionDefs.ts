@@ -6,7 +6,6 @@ import { IOscActionDef } from "../registry/interfaces";
 // You can also set minVal/maxVal fields if it's a numeric value.
 // Your plugin can compute addtional actions not defined here
 
-
 // but they will not get recognized by the store.
 const PREFIX = "/intermix/seqpart/{UID}/";
 
@@ -14,7 +13,7 @@ const actionDefs: IOscActionDef[] = [
     {
         address: PREFIX + "activeStep",
         typeTag: ",i",
-        description: "The part will record notes and controllers into the active step."
+        description: "The part will record notes and controllers into the active step.",
     },
     {
         address: PREFIX + "addNote",

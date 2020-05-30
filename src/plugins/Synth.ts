@@ -16,8 +16,7 @@ import { IAudioController, IDelayedNote, IPlugin, IPluginMetaData, Tuple, IOscAc
  * https://developer.mozilla.org/de/docs/Web/API/AudioContext
  */
 export default class DemoSynth extends AbstractPlugin implements IPlugin {
-
-    private static readonly PREFIX = "/intermix/plugin/{UID}/"
+    private static readonly PREFIX = "/intermix/plugin/{UID}/";
 
     public readonly metaData: IPluginMetaData = {
         type: "instrument",
@@ -65,9 +64,7 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
 
     // list of all audio output nodes
     public get outputs(): AudioNode[] {
-        return [
-            this.filter,
-        ];
+        return [this.filter];
     }
 
     // list of all input nodes, if no inputs, return an empty list
@@ -145,7 +142,7 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
             // we can't stop a node twice so we just disconnect
             node.disconnect();
         });
-        this.queue = [];  // release all references
+        this.queue = []; // release all references
     }
 
     // Creates a sawtooth oscillator object and returns it.

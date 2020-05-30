@@ -12,7 +12,7 @@ export interface IRegistryItem {
     unsubscribe: () => void;
 }
 
-export interface IPlugin extends IRegistryItem  {
+export interface IPlugin extends IRegistryItem {
     initState: IState;
     readonly metaData: IPluginMetaData;
     frequencyLookup: number[];
@@ -45,7 +45,7 @@ export interface ISinglePluginActionCreators {
 }
 
 export interface IAudioController {
-    value: number;  // e.g. note number (0-127)
+    value: number; // e.g. note number (0-127)
 }
 
 export interface IDelayedAudioController extends IAudioController {
@@ -54,7 +54,7 @@ export interface IDelayedAudioController extends IAudioController {
 
 export interface INote extends IAudioController {
     velocity: number;
-    steps: number;  // note length in sequencer steps (default: 64th notes)
+    steps: number; // note length in sequencer steps (default: 64th notes)
 }
 
 export interface IDelayedNote extends INote, IDelayedAudioController {
@@ -88,13 +88,13 @@ export interface IActionDef {
 export interface IOscAction extends Action {
     address: string;
     typeTag: string;
-    payload?: number | string | (number|string)[];
+    payload?: number | string | (number | string)[];
 }
 
 export interface IOscActionDef {
     address: string;
     typeTag: string;
-    value?: number | string | (number|string)[];
+    value?: number | string | (number | string)[];
     valueName?: string;
     range?: [number, number];
     process?: () => object;

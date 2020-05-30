@@ -8,16 +8,17 @@ const numbers: number[] = getRandomNumberArray(arrayLength, intLength);
 
 const suite = new Suite("copyArrayByValue");
 
-suite.add("pre-allocated while with numbers", () => {
-    preAllocatedWhile(numbers);
-})
+suite
+    .add("pre-allocated while with numbers", () => {
+        preAllocatedWhile(numbers);
+    })
 
-.add("forEach with lambda function", () => {
-    forEachLambda(numbers);
-})
+    .add("forEach with lambda function", () => {
+        forEachLambda(numbers);
+    })
 
-.add("spread operator", () => {
-    spreadOperator(numbers);
-});
+    .add("spread operator", () => {
+        spreadOperator(numbers);
+    });
 
 export default suite;
