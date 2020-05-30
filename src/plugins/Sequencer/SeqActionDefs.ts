@@ -1,39 +1,40 @@
 // This is an action definition file
 // All actions that should be recognized
-// by the store should be defined here.
-// Every actiondef should have type, desc and defVal fields.
-// You can also set minVal/maxVal fields if it's a numeric value.
-// Your plugin can compute addtional actions not defined here
-// but they will not get recognized by the store.
+// by the store (and the plugin) should be defined here.
 
-import { IOscActionDef } from "../../registry/interfaces";
-
-
-enum STATE {
-    STOP,
-    START,
-}
+import { IOscActionDef, IState } from "../../registry/interfaces";
 
 const PREFIX = "/intermix/plugin/{UID}/";
+
+// to reset the sequencer we have to reset "state" and "pointer" at once
+const reset = (): IState => {
+    return { state: 0, pointer: 0 }
+}
 
 const actionDefs: IOscActionDef[] = [
     {
         address: PREFIX + "START",
         typeTag: ",T",
-        valueName: "STATE",
-        description: "starts the sequencer",
+        valueName: "state",
+        description: "starts the sequencer and (if neccessary) the suspended audio context",
     },
     {
         address: PREFIX + "STOP",
         typeTag: ",F",
-        valueName: "STATE",
-        description: "stops the sequencer at the current position",
+        valueName: "state",
+        description: "stops the sequencer at the current position and halts the audio context",
     },
     {
-        address: PREFIX + "STATE",
+        address: PREFIX + "state",
         typeTag: ",i",
         range: [0, 1],
         description: "starts or stops the sequencer",
+    },
+    {
+        address: PREFIX + "reset",
+        typeTag: ",T",
+        process: reset,
+        description: "stops the sequencer (not the audio context) and resets the queue pointer",
     },
     {
         address: PREFIX + "BPM",
@@ -42,18 +43,6 @@ const actionDefs: IOscActionDef[] = [
         range: [0, 240],
         description: "sets the BPM value",
     }
-    // {
-    //     type: "STATE",
-    //     desc: "0=stop, 1=start, 2=pause",
-    //     defVal: STATE.STOP,
-    // },
-    // {
-    //     type: "BPM",
-    //     desc: "sets new BPM value",
-    //     minVal: 0,
-    //     maxVal: 240,
-    //     defVal: 120,
-    // },
     // {
     //     type: "ADD_PART",
     //     desc: "adds a part to the sequencer",

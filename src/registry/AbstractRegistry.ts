@@ -185,11 +185,19 @@ export default abstract class AbstractRegistry {
                 type = method;
             }
 
-            handlers[method] = (state: IState, action: AnyAction | IAction): IState => {
-                return Object.assign({}, state, {
-                    [type]: action.payload,
-                });
-            };
+            if (actionDef.process) {
+                const newValue: object = actionDef.process();
+                handlers[method] = (state: IState, action: AnyAction | IAction): IState => {
+                    return Object.assign({}, state, newValue)
+                };
+            } else {
+                handlers[method] = (state: IState, action: AnyAction | IAction): IState => {
+                    return Object.assign({}, state, {
+                        [type]: action.payload,
+                    });
+                };
+            }
+
         });
         return handlers;
     }

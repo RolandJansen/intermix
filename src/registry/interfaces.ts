@@ -97,6 +97,7 @@ export interface IOscActionDef {
     value?: number | string | (number|string)[];
     valueName?: string;
     range?: [number, number];
+    process?: () => object;
     description?: string;
 }
 

@@ -105,14 +105,14 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
     public onChange(changed: Tuple): boolean {
         switch (changed[0]) {
             case "STATE":
-                if (changed[1] === 1) {
-                    this.start();
-                } else if (changed[1] === 2) {
-                    this.pause();
-                } else {
+                if (changed[1] === 0) {
                     this.stop();
+                } else {
+                    this.start();
                 }
                 return true;
+            case "reset":
+                this.reset();
             case "BPM":
                 this.setBpmAndTimePerStep(changed[1]);
                 return true;
@@ -174,27 +174,31 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         }
     }
 
-    private stop(): void {
-        this.clock.postMessage("stop");
-        this.nextStepTimeInSec = 0;
-        this.score.resetScorePointer();
-        this.isRunning = false;
-    }
-
     /**
      * Stops the sequencer and suspends the AudioContext to
      * globally halt all audio streams. It just halts if
      * if sequencer and AudioContext both are in running state.
      * @return  true if halted, false if not
      */
-    private pause(): boolean {
+    private stop(): boolean {
         if (this.ac.state === "running" && this.isRunning) {
-            this.stop();
+            this.halt();
             this.ac.suspend();
             return true;
         } else {
             return false;
         }
+    }
+
+    private reset(): void {
+        this.halt();
+        this.score.resetScorePointer();
+    }
+
+    private halt(): void {
+        this.clock.postMessage("stop");
+        this.nextStepTimeInSec = 0;
+        this.isRunning = false;
     }
 
     private setBpmAndTimePerStep(bpm: number): void {
@@ -310,8 +314,8 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
             // delayedAction.payload.startTime = startTime;
             delayedAction.payload.duration = duration;
         } //else {
-            // delayedPayload = Object.assign({}, payload, { startTime }) as IDelayedAudioController;
-            // delayedAction.payload
+        // delayedPayload = Object.assign({}, payload, { startTime }) as IDelayedAudioController;
+        // delayedAction.payload
         // }
         // action.payload = delayedPayload;
         return delayedAction;

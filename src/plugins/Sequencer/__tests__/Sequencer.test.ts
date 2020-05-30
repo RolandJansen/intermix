@@ -40,7 +40,7 @@ describe("Sequencer", () => {
 
     test("has action definitions", () => {
         const stateAction: IOscActionDef = {
-            address: "/intermix/plugin/{UID}/STATE",
+            address: "/intermix/plugin/{UID}/state",
             typeTag: ",i",
             range: [0, 1],
             description: "starts or stops the sequencer",
@@ -161,33 +161,33 @@ describe("Sequencer", () => {
         });
 
         test("stops", () => {
+            sequencer.onChange(["STATE", 1]);
+            expect(sequencer["isRunning"]).toBeTruthy();
+
             sequencer.onChange(["STATE", 0]);
+            expect(sequencer["ac"].state).toMatch("suspended");
+            expect(sequencer["isRunning"]).toBeFalsy();
+        });
+
+        test("doesn't stop if sequencer is not running", () => {
+            sequencer.onChange(["STATE", 0]);
+            expect(sequencer["ac"].state).toMatch("running");
+        });
+
+        test("reactivates audio context when restarted", () => {
+            sequencer.onChange(["STATE", 1]);
+            sequencer.onChange(["STATE", 0]);
+            expect(sequencer["ac"].state).toMatch("suspended");
+            sequencer.onChange(["STATE", 1]);
+            expect(sequencer["ac"].state).toMatch("running");
+        });
+
+        test("resets (stop and reset queue pointer)", () => {
+            sequencer.onChange(["reset", 1]);
             expect(sequencer["clock"].postMessage).toBeCalledWith("stop");
             expect(sequencer["isRunning"]).toBeFalsy();
             expect(sequencer["nextStep"]).toEqual(0);
             expect(sequencer["score"].resetScorePointer).toHaveBeenCalled();
-        });
-
-        test("pauses", () => {
-            sequencer.onChange(["STATE", 1]);
-            expect(sequencer["isRunning"]).toBeTruthy();
-
-            sequencer.onChange(["STATE", 2]);
-            expect(sequencer["ac"].state).toMatch("suspended");
-            expect(sequencer["isRunning"]).toBeFalsy();
-        });
-
-        test("doesn't pause if sequencer is not running", () => {
-            sequencer.onChange(["STATE", 2]);
-            expect(sequencer["ac"].state).toMatch("running");
-        });
-
-        test("starts and resumes audio context after pause", () => {
-            sequencer.onChange(["STATE", 1]);
-            sequencer.onChange(["STATE", 2]);
-            expect(sequencer["ac"].state).toMatch("suspended");
-            sequencer.onChange(["STATE", 1]);
-            expect(sequencer["ac"].state).toMatch("running");
         });
 
     });
