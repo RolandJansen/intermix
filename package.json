@@ -5,7 +5,7 @@
   "main": "dist/intermix.js",
   "types": "dist/intermix.d.ts",
   "scripts": {
-    "lint": "eslint src/**/*.{js,ts} --fix",
+    "lint": "eslint src/**/*.{js,ts}",
     "clean": "rimraf dist/*",
     "doc": "typedoc",
     "prebuild": "npm run lint && npm run clean",
