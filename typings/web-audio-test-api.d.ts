@@ -91,8 +91,7 @@ declare namespace WATA {
 
 // type AudioContext.prototype.WEB_AUDIO_TEST_API_VERSION: string;
 
-
-declare var WebAudioTestAPI: IWebAudioTestAPI;
+declare const WebAudioTestAPI: IWebAudioTestAPI;
 
 // export namespace AudioContext {
 //     export const WEB_AUDIO_TEST_API_VERSION: string;

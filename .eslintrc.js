@@ -21,7 +21,7 @@ module.exports = {
         "@typescript-eslint"
     ],
     "rules": {
-        "no-console": 1,  // just warnings for console.log
+        "no-console": 1,  // just warnings for console.log etc
         "@typescript-eslint/no-use-before-define": 0,
         "@typescript-eslint/triple-slash-reference": 0,
         "@typescript-eslint/no-inferrable-types": 1,
