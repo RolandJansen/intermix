@@ -6,6 +6,7 @@
   "types": "dist/intermix.d.ts",
   "scripts": {
     "lint": "eslint src/**/*.{js,ts}",
+    "prettify": "eslint src/**/*.{js,ts} --fix",
     "clean": "rimraf dist/*",
     "doc": "typedoc",
     "prebuild": "npm run lint && npm run clean",
@@ -52,6 +53,16 @@
     ],
     "testURL": "http://localhost/"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx}": [
+      "eslint --fix"
+    ]
+  },
   "devDependencies": {
     "@types/benchmark": "^1.0.31",
     "@types/jest": "^23.3.1",
@@ -73,8 +84,10 @@
     "file-loader": "^6.0.0",
     "html-webpack-externals-plugin": "^3.8.0",
     "html-webpack-plugin": "^4.2.0",
+    "husky": "^4.2.5",
     "jest": "^25.3.0",
     "jest-extended": "^0.11.0",
+    "lint-staged": "^10.2.7",
     "prettier": "^2.0.5",
     "rimraf": "^3.0.2",
     "source-map-loader": "^0.2.4",
