@@ -7,8 +7,8 @@ import PluginRegistry from "./PluginRegistry";
 import { IPlugin } from "./interfaces";
 
 /**
- * Calls the appropriate sub-registry
- * and builds the new state and reducer
+ * Calls the appropriate sub-registries
+ * and adds new items to the state and reducers map
  *
  * This is not derived from AbstractRegistry,
  * it's more like an orchestrator class.

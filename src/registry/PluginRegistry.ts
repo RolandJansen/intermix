@@ -5,6 +5,9 @@ import { store } from "../store/store";
 import { bindActionCreators } from "redux";
 import commonActionDefs from "./commonActionDefs";
 
+/**
+ * The registry for plugins of all kind.
+ */
 export default class PluginRegistry extends AbstractRegistry {
     public itemList: RegistryItemList<IPlugin>;
 
@@ -13,6 +16,11 @@ export default class PluginRegistry extends AbstractRegistry {
         this.itemList = new RegistryItemList<IPlugin>();
     }
 
+    /**
+     * Creates a new plugin from a given class, generates
+     * action creators and returns the new plugin instance.
+     * @param pluginClass The class from which the plugin will be derived
+     */
     public add<P extends IPlugin>(pluginClass: new (ac: AudioContext) => P): P {
         const newItem = new pluginClass(this.ac);
 
@@ -40,6 +48,11 @@ export default class PluginRegistry extends AbstractRegistry {
         return newItem;
     }
 
+    /**
+     * Unsubscribe an item from the store and
+     * remove it from its registry.
+     * @param itemId The unique id of the item to be removed
+     */
     public remove(itemId: string): void {
         const oldItem: IPlugin = this.itemList.getItem(itemId);
 

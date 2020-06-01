@@ -2,24 +2,18 @@ import { ActionCreatorsMapObject } from "redux";
 import { getRandomString } from "../helper";
 import { IPlugin, IPluginMetaData, IState, Tuple, IOscActionDef } from "./interfaces";
 
-// in plugins müssen actionsCreators in
-// einem objekt gekapselt sein.
-// Wird vom wrapper via bindActionCreators (redux)
-// durch ein objekt mit dispatch-funktionen ersetzt.
-// so muß das Plugin nichts vom store oder redux wissen.
-
 /**
  * The basic skeleton of an Intermix Plugin
  */
 export default abstract class AbstractPlugin implements IPlugin {
     public abstract readonly metaData: IPluginMetaData;
     public abstract readonly actionDefs: IOscActionDef[];
-    // public abstract actionCreators: ActionCreatorsMapObject;
 
     public readonly frequencyLookup: number[];
     public readonly uidLength = 4;
     public readonly uid: string;
 
+    // actionCreators will be bound to dispatch by the registry
     public actionCreators: ActionCreatorsMapObject = {};
     public unboundActionCreators: ActionCreatorsMapObject = {};
     public initState: IState = {};
@@ -39,6 +33,11 @@ export default abstract class AbstractPlugin implements IPlugin {
      */
     public abstract onChange(changed: Tuple): boolean;
 
+    /**
+     * Unsubscribe from the dispatcher.
+     * This is empty by default and will
+     * be overridden by the registry.
+     */
     public unsubscribe(): void {
         // will be overridden by the registry
     }
@@ -68,6 +67,11 @@ export default abstract class AbstractPlugin implements IPlugin {
         }
     }
 
+    /**
+     * Computes a random string out of letters and numbers.
+     * Just a wrapper for the helper function.
+     * @param length Number of chars to be contained in the string
+     */
     protected getRandomString(length: number): string {
         return getRandomString(length);
     }

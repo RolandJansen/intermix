@@ -1,5 +1,7 @@
 import { IActionDef } from "./interfaces";
 
+// WARNING!: Currently not in use.
+
 /**
  * This list is ment to be a short reference but could also
  * be used as a lookup table for plugins (onChange).

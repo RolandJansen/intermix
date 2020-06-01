@@ -11,9 +11,6 @@ import SeqPart from "./seqpart/SeqPart";
 const audioContext: AudioContext = new AudioContext();
 const registry: MasterRegistry = new MasterRegistry(audioContext);
 
-// deprecated
-// const registry: Registry = new Registry(audioContext);
-
 // plugins
 // const defaultSequencer: Sequencer = registry.registerPlugin(Sequencer);
 // const defaultSampler: DemoSampler = registry.registerPlugin(DemoSampler);
@@ -94,9 +91,6 @@ export function getUnboundActionCreators(itemId: string): ActionCreatorsMapObjec
 export function getSeqPart(itemId: string): SeqPart {
     return registry.getSeqPart(itemId);
 }
-// export function getNewPart(): SeqPart {
-//     return new SeqPart();
-// }
 
 // export function animate(animeFunc: (lastPlayedStep: number) => void): void {
 //     defaultSequencer.updateFrame = animeFunc;

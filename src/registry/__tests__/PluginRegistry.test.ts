@@ -7,13 +7,6 @@ import TestInstrument from "../../plugins/TestInstrument";
 import { store } from "../../store/store";
 import commonActionDefs from "../../registry/commonActionDefs";
 
-// tslint:disable: no-string-literal
-// We use string-literals to test private functions like:
-// objectName["privateMethod"](parameters)
-// Normally this could be considered as bad style ("test API only")
-// but here we want to check the values of private fields to
-// check the result of certain api calls.
-
 // instruct Jest to use the mock class
 // instead of the real one globaly.
 jest.mock("../../store/store");

@@ -1,13 +1,6 @@
 import { IAction } from "../registry/interfaces";
 import SeqPart from "./SeqPart";
 
-// tslint:disable: no-string-literal
-// We use string-literals to test private functions like:
-// objectName["privateMethod"](parameters)
-// Normally this could be considered as bad style ("test API only")
-// but here we want to check the values of private fields to
-// check the result of certain api calls.
-
 describe("SeqPart", () => {
     let part: SeqPart;
 

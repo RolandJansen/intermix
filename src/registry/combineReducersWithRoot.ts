@@ -1,7 +1,6 @@
 import { AnyAction, Reducer, ReducersMapObject } from "redux";
 import { IAction, IState } from "./interfaces";
 
-// tslint:disable:max-line-length
 /**
  * This does basically the same like redux combineReducers
  * but also takes a pre-configured root reducer as second argument.
@@ -13,7 +12,6 @@ import { IAction, IState } from "./interfaces";
  * This is based on a post by Chris Nitchie:
  * https://stackoverflow.com/questions/39261092/redux-create-root-reducer-from-combinereducers-and-loose-properties?answertab=active#tab-top
  */
-// tslint:enable:max-line-length
 export default (reducers: ReducersMapObject, rootReducer: Reducer) => {
     return (prevState: IState, action: AnyAction | IAction): IState => {
         // create an object that contains the

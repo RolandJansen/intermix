@@ -4,12 +4,6 @@ import Sequencer from "../Sequencer";
 import SeqPart from "../../../seqpart/SeqPart";
 import { ILoop, IAction, IOscActionDef } from "../../../registry/interfaces";
 
-// We use string-literals to test private functions like:
-// objectName["privateMethod"](parameters)
-// Normally this could be considered as bad style ("test API only")
-// but here we want to check the values of private fields to
-// check the result of certain api calls.
-
 // mock dependencies of the module under test
 jest.mock("../clock.worker");
 

@@ -12,6 +12,11 @@ import {
 } from "./interfaces";
 import RegistryItemList from "./RegistryItemList";
 
+/**
+ * Base class for item registries.
+ * Registries create objects (plugins, sequencer parts, etc)
+ * and prepare them to be used in intermix.
+ */
 export default abstract class AbstractRegistry {
     public abstract itemList: RegistryItemList<IRegistryItem>;
 
@@ -81,7 +86,7 @@ export default abstract class AbstractRegistry {
      * Determines which value has been changed between
      * two successive states. Only works with flat states.
      * @param currentState Original item state
-     * @param nextState Changed item state
+     * @param nextState New item state
      */
     protected getChanged(currentState: IState, nextState: IState): Tuple {
         let prop: string;
@@ -97,7 +102,7 @@ export default abstract class AbstractRegistry {
     /**
      * Creates action creator functions from an object with
      * action definitions.
-     * @param actionDefs Object with action definitions
+     * @param actionDefs An array of action definitions (see IActionDef)
      * @param uid The unique id of the item that gets registered
      */
     protected getActionCreators(actionDefs: IOscActionDef[], uid: string): ActionCreatorsMapObject {
@@ -148,8 +153,8 @@ export default abstract class AbstractRegistry {
      * they do the real work.
      * This approach is explained in detail in the redux doc section
      * "Reducing Boilerplate".
+     * @param actionDefs An array of action definitions (see IActionDef)
      * @param initialState Initial state of the sub-state-tree for this reducer
-     * @param handlers Lookup table: action-types -> handlers
      */
     protected getSubReducer(actionDefs: IOscActionDef[], initialState: IState): Reducer {
         const actionHandlers: IActionHandlerMap = this.getActionHandlers(actionDefs);
@@ -203,6 +208,7 @@ export default abstract class AbstractRegistry {
     /**
      * Generates the initial state for a registry item from
      * its ActionDef object.
+     * @param actionDefs An array of action definitions (see IActionDef)
      */
     protected getInitialState(actionDefs: IOscActionDef[], uid: string): IState {
         const iState: IState = {};

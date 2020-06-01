@@ -4,6 +4,9 @@ import { store } from "../store/store";
 import AbstractRegistry from "./AbstractRegistry";
 import RegistryItemList from "./RegistryItemList";
 
+/**
+ * The registry for sequencer parts.
+ */
 export default class SeqPartRegistry extends AbstractRegistry {
     public itemList: RegistryItemList<SeqPart>;
 
@@ -12,6 +15,11 @@ export default class SeqPartRegistry extends AbstractRegistry {
         this.itemList = new RegistryItemList<SeqPart>();
     }
 
+    /**
+     * Creates a new sequencer part, generates action creators
+     * and returns the new seqPart instance.
+     * @param lengthInStepsPerBar length of the sequencer part (optional)
+     */
     public add(lengthInStepsPerBar?: number): SeqPart {
         // create the new part
         let newPart: SeqPart;
@@ -34,6 +42,11 @@ export default class SeqPartRegistry extends AbstractRegistry {
         return newPart;
     }
 
+    /**
+     * Unsubscribe an item from the store and
+     * remove it from its registry.
+     * @param itemId The unique id of the item to be removed
+     */
     public remove(itemId: string): void {
         const oldItem: SeqPart = this.itemList.getItem(itemId);
 

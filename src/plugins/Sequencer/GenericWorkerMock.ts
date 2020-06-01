@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+
 /**
  * This is a fake implementation of a generic dedicated worker.
  * The implementation of the worker should be in a seperate
@@ -7,8 +8,6 @@
  * const worker = new GenericWorkerMock();
  * worker.internal.onmessage = functionWithActualImplementation;
  */
-
-/* tslint:disable: max-classes-per-file */
 export default class GenericWorkerMock {
     public internal: InternalWorker;
 

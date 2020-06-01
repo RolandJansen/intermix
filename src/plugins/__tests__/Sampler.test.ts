@@ -3,13 +3,6 @@ import "web-audio-test-api";
 import { IAction, IDelayedNote, IOscActionDef } from "../../registry/interfaces";
 import DemoSampler from "../Sampler";
 
-// tslint:disable: no-string-literal
-// We use string-literals to test private functions like:
-// objectName["privateMethod"](parameters)
-// Normally this could be considered as bad style ("test API only")
-// but here we want to check the values of private fields to
-// check the result of certain api calls.
-
 describe("DemoSampler", () => {
     let ac: AudioContext;
     let sampler: DemoSampler;

@@ -1,16 +1,7 @@
 import AbstractPlugin from "../registry/AbstractPlugin";
 import { IAudioController, IDelayedNote, IPlugin, IPluginMetaData, Tuple, IOscActionDef } from "../registry/interfaces";
 /**
- * An example synthesizer plugin for intermix.js
- *
- *
- *
- * Technically, the intermix namespace (window.intermix) is
- * just an extended AudioContext instance.
- * This means that intermix provides not just the
- * library functions but also all properties and methods
- * of the browsers AudioContext which makes it easy to build
- * synthesizers.
+ * The builtin synthesizer plugin for intermix.js
  *
  * For API docs of the AudioContext see
  * https://developer.mozilla.org/de/docs/Web/API/AudioContext

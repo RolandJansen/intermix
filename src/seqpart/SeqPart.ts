@@ -11,25 +11,15 @@ interface IPointerTable {
 /**
  * Represents a part of a sequence. It can be
  * used in many ways:
- * <ul>
- * <li>A part of a track like in piano-roll sequencers</li>
- * <li>A pattern like in step sequencers, drum computers and trackers</li>
- * <li>A loop like in live sequencers</li>
- * </ul>
+ *
+ * * A part of a track like in piano-roll sequencers
+ * * A pattern like in step sequencers, drum computers and trackers
+ * * A loop like in live sequencers
+ *
  * Technically it can store any type of event your system is capable of.
  * This means it is not limited to audio, midi, osc or dmx but can hold
- * any type of javascript object. A possible usecase would be to trigger
- * screen events with the draw function of the sequencer object.
- * @example
- * var sound = new intermix.Sound(soundWaveObject);
- * var seq = new intermix.Sequencer();
- * var part = new intermix.Part();
- * var note = intermix.events.createAudioNote('a3', 1, 0, sound);
- * part.addEvent(note, 0);
- * part.addEvent(note, 4);
- * seq.addPart(part, 0);
- * @constructor
- * @param  pLength       Length of the part in 64th notes (default: 64)
+ * any type of javascript object. However it is strongly recommended
+ * to only use actions of type IOscAction.
  */
 export default class SeqPart implements IRegistryItem {
     public static stepsPerBarDefault = 16; // global pattern resolution: 1bar = 1 full note
@@ -64,8 +54,12 @@ export default class SeqPart implements IRegistryItem {
         this.pointers = {};
     }
 
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    public unsubscribe() {
+    /**
+     * Unsubscribe from the dispatcher.
+     * This is empty by default and will
+     * be overridden by the registry.
+     */
+    public unsubscribe(): void {
         // will be overridden by the registry
     }
 
@@ -82,11 +76,6 @@ export default class SeqPart implements IRegistryItem {
      * Get the length of the pattern in stepsPerBar
      */
     public get length(): number {
-        // return this.pattern.length / this.stepMultiplier;
-        return this.pattern.length;
-    }
-
-    public get lengtha(): number {
         // return this.pattern.length / this.stepMultiplier;
         return this.pattern.length;
     }
@@ -179,10 +168,8 @@ export default class SeqPart implements IRegistryItem {
         return actions;
     }
 
-    /**
-     * This is very close to getActionsAtStep and
-     * can probably be simplified.
-     */
+    // This is very close to getActionsAtStep and
+    // can probably be simplified.
     public getActionsAtPointerPosition(pointerId: string): IAction[] {
         let actionsAtPointerPosition: IAction[] = [];
 
@@ -218,7 +205,6 @@ export default class SeqPart implements IRegistryItem {
     /**
      * Initialize an empty pattern for the part.
      * @param  lengthInStepsPerBar  Length of the pattern
-     * @return An empty pattern
      */
     private initPattern(lengthInStepsPerBar: number): Pattern {
         const pattern: Pattern = [];
