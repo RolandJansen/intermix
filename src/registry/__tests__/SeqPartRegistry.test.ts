@@ -47,10 +47,10 @@ describe("add", () => {
     });
 
     test("action creators are bound to store.dispatch()", () => {
-        const testPayload = [23, 5, 0.5, 0.5];
+        const testPayload = ["note", 23, 5, 0.5, 0.5];
         const action: IOscAction = {
             address: `/intermix/seqpart/${testPart.uid}/addNote`,
-            typeTag: ",iiff",
+            typeTag: ",siiff",
             type: "addNote",
             payload: testPayload,
         };
@@ -60,10 +60,10 @@ describe("add", () => {
     });
 
     test("unbound action creators are not bound to store.dispatch()", () => {
-        const testPayload = [23, 5, 0.5, 0.5];
+        const testPayload = ["note", 23, 5, 0.5, 0.5];
         const action: IOscAction = {
             address: `/intermix/seqpart/${testPart.uid}/addNote`,
-            typeTag: ",iiff",
+            typeTag: ",siiff",
             type: "addNote",
             payload: testPayload,
         };

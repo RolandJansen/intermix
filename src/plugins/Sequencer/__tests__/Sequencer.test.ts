@@ -33,13 +33,12 @@ describe("Sequencer", () => {
     });
 
     test("has action definitions", () => {
-        const stateAction: IOscActionDef = {
-            address: "/intermix/plugin/{UID}/state",
+        const testActionDef: IOscActionDef = {
+            address: "position",
             typeTag: ",i",
-            range: [0, 1],
-            description: "starts or stops the sequencer",
+            description: "jump to a specific step in the masterqueue",
         };
-        expect(sequencer.actionDefs).toContainEqual(stateAction);
+        expect(sequencer.actionDefs).toContainEqual(testActionDef);
     });
 
     test("has an empty list of inputs", () => {

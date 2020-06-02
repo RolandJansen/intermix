@@ -13,8 +13,8 @@ const actionDefs: IOscActionDef[] = [
     },
     {
         address: PREFIX + "addNote",
-        typeTag: ",iiff",
-        value: [0, 0, 0.0, 0.0],
+        typeTag: ",siiff",
+        value: ["note", 0, 0, 0.0, 0.0],
         description: "Adds a note to a SeqPart object",
     },
     {
@@ -25,8 +25,8 @@ const actionDefs: IOscActionDef[] = [
     },
     {
         address: PREFIX + "deleteNote",
-        typeTag: ",iiff",
-        value: [0, 0, 0.0, 0.0],
+        typeTag: ",siiff",
+        value: ["note", 0, 0, 0.0, 0.0],
         description: "Deletes a note from the SeqPart object",
     },
     {

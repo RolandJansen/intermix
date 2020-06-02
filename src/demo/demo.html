@@ -87,6 +87,8 @@
         console.log(copiedObject);
     });
 
+    let BPM = 120;
+
     const sequencer = new Nexus.Sequencer('#sequencer', {
         size: [540, 200],
         rows: 4,
@@ -103,7 +105,7 @@
     })
     const setBpm = new Nexus.Number('#set-bpm', {
         size: [80, 50],
-        value: 120,
+        value: BPM,
         min: 0,
         max: 240,
     })
@@ -126,24 +128,23 @@
         // sequencer.stepper(counter);
     })
 
+    setBpm.on('change', (e) => {
+        BPM = e;
+    })
+
     sequencer.on('change', (e) => {
-        // console.log(e);
         const partId = seqPartUID[e.row];
         const instrumentId = instrumentUID[e.row];
         const partActionCreators = intermix.getActionCreators(partId);
-        const action = getNote(40, 1, instrumentId);
+        const duration = get16thDuration(BPM);
         if (e.state) {
-            // send an "ADD_ACTION" action with a note as payload to the according part
-            partActionCreators.ADD_ACTION({
-                step: e.column,
-                action,
-            });
+            // send an "addNote" action to the according part
+            partActionCreators.activeStep(e.column);
+            partActionCreators.addNote(["note", 40, 1, duration, 0.0]);
         } else {
-            // send a "REMOVE_ACTION" action with the exact position to the according part
-            partActionCreators.REMOVE_ACTION({
-                step: e.column,
-                action,
-            })
+            // send a "deleteNote" action to the according part
+            partActionCreators.activeStep(e.column);
+            partActionCreators.deleteNote(["note", 40, 1, duration, 0.0]);
         }
     })
 
@@ -170,7 +171,6 @@
     ]
 
     function init() {
-        instrumentUID.push("sdf")
 
         // create sampler plugins and a sequencer part for each one
         for (let i = 0; i < 4; i++) {
@@ -237,34 +237,21 @@
     const populateSeqParts = (matrix) => {
         matrix.forEach((seqRow, rowIndex) => {
             const seqPartId = seqPartUID[rowIndex];
-            const samplerId = samplerUID[rowIndex];
+            const samplerId = instrumentUID[rowIndex];
             const seqPartActionCreators = intermix.getActionCreators(seqPartId);
-            const note = getNote(40, 1, samplerId);
+            const duration = get16thDuration()
 
             seqRow.forEach((seqStep, stepIndex) => {
                 if (seqRow[stepIndex] === true) {
-                    seqPartActionCreators.ADD_ACTION({
-                        step: stepIndex,
-                        action: note,
-                    });
+                    seqPartActionCreators.addNote(["note", 40, 1, 1.0, 0.0]);
                 }
             })
         })
     }
 
-    const getNote = (value, steps, uid) => {
-        const velocity = 1;
-        const duration = 0;
-        return {
-            type: "NOTE",
-            dest: uid,
-            payload: {
-                value,
-                velocity,
-                steps,
-                duration,
-            }
-        }
+    const get16thDuration = (bpm) => {
+        const divisor = bpm * 4;
+        return timePerBeat = 60 / divisor;
     }
 
     document.getElementById('resumeAudioContext').addEventListener('click', () => {

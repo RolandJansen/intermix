@@ -255,7 +255,7 @@ describe("SeqPart Registry", () => {
         });
 
         test("takes a seqPart id and returns its action creators", () => {
-            const expected = [0, 0, 0, 0];
+            const expected = ["note", 0, 0, 0.0, 0.0];
             const ac = registry.getActionCreators(partId);
             const oldState = store.getState();
             expect(oldState[partId].addNote).toEqual(expected);
