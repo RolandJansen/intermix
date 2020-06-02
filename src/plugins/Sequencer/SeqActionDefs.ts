@@ -8,33 +8,32 @@ const PREFIX = "/intermix/plugin/{UID}/";
 
 // to reset the sequencer we have to reset "state" and "pointer" at once
 const reset = (): IState => {
-    return { state: 0, pointer: 0 };
+    return { running: 0, pointer: 0 };
 };
 
 const actionDefs: IOscActionDef[] = [
     {
-        address: PREFIX + "START",
+        address: PREFIX + "start",
         typeTag: ",T",
-        valueName: "state",
+        valueName: "running",
         description: "starts the sequencer and (if neccessary) the suspended audio context",
     },
     {
-        address: PREFIX + "STOP",
+        address: PREFIX + "stop",
         typeTag: ",F",
-        valueName: "state",
+        valueName: "running",
         description: "stops the sequencer at the current position and halts the audio context",
     },
     {
-        address: PREFIX + "state",
-        typeTag: ",i",
-        range: [0, 1],
-        description: "starts or stops the sequencer",
-    },
-    {
         address: PREFIX + "reset",
-        typeTag: ",T",
+        typeTag: ",N",
         process: reset,
         description: "stops the sequencer (not the audio context) and resets the queue pointer",
+    },
+    {
+        address: "position",
+        typeTag: ",i",
+        description: "jump to a specific step in the masterqueue",
     },
     {
         address: PREFIX + "BPM",
@@ -42,6 +41,26 @@ const actionDefs: IOscActionDef[] = [
         value: 120,
         range: [0, 240],
         description: "sets the BPM value",
+    },
+    {
+        address: PREFIX + "loopStart",
+        typeTag: ",i",
+        description: "sets the loop startpoint in steps",
+    },
+    {
+        address: PREFIX + "loopEnd",
+        typeTag: ",i",
+        description: "sets the loop endpoint in steps",
+    },
+    {
+        address: PREFIX + "loopActive",
+        typeTag: ",T",
+        description: "sets the loop active",
+    },
+    {
+        address: PREFIX + "loopInactive",
+        typeTag: ",F",
+        description: "sets the loop inactive",
     },
     // {
     //     type: "ADD_PART",
@@ -75,26 +94,14 @@ const actionDefs: IOscActionDef[] = [
     //     defVal: [],
     // },
 
-    // {
-    //     type: "LOOP",
-    //     desc: "sets the loop start- and endpoint in steps",
-    //     defVal: { start: 0, end: 63 },
-    // },
-    // {
-    //     type: "LOOP_ACTIVE",
-    //     desc: "sets the loop active/inactive",
-    //     defVal: false,
-    // },
-    // {
-    //     type: "JUMP_TO_POSITION",
-    //     desc: "jump to a specific step in the masterqueue",
-    //     defVal: 0,
-    // },
-    // {
-    //     type: "ANIMATE",
-    //     desc: "a function that should be invoked by the sequencer at every step",
-    //     defVal: (): boolean => true,
-    // },
+    {
+        address: "animate",
+        typeTag: ",P",
+        value: (): void => {
+            /* empty; */
+        },
+        description: "a function that should be invoked by the sequencer at every step",
+    },
 ];
 
 export default actionDefs;

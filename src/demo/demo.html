@@ -27,8 +27,8 @@
     <div id="sequencer"></div>
     <div class="button-group">
         <div id="start-button"></div>
-        <div id="pause-button"></div>
         <div id="stop-button"></div>
+        <div id="reset-button"></div>
         <div id="set-bpm"></div>
     </div>
     <!-- <div id="blink"></div> -->
@@ -95,11 +95,11 @@
     const startButton = new Nexus.TextButton('#start-button', {
         text: 'Start',
     })
-    const pauseButton = new Nexus.TextButton('#pause-button', {
-        text: 'Pause',
-    })
     const stopButton = new Nexus.TextButton('#stop-button', {
         text: 'Stop',
+    })
+    const resetButton = new Nexus.TextButton('#reset-button', {
+        text: 'Reset',
     })
     const setBpm = new Nexus.Number('#set-bpm', {
         size: [80, 50],
@@ -110,16 +110,16 @@
 
     startButton.on('change', () => {
         sequencer.stepper.value = -1;
-        seqActionCreators.STATE(1);
-    })
-
-    pauseButton.on('change', () => {
-        seqActionCreators.STATE(2);
+        seqActionCreators.start();
     })
 
     stopButton.on('change', () => {
+        seqActionCreators.stop();
+    })
 
-        seqActionCreators.STATE(0);
+    resetButton.on('change', () => {
+
+        seqActionCreators.reset();
         // sequencer.stepper.value = -1;
         // const counter = new Nexus.Counter(0, 1);
         // counter.value = 0;
@@ -129,18 +129,18 @@
     sequencer.on('change', (e) => {
         // console.log(e);
         const partId = seqPartUID[e.row];
-        const samplerId = samplerUID[e.row];
-        const actionCreators = intermix.getActionCreators(partId);
-        const action = getNote(40, 1, samplerId);
+        const instrumentId = instrumentUID[e.row];
+        const partActionCreators = intermix.getActionCreators(partId);
+        const action = getNote(40, 1, instrumentId);
         if (e.state) {
             // send an "ADD_ACTION" action with a note as payload to the according part
-            actionCreators.ADD_ACTION({
+            partActionCreators.ADD_ACTION({
                 step: e.column,
                 action,
             });
         } else {
             // send a "REMOVE_ACTION" action with the exact position to the according part
-            actionCreators.REMOVE_ACTION({
+            partActionCreators.REMOVE_ACTION({
                 step: e.column,
                 action,
             })
@@ -154,7 +154,7 @@
     }
 
     const ac = intermix.getAudioContext();
-    const samplerUID = [];
+    const instrumentUID = [];
     const seqPartUID = [];
     let sequencerUID = '';
 
@@ -170,24 +170,25 @@
     ]
 
     function init() {
+        instrumentUID.push("sdf")
 
         // create sampler plugins and a sequencer part for each one
         for (let i = 0; i < 4; i++) {
-            samplerUID.push(intermix.addPlugin('DemoSampler'))
+            instrumentUID.push(intermix.addPlugin('Sampler'))
             seqPartUID.push(intermix.addSeqPart())  // 16 steps if not stated otherwise
         }
 
-        console.log(samplerUID)
+        console.log("sampler id is: " + instrumentUID)
 
         // add a sample to each sampler
         samples.forEach((sample, index) => {
-            addAudioDataToSampler(samplerUID[index], sample["default"]);
+            addAudioDataToSampler(instrumentUID[index], sample["default"]);
         })
 
         // setup the sequencer
         sequencerUID = intermix.addPlugin('Sequencer');
         seqActionCreators = intermix.getActionCreators(sequencerUID);
-        seqActionCreators.ANIMATE(selectNextSeqRow);  // animate the sequencer
+        seqActionCreators.animate(selectNextSeqRow);  // animate the sequencer
 
         // setup a basic sequence
         sequencer.matrix.populate.row(0, [1, 0, 0, 0, 0, 0, 0, 0]);
@@ -227,14 +228,9 @@
         loadFile(rawData).then((response) => {
             return ac.decodeAudioData(response);
         }).then((decoded) => {
-            const audioDataAction = {
-                type: "AUDIODATA",
-                dest: samplerUID,
-                payload: decoded,
-            };
             // send the audio buffer to the sampler
             const actionCreators = intermix.getActionCreators(samplerUID)
-            actionCreators.AUDIODATA(audioDataAction)
+            actionCreators.audioData(decoded)
         })
     }
 

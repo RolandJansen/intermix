@@ -85,16 +85,18 @@ export interface IActionDef {
     steps?: number;
 }
 
+type procedure = () => void;
+
 export interface IOscAction extends Action {
     address: string;
     typeTag: string;
-    payload?: number | string | (number | string)[];
+    payload?: number | string | (number | string)[] | procedure;
 }
 
 export interface IOscActionDef {
     address: string;
     typeTag: string;
-    value?: number | string | (number | string)[];
+    value?: number | string | (number | string)[] | procedure;
     valueName?: string;
     range?: [number, number];
     process?: () => object;

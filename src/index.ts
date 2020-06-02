@@ -3,23 +3,18 @@ import { IPlugin, IState } from "./registry/interfaces";
 import MasterRegistry from "./registry/MasterRegistry";
 import { store } from "./store/store";
 import Sequencer from "./plugins/Sequencer/Sequencer";
-import DemoSampler from "./plugins/Sampler";
-import DemoSynth from "./plugins/Synth";
+import Sampler from "./plugins/Sampler";
+import Synth from "./plugins/Synth";
 import SeqPart from "./seqpart/SeqPart";
 
 // system components
 const audioContext: AudioContext = new AudioContext();
 const registry: MasterRegistry = new MasterRegistry(audioContext);
 
-// plugins
-// const defaultSequencer: Sequencer = registry.registerPlugin(Sequencer);
-// const defaultSampler: DemoSampler = registry.registerPlugin(DemoSampler);
-// const defaultSynth: DemoSynth = registry.registerPlugin(DemoSynth);
-
 export const plugins = {
     Sequencer,
-    DemoSampler,
-    DemoSynth,
+    Sampler,
+    Synth,
 };
 
 export function getState(): IState {
