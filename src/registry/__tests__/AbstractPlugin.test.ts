@@ -10,13 +10,13 @@ const ac = new AudioContext();
 let plug: TestPlugin;
 
 beforeEach(() => {
-    plug = new TestPlugin(ac);
+    plug = new TestPlugin("abcd", ac);
 });
 
-test("Generate a random unique ID", () => {
-    expect(plug.uid).toBeDefined();
-    expect(plug.uid.length).toEqual(plug.uidLength);
-});
+// test("Generate a random unique ID", () => {
+//     expect(plug.uid).toBeDefined();
+//     expect(plug.uid.length).toEqual(plug.uidLength);
+// });
 
 // See cheat sheet:
 // http://www.inspiredacoustics.com/en/MIDI_note_numbers_and_center_frequencies
