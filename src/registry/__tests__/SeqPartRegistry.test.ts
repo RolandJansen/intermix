@@ -12,7 +12,10 @@ let registry: SeqPartRegistry;
 let testPart: SeqPart;
 
 beforeEach(() => {
-    globalState = {};
+    globalState = {
+        plugins: [],
+        seqparts: [],
+    };
 
     // can't use mockReturnValue here cause it
     // handles its argument like a constant
@@ -38,7 +41,7 @@ describe("add", () => {
     test("adds action creator functions to the SeqPart instance", () => {
         const acKeys = Object.keys(testPart.actionCreators);
         expect(acKeys).toContain("addNote");
-        expect(acKeys).toContain("deleteNote");
+        expect(acKeys).toContain("removeNote");
     });
 
     test("adds unbound action creators to the plugin instance", () => {

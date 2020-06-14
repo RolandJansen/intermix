@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import AbstractPlugin from "../../registry/AbstractPlugin";
+import AbstractControllerPlugin from "../../registry/AbstractControllerPlugin";
 import {
     IAction,
     IActionDef,
     IControllerPlugin,
-    IDelayedAudioController,
-    IDelayedNote,
     ILoop,
     Tuple,
     ReturnFunction,
     IOscActionDef,
+    IState,
+    OscArgSequence,
 } from "../../registry/interfaces";
 import SeqPart from "../../seqpart/SeqPart";
 import ClockWorker from "./clock.worker";
@@ -26,7 +26,7 @@ export interface IQueuePosition {
  * parts, runs the scheduler that fires actions
  * and draws to the screen.
  */
-export default class Sequencer extends AbstractPlugin implements IControllerPlugin {
+export default class Sequencer extends AbstractControllerPlugin implements IControllerPlugin {
     public static bpmDefault = 120;
 
     public readonly metaData = {
@@ -49,7 +49,7 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
 
     private timePerStepInSec: number; // period of time between two steps
     private nextStepTimeInSec = 0; // time relative to ac.currentTime until the next sequencer step
-    private nextStep = 0; // position in the queue that will get triggered next
+    // private nextStep = 0; // position in the queue that will get triggered next
     private triggeredSteps: IQueuePosition[] = []; // list of steps that were triggered but are still ahead of time
     // private lastPlayedStep = 0;         // step in queue that was played (not triggered) recently (used for drawing).
     private isRunning = false; // true if sequencer is running, otherwise false
@@ -59,7 +59,7 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
     constructor(private ac: AudioContext) {
         super();
         this.timePerStepInSec = this.getTimePerStep();
-        this.score = new Score();
+        this.score = new Score(this.getGlobalState);
 
         // Initialize the timer
         this.clock = new ClockWorker();
@@ -91,17 +91,6 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
     }
 
     /**
-     * This is where you drop in actions that should be dispatched for
-     * other plugins (not in this plugins actionCreators list).
-     * The implementation will be injected by the registry so we just have to
-     * provide an empty method here. It has to be public so the registry can see it.
-     * @param action An action object that normally holds data for an audio device
-     */
-    public sendAction(action: IAction): void {
-        /* nothing */
-    }
-
-    /**
      * onChange gets called on every state change
      * @param changed A tuple with actiontype and payload
      */
@@ -119,25 +108,26 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
             case "BPM":
                 this.setBpmAndTimePerStep(changed[1]);
                 return true;
-            case "ADD_PART":
-                const newPart: SeqPart = changed[1];
-                this.score.parts.add(newPart);
+            // case "ADD_PART":
+            //     const newPart: SeqPart = changed[1];
+            //     this.score.parts.add(newPart);
+            //     return true;
+            // case "REMOVE_PART":
+            //     const partID: string = changed[1];
+            //     this.score.parts.remove(partID);
+            //     return true;
+            case "activeStep":
+                this.score.activeStep = changed[1] as number;
                 return true;
-            case "REMOVE_PART":
-                const partID: string = changed[1];
-                this.score.parts.remove(partID);
+            case "addToScore":
+                const toBeAdded: [string, string] = changed[1];
+                this.score.addPartToScore(toBeAdded);
+                // this.actionCreators.QUEUE(this.score.queue);
                 return true;
-            case "ADD_TO_SCORE":
-                const toBeAdded: string = changed[1].partID;
-                const newPosition: number = changed[1].position;
-                this.score.addPartToScore(toBeAdded, newPosition);
-                this.actionCreators.QUEUE(this.score.queue);
-                return true;
-            case "REMOVE_FROM_SCORE":
-                const toBeRemoved: string = changed[1].partID;
-                const oldPosition: number = changed[1].position;
-                this.score.removePartFromScore(toBeRemoved, oldPosition);
-                this.actionCreators.QUEUE(this.score.queue);
+            case "removeFromScore":
+                const toBeRemoved: [string, string] = changed[1];
+                this.score.removePartFromScore(toBeRemoved);
+                // this.actionCreators.QUEUE(this.score.queue);
                 return true;
             case "LOOP":
                 const loop: ILoop = changed[1];
@@ -237,7 +227,7 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         }
 
         while (this.nextStepTimeInSec < limit) {
-            this.score.addPartsToRunqueue();
+            this.score.addPatternsToRunqueue();
             this.sendAllActionsInNextStep();
             this.triggeredSteps.push(this.score.getScorePosition(this.nextStepTimeInSec));
             this.nextStepTimeInSec += this.timePerStepInSec;
@@ -283,9 +273,9 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
         //     part.pointer++;
         // });
 
-        const nextStepActions = this.score.getAllActionsInNextStep();
-        nextStepActions.forEach((actionEvent) => {
-            const action = this.prepareActionForDispatching(actionEvent, this.nextStepTimeInSec);
+        const nextStepActions = this.score.getAllActionsForNextStep();
+        nextStepActions.forEach((action) => {
+            this.prepareActionForDispatching(action, this.nextStepTimeInSec);
             this.sendAction(action);
         });
     }
@@ -294,36 +284,18 @@ export default class Sequencer extends AbstractPlugin implements IControllerPlug
      * Adds delay and eventually duration to an action and returns it.
      * Type of payload in the returned object can be IDelayedNote
      * or IDelayedAudioController (notes have a duration while controllers have not).
-     * @param action An action object that normally holds data for an audio device
+     * @param event An action object that normally holds data for an audio device
      * @param startTime time in seconds when the audio event should start
      */
     private prepareActionForDispatching(action: IAction, startTime: number): IAction {
-        const delayedAction = Object.assign({}, action, {
-            payload: action.payload,
-        });
+        const payloadLength = action.payload.length;
+        action.payload[payloadLength - 1] = startTime;
 
-        if (Array.isArray(action.payload)) {
-            delayedAction.payload = action.payload;
-        } else {
-            delayedAction.payload = [action.payload];
+        if (action.payload[0] === "note") {
+            // const duration = this.getDurationTime(event.payload.steps);
+            // action.payload[payloadLength - 2] = duration;
         }
-
-        delayedAction.payload.push(startTime);
-
-        if (action.type === "NOTE") {
-            const duration = this.getDurationTime(action.payload.steps);
-            // delayedPayload = Object.assign({}, payload, {
-            //     startTime,
-            //     duration,
-            // }) as IDelayedNote;
-            // delayedAction.payload.startTime = startTime;
-            delayedAction.payload.duration = duration;
-        } //else {
-        // delayedPayload = Object.assign({}, payload, { startTime }) as IDelayedAudioController;
-        // delayedAction.payload
-        // }
-        // action.payload = delayedPayload;
-        return delayedAction;
+        return action;
     }
 
     /**

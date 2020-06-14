@@ -1,7 +1,7 @@
 /// <reference path="../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
-import { IDelayedNote } from "../../registry/interfaces";
 import DemoSynth from "../Synth";
+import { IntermixNote, IntermixCtrl } from "../../registry/interfaces";
 
 describe("DemoSynth", () => {
     let ac: AudioContext;
@@ -44,16 +44,19 @@ describe("DemoSynth", () => {
     });
 
     describe("onChange", () => {
-        let note: IDelayedNote;
+        let testNote: IntermixNote;
+        let testCtrl: IntermixCtrl;
 
         beforeEach(() => {
-            note = {
-                value: 23,
-                velocity: 1,
-                steps: 1,
-                duration: 1,
-                startTime: 1,
-            };
+            testNote = ["note", 23, 1, 1, 1];
+            testCtrl = ["testCtrl", 0.23, 0];
+            // {
+            //     value: 23,
+            //     velocity: 1,
+            //     steps: 1,
+            //     duration: 1,
+            //     startTime: 1,
+            // };
             synth["ac"].$processTo("00:00.000");
         });
 
@@ -63,15 +66,15 @@ describe("DemoSynth", () => {
         });
 
         test("should add and delete OscillatorNodes from the queue", () => {
-            synth.onChange(["NOTE", note]);
-            synth.onChange(["NOTE", note]);
+            synth.onChange(["NOTE", testNote]);
+            synth.onChange(["NOTE", testNote]);
             expect(synth["queue"].length).toEqual(2);
             synth.onChange(["STOP", true]);
             expect(synth["queue"].length).toEqual(0);
         });
 
         test("should start and stop an OscillatorNode at given times", () => {
-            synth.onChange(["NOTE", note]);
+            synth.onChange(["NOTE", testNote]);
 
             const node = synth["queue"][0];
             expect(node.$stateAtTime("00:00.000")).toBe("SCHEDULED");
@@ -82,7 +85,7 @@ describe("DemoSynth", () => {
         });
 
         test("should disconnect nodes on stop", () => {
-            synth.onChange(["NOTE", note]);
+            synth.onChange(["NOTE", testNote]);
             const oscNode = synth["queue"][0];
             oscNode.disconnect = jest.fn(); // fake disconnect call
             synth.onChange(["STOP", true]);
@@ -90,7 +93,7 @@ describe("DemoSynth", () => {
         });
 
         test("should remove nodes from queue on stop", () => {
-            synth.onChange(["NOTE", note]);
+            synth.onChange(["NOTE", testNote]);
             expect(synth["queue"].length).toEqual(1);
             synth.onChange(["STOP", true]);
             expect(synth["queue"].length).toEqual(0);
@@ -98,13 +101,13 @@ describe("DemoSynth", () => {
 
         test("should handle envelope attack", () => {
             // there's no check if value is within range (covered by actionDef)
-            synth.onChange(["ENV_ATTACK", { value: 0.23 }]);
+            synth.onChange(["ENV_ATTACK", testCtrl]);
             expect(synth["attack"]).toEqual(0.23);
         });
 
         test("should handle envelope decay", () => {
             // there's no check if value is within range (covered by actionDef)
-            synth.onChange(["ENV_DECAY", { value: 0.23 }]);
+            synth.onChange(["ENV_DECAY", testCtrl]);
             expect(synth["decay"]).toEqual(0.23);
         });
     });

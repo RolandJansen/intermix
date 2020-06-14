@@ -34,7 +34,7 @@ export function getAudioContext(): AudioContext {
     return audioContext;
 }
 
-type GenericPluginClass = new (ac: AudioContext) => IPlugin;
+type GenericPluginClass = new (itemId: string, ac: AudioContext) => IPlugin;
 
 /**
  * Tries to find a class (prototype) with the name of a given string (reflection),

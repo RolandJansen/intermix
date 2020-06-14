@@ -1,4 +1,4 @@
-import { getRandomString } from "../helper";
+// import { getRandomString } from "../helper";
 import { IRegistryItem } from "./interfaces";
 
 interface IRegistryItemLookup<itemType> {
@@ -6,7 +6,7 @@ interface IRegistryItemLookup<itemType> {
 }
 
 export default class RegistryItemList<T extends IRegistryItem> {
-    private keyLength = 5;
+    // private keyLength = 5;
     private itemLookupTable: IRegistryItemLookup<T> = {};
 
     public getUidList(): string[] {
@@ -28,18 +28,12 @@ export default class RegistryItemList<T extends IRegistryItem> {
     }
 
     public add(item: T): string {
-        let itemKey = item.uid;
+        // if (!this.isKeyUnique(item.uid)) {
+        //     throw new Error(`Item-ID ${item.uid} is already in the list.`);
+        // }
 
-        if (item.uid === "") {
-            itemKey = getRandomString(this.keyLength);
-            while (!this.isKeyUnique(itemKey)) {
-                itemKey = getRandomString(this.keyLength);
-            }
-            item.uid = itemKey;
-        }
-
-        this.itemLookupTable[itemKey] = item;
-        return itemKey;
+        this.itemLookupTable[item.uid] = item;
+        return item.uid;
     }
 
     public remove(itemKey: string): void {
@@ -50,10 +44,19 @@ export default class RegistryItemList<T extends IRegistryItem> {
         }
     }
 
-    private isKeyUnique(itemKey: string): boolean {
-        if (this.itemLookupTable.hasOwnProperty(itemKey)) {
-            return false;
-        }
-        return true;
-    }
+    // public getUniqueItemKey(): string {
+    //     let itemKey = getRandomString(this.keyLength);
+    //     while (!this.isKeyUnique(itemKey)) {
+    //         itemKey = getRandomString(this.keyLength);
+    //     }
+
+    //     return itemKey;
+    // }
+
+    // private isKeyUnique(itemKey: string): boolean {
+    //     if (this.itemLookupTable.hasOwnProperty(itemKey)) {
+    //         return false;
+    //     }
+    //     return true;
+    // }
 }

@@ -1,30 +1,33 @@
-import { IAction } from "../registry/interfaces";
+import { IntermixNote, IntermixCtrl } from "../registry/interfaces";
 import SeqPart from "./SeqPart";
 
 describe("SeqPart", () => {
     let part: SeqPart;
 
-    const action1: IAction = {
-        type: "NOTE",
-        listener: "abcd",
-        payload: {
-            noteNumber: 0,
-            velocity: 0,
-            duration: 0,
-        },
-    };
-    const action2: IAction = {
-        type: "SYSEX",
-        listener: "abcd",
-        payload: 0x14a70f,
-    };
+    const noteEvent: IntermixNote = ["note", 0, 0, 0, 0];
+    // {
+    //     type: "NOTE",
+    //     listener: "abcd",
+    //     payload: {
+    //         noteNumber: 0,
+    //         velocity: 0,
+    //         duration: 0,
+    //     },
+    // };
+    const action2: IntermixCtrl = ["test-controller", 0, 0];
+    // {
+    //     type: "SYSEX",
+    //     listener: "abcd",
+    //     payload: 0x14a70f,
+    // };
 
     beforeEach(() => {
-        part = new SeqPart();
+        part = new SeqPart("abc");
     });
 
     test("has a default name", () => {
-        expect(part.name).toBe("Part");
+        // has to be tested through reducer
+        // expect(part.name).toBe("Part");
     });
 
     test("has 16 stepsPerBar by default", () => {
@@ -32,14 +35,14 @@ describe("SeqPart", () => {
     });
 
     test("can have other stepsPerBar values", () => {
-        const customPart = new SeqPart(undefined, 32);
+        const customPart = new SeqPart("abc", 16, 32);
         expect(customPart.stepsPerBar).toEqual(32);
     });
 
     test("throws if 64 is not divisible by stepsPerBar", () => {
         expect(() => {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const sp = new SeqPart(undefined, 23);
+            const sp = new SeqPart("abc", 64, 23);
         }).toThrow();
     });
 
@@ -48,14 +51,14 @@ describe("SeqPart", () => {
     });
 
     test("can have another pattern-length", () => {
-        const otherPart = new SeqPart(224);
+        const otherPart = new SeqPart("abc", 224);
         const partLength = 224 * otherPart["stepMultiplier"];
         expect(otherPart).toHaveLength(partLength);
     });
 
     describe(".addAction", () => {
         it("is chainable", () => {
-            const ctx = part.addAction(action1, 2);
+            const ctx = part.addEvent(noteEvent, 2);
             expect(ctx).toEqual(part);
         });
 
@@ -63,24 +66,24 @@ describe("SeqPart", () => {
             // cumbersome test because we want to avoid
             // the use of other high level api (part.getActionsAtStep())
             const stepMultiplyer = 64 / part.stepsPerBar;
-            part.addAction(action1, 4);
+            part.addEvent(noteEvent, 4);
 
             const actions = part.seqPattern[4 * stepMultiplyer];
-            expect(actions[0]).toBe(action1);
+            expect(actions[0]).toBe(noteEvent);
         });
 
         it("throws if position is out of pattern bounds", () => {
             expect(() => {
-                part.addAction(action1, 16);
+                part.addEvent(noteEvent, 16);
             }).toThrow();
         });
     });
 
     describe(".getActionsAtStep", () => {
         it("returns an array with actions if any", () => {
-            part.addAction(action1, 2);
+            part.addEvent(noteEvent, 2);
             const actions = part.getActionsAtStep(2);
-            expect(actions[0]).toBe(action1);
+            expect(actions[0]).toBe(noteEvent);
         });
 
         it("returns an empty array if step is out of bounds", () => {
@@ -90,11 +93,11 @@ describe("SeqPart", () => {
 
     describe(".removeAction", () => {
         beforeEach(() => {
-            part.addAction(action1, 4).addAction(action2, 4);
+            part.addEvent(noteEvent, 4).addEvent(action2, 4);
         });
 
         it("is chainable", () => {
-            const ctx = part.removeAction(action1, 4);
+            const ctx = part.removeEvent(noteEvent, 4);
             expect(ctx).toEqual(part);
         });
 
@@ -102,7 +105,7 @@ describe("SeqPart", () => {
             // cumbersome test because we want to avoid
             // the use of other high level api (part.getActionsAtStep())
             const stepMultiplyer = 64 / part.stepsPerBar;
-            part.removeAction(action1, 4);
+            part.removeEvent(noteEvent, 4);
 
             const actions = part.seqPattern[4 * stepMultiplyer];
             expect(actions[0]).toEqual(action2);
@@ -110,37 +113,37 @@ describe("SeqPart", () => {
 
         it("fails silently if event is not found at position", () => {
             const oldPattern = [...part.seqPattern];
-            part.removeAction(action1, 3);
+            part.removeEvent(noteEvent, 3);
             expect(part.seqPattern).toEqual(oldPattern);
         });
 
         it("throws if position is out of pattern bounds", () => {
             expect(() => {
-                part.removeAction(action1, 16);
+                part.removeEvent(noteEvent, 16);
             }).toThrow();
         });
     });
 
-    describe(".getNotePositions", () => {
-        it("returns an array with all positions where note events are found", () => {
-            part.addAction(action1, 2).addAction(action2, 4).addAction(action2, 6).addAction(action1, 6);
+    // describe(".getNotePositions", () => {
+    //     it("returns an array with all positions where note events are found", () => {
+    //         part.addAction(noteEvent, 2).addAction(action2, 4).addAction(action2, 6).addAction(noteEvent, 6);
 
-            expect(part.getNotePositions()).toEqual([2, 6]);
-        });
-    });
+    //         expect(part.getNotePositions()).toEqual([2, 6]);
+    //     });
+    // });
 
     describe(".getActionsAtStep", () => {
         it("returns an array with all actions at step", () => {
-            part.addAction(action1, 4).addAction(action2, 4);
+            part.addEvent(noteEvent, 4).addEvent(action2, 4);
 
             const actions = part.getActionsAtStep(4);
             expect(actions).toHaveLength(2);
-            expect(actions).toContain(action1);
+            expect(actions).toContain(noteEvent);
             expect(actions).toContain(action2);
         });
 
         it("returns an empty array if no actions at step", () => {
-            part.addAction(action1, 4).addAction(action2, 4);
+            part.addEvent(noteEvent, 4).addEvent(action2, 4);
 
             const actions = part.getActionsAtStep(3);
             expect(actions).toHaveLength(0);
@@ -158,11 +161,11 @@ describe("SeqPart", () => {
             const oldPatternLength = part.length;
             const oldPatternZero = newSteps * part["stepMultiplier"];
 
-            part.addAction(action1, 0);
+            part.addEvent(noteEvent, 0);
             part.extendOnTop(newSteps);
 
             expect(part).toHaveLength(newSteps * part["stepMultiplier"] + oldPatternLength);
-            expect(part.seqPattern[oldPatternZero][0]).toEqual(action1);
+            expect(part.seqPattern[oldPatternZero][0]).toEqual(noteEvent);
         });
     });
 
@@ -171,11 +174,11 @@ describe("SeqPart", () => {
             const newSteps = 23;
             const oldPatternLength = part.length;
 
-            part.addAction(action1, 0);
+            part.addEvent(noteEvent, 0);
             part.extendOnEnd(newSteps);
 
             expect(part).toHaveLength(newSteps * part["stepMultiplier"] + oldPatternLength);
-            expect(part.seqPattern[0][0]).toEqual(action1);
+            expect(part.seqPattern[0][0]).toEqual(noteEvent);
         });
     });
 });

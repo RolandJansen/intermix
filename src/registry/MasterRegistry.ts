@@ -1,10 +1,17 @@
-import { AnyAction, Reducer, ReducersMapObject, ActionCreatorsMapObject } from "redux";
+import { Reducer, ReducersMapObject, ActionCreatorsMapObject } from "redux";
 import { store } from "../store/store";
 import combineReducersWithRoot from "./combineReducersWithRoot";
 import SeqPartRegistry from "./SeqPartRegistry";
 import SeqPart from "../seqpart/SeqPart";
 import PluginRegistry from "./PluginRegistry";
 import { IPlugin } from "./interfaces";
+import rootReducer from "../store/rootReducer";
+import { addPlugin, addPart, removePlugin, removePart } from "../store/rootActions";
+
+// this file has a method also called "addPlugin"
+// so we'll rename it to avoid confusion.
+const addPluginAction = addPlugin;
+const removePluginAction = removePlugin;
 
 /**
  * Calls the appropriate sub-registries
@@ -22,68 +29,74 @@ export default class MasterRegistry {
         this.seqParts = new SeqPartRegistry();
     }
 
-    public addPlugin<P extends IPlugin>(pluginClass: new (ac: AudioContext) => P): string {
-        try {
-            const newPlugin: IPlugin = this.plugins.add(pluginClass);
+    public addPlugin<P extends IPlugin>(pluginClass: new (itemId: string, ac: AudioContext) => P): string {
+        // try {
+        // console.log(store.getState());
+        const newPlugin: IPlugin = this.plugins.add(pluginClass);
+        // console.log("new plugin added: " + newPlugin.uid);
 
-            // build a new root reducer and replace the current one
-            this.replaceReducer();
+        // build a new root reducer and replace the current one
+        this.replaceReducer();
 
-            // make the new item observe the store
-            newPlugin.unsubscribe = this.seqParts.observeStore(store, newPlugin);
-            return newPlugin.uid;
-        } catch (error) {
-            // not implemented yet
-            console.log(error);
-            return "";
-        }
+        store.dispatch(addPluginAction(newPlugin.uid));
+
+        // make the new item observe the store
+        newPlugin.unsubscribe = this.seqParts.observeStore(store, newPlugin);
+        return newPlugin.uid;
+        // } catch (error) {
+        //     // not implemented yet
+        //     console.log(error);
+        //     return "";
+        // }
     }
 
     public removePlugin(itemId: string): void {
-        try {
-            this.plugins.remove(itemId);
-            this.replaceReducer();
-            store.dispatch({ type: "REMOVE", payload: itemId });
-        } catch (error) {
-            console.log(error);
-            // not implemented yet
-        }
+        // try {
+        this.plugins.remove(itemId);
+        this.replaceReducer();
+        store.dispatch(removePluginAction(itemId));
+        // } catch (error) {
+        //     console.log(error);
+        //     // not implemented yet
+        // }
     }
 
     public addSeqPart(lengthInStepsPerBar?: number): string {
-        try {
-            let newPart: SeqPart;
+        // try {
+        let newPart: SeqPart;
 
-            // add new item to the seqPart Registry
-            if (lengthInStepsPerBar) {
-                newPart = this.seqParts.add(lengthInStepsPerBar);
-            } else {
-                newPart = this.seqParts.add();
-            }
-
-            // build a new root reducer and replace the current one
-            this.replaceReducer();
-
-            // make the new item observe the store
-            newPart.unsubscribe = this.seqParts.observeStore(store, newPart);
-
-            return newPart.uid;
-        } catch (error) {
-            // not implemented yet
-            console.log(error);
-            return "";
+        // add new item to the seqPart Registry
+        if (lengthInStepsPerBar) {
+            newPart = this.seqParts.add(lengthInStepsPerBar);
+        } else {
+            newPart = this.seqParts.add();
         }
+
+        // build a new root reducer and replace the current one
+        this.replaceReducer();
+
+        store.dispatch(addPart(newPart.uid));
+
+        // make the new item observe the store
+        newPart.unsubscribe = this.seqParts.observeStore(store, newPart);
+
+        return newPart.uid;
+        // } catch (error) {
+        //     // not implemented yet
+        //     console.log(error);
+        //     return "";
+        // }
     }
 
     public removeSeqPart(itemId: string): void {
-        try {
-            this.seqParts.remove(itemId);
-            this.replaceReducer();
-            store.dispatch({ type: "REMOVE", payload: itemId });
-        } catch (error) {
-            console.log(error);
-            // not implemented yet
-        }
+        // try {
+        this.seqParts.remove(itemId);
+        this.replaceReducer();
+        store.dispatch(removePart(itemId));
+        // } catch (error) {
+        //     console.log(error);
+        //     // not implemented yet
+        // }
     }
 
     // this is probably not the best idea
@@ -113,11 +126,10 @@ export default class MasterRegistry {
      * and replaces the current reducer
      */
     private replaceReducer(): void {
-        const pluginReducer: ReducersMapObject = this.plugins.getAllSubReducers();
-        const seqPartReducer: ReducersMapObject = this.seqParts.getAllSubReducers();
+        const pluginReducers: ReducersMapObject = this.plugins.getAllSubReducers();
+        const seqPartReducers: ReducersMapObject = this.seqParts.getAllSubReducers();
 
-        const subReducers: ReducersMapObject = this.getSubReducer(pluginReducer, seqPartReducer);
-        const rootReducer: Reducer = this.getRootReducer();
+        const subReducers: ReducersMapObject = this.getSubReducer(pluginReducers, seqPartReducers);
         const reducerTree: Reducer = this.getCompleteReducer(rootReducer, subReducers);
 
         store.replaceReducer(reducerTree);
@@ -125,21 +137,6 @@ export default class MasterRegistry {
 
     private getSubReducer(...subReducers: ReducersMapObject[]): ReducersMapObject {
         return Object.assign({}, ...subReducers);
-    }
-
-    /**
-     * Builds the root reducer with handlers that can operate
-     * on the root state. Use with combineReducersWithRoot().
-     */
-    private getRootReducer(): Reducer {
-        return (state = {}, action: AnyAction): void => {
-            if (action.type === "REMOVE" && state.hasOwnProperty(action.payload)) {
-                const newState = JSON.parse(JSON.stringify(state));
-                delete newState[action.payload];
-                return newState;
-            }
-            return state;
-        };
     }
 
     private getCompleteReducer(rootReducer: Reducer, subReducers: ReducersMapObject): Reducer {

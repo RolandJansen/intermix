@@ -1,6 +1,6 @@
 /// <reference path="../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
-import { IAction, IDelayedNote, IOscActionDef } from "../../registry/interfaces";
+import { IAction, IOscActionDef, IntermixNote } from "../../registry/interfaces";
 import DemoSampler from "../Sampler";
 
 describe("DemoSampler", () => {
@@ -50,18 +50,19 @@ describe("DemoSampler", () => {
     });
 
     describe("onChange", () => {
-        let note: IDelayedNote;
+        let note: IntermixNote;
         let buffer: AudioBuffer;
         let audioDataAction: IAction;
 
         beforeEach(() => {
-            note = {
-                value: 23,
-                velocity: 1,
-                steps: 1,
-                duration: 1,
-                startTime: 1,
-            };
+            note = ["note", 23, 1, 1, 1];
+            // {
+            //     value: 23,
+            //     velocity: 1,
+            //     steps: 1,
+            //     duration: 1,
+            //     startTime: 1,
+            // };
             buffer = ac.createBuffer(1, 22050, 44100); // create a buffer of 0.5s length
             audioDataAction = {
                 type: "AUDIODATA",

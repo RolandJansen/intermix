@@ -21,12 +21,15 @@ export default class SeqPartRegistry extends AbstractRegistry {
      * @param lengthInStepsPerBar length of the sequencer part (optional)
      */
     public add(lengthInStepsPerBar?: number): SeqPart {
+        // get a new unique id
+        const uid = this.getUniqueItemKey();
+
         // create the new part
         let newPart: SeqPart;
         if (lengthInStepsPerBar) {
-            newPart = new SeqPart(lengthInStepsPerBar);
+            newPart = new SeqPart(uid, lengthInStepsPerBar);
         } else {
-            newPart = new SeqPart();
+            newPart = new SeqPart(uid);
         }
 
         // add to item list

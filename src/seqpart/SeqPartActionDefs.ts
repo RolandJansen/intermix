@@ -1,40 +1,190 @@
-import { IOscActionDef } from "../registry/interfaces";
-// This is an action definition file
-// All actions that should be recognized
-// by the store should be defined here.
+import {
+    IOscActionDef,
+    IState,
+    reducerLogic,
+    IAction,
+    OscArgSequence,
+    IntermixNote,
+    IntermixCtrl,
+} from "../registry/interfaces";
+import { AnyAction } from "redux";
+
+const setStepActive: reducerLogic = (mySubState: IState, action: AnyAction | IAction): IState => {
+    const newSubState: IState = {};
+    const step = action.payload as number;
+    const maxStepValue = mySubState.pattern.length / mySubState.stepMultiplier - 1;
+    if (step <= maxStepValue) {
+        newSubState["activeStep"] = step;
+    } else {
+        throw new Error(`Position out of pattern bounds. Step is ${step} but should be within 0 and ${maxStepValue}`);
+    }
+    return newSubState;
+};
+
+const addItem: reducerLogic = (mySubState: IState, action: AnyAction | IAction): IState => {
+    const newSubState: IState = {};
+    let newItem: IntermixNote | IntermixCtrl;
+
+    if (itsANote(action.payload)) {
+        newItem = action.payload as IntermixNote;
+        newSubState.addNote = newItem;
+    } else if (itsAController(action.payload)) {
+        newItem = action.payload as IntermixCtrl;
+        newSubState.addCtrl = newItem;
+    } else {
+        return newSubState;
+    }
+
+    const position = mySubState.activeStep * mySubState.stepMultiplier;
+    const oldStep: OscArgSequence[] = mySubState.pattern[position];
+    const newPatternStep = addItemToPatternStep(oldStep, newItem);
+
+    const newPattern = Array.from(mySubState.pattern);
+    newPattern[position] = newPatternStep;
+    newSubState.pattern = newPattern;
+
+    return newSubState;
+};
+
+/**
+ * Selects the active step in the pattern, makes a deep copy
+ * and inserts the new item. If an item of the same type is
+ * already there, it will be overwritten with the new item.
+ * @param mySubState the plugins sub-state
+ * @param item a note or a controller (array of string and numbers)
+ * @return A deep copy of the pattern step including the new item
+ */
+const addItemToPatternStep = (oldStep: OscArgSequence[], item: IntermixNote | IntermixCtrl): OscArgSequence[] => {
+    const newStep: OscArgSequence[] = [];
+
+    const itemCount = oldStep.length;
+    if (itemCount === 1) {
+        if (itemsHaveSameValue(oldStep[0], item)) {
+            newStep[0] = item;
+        } else {
+            newStep[0] = Array.from(oldStep[0]);
+            newStep.push(item);
+        }
+    } else if (itemCount > 1) {
+        oldStep.forEach((item, index) => {
+            if (itemsHaveSameValue(oldStep[index], item)) {
+                newStep[index] = item;
+            } else {
+                newStep[index] = Array.from(oldStep[index]);
+                newStep.push(item);
+            }
+        });
+    }
+
+    return newStep;
+};
+
+const removeItem: reducerLogic = (mySubState: IState, action: AnyAction | IAction): IState => {
+    const newSubState: IState = {};
+
+    let item: IntermixNote | IntermixCtrl;
+
+    if (itsANote(action.payload)) {
+        item = action.payload as IntermixNote;
+        newSubState.removeNote = item;
+    } else if (itsAController(action.payload)) {
+        item = action.payload as IntermixCtrl;
+        newSubState.removeCtrl = item;
+    } else {
+        return newSubState;
+    }
+
+    const position = mySubState.activeStep * mySubState.stepMultiplier;
+    const oldStep: OscArgSequence[] = mySubState.pattern[position];
+    const newStep: OscArgSequence[] = removeItemFromPatternStep(oldStep, item);
+
+    const newPattern = Array.from(mySubState.pattern);
+    newPattern[position] = newStep;
+    newSubState.pattern = newPattern;
+
+    return newSubState;
+};
+
+const removeItemFromPatternStep = (oldStep: OscArgSequence[], item: IntermixNote | IntermixCtrl): OscArgSequence[] => {
+    const newStep: OscArgSequence[] = [];
+
+    const itemCount = oldStep.length;
+    if (itemCount === 1) {
+        if (itemsHaveSameValue(oldStep[0], item)) {
+            return newStep;
+        }
+    } else if (itemCount > 1) {
+        oldStep.forEach((item, index) => {
+            if (!itemsHaveSameValue(oldStep[index], item)) {
+                newStep[index] = Array.from(oldStep[index]);
+            }
+        });
+    }
+
+    return newStep;
+};
+
+const itemsHaveSameValue = (itemOne: OscArgSequence, itemTwo: OscArgSequence): boolean => {
+    return itemOne[0] === itemTwo[0] && itemOne[1] === itemTwo[1] ? true : false;
+};
+
+// type guard for intermixNote
+const itsANote = (item: any): item is IntermixNote => {
+    return (item as IntermixNote)[0] === "note" && (item as IntermixNote).length === 5;
+};
+
+// type guard for intermixCtrl
+const itsAController = (item: any): item is IntermixCtrl => {
+    return typeof (item as IntermixCtrl)[0] === "string" && (item as IntermixCtrl).length === 3;
+};
 
 const PREFIX = "/intermix/seqpart/{UID}/";
 
-const actionDefs: IOscActionDef[] = [
+export const actionDefs: IOscActionDef[] = [
     {
         address: PREFIX + "activeStep",
         typeTag: ",i",
-        description: "The part will record notes and controllers into the active step.",
+        process: setStepActive,
+        description: "The part will operate (add/remove items) on the active step.",
     },
     {
         address: PREFIX + "addNote",
         typeTag: ",siiff",
+        process: addItem,
         value: ["note", 0, 0, 0.0, 0.0],
         description: "Adds a note to a SeqPart object",
     },
     {
+        address: PREFIX + "removeNote",
+        typeTag: ",siiff",
+        process: removeItem,
+        value: ["note", 0, 0, 0.0, 0.0],
+        description: "Removes a note from the SeqPart object",
+    },
+    {
         address: PREFIX + "addCtrl",
         typeTag: ",sff",
+        process: addItem,
         value: ["initial-value", 0.0, 0.0],
         description: "Adds a controller to a SeqPart object",
     },
     {
-        address: PREFIX + "deleteNote",
-        typeTag: ",siiff",
-        value: ["note", 0, 0, 0.0, 0.0],
-        description: "Deletes a note from the SeqPart object",
+        address: PREFIX + "removeCtrl",
+        typeTag: ",sff",
+        process: removeItem,
+        value: ["initial-value", 0.0, 0.0],
+        description: "Removes a controller from the SeqPart object",
     },
     {
-        address: PREFIX + "deleteCtrl",
-        typeTag: ",sff",
-        value: ["initial-value", 0.0, 0.0],
-        description: "Deletes a controller from the SeqPart object",
+        address: PREFIX + "name",
+        typeTag: ",s",
+        value: "Part",
+        description: "Name of the part that can be displayed in the UI",
+    },
+    {
+        address: PREFIX + "stepsPerBar",
+        typeTag: ",i",
+        value: 32,
+        description: "Pattern resolution: A value of 16 means a resolution of 16th notes.",
     },
 ];
-
-export default actionDefs;

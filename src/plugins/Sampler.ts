@@ -1,5 +1,5 @@
 import AbstractPlugin from "../registry/AbstractPlugin";
-import { IDelayedNote, IPlugin, IPluginMetaData, Tuple, IOscActionDef } from "../registry/interfaces";
+import { IPlugin, IPluginMetaData, Tuple, IOscActionDef, IState, IntermixNote } from "../registry/interfaces";
 
 export default class Sampler extends AbstractPlugin implements IPlugin {
     private static readonly PREFIX = "/intermix/plugin/{UID}/";
@@ -26,6 +26,7 @@ export default class Sampler extends AbstractPlugin implements IPlugin {
         },
     ];
 
+    // private myState: IState = {};
     private gainNode: GainNode;
     private audioData: AudioBuffer;
     private queue: AudioBufferSourceNode[] = []; // list of polyphonic voices
@@ -39,6 +40,15 @@ export default class Sampler extends AbstractPlugin implements IPlugin {
 
         // create an empty audio buffer to prevent potential errors
         this.audioData = ac.createBuffer(1, 1, ac.sampleRate);
+    }
+
+    /**
+     * Used by the master registry to inject the state from the store
+     * This is ment to be readonly.
+     * Never ever manipulate the state from within the plugin!
+     */
+    public set pluginState(subState: IState) {
+        this.myState = subState;
     }
 
     // list of all audio output nodes
@@ -56,7 +66,7 @@ export default class Sampler extends AbstractPlugin implements IPlugin {
     public onChange(changed: Tuple): boolean {
         switch (changed[0]) {
             case "NOTE":
-                const note: IDelayedNote = changed[1];
+                const note: IntermixNote = changed[1];
                 this.handleNote(note);
                 return true;
             case "VOLUME":
@@ -74,8 +84,8 @@ export default class Sampler extends AbstractPlugin implements IPlugin {
         }
     }
 
-    private handleNote(note: IDelayedNote): void {
-        if (note.value >= 0 && note.value <= 127) {
+    private handleNote(note: IntermixNote): void {
+        if (note[1] >= 0 && note[1] <= 127) {
             this.start(note);
         }
     }
@@ -95,9 +105,9 @@ export default class Sampler extends AbstractPlugin implements IPlugin {
      * in a queue. This enables you to play multiple sounds at once
      * and even stop them all at a given time.
      */
-    private start(note: IDelayedNote): void {
+    private start(note: IntermixNote): void {
         // const frequency = this.frequencyLookup[note.value];
-        const playbackRate = this.getPlaybackRate(note.value);
+        const playbackRate = this.getPlaybackRate(note[1]);
 
         const bufferSrcNode = this.createBufferSrcNode();
 
@@ -105,7 +115,7 @@ export default class Sampler extends AbstractPlugin implements IPlugin {
         bufferSrcNode.connect(this.gainNode);
 
         this.queue.push(bufferSrcNode);
-        bufferSrcNode.start(note.startTime);
+        bufferSrcNode.start(note[4]);
     }
 
     /**

@@ -2,7 +2,7 @@
 import "web-audio-test-api";
 import Sequencer from "../Sequencer";
 import SeqPart from "../../../seqpart/SeqPart";
-import { ILoop, IAction, IOscActionDef } from "../../../registry/interfaces";
+import { ILoop, IOscActionDef, IntermixNote, OscArgSequence } from "../../../registry/interfaces";
 
 // mock dependencies of the module under test
 jest.mock("../clock.worker");
@@ -51,11 +51,11 @@ describe("Sequencer", () => {
 
     describe("onChange", () => {
         beforeEach(() => {
-            sequencer.actionCreators["QUEUE"] = (): boolean => true;
+            // sequencer.actionCreators["QUEUE"] = (): boolean => true;
         });
 
         test("returns true when called with a recognized value", () => {
-            const expected = sequencer.onChange(["STATE", 0]);
+            const expected = sequencer.onChange(["BPM", 0]);
             expect(expected).toBeTruthy();
         });
 
@@ -70,48 +70,37 @@ describe("Sequencer", () => {
             expect(sequencer["timePerStepInSec"]).toEqual(0.0234375);
         });
 
-        test("adds a SeqPart object", () => {
-            const testPart = new SeqPart();
-            testPart.uid = "abcd";
-            sequencer.onChange(["ADD_PART", testPart]);
-            const partList = sequencer["score"]["parts"].getUidList();
-            expect(partList).toContain("abcd");
-        });
+        // test("adds a SeqPart object", () => {
+        //     const testPart = new SeqPart("abcd");
+        //     sequencer.onChange(["ADD_PART", testPart]);
+        //     const partList = sequencer["score"]["parts"].getUidList();
+        //     expect(partList).toContain("abcd");
+        // });
 
-        test("removes a SeqPart object", () => {
-            const testPart = new SeqPart();
-            testPart.uid = "abcd";
-            const parts = sequencer["score"]["parts"];
-            parts.add(testPart);
+        // test("removes a SeqPart object", () => {
+        //     const testPart = new SeqPart("abcd");
+        //     const parts = sequencer["score"]["parts"];
+        //     parts.add(testPart);
 
-            sequencer.onChange(["REMOVE_PART", "abcd"]);
-            expect(parts.getUidList()).toHaveLength(0);
-        });
+        //     sequencer.onChange(["REMOVE_PART", "abcd"]);
+        //     expect(parts.getUidList()).toHaveLength(0);
+        // });
 
         test("puts a seq part on the score", () => {
-            const testPart = new SeqPart();
-            const partID = sequencer["score"]["parts"].add(testPart);
-            sequencer.onChange([
-                "ADD_TO_SCORE",
-                {
-                    partID,
-                    position: 23,
-                },
-            ]);
-            expect(sequencer["score"]["queue"][23]).toContain(partID);
+            const testPart = new SeqPart("abcd");
+            const fictivePluginUid = "efgh";
+            const testTuple = [testPart.uid, fictivePluginUid];
+            // const partID = sequencer["score"]["parts"].add(testPart);
+            sequencer.onChange(["addToScore", testTuple]);
+            expect(sequencer["score"]["queue"][0]).toContain(testTuple);
         });
 
         test("removes a seq part from score", () => {
-            const testPart = new SeqPart();
-            testPart.uid = "abcd";
-            sequencer["score"]["queue"][23] = [testPart.uid];
-            sequencer.onChange([
-                "REMOVE_FROM_SCORE",
-                {
-                    partID: testPart.uid,
-                    position: 23,
-                },
-            ]);
+            const testPart = new SeqPart("abcd");
+            const fictivePluginUid = "efgh";
+            sequencer["score"]["queue"][23] = [[testPart.uid, fictivePluginUid]];
+            sequencer["score"].activeStep = 23;
+            sequencer.onChange(["removeFromScore", [testPart.uid, fictivePluginUid]]);
             expect(sequencer["score"]["queue"][23]).toHaveLength(0);
         });
 
@@ -126,15 +115,15 @@ describe("Sequencer", () => {
         });
 
         test("activates loop mode", () => {
-            sequencer["score"]["loopActivated"] = false;
+            sequencer["score"]["loopActive"] = false;
             sequencer.onChange(["LOOP_ACTIVE", true]);
-            expect(sequencer["score"]["loopActivated"]).toBeTruthy();
+            expect(sequencer["score"]["loopActive"]).toBeTruthy();
         });
 
         test("deactivates loop mode", () => {
-            sequencer["score"]["loopActivated"] = true;
+            sequencer["score"]["loopActive"] = true;
             sequencer.onChange(["LOOP_ACTIVE", false]);
-            expect(sequencer["score"]["loopActivated"]).toBeFalsy();
+            expect(sequencer["score"]["loopActive"]).toBeFalsy();
         });
 
         test("moves the score pointer to a certain position", () => {
@@ -183,34 +172,50 @@ describe("Sequencer", () => {
             sequencer.onChange(["reset", 1]);
             expect(sequencer["clock"].postMessage).toBeCalledWith("stop");
             expect(sequencer["isRunning"]).toBeFalsy();
-            expect(sequencer["nextStep"]).toEqual(0);
+            // expect(sequencer["nextStep"]).toEqual(0);
             expect(sequencer["score"].resetScorePointer).toHaveBeenCalled();
         });
     });
 
     describe("scheduler", () => {
-        const action1: IAction = {
-            listener: "abcd",
-            type: "SOME_TYPE",
-            payload: 23,
-        };
-        const action2: IAction = {
-            listener: "efgh",
-            type: "SOME_TYPE",
-            payload: 42,
-        };
-        let part: SeqPart;
+        // const action1: IAction = {
+        //     listener: "abcd",
+        //     type: "SOME_TYPE",
+        //     payload: 23,
+        // };
+        // const action2: IAction = {
+        //     listener: "efgh",
+        //     type: "SOME_TYPE",
+        //     payload: 42,
+        // };
+        // let part: SeqPart;
+
+        const partId = "abcd";
+        const pluginId = "efgh";
+        const note1: IntermixNote = ["note", 23, 1, 1, 0];
+        const note2: IntermixNote = ["note", 42, 1, 1, 0];
 
         beforeEach(() => {
-            part = new SeqPart();
-            part.addAction(action1, 0);
-            part.addAction(action2, 1);
+            const noteVal1 = Array.from(note1);
+            const noteVal2 = Array.from(note2);
+            const pattern = Array(64).fill([]);
+            pattern[0].push(noteVal1);
+            pattern[1].push(noteVal2);
+            sequencer["score"]["getGlobalState"] = jest.fn();
+            (sequencer["score"]["getGlobalState"] as jest.Mock).mockReturnValue({
+                abcd: {
+                    pattern,
+                },
+            });
 
-            const partId = sequencer["score"].parts.add(part);
-            sequencer["score"].addPartToScore(partId, 1);
+            // part = new SeqPart("abcd");
+            // part.addAction(action1, 0);
+            // part.addAction(action2, 1);
 
+            // const partId = sequencer["score"].parts.add(part);
+            sequencer["score"].addPartToScore([partId, pluginId]);
             sequencer["score"].increaseScorePointer = jest.fn();
-            sequencer["score"].addPartsToRunqueue = jest.fn();
+            sequencer["score"]["addPatternToRunqueue"] = jest.fn();
             sequencer["sendAllActionsInNextStep"] = jest.fn();
             sequencer["ac"].$processTo("00:01.000");
             sequencer["scheduler"]();
@@ -226,7 +231,7 @@ describe("Sequencer", () => {
         });
 
         test("adds parts to runqueue", () => {
-            expect(sequencer["score"].addPartsToRunqueue).toHaveBeenCalled();
+            expect(sequencer["score"]["addPatternToRunqueue"]).toHaveBeenCalled();
         });
 
         test("increases nextStepTime on every step", () => {
@@ -243,43 +248,73 @@ describe("Sequencer", () => {
         // probably more mocks needed. we're testing against
         // real score object (which effects other tests, too)
 
-        const action1: IAction = {
-            listener: "abcd",
-            type: "SOME_TYPE",
-            payload: 23,
-        };
-        const action2: IAction = {
-            listener: "efgh",
-            type: "SOME_TYPE",
-            payload: 42,
-        };
-        const brokenPayload = {
-            value: 23,
-            velocity: 1,
-            steps: 4,
-        };
-        const sanePayload = Object.assign({}, brokenPayload, { duration: 0 });
-        const brokenNoteAction: IAction = {
-            listener: "ijkl",
-            type: "NOTE",
-            payload: brokenPayload,
-        };
-        const saneNoteAction = {
-            listener: "ijkl",
-            type: "NOTE",
-            payload: sanePayload,
-        };
-        let part: SeqPart;
+        // const action1: IAction = {
+        //     listener: "abcd",
+        //     type: "SOME_TYPE",
+        //     payload: 23,
+        // };
+        // const action2: IAction = {
+        //     listener: "efgh",
+        //     type: "SOME_TYPE",
+        //     payload: 42,
+        // };
+        // const brokenPayload = {
+        //     value: 23,
+        //     velocity: 1,
+        //     steps: 4,
+        // };
+        // const sanePayload = Object.assign({}, brokenPayload, { duration: 0 });
+        // const brokenNoteAction: IAction = {
+        //     listener: "ijkl",
+        //     type: "NOTE",
+        //     payload: brokenPayload,
+        // };
+        // const saneNoteAction = {
+        //     listener: "ijkl",
+        //     type: "NOTE",
+        //     payload: sanePayload,
+        // };
+        // let part: SeqPart;
+
+        // same as "scheduler" tests
+        const partId = "abcd";
+        const pluginId = "efgh";
+        const note1: IntermixNote = ["note", 23, 1, 1, 0];
+        const note2: IntermixNote = ["note", 42, 1, 1, 0];
 
         beforeEach(() => {
-            part = new SeqPart();
-            part.addAction(action1, 0);
-            part.addAction(action2, 1);
-            part.addAction(saneNoteAction, 2);
-            part.addAction(brokenNoteAction, 2);
+            // const subArray: OscArgSequence[] = [];
+            const pattern = [];
 
-            const partId = sequencer["score"].parts.add(part);
-            sequencer["score"].addPartToScore(partId, 1);
+            for (let i = 0; i < 64; i++) {
+                const subArray: OscArgSequence[] = [];
+                pattern[i] = subArray;
+            }
+
+            const noteVal1 = Array.from(note1);
+            const noteVal2 = Array.from(note2);
+            const saneNote = Array.from(note1);
+            const brokenNote = ["note", 5, 1, 1, "hello"];
+            pattern[0].push(noteVal1);
+            pattern[1].push(noteVal2);
+            pattern[2].push(saneNote);
+            pattern[2].push(brokenNote);
+
+            sequencer["score"]["getGlobalState"] = jest.fn();
+            (sequencer["score"]["getGlobalState"] as jest.Mock).mockReturnValue({
+                abcd: {
+                    pattern,
+                },
+            });
+
+            // part = new SeqPart("abcd");
+            // part.addAction(action1, 0);
+            // part.addAction(action2, 1);
+            // part.addAction(saneNoteAction, 2);
+            // part.addAction(brokenNoteAction, 2);
+
+            // const partId = sequencer["score"].parts.add(part);
+            sequencer["score"].addPartToScore([partId, pluginId]);
             sequencer.sendAction = jest.fn();
 
             sequencer["ac"].$processTo("00:01.000");
@@ -288,7 +323,7 @@ describe("Sequencer", () => {
 
         afterEach(() => {
             sequencer["ac"].$processTo("00:00.000");
-            (sequencer.sendAction as jest.Mock).mock.calls = []; // reset call history
+            (sequencer.sendAction as jest.Mock).mockClear(); // reset call history
         });
 
         test("sends all actions from the score to dispatch", () => {
@@ -300,27 +335,27 @@ describe("Sequencer", () => {
             const delayedAction1 = sendAction.mock.calls[0][0];
             const delayedAction2 = sendAction.mock.calls[1][0];
 
-            expect(delayedAction1.payload[delayedAction1.payload.length - 1]).toEqual(1.03125);
-            expect(delayedAction2.payload[delayedAction1.payload.length - 1]).toEqual(1.15625);
+            expect(delayedAction1.payload[delayedAction1.payload.length - 1]).toEqual(1);
+            expect(delayedAction2.payload[delayedAction1.payload.length - 1]).toEqual(1.03125);
         });
 
         test("adds delay to payload of NOTE actions", () => {
             const sendAction = sequencer.sendAction as jest.Mock;
             const delayedNote = sendAction.mock.calls[2][0];
-            expect(delayedNote.payload[delayedNote.payload.length - 1]).toEqual(1.28125);
+            expect(delayedNote.payload[delayedNote.payload.length - 1]).toEqual(1.0625);
         });
         test("changes duration for NOTE actions", () => {
             const sendAction = sequencer.sendAction as jest.Mock;
             const delayedNoteAction = sendAction.mock.calls[2][0];
 
-            expect(delayedNoteAction.payload.duration).toEqual(0.125);
+            expect(delayedNoteAction.payload.length - 2).toEqual(3);
         });
 
         test("adds duration on NOTE actions if its not defined", () => {
             const sendAction = sequencer.sendAction as jest.Mock;
             const delayedNoteAction = sendAction.mock.calls[3][0];
 
-            expect(delayedNoteAction.payload.duration).toEqual(0.125);
+            expect(delayedNoteAction.payload.length - 2).toEqual(3);
         });
     });
 

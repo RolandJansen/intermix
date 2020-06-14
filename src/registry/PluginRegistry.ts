@@ -21,11 +21,10 @@ export default class PluginRegistry extends AbstractRegistry {
      * action creators and returns the new plugin instance.
      * @param pluginClass The class from which the plugin will be derived
      */
-    public add<P extends IPlugin>(pluginClass: new (ac: AudioContext) => P): P {
-        const newItem = new pluginClass(this.ac);
-
-        // add to item list
-        const itemId = this.itemList.add(newItem);
+    public add<P extends IPlugin>(pluginClass: new (itemId: string, ac: AudioContext) => P): P {
+        const itemId = this.getUniqueItemKey();
+        const newItem = new pluginClass(itemId, this.ac);
+        this.itemList.add(newItem);
 
         // add commonActionDefs to the plugin if its an instrument
         if (newItem.metaData.type === "instrument") {
@@ -39,8 +38,7 @@ export default class PluginRegistry extends AbstractRegistry {
         // bind action creators to dispatch
         newItem.actionCreators = bindActionCreators(actionCreators, store.dispatch);
 
-        // if the plugin is a controller, it needs a sendAction method
-        this.bindSendActionMethod(newItem);
+        this.setupControllerPlugin(newItem);
 
         // plugins have audio outputs
         this.wireAudioOutputs(newItem);
@@ -63,21 +61,32 @@ export default class PluginRegistry extends AbstractRegistry {
         this.itemList.remove(itemId);
     }
 
-    /**
-     * If the plugin is a controller, bind the sendAction method
-     * to the dispatcher so it emmits actions when called.
-     */
-    private bindSendActionMethod(pInstance: IPlugin): void {
-        if (this.isInstanceOfIControllerPlugin(pInstance)) {
-            const actionRelay = this.getActionRelay();
-            pInstance.sendAction = (action: IAction): IAction => store.dispatch(actionRelay(action));
+    private setupControllerPlugin(newItem: IPlugin): void {
+        if (this.isInstanceOfIControllerPlugin(newItem)) {
+            // if the plugin is a controller, it needs a sendAction method
+            this.bindSendActionMethod(newItem);
+            // and it needs access to the global state
+            this.mapStoreToPlugin(newItem);
         }
     }
 
     // type guard for IControllerPlugin
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private isInstanceOfIControllerPlugin(obj: any): obj is IControllerPlugin {
         return "sendAction" in obj;
+    }
+
+    /**
+     * If the plugin is a controller, bind the sendAction method
+     * to the dispatcher so it emmits actions when called.
+     * @todo actions should be of type IOscAction
+     */
+    private bindSendActionMethod(newItem: IControllerPlugin): void {
+        const actionRelay = this.getActionRelay();
+        newItem.sendAction = (action: IAction): IAction => store.dispatch(actionRelay(action));
+    }
+
+    private mapStoreToPlugin(newItem: IControllerPlugin): void {
+        newItem.getGlobalState = store.getState;
     }
 
     /**

@@ -1,8 +1,8 @@
 import { ActionCreatorsMapObject } from "redux";
-import { IAction, IRegistryItem, Tuple, IOscActionDef } from "../registry/interfaces";
-import seqPartActionDefs from "./SeqPartActionDefs";
+import { Tuple, IOscActionDef, ISeqPart, ISeqPartInitState, OscArgSequence } from "../registry/interfaces";
+import { actionDefs } from "./SeqPartActionDefs";
 
-type Pattern = IAction[][];
+type Pattern = OscArgSequence[][];
 
 interface IPointerTable {
     [pointerId: string]: number;
@@ -21,37 +21,42 @@ interface IPointerTable {
  * any type of javascript object. However it is strongly recommended
  * to only use actions of type IOscAction.
  */
-export default class SeqPart implements IRegistryItem {
+export default class SeqPart implements ISeqPart {
     public static stepsPerBarDefault = 16; // global pattern resolution: 1bar = 1 full note
-    public static partName = "Part"; // global default name
 
-    public readonly actionDefs: IOscActionDef[] = seqPartActionDefs;
+    public readonly actionDefs: IOscActionDef[] = actionDefs;
+    public readonly initState: ISeqPartInitState;
 
     /* will both be populated by the registry */
     public actionCreators: ActionCreatorsMapObject = {};
     public unboundActionCreators: ActionCreatorsMapObject = {};
-
-    public name = SeqPart.partName;
-    public uid = ""; // will be set by the registry
-    public pointers: IPointerTable; // can be set to a specific point in the pattern (by the sequencer)
 
     private stepMultiplier: number; // 64 = stepsPerBar * stepMultiplier
     private pattern: Pattern; // holds the sequence
 
     /**
      * Initializes the pattern
-     * @param length      length in stepsPerBar (if sPB=16: 16=1bar)
-     * @param stepsPerBar pattern resolution: 1bar = 1 full note
+     * @param uid           unique identifier of this part
+     * @param patternLength length of the pattern in stepsPerBar
+     * @param stepsPerBar   pattern resolution: 1bar = 1 full note
      */
-    constructor(length: number = SeqPart.stepsPerBarDefault, public stepsPerBar = SeqPart.stepsPerBarDefault) {
+    constructor(
+        readonly uid: string,
+        private patternLength = SeqPart.stepsPerBarDefault,
+        public stepsPerBar = SeqPart.stepsPerBarDefault
+    ) {
         if (64 % stepsPerBar === 0) {
             this.stepMultiplier = 64 / stepsPerBar;
-            this.pattern = this.initPattern(length);
+            this.pattern = this.initPattern(this.patternLength);
         } else {
             throw new Error("stepsPerBar must be a divisor of 64.");
         }
 
-        this.pointers = {};
+        this.initState = {
+            stepsPerBar: this.stepsPerBar,
+            stepMultiplier: this.stepMultiplier,
+            pattern: this.pattern,
+        };
     }
 
     /**
@@ -84,16 +89,16 @@ export default class SeqPart implements IRegistryItem {
         switch (changed[0]) {
             case "ADD_ACTION":
                 const addStep: number = changed[1].step;
-                const addAction: IAction = changed[1].action;
+                const addAction: OscArgSequence = changed[1].action;
                 // write test with step<0 and addAction=undefined
                 if (addStep >= 0 && addAction) {
-                    this.addAction(addAction, addStep);
+                    this.addEvent(addAction, addStep);
                 }
                 return true;
             case "REMOVE_ACTION":
                 const removeStep: number = changed[1].step;
-                const removeAction: IAction = changed[1].action;
-                this.removeAction(removeAction, removeStep);
+                const removeAction: OscArgSequence = changed[1].action;
+                this.removeEvent(removeAction, removeStep);
                 return true;
             default:
                 return false;
@@ -102,15 +107,15 @@ export default class SeqPart implements IRegistryItem {
 
     /**
      * Adds an event to the pattern at a given position
-     * @param  action  The event (note, controller, whatever)
+     * @param  event  The event (note, controller, whatever)
      * @param  step  Position in the pattern
      * @return The part object to make the function chainable.
      */
-    public addAction(action: IAction, step: number): SeqPart {
+    public addEvent(event: OscArgSequence, step: number): SeqPart {
         const maxStepValue = this.pattern.length / this.stepMultiplier - 1;
         if (step <= maxStepValue) {
             const pos = step * this.stepMultiplier;
-            this.pattern[pos].push(action);
+            this.pattern[pos].push(event);
         } else {
             throw new Error(
                 `Position out of pattern bounds. Step is ${step} but should be within 0 and ${maxStepValue}`
@@ -121,13 +126,13 @@ export default class SeqPart implements IRegistryItem {
 
     /**
      * Removes an event at a given position
-     * @param  action  The event (note, controller, whatever)
+     * @param  event  The event (note, controller, whatever)
      * @param  step  Position in the pattern
      * @return The part object to make the function chainable
      */
-    public removeAction(action: IAction, step: number): SeqPart {
+    public removeEvent(event: OscArgSequence, step: number): SeqPart {
         const pos = step * this.stepMultiplier;
-        const index = this.pattern[pos].indexOf(action);
+        const index = this.pattern[pos].indexOf(event);
         if (index >= 0) {
             this.pattern[pos].splice(index, 1);
         }
@@ -144,22 +149,22 @@ export default class SeqPart implements IRegistryItem {
      * });
      * @return List with all non-empty pattern entries
      */
-    public getNotePositions(): number[] {
-        const positions: number[] = [];
-        this.pattern.forEach((actions, index) => {
-            if (actions.length > 0) {
-                actions.forEach((action) => {
-                    if (action.type === "NOTE") {
-                        positions.push(index / this.stepMultiplier);
-                    }
-                });
-            }
-        });
-        return positions;
-    }
+    // public getNotePositions(): number[] {
+    //     const positions: number[] = [];
+    //     this.pattern.forEach((actions, index) => {
+    //         if (actions.length > 0) {
+    //             actions.forEach((action) => {
+    //                 if (action.type === "NOTE") {
+    //                     positions.push(index / this.stepMultiplier);
+    //                 }
+    //             });
+    //         }
+    //     });
+    //     return positions;
+    // }
 
-    public getActionsAtStep(step: number): IAction[] {
-        let actions: IAction[] = [];
+    public getActionsAtStep(step: number): OscArgSequence[] {
+        let actions: OscArgSequence[] = [];
         const position = step * this.stepMultiplier;
 
         if (position < this.pattern.length) {
@@ -170,19 +175,19 @@ export default class SeqPart implements IRegistryItem {
 
     // This is very close to getActionsAtStep and
     // can probably be simplified.
-    public getActionsAtPointerPosition(pointerId: string): IAction[] {
-        let actionsAtPointerPosition: IAction[] = [];
+    // public getActionsAtPointerPosition(pointerId: string): IAction[] {
+    //     let actionsAtPointerPosition: IAction[] = [];
 
-        if (this.pointers.hasOwnProperty(pointerId)) {
-            const pointer = this.pointers[pointerId];
+    //     if (this.pointers.hasOwnProperty(pointerId)) {
+    //         const pointer = this.pointers[pointerId];
 
-            if (pointer < this.pattern.length) {
-                actionsAtPointerPosition = this.pattern[pointer];
-            }
-        }
+    //         if (pointer < this.pattern.length) {
+    //             actionsAtPointerPosition = this.pattern[pointer];
+    //         }
+    //     }
 
-        return actionsAtPointerPosition;
-    }
+    //     return actionsAtPointerPosition;
+    // }
 
     /**
      * Extends a part at the top/start.

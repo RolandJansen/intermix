@@ -1,25 +1,29 @@
 import { ActionCreatorsMapObject } from "redux";
 import { getRandomString } from "../helper";
-import { IPlugin, IPluginMetaData, IState, Tuple, IOscActionDef } from "./interfaces";
+import { IPlugin } from "./interfaces";
+
+/**
+ * In the following we use declaration merging to
+ * not beeing forced to add members of IPlugin
+ * to the abstract class (just in the derived classes)
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface AbstractPlugin extends IPlugin {}
 
 /**
  * The basic skeleton of an Intermix Plugin
  */
-export default abstract class AbstractPlugin implements IPlugin {
-    public abstract readonly metaData: IPluginMetaData;
-    public abstract readonly actionDefs: IOscActionDef[];
+abstract class AbstractPlugin implements IPlugin {
+    // public abstract readonly metaData: IPluginMetaData;
+    // public abstract readonly actionDefs: IOscActionDef[];
 
     public readonly frequencyLookup: number[];
-    public readonly uidLength = 4;
-    public readonly uid: string;
 
     // actionCreators will be bound to dispatch by the registry
     public actionCreators: ActionCreatorsMapObject = {};
     public unboundActionCreators: ActionCreatorsMapObject = {};
-    public initState: IState = {};
 
     constructor() {
-        this.uid = this.getRandomString(this.uidLength);
         this.frequencyLookup = this.getNoteFrequencies();
     }
 
@@ -31,7 +35,7 @@ export default abstract class AbstractPlugin implements IPlugin {
      * has changed.
      * @param changed Parameter with new value from store
      */
-    public abstract onChange(changed: Tuple): boolean;
+    // public abstract onChange(changed: Tuple): boolean;
 
     /**
      * Unsubscribe from the dispatcher.
@@ -92,3 +96,5 @@ export default abstract class AbstractPlugin implements IPlugin {
         return frequencies;
     }
 }
+
+export default AbstractPlugin;

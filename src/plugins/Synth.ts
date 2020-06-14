@@ -1,5 +1,13 @@
 import AbstractPlugin from "../registry/AbstractPlugin";
-import { IAudioController, IDelayedNote, IPlugin, IPluginMetaData, Tuple, IOscActionDef } from "../registry/interfaces";
+import {
+    IPlugin,
+    IPluginMetaData,
+    Tuple,
+    IOscActionDef,
+    IState,
+    IntermixNote,
+    IntermixCtrl,
+} from "../registry/interfaces";
 /**
  * The builtin synthesizer plugin for intermix.js
  *
@@ -32,6 +40,7 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
         },
     ];
 
+    private myState: IState = {};
     private attack: number;
     private decay: number;
     private filter: BiquadFilterNode;
@@ -53,6 +62,15 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
         this.initFilter();
     }
 
+    /**
+     * Used by the master registry to inject the state from the store
+     * This is ment to be readonly.
+     * Never ever manipulate the state from within the plugin!
+     */
+    public set pluginState(subState: IState) {
+        this.myState = subState;
+    }
+
     // list of all audio output nodes
     public get outputs(): AudioNode[] {
         return [this.filter];
@@ -69,18 +87,18 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
         // console.log(changed);
         switch (changed[0]) {
             case "NOTE":
-                const note: IDelayedNote = changed[1];
+                const note: IntermixNote = changed[1];
                 this.handleNote(note);
                 return true;
             case "STOP":
                 this.stop();
                 return true;
             case "ENV_ATTACK":
-                const attack: IAudioController = changed[1];
+                const attack: IntermixCtrl = changed[1];
                 this.handleAttack(attack);
                 return true;
             case "ENV_DECAY":
-                const decay: IAudioController = changed[1];
+                const decay: IntermixCtrl = changed[1];
                 this.handleDecay(decay);
                 return true;
             default:
@@ -89,8 +107,8 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
     }
 
     // Handles note events
-    private handleNote(note: IDelayedNote): void {
-        if (note.value >= 0 && note.value <= 127) {
+    private handleNote(note: IntermixNote): void {
+        if (note[1] >= 0 && note[1] <= 127) {
             this.start(note);
         }
     }
@@ -99,16 +117,16 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
     // You could also archive this with getter/setter
     // but for the sake of consistency we use one handler
     // per action in this example.
-    private handleAttack(control: IAudioController): void {
-        this.attack = control.value;
+    private handleAttack(control: IntermixCtrl): void {
+        this.attack = control[1];
     }
 
     // Handles decay-time-change events.
     // You could also archive this with getter/setter
     // but for the sake of consistency we use one handler
     // per action in this example.
-    private handleDecay(control: IAudioController): void {
-        this.decay = control.value;
+    private handleDecay(control: IntermixCtrl): void {
+        this.decay = control[1];
     }
 
     // Sets filtertype, quality and initial cutoff frequency
@@ -119,13 +137,13 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
     }
 
     // Plays a note
-    private start(note: IDelayedNote): void {
-        const freq = this.frequencyLookup[note.value];
+    private start(note: IntermixNote): void {
+        const freq = this.frequencyLookup[note[1]];
         const osc = this.getNewOsc(freq);
-        osc.start(note.startTime);
-        osc.stop(note.startTime + note.duration);
+        osc.start(note[4]);
+        osc.stop(note[4] + note[3]);
         this.queue.push(osc);
-        this.startEnvelope(note.startTime);
+        this.startEnvelope(note[4]);
     }
 
     private stop(): void {

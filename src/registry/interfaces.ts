@@ -3,28 +3,37 @@ import { ActionCreatorsMapObject, AnyAction, Action } from "redux";
 // A generic type for a function, which returns something
 export type ReturnFunction<ValueType> = () => ValueType;
 
+// export type RegisterableClass = new (itemId: string, ac: AudioContext) => IRegistryItem;
+
 export interface IRegistryItem {
-    uid: string;
+    readonly uid: string;
     actionDefs: IOscActionDef[];
     actionCreators: ActionCreatorsMapObject;
     unboundActionCreators: ActionCreatorsMapObject;
-    onChange: (changed: Tuple) => boolean;
-    unsubscribe: () => void;
+    onChange(changed: Tuple): boolean;
+    unsubscribe(): void;
 }
 
 export interface IPlugin extends IRegistryItem {
-    initState: IState;
     readonly metaData: IPluginMetaData;
-    frequencyLookup: number[];
-    outputs: AudioNode[];
+    readonly frequencyLookup: number[];
     inputs: AudioNode[];
+    outputs: AudioNode[];
     [propName: string]: any;
 }
 
 export interface IControllerPlugin extends IPlugin {
-    // if return type is IAction of void depends in if it's
-    // bound (void) or not (IAction)
     sendAction: (action: IAction) => void;
+}
+
+export interface ISeqPart extends IRegistryItem {
+    readonly initState: ISeqPartInitState;
+}
+
+export interface ISeqPartInitState extends IState {
+    stepsPerBar: number;
+    stepMultiplier: number;
+    pattern: OscArgSequence[][];
 }
 
 export interface IPluginMetaData {
@@ -44,30 +53,32 @@ export interface ISinglePluginActionCreators {
     actionCreators: ActionCreatorsMapObject;
 }
 
-export interface IAudioController {
-    value: number; // e.g. note number (0-127)
-}
+// export interface IAudioController {
+//     value: number; // e.g. note number (0-127)
+// }
 
-export interface IDelayedAudioController extends IAudioController {
-    startTime: number; // delay in seconds
-}
+// export interface IDelayedAudioController extends IAudioController {
+//     startTime: number; // delay in seconds
+// }
 
-export interface INote extends IAudioController {
-    velocity: number;
-    steps: number; // note length in sequencer steps (default: 64th notes)
-}
+// export interface INote extends IAudioController {
+//     velocity: number;
+//     steps: number; // note length in sequencer steps (default: 64th notes)
+// }
 
-export interface IDelayedNote extends INote, IDelayedAudioController {
-    duration: number; // note length in seconds
-}
+// export interface IDelayedNote extends INote, IDelayedAudioController {
+//     duration: number; // note length in seconds
+// }
 
 export type Payload = any;
 
-// export interface ISeqPartLoad {
-//     part: SeqPart;
-//     position: number;
-// }
-
+/**
+ * This is the action format that
+ * is used by the intermix core.
+ * If you dispatch an IOscAction,
+ * it will be converted by an
+ * OSC preprocessor middleware (see store).
+ */
 export interface IAction extends AnyAction {
     // listenerType: string;
     listener: string;
@@ -76,6 +87,11 @@ export interface IAction extends AnyAction {
     error?: Error;
 }
 
+/**
+ * Action Definition format for
+ * IAction. This is not in use
+ * and will probably be removed.
+ */
 export interface IActionDef {
     type: string;
     desc: string;
@@ -85,23 +101,35 @@ export interface IActionDef {
     steps?: number;
 }
 
-type procedure = () => void;
+export type procedure = () => void;
 
 export interface IOscAction extends Action {
     address: string;
     typeTag: string;
-    payload?: number | string | (number | string)[] | procedure;
+    payload?: number | string | (number | string)[] | ArrayBuffer | procedure;
 }
+
+/**
+ * A list of OSC arguments that can hold
+ * any number of int, float and string values
+ * in any order.
+ */
+export type OscArgSequence = (number | string)[];
+
+export type reducerLogic = (mySubState: IState, action: AnyAction | IAction) => IState;
 
 export interface IOscActionDef {
     address: string;
     typeTag: string;
-    value?: number | string | (number | string)[] | procedure;
+    value?: number | string | OscArgSequence | ArrayBuffer | procedure;
     valueName?: string;
     range?: [number, number];
-    process?: () => object;
+    process?: reducerLogic;
     description?: string;
 }
+
+export type IntermixNote = [string, number, number, number, number];
+export type IntermixCtrl = [string, number, number];
 
 /**
  * An OSC timetag is a 64bit fixed point number

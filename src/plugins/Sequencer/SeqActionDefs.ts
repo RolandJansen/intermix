@@ -62,6 +62,21 @@ const actionDefs: IOscActionDef[] = [
         typeTag: ",F",
         description: "sets the loop inactive",
     },
+    {
+        address: PREFIX + "activeStep",
+        typeTag: ",i",
+        description: "The part will operate (add/remove items) on the active step.",
+    },
+    {
+        address: PREFIX + "addToScore",
+        typeTag: ",ss",
+        description: "adds a tuple with part/plugin id to the score at the active step.",
+    },
+    {
+        address: PREFIX + "removeFromScore",
+        typeTag: ",ss",
+        description: "removes a tuple with part/plugin id from the score at the active step.",
+    },
     // {
     //     type: "ADD_PART",
     //     desc: "adds a part to the sequencer",
@@ -73,21 +88,6 @@ const actionDefs: IOscActionDef[] = [
     //     defVal: "",
     // },
     // {
-    //     type: "ADD_TO_SCORE",
-    //     desc: "adds a part-reference to the score",
-    //     defVal: {
-    //         partID: "",
-    //         position: 0,
-    //     },
-    // },
-    // {
-    //     type: "REMOVE_FROM_SCORE",
-    //     desc: "removes a part-reference from the score",
-    //     defVal: {
-    //         partID: "",
-    //         position: 0,
-    //     },
-    // },
     // {
     //     type: "QUEUE",
     //     desc: "saves the queue in the store and distributes it to other plugins",

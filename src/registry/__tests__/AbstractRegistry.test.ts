@@ -62,6 +62,7 @@ class TestRegistry extends AbstractRegistry {
 
     public add(): TestItem {
         const newItem = new TestItem();
+        newItem.uid = this.getUniqueItemKey();
         this.itemList.add(newItem);
         return newItem;
     }
@@ -85,7 +86,7 @@ class TestRegistry extends AbstractRegistry {
     }
 
     public getInitialState_Test(actionDefs: IOscActionDef[], uid: string): IState {
-        return this.getInitialState(actionDefs, uid);
+        return this.getInitialState(uid, actionDefs);
     }
 
     public getActionHandlers_Test(actionDefs: IOscActionDef[]): IActionHandlerMap {
@@ -106,6 +107,11 @@ let testItem: TestItem;
 let testItemUid: string;
 
 beforeEach(() => {
+    store.getState = jest.fn();
+    (store.getState as jest.Mock).mockReturnValue({
+        plugins: [],
+        seqparts: [],
+    });
     registry = new TestRegistry();
     testItem = registry.add();
     testItemUid = testItem.uid;

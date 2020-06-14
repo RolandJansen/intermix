@@ -9,8 +9,12 @@ import {
     Tuple,
     IOscAction,
     IOscActionDef,
+    OscArgSequence,
+    procedure,
 } from "./interfaces";
 import RegistryItemList from "./RegistryItemList";
+import { getRandomString } from "../helper";
+import SeqPart from "../seqpart/SeqPart";
 
 /**
  * Base class for item registries.
@@ -18,8 +22,9 @@ import RegistryItemList from "./RegistryItemList";
  * and prepare them to be used in intermix.
  */
 export default abstract class AbstractRegistry {
-    public abstract itemList: RegistryItemList<IRegistryItem>;
+    private static keyLength = 5;
 
+    public abstract itemList: RegistryItemList<IRegistryItem>;
     public abstract add(optionalParameter?: any): IRegistryItem;
     public abstract remove(itemId: string): void;
 
@@ -29,12 +34,21 @@ export default abstract class AbstractRegistry {
 
         allUids.forEach((uid: string) => {
             const item: IRegistryItem = this.itemList.getItem(uid);
-            const initState: IState = this.getInitialState(item.actionDefs, uid);
+            let initState: IState = {};
+            if (this.isSeqPart(item)) {
+                initState = this.getInitialState(uid, item.actionDefs, item.initState);
+            } else {
+                initState = this.getInitialState(uid, item.actionDefs);
+            }
             subReducers[uid] = this.getSubReducer(item.actionDefs, initState);
         });
 
         return subReducers;
     }
+
+    private isSeqPart = (item: IRegistryItem): item is SeqPart => {
+        return (item as SeqPart).initState !== undefined;
+    };
 
     /**
      * Subscribes an item to the store. The function that will
@@ -173,7 +187,7 @@ export default abstract class AbstractRegistry {
      * Generates an object mapping from action-types to the handlers
      * that will be used to auto-generate reducers. See:
      * https://redux.js.org/recipes/reducingboilerplate#generating-reducers
-     * @param actionDefs An array of action definitions (see IActionDef)
+     * @param actionDefs An array of action definitions (see IOscActionDef)
      */
     protected getActionHandlers(actionDefs: IOscActionDef[]): IActionHandlerMap {
         const handlers: IActionHandlerMap = {};
@@ -190,9 +204,9 @@ export default abstract class AbstractRegistry {
             }
 
             if (actionDef.process) {
-                const newValue: object = actionDef.process();
-                handlers[method] = (state: IState): IState => {
-                    return Object.assign({}, state, newValue);
+                const process = actionDef.process;
+                handlers[method] = (state: IState, action: AnyAction | IAction): IState => {
+                    return Object.assign({}, state, process(state, action));
                 };
             } else {
                 handlers[method] = (state: IState, action: AnyAction | IAction): IState => {
@@ -210,7 +224,7 @@ export default abstract class AbstractRegistry {
      * its ActionDef object.
      * @param actionDefs An array of action definitions (see IActionDef)
      */
-    protected getInitialState(actionDefs: IOscActionDef[], uid: string): IState {
+    protected getInitialState(uid: string, actionDefs: IOscActionDef[], initState: IState = {}): IState {
         const iState: IState = {};
 
         iState.uid = uid; // readonly field
@@ -218,6 +232,7 @@ export default abstract class AbstractRegistry {
             const addressParts = actionDef.address.split("/");
             const method = addressParts[addressParts.length - 1];
             let type: string;
+            let value: number | string | OscArgSequence | ArrayBuffer | procedure;
 
             if (actionDef.valueName) {
                 type = actionDef.valueName;
@@ -225,9 +240,43 @@ export default abstract class AbstractRegistry {
                 type = method;
             }
 
-            iState[type] = actionDef.value;
+            if (actionDef.value) {
+                value = actionDef.value;
+            } else {
+                if (actionDef.typeTag === ",s") {
+                    value = "";
+                } else {
+                    value = 0;
+                }
+            }
+
+            iState[type] = value;
         });
 
-        return iState;
+        return { ...iState, ...initState };
+    }
+
+    protected getUniqueItemKey(): string {
+        let itemKey = getRandomString(AbstractRegistry.keyLength);
+        while (!this.isKeyUnique(itemKey)) {
+            itemKey = getRandomString(AbstractRegistry.keyLength);
+        }
+
+        return itemKey;
+    }
+
+    private isKeyUnique(itemKey: string): boolean {
+        const allocated = this.getAllocatedKeys();
+        allocated.forEach((key) => {
+            if (key === itemKey) {
+                return false;
+            }
+        });
+        return true;
+    }
+
+    private getAllocatedKeys(): string[] {
+        const state = store.getState();
+        return [...state.plugins, ...state.seqparts];
     }
 }

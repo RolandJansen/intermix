@@ -126,7 +126,7 @@ describe("PluginRegistry", () => {
 });
 
 describe("SeqPart Registry", () => {
-    const payload = [1, 2, 3, 5];
+    const payload = ["note", 0, 0, 0, 0];
 
     let part: SeqPart;
     let partId: string;
@@ -149,9 +149,9 @@ describe("SeqPart Registry", () => {
                 payload,
             };
             action2 = {
-                address: `/intermix/seqpart/${partId}/deleteNote`,
+                address: `/intermix/seqpart/${partId}/removeNote`,
                 typeTag: ",iiff",
-                type: ",deleteNote",
+                type: ",removeNote",
                 payload,
             };
         });
@@ -171,7 +171,7 @@ describe("SeqPart Registry", () => {
 
             const state = store.getState();
             expect(state[partId].addNote).toEqual(payload);
-            expect(state[partId].deleteNote).toEqual(payload);
+            expect(state[partId].removeNote).toEqual(payload);
         });
 
         test("adds action creators to the part", () => {
@@ -259,12 +259,12 @@ describe("SeqPart Registry", () => {
             const ac = registry.getActionCreators(partId);
             const oldState = store.getState();
             expect(oldState[partId].addNote).toEqual(expected);
-            expect(oldState[partId].deleteNote).toEqual(expected);
+            expect(oldState[partId].removeNote).toEqual(expected);
             ac.addNote(payload);
-            ac.deleteNote(payload);
+            ac.removeNote(payload);
             const nextState = store.getState();
             expect(nextState[partId].addNote).toBe(payload);
-            expect(nextState[partId].deleteNote).toBe(payload);
+            expect(nextState[partId].removeNote).toBe(payload);
         });
 
         test("takes a seqPart id and returns its unbound action creators", () => {

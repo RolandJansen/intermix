@@ -1,11 +1,25 @@
 import { IQueuePosition } from "./Sequencer";
-import SeqPart from "../../seqpart/SeqPart";
-import { ILoop, IAction } from "../../registry/interfaces";
-import RegistryItemList from "../../registry/RegistryItemList";
+import { ILoop, IAction, IState, OscArgSequence } from "../../registry/interfaces";
+
+type Pattern = OscArgSequence[][];
 
 export interface IRunqueue {
-    [pointerId: string]: SeqPart;
+    [pointerId: string]: Pattern;
 }
+
+interface IPointer {
+    position: number;
+    partId: string;
+    pluginId: string;
+}
+
+interface IPointerTable {
+    [pointerId: string]: IPointer;
+}
+
+type SeqPartID = string;
+type PluginID = string;
+type PartAndPlugin = [SeqPartID, PluginID];
 
 /**
  * One concept that may needs explanation:
@@ -15,18 +29,19 @@ export interface IRunqueue {
  * Think of it like a tape that plays beyond its recorded audio.
  */
 export default class Score {
-    public parts: RegistryItemList<SeqPart>; // Lookup table with all available parts
-    private mainQueue: string[][] = []; // main queue that only holds part ids
-    private runQueue: IRunqueue = {}; // table with parts that are playing or will be played shortly
-    private seqPartPointerId = 0; // every pointer in every part has a unique id
+    // public parts: RegistryItemList<SeqPart>; // Lookup table with all available parts
+    public activeStep = 0; // step in the queue where parts can be inserted or removed
+    private mainQueue: PartAndPlugin[][] = []; // main queue that only holds part ids
     private nextStep = 0; // position in the queue that will get triggered next
-    private loopActivated = false; // play a section of the queue in a loop
+    private loopActive = false; // play a section of the queue in a loop
     private loopStart = 0; // first step of the loop
     private loopEnd = 63; // last step of the loop
 
-    public constructor() {
-        this.parts = new RegistryItemList();
-    }
+    private runQueue: IRunqueue = {}; // table with parts that are playing or will be played shortly
+    private patternPointerId = 0; // every pointer in the runqueue has a unique id
+    private pointers: IPointerTable = {};
+
+    public constructor(private getGlobalState: () => IState) {}
 
     public set loop(loop: ILoop) {
         if (loop.start < loop.end) {
@@ -36,20 +51,20 @@ export default class Score {
     }
 
     // this is casual and should be expressed with higher level functions
-    public get queue(): string[][] {
+    public get queue(): PartAndPlugin[][] {
         return this.mainQueue;
     }
 
     public activateLoop(): void {
-        this.loopActivated = true;
+        this.loopActive = true;
     }
 
     public deactivateLoop(): void {
-        this.loopActivated = false;
+        this.loopActive = false;
     }
 
     public increaseScorePointer(): void {
-        if (this.loopActivated && this.nextStep >= this.loopEnd) {
+        if (this.loopActive && this.nextStep >= this.loopEnd) {
             this.setScorePointerTo(this.loopStart);
         } else {
             this.nextStep++;
@@ -79,61 +94,87 @@ export default class Score {
         };
     }
 
-    public addPartToScore(seqPartKey: string, position: number): void {
-        if (!this.mainQueue[position]) {
-            this.mainQueue[position] = [];
+    public addPartToScore(partPluginTuple: PartAndPlugin): void {
+        if (!this.mainQueue[this.activeStep]) {
+            this.mainQueue[this.activeStep] = [];
         }
-        this.mainQueue[position].push(seqPartKey);
+        this.mainQueue[this.activeStep].push(partPluginTuple);
     }
 
-    public removePartFromScore(seqPartKey: string, position: number): void {
-        if (this.mainQueue[position] instanceof Array && this.mainQueue[position].length > 0) {
-            const index = this.mainQueue[position].indexOf(seqPartKey);
+    public removePartFromScore(partPluginTuple: PartAndPlugin): void {
+        if (this.mainQueue[this.activeStep] instanceof Array && this.mainQueue[this.activeStep].length > 0) {
+            const index = this.mainQueue[this.activeStep].indexOf(partPluginTuple);
             if (index >= 0) {
-                this.mainQueue[position].splice(index, 1);
+                this.mainQueue[this.activeStep].splice(index, 1);
+            } else {
+                this.mainQueue[this.activeStep] = [];
             }
         }
     }
 
     /**
      * Looks in the master queue for parts and adds
-     * copies of them to the runqueue.
+     * their pattern to the runqueue.
      */
-    public addPartsToRunqueue(): void {
+    public addPatternsToRunqueue(): void {
         if (typeof this.mainQueue[this.nextStep] !== "undefined") {
             if (this.mainQueue[this.nextStep].length !== 0) {
-                this.mainQueue[this.nextStep].forEach((itemId) => {
-                    this.addPartToRunqueue(itemId);
+                this.mainQueue[this.nextStep].forEach((item: PartAndPlugin) => {
+                    this.addPatternToRunqueue(item);
                 });
             }
         }
     }
 
-    private addPartToRunqueue(itemId: string): void {
-        const part = this.parts.getItem(itemId);
-        this.seqPartPointerId++;
-        part.pointers[this.seqPartPointerId] = 0;
-        this.runQueue[this.seqPartPointerId] = part;
+    private addPatternToRunqueue(item: PartAndPlugin): void {
+        const pattern: Pattern = this.getGlobalState()[item[0]].pattern;
+        this.patternPointerId++;
+
+        this.pointers[this.patternPointerId] = {
+            position: 0,
+            partId: item[0],
+            pluginId: item[1],
+        };
+        this.runQueue[this.patternPointerId] = pattern;
     }
 
-    public getAllActionsInNextStep(): IAction[] {
+    public getAllActionsForNextStep(): IAction[] {
         let actionList: IAction[] = [];
         let pointerId: string;
 
         for (pointerId in this.runQueue) {
-            const part = this.runQueue[pointerId];
-            const pointer = part.pointers[pointerId];
+            const pattern = this.runQueue[pointerId];
+            const pointer = this.pointers[pointerId];
 
             // could be refactored into a function
-            if (pointer < part.length - 1) {
-                const partActions = part.getActionsAtPointerPosition(pointerId);
-                actionList = actionList.concat(partActions);
-                part.pointers[pointerId]++;
+            if (pointer.position < pattern.length - 1) {
+                const events = pattern[pointer.position];
+                // console.log(events);
+
+                actionList = this.buildActionsFromEvents(events, pointer);
+                this.pointers[pointerId].position++;
             } else {
-                delete part.pointers[pointerId];
+                delete this.pointers[pointerId];
                 delete this.runQueue[pointerId];
             }
         }
         return actionList;
+    }
+
+    /**
+     * builds actions of type IAction and copies the event array
+     * so it won't be mutated.
+     * @param events List of "payloads" (notes or controller values)
+     * @param pointer A runqueue pointer object
+     */
+    private buildActionsFromEvents(events: OscArgSequence[], pointer: IPointer): IAction[] {
+        const actions: IAction[] = events.map((payload: OscArgSequence) => {
+            return {
+                listener: pointer.pluginId,
+                type: payload[0],
+                payload,
+            };
+        });
+        return actions;
     }
 }

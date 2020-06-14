@@ -1,11 +1,33 @@
 import Score, { IRunqueue } from "../Score";
-import { ILoop, IAction } from "../../../registry/interfaces";
-import SeqPart from "../../../seqpart/SeqPart";
+import { ILoop, OscArgSequence, IntermixNote } from "../../../registry/interfaces";
+
+const partId1 = "abcd";
+const partId2 = "efgh";
+const pluginId = "ijkl";
+const note1: IntermixNote = ["note", 23, 1, 1, 0];
+const note2: IntermixNote = ["note", 42, 1, 1, 0];
 
 let testScore: Score;
+let pattern1: OscArgSequence[][];
+let pattern2: OscArgSequence[][];
 
 beforeEach(() => {
-    testScore = new Score();
+    pattern1 = [];
+    pattern2 = [];
+
+    for (let i = 0; i < 64; i++) {
+        const subArray: OscArgSequence[] = [];
+        pattern1[i] = subArray;
+        pattern2[i] = Array.from(subArray);
+    }
+
+    const getState = jest.fn();
+    getState.mockReturnValue({
+        abcd: { pattern: pattern1 },
+        efgh: { pattern: pattern2 },
+    });
+
+    testScore = new Score(getState);
 });
 
 test("move the score pointer", () => {
@@ -21,8 +43,7 @@ test("increase the score pointer", () => {
 });
 
 test("setting a new pointer position clears the runqueue", () => {
-    const part1 = new SeqPart();
-    testScore["runQueue"]["abcd"] = part1;
+    testScore["runQueue"][0] = pattern1;
 
     const runQueueItemsBefore = Object.keys(testScore["runQueue"]);
     expect(runQueueItemsBefore).toHaveLength(1);
@@ -34,21 +55,21 @@ test("setting a new pointer position clears the runqueue", () => {
 
 test("get the mainQueue", () => {
     // this function is bad design but should be tested anyway
-    const queue: string[][] = ([] = testScore.queue);
+    const queue = ([] = testScore.queue);
     expect(queue).toBe(testScore["mainQueue"]);
 });
 
 describe("Loop Mode", () => {
     test("activate loop mode", () => {
-        testScore["loopActivated"] = false;
+        testScore["loopActive"] = false;
         testScore.activateLoop();
-        expect(testScore["loopActivated"]).toBeTruthy();
+        expect(testScore["loopActive"]).toBeTruthy();
     });
 
     test("deactivate loop mode", () => {
-        testScore["loopActivated"] = true;
+        testScore["loopActive"] = true;
         testScore.deactivateLoop();
-        expect(testScore["loopActivated"]).toBeFalsy();
+        expect(testScore["loopActive"]).toBeFalsy();
     });
 
     test("sets loop start- and endpoint", () => {
@@ -85,30 +106,30 @@ describe("Loop Mode", () => {
 });
 
 describe("main queue", () => {
-    const partId1 = "abcd";
-    const partId2 = "efgh";
-
     test("add a part id", () => {
-        testScore.addPartToScore(partId1, 5);
+        testScore.activeStep = 5;
+        testScore.addPartToScore([partId1, pluginId]);
         const queuePosition = testScore["mainQueue"][5];
 
         expect(queuePosition).toHaveLength(1);
-        expect(queuePosition).toContain(partId1);
+        expect(queuePosition).toContainEqual([partId1, pluginId]);
     });
 
     test("can have many parts at the same position", () => {
-        testScore.addPartToScore(partId1, 5);
-        testScore.addPartToScore(partId2, 5);
+        testScore.activeStep = 5;
+        testScore.addPartToScore([partId1, pluginId]);
+        testScore.addPartToScore([partId2, pluginId]);
         const queuePosition = testScore["mainQueue"][5];
 
         expect(queuePosition).toHaveLength(2);
-        expect(queuePosition).toContain(partId1);
-        expect(queuePosition).toContain(partId2);
+        expect(queuePosition).toContainEqual([partId1, pluginId]);
+        expect(queuePosition).toContainEqual([partId2, pluginId]);
     });
 
     test("remove a part", () => {
-        testScore.addPartToScore(partId1, 5);
-        testScore.removePartFromScore(partId1, 5);
+        testScore.activeStep = 5;
+        testScore.addPartToScore([partId1, pluginId]);
+        testScore.removePartFromScore([partId1, pluginId]);
         const queuePosition = testScore["mainQueue"][5];
 
         expect(queuePosition).toHaveLength(0);
@@ -116,60 +137,42 @@ describe("main queue", () => {
     });
 
     test("removes nothing if part not found", () => {
-        testScore.addPartToScore(partId1, 5);
+        testScore.activeStep = 5;
+        testScore.addPartToScore([partId1, pluginId]);
         const queuePosition = testScore["mainQueue"][5];
         expect(queuePosition).toHaveLength(1);
 
-        testScore.removePartFromScore("ijkl", 5);
+        testScore.removePartFromScore(["mnop", "qrst"]);
         expect(queuePosition).toHaveLength(1);
     });
 });
 
 describe("runqueue", () => {
-    const action1: IAction = {
-        listener: "abcd",
-        type: "SOME_TYPE",
-        payload: 23,
-    };
-    const action2: IAction = {
-        listener: "efgh",
-        type: "SOME_TYPE",
-        payload: 42,
-    };
-    let part1: SeqPart;
-    let part2: SeqPart;
-    let part1Uid: string;
-    let part2Uid: string;
     let runqueue: IRunqueue;
 
     beforeEach(() => {
-        // add parts to the part-list
-        part1 = new SeqPart();
-        part2 = new SeqPart();
-        part1.addAction(action1, 0);
-        part1.addAction(action2, 1);
-        part2.addAction(action2, 0);
-        part2.addAction(action1, 1);
-        part1Uid = testScore.parts.add(part1);
-        part2Uid = testScore.parts.add(part2);
+        pattern1[0].push(Array.from(note1));
+        pattern1[1].push(Array.from(note2));
+        pattern2[0].push(Array.from(note2));
+        pattern2[1].push(Array.from(note1));
 
         // add them to the queue
-        testScore.addPartToScore(part1Uid, 0);
-        testScore.addPartToScore(part2Uid, 0);
+        testScore.addPartToScore([partId1, pluginId]);
+        testScore.addPartToScore([partId2, pluginId]);
         testScore.resetScorePointer();
-        testScore.addPartsToRunqueue();
+        testScore.addPatternsToRunqueue();
 
         runqueue = testScore["runQueue"];
     });
 
     test("adds SeqParts from the main queue to the runqueue", () => {
         const pointerIds = Object.keys(runqueue);
-        const part1InRunqueue = runqueue[pointerIds[0]];
-        const part2InRunqueue = runqueue[pointerIds[1]];
+        const pattern1InRunqueue = runqueue[pointerIds[0]];
+        const pattern2InRunqueue = runqueue[pointerIds[1]];
 
         // just references so they should be the same object
-        expect(part1InRunqueue).toBe(part1);
-        expect(part2InRunqueue).toBe(part2);
+        expect(pattern1InRunqueue).toBe(pattern1);
+        expect(pattern2InRunqueue).toBe(pattern2);
     });
 
     test("removes a part reference from runqueue when the part pointer expires", () => {
@@ -178,10 +181,13 @@ describe("runqueue", () => {
 
         // set one pointer to end of pattern
         const pointerId = pointerIdsBefore[0];
-        const expiredPart = runqueue[pointerId];
-        expiredPart.pointers[pointerId] = expiredPart.length - 1;
+        const expiringPart = runqueue[pointerId];
+        const pointer = testScore["pointers"][pointerId];
+        pointer.position = expiringPart.length - 1;
 
-        testScore.getAllActionsInNextStep();
+        // expiringPart.pointers[pointerId] = expiringPart.length - 1;
+
+        testScore.getAllActionsForNextStep();
         const pointerIdsAfter = Object.keys(runqueue);
         expect(pointerIdsAfter).toHaveLength(1);
     });
@@ -189,14 +195,14 @@ describe("runqueue", () => {
     test("deletes an expired pointer from the part", () => {
         const pointerId = Object.keys(runqueue)[0];
         const expiredPart = runqueue[pointerId];
-        const expiredPartPointersBefore = Object.keys(expiredPart.pointers);
+        const expiredPartPointersBefore = Object.keys(testScore["pointers"]);
         expect(expiredPartPointersBefore).toContain(pointerId);
 
         // expire the pointer, see what happens
-        expiredPart.pointers[pointerId] = expiredPart.length - 1;
-        testScore.getAllActionsInNextStep();
+        testScore["pointers"][pointerId].position = expiredPart.length - 1;
+        testScore.getAllActionsForNextStep();
 
-        const expiredPartPointersAfter = Object.keys(expiredPart.pointers);
+        const expiredPartPointersAfter = Object.keys(testScore["pointers"]);
         expect(expiredPartPointersAfter).not.toContain(pointerId);
     });
 });

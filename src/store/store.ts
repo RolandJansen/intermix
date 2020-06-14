@@ -1,5 +1,6 @@
-import { Action, createStore, Store, AnyAction, Middleware, applyMiddleware } from "redux";
-import { IState, IOscAction, IOscBundleAction } from "../registry/interfaces";
+import rootReducer from "./rootReducer";
+import { createStore, Store, AnyAction, Middleware, applyMiddleware } from "redux";
+import { IOscAction, IOscBundleAction } from "../registry/interfaces";
 
 // We don't want to preprocess OSC actions in every
 // single reducer so we put it into this middleware
@@ -10,9 +11,9 @@ const preprocessOSC: Middleware = () => (next) => (action): AnyAction => {
         const address: string[] = action.address.split("/");
 
         if (address[1] === "intermix") {
-            const type = address[4]; // there could be an explicit value type action.valueName
+            // const type = address[4]; // there could be an explicit value type action.valueName
             toBeDispatched = {
-                type,
+                type: action.type,
                 listenerType: address[2],
                 listener: address[3],
                 payload: action.payload,
@@ -45,13 +46,6 @@ const itsAnOscAction = (action: AnyAction): action is IOscAction => {
 // type guard for IOscBundleAction
 const itsAnOscBundleAction = (action: AnyAction): action is IOscBundleAction => {
     return (action as IOscBundleAction).timetag !== undefined;
-};
-
-// An empty root reducer. It will be hydrated with
-// more reducers at runtime as plugins get loaded.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const rootReducer = (state = {}, action: Action): IState => {
-    return state;
 };
 
 const store: Store = createStore(rootReducer, applyMiddleware(preprocessOSC));

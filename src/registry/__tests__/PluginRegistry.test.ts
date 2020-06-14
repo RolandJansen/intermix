@@ -17,7 +17,10 @@ let registry: PluginRegistry;
 let testPlugin: IPlugin;
 
 beforeEach(() => {
-    globalState = {};
+    globalState = {
+        plugins: [],
+        seqparts: [],
+    };
 
     // can't use mockReturnValue here cause it
     // handles its argument like a constant
