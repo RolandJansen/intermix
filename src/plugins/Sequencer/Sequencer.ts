@@ -97,7 +97,7 @@ export default class Sequencer extends AbstractControllerPlugin implements ICont
     public onChange(changed: Tuple): boolean {
         console.log(changed);
         switch (changed[0]) {
-            case "STATE":
+            case "running":
                 if (changed[1] === 0) {
                     this.stop();
                 } else {
