@@ -15,13 +15,13 @@ const actionDefs: IOscActionDef[] = [
     {
         address: PREFIX + "start",
         typeTag: ",T",
-        valueName: "running",
+        type: "running",
         description: "starts the sequencer and (if neccessary) the suspended audio context",
     },
     {
         address: PREFIX + "stop",
         typeTag: ",F",
-        valueName: "running",
+        type: "running",
         description: "stops the sequencer at the current position and halts the audio context",
     },
     {
@@ -31,7 +31,7 @@ const actionDefs: IOscActionDef[] = [
         description: "stops the sequencer (not the audio context) and resets the queue pointer",
     },
     {
-        address: "position",
+        address: PREFIX + "position",
         typeTag: ",i",
         description: "jump to a specific step in the masterqueue",
     },

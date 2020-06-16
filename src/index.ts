@@ -1,5 +1,5 @@
 import { Action, ActionCreatorsMapObject } from "redux";
-import { IPlugin, IState } from "./registry/interfaces";
+import { IState, IPluginConstructor } from "./registry/interfaces";
 import MasterRegistry from "./registry/MasterRegistry";
 import { store } from "./store/store";
 import Sequencer from "./plugins/Sequencer/Sequencer";
@@ -34,7 +34,7 @@ export function getAudioContext(): AudioContext {
     return audioContext;
 }
 
-type GenericPluginClass = new (itemId: string, ac: AudioContext) => IPlugin;
+// type GenericPluginClass = new (itemId: string, ac: AudioContext) => IPlugin;
 
 /**
  * Tries to find a class (prototype) with the name of a given string (reflection),
@@ -47,7 +47,7 @@ export function addPlugin(pluginClassName: string): string {
     try {
         if (plugins.hasOwnProperty(pluginClassName)) {
             const possibleClass: any = (plugins as any)[pluginClassName];
-            const pluginClass: GenericPluginClass = possibleClass as GenericPluginClass;
+            const pluginClass: IPluginConstructor = possibleClass as IPluginConstructor;
 
             return registry.addPlugin(pluginClass);
         }

@@ -1,6 +1,6 @@
 import AbstractRegistry from "./AbstractRegistry";
 import RegistryItemList from "./RegistryItemList";
-import { IPlugin, IControllerPlugin, IAction } from "./interfaces";
+import { IPlugin, IControllerPlugin, IAction, IPluginConstructor } from "./interfaces";
 import { store } from "../store/store";
 import { bindActionCreators } from "redux";
 import commonActionDefs from "./commonActionDefs";
@@ -21,7 +21,8 @@ export default class PluginRegistry extends AbstractRegistry {
      * action creators and returns the new plugin instance.
      * @param pluginClass The class from which the plugin will be derived
      */
-    public add<P extends IPlugin>(pluginClass: new (itemId: string, ac: AudioContext) => P): P {
+    // public add<P extends IPlugin>(pluginClass: new (itemId: string, ac: AudioContext) => P): P {
+    public add(pluginClass: IPluginConstructor): IPlugin {
         const itemId = this.getUniqueItemKey();
         const newItem = new pluginClass(itemId, this.ac);
         this.itemList.add(newItem);

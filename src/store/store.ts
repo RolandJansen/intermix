@@ -5,6 +5,8 @@ import { IOscAction, IOscBundleAction } from "../registry/interfaces";
 // We don't want to preprocess OSC actions in every
 // single reducer so we put it into this middleware
 const preprocessOSC: Middleware = () => (next) => (action): AnyAction => {
+    // console.log("input action: ");
+    // console.log(action);
     let toBeDispatched: AnyAction = action;
 
     if (itsAnOscAction(action)) {
@@ -35,6 +37,8 @@ const preprocessOSC: Middleware = () => (next) => (action): AnyAction => {
         }
     }
 
+    // console.log("output action: ");
+    console.log(toBeDispatched);
     return next(toBeDispatched);
 };
 

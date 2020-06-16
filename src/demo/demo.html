@@ -32,60 +32,8 @@
         <div id="set-bpm"></div>
     </div>
     <!-- <div id="blink"></div> -->
-    <button id="original-object">original Object</button>
-    <button id="copied-object">copied Object</button>
-    <button id="org-list">original list w/ objects</button>
-    <button id="copied-list">copied list w/ objects</button>
 </body>
 <script>
-
-    const originalObject = {
-        address: "hello",
-        name: "echo",
-        problem: {
-            dieses: "problem",
-            ist: "referentiell",
-        },
-        strangeArray: [1, 2, 3],
-    }
-
-    const copiedObject = Object.assign({}, originalObject, {
-        address: "olleh",
-    })
-
-    copiedObject.problem.dieses = "no problemo";
-    copiedObject.strangeArray = [3, 2, 1];
-    copiedObject.name = "oche";
-
-    const orgList = [
-        {
-            name: "obj nr1",
-        },
-        {
-            name: "obj nr2"
-        }
-    ]
-
-    // const copiedList = orgList.slice();
-    // const copiedList = [...orgList]
-    const copiedList = Array.from(orgList)
-    copiedList[1].name = "bums"
-
-    document.getElementById('org-list').addEventListener('click', () => {
-        console.log(orgList);
-    });
-
-    document.getElementById('copied-list').addEventListener('click', () => {
-        console.log(copiedList);
-    });
-
-    document.getElementById('original-object').addEventListener('click', () => {
-        console.log(originalObject);
-    });
-
-    document.getElementById('copied-object').addEventListener('click', () => {
-        console.log(copiedObject);
-    });
 
     let BPM = 120;
 
@@ -110,26 +58,37 @@
         max: 240,
     })
 
-    startButton.on('change', () => {
-        sequencer.stepper.value = -1;
-        seqActionCreators.start();
+    startButton.on('change', (e) => {
+        // e: true -> mousedown
+        if (e) {
+            sequencer.stepper.value = -1;
+            seqActionCreators.start();
+        }
     })
 
-    stopButton.on('change', () => {
-        seqActionCreators.stop();
+    stopButton.on('change', (e) => {
+        // e: true -> mousedown
+        if (e) {
+            seqActionCreators.stop();
+        }
     })
 
-    resetButton.on('change', () => {
-
-        seqActionCreators.reset();
-        // sequencer.stepper.value = -1;
-        // const counter = new Nexus.Counter(0, 1);
-        // counter.value = 0;
-        // sequencer.stepper(counter);
+    resetButton.on('change', (e) => {
+        // e: true -> mousedown
+        if (e) {
+            seqActionCreators.reset();
+            // sequencer.stepper.value = -1;
+            // const counter = new Nexus.Counter(0, 1);
+            // counter.value = 0;
+            // sequencer.stepper(counter);
+        }
     })
 
     setBpm.on('change', (e) => {
-        BPM = e;
+        // e: true -> mousedown
+        if (e) {
+            BPM = e;
+        }
     })
 
     sequencer.on('change', (e) => {
@@ -144,7 +103,7 @@
         } else {
             // send a "deleteNote" action to the according part
             partActionCreators.activeStep(e.column);
-            partActionCreators.deleteNote(["note", 40, 1, duration, 0.0]);
+            partActionCreators.removeNote(["note", 40, 1, duration, 0.0]);
         }
     })
 
@@ -178,17 +137,17 @@
             seqPartUID.push(intermix.addSeqPart())  // 16 steps if not stated otherwise
         }
 
-        console.log("sampler id is: " + instrumentUID)
-
         // add a sample to each sampler
         samples.forEach((sample, index) => {
             addAudioDataToSampler(instrumentUID[index], sample["default"]);
         })
 
         // setup the sequencer
-        // sequencerUID = intermix.addPlugin('Sequencer');
-        // seqActionCreators = intermix.getActionCreators(sequencerUID);
-        // seqActionCreators.animate(selectNextSeqRow);  // animate the sequencer
+        sequencerUID = intermix.addPlugin('Sequencer');
+        seqActionCreators = intermix.getActionCreators(sequencerUID);
+        seqActionCreators.animate(selectNextSeqRow);  // animate the sequencer
+
+        console.log(seqActionCreators);
 
         // setup a basic sequence
         sequencer.matrix.populate.row(0, [1, 0, 0, 0, 0, 0, 0, 0]);
@@ -201,15 +160,12 @@
         // add parts to sequencer and to the score
         seqPartUID.forEach((seqPartId, index) => {
             const part = intermix.getSeqPart(seqPartId);
-            seqActionCreators.ADD_PART(part);
-            seqActionCreators.ADD_TO_SCORE({
-                partID: seqPartId,
-                position: 0,
-            })
+            // seqActionCreators.ADD_PART(part);
+            seqActionCreators.addToScore([seqPartId, instrumentUID[index]])
         })
 
         // play in loop mode
-        seqActionCreators.LOOP_ACTIVE(true);
+        seqActionCreators.loopActive();
 
     }
 

@@ -56,7 +56,7 @@ export default class Sequencer extends AbstractControllerPlugin implements ICont
 
     private clock: Worker;
 
-    constructor(private ac: AudioContext) {
+    constructor(public readonly uid: string, private ac: AudioContext) {
         super();
         this.timePerStepInSec = this.getTimePerStep();
         this.score = new Score(this.getGlobalState);
@@ -95,6 +95,7 @@ export default class Sequencer extends AbstractControllerPlugin implements ICont
      * @param changed A tuple with actiontype and payload
      */
     public onChange(changed: Tuple): boolean {
+        console.log(changed);
         switch (changed[0]) {
             case "STATE":
                 if (changed[1] === 0) {

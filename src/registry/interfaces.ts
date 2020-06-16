@@ -14,6 +14,10 @@ export interface IRegistryItem {
     unsubscribe(): void;
 }
 
+export interface IPluginConstructor {
+    new (itemId: string, ac: AudioContext): IPlugin;
+}
+
 export interface IPlugin extends IRegistryItem {
     readonly metaData: IPluginMetaData;
     readonly frequencyLookup: number[];
@@ -121,8 +125,8 @@ export type reducerLogic = (mySubState: IState, action: AnyAction | IAction) => 
 export interface IOscActionDef {
     address: string;
     typeTag: string;
+    type?: string;
     value?: number | string | OscArgSequence | ArrayBuffer | procedure;
-    valueName?: string;
     range?: [number, number];
     process?: reducerLogic;
     description?: string;

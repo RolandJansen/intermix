@@ -19,7 +19,7 @@ describe("Sequencer", () => {
 
     beforeEach(() => {
         ac = new AudioContext();
-        sequencer = new Sequencer(ac);
+        sequencer = new Sequencer("abcd", ac);
         // sequencer.clock.mockClear();
     });
 
@@ -34,7 +34,7 @@ describe("Sequencer", () => {
 
     test("has action definitions", () => {
         const testActionDef: IOscActionDef = {
-            address: "position",
+            address: "/intermix/plugin/{UID}/position",
             typeTag: ",i",
             description: "jump to a specific step in the masterqueue",
         };

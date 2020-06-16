@@ -46,7 +46,7 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
     private filter: BiquadFilterNode;
     private queue: OscillatorNode[] = [];
 
-    constructor(private ac: AudioContext) {
+    constructor(public readonly uid: string, private ac: AudioContext) {
         super();
 
         // Create a new biquad filter

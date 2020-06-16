@@ -9,7 +9,7 @@ describe("DemoSampler", () => {
 
     beforeEach(() => {
         ac = new AudioContext();
-        sampler = new DemoSampler(ac);
+        sampler = new DemoSampler("abcd", ac);
     });
 
     test("ensure that we're testing against the WebAudioTestAPI", () => {

@@ -9,7 +9,7 @@ describe("DemoSynth", () => {
 
     beforeEach(() => {
         ac = new AudioContext();
-        synth = new DemoSynth(ac);
+        synth = new DemoSynth("abcd", ac);
     });
 
     test("ensure that we're testing against the WebAudioTestAPI", () => {

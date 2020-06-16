@@ -31,7 +31,7 @@ export default class Sampler extends AbstractPlugin implements IPlugin {
     private audioData: AudioBuffer;
     private queue: AudioBufferSourceNode[] = []; // list of polyphonic voices
 
-    constructor(private ac: AudioContext) {
+    constructor(public readonly uid: string, private ac: AudioContext) {
         super();
 
         // create gain node

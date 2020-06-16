@@ -133,18 +133,20 @@ export default abstract class AbstractRegistry {
             const method = addressParts[addressParts.length - 1];
 
             let type: string;
-            if (actionDefCopy.valueName) {
-                type = actionDefCopy.valueName;
+            if (actionDefCopy.type) {
+                type = actionDefCopy.type;
             } else {
                 type = method;
             }
 
-            if (actionDefCopy.typeTag === ",T" || actionDefCopy.typeTag === ",F") {
+            if (actionDefCopy.typeTag === ",T" || actionDefCopy.typeTag === ",F" || actionDefCopy.typeTag === ",N") {
+                const payload = actionDefCopy.typeTag === ",T" ? 1 : 0;
                 actionCreators[method] = (): IOscAction => {
                     return {
-                        address: actionDef.address,
-                        typeTag: actionDef.typeTag,
+                        address: actionDefCopy.address,
+                        typeTag: actionDefCopy.typeTag,
                         type,
+                        payload,
                     };
                 };
             } else {
@@ -197,8 +199,8 @@ export default abstract class AbstractRegistry {
             const method = addressParts[addressParts.length - 1];
             let type: string;
 
-            if (actionDef.valueName) {
-                type = actionDef.valueName;
+            if (actionDef.type) {
+                type = actionDef.type;
             } else {
                 type = method;
             }
@@ -234,8 +236,8 @@ export default abstract class AbstractRegistry {
             let type: string;
             let value: number | string | OscArgSequence | ArrayBuffer | procedure;
 
-            if (actionDef.valueName) {
-                type = actionDef.valueName;
+            if (actionDef.type) {
+                type = actionDef.type;
             } else {
                 type = method;
             }
