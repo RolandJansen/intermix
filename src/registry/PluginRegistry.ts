@@ -1,6 +1,6 @@
 import AbstractRegistry from "./AbstractRegistry";
 import RegistryItemList from "./RegistryItemList";
-import { IPlugin, IControllerPlugin, IAction, IPluginConstructor } from "./interfaces";
+import { IPlugin, IControllerPlugin, IAction, IPluginConstructor, IState } from "./interfaces";
 import { store } from "../store/store";
 import { bindActionCreators } from "redux";
 import commonActionDefs from "./commonActionDefs";
@@ -87,7 +87,7 @@ export default class PluginRegistry extends AbstractRegistry {
     }
 
     private mapStoreToPlugin(newItem: IControllerPlugin): void {
-        newItem.getGlobalState = store.getState;
+        newItem.getGlobalState = (): IState => store.getState();
     }
 
     /**

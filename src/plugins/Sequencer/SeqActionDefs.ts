@@ -53,12 +53,14 @@ const actionDefs: IOscActionDef[] = [
         description: "sets the loop endpoint in steps",
     },
     {
-        address: PREFIX + "loopActive",
+        address: PREFIX + "loopActivate",
+        type: "loopActive",
         typeTag: ",T",
         description: "sets the loop active",
     },
     {
-        address: PREFIX + "loopInactive",
+        address: PREFIX + "loopDeactivate",
+        type: "loopActive",
         typeTag: ",F",
         description: "sets the loop inactive",
     },
@@ -78,24 +80,12 @@ const actionDefs: IOscActionDef[] = [
         description: "removes a tuple with part/plugin id from the score at the active step.",
     },
     // {
-    //     type: "ADD_PART",
-    //     desc: "adds a part to the sequencer",
-    //     defVal: {},
-    // },
-    // {
-    //     type: "REMOVE_PART",
-    //     desc: "removes a part from the sequencer",
-    //     defVal: "",
-    // },
-    // {
-    // {
     //     type: "QUEUE",
     //     desc: "saves the queue in the store and distributes it to other plugins",
     //     defVal: [],
     // },
-
     {
-        address: "animate",
+        address: PREFIX + "animate",
         typeTag: ",P",
         value: (): void => {
             /* empty; */

@@ -58,7 +58,9 @@ const addItemToPatternStep = (oldStep: OscArgSequence[], item: IntermixNote | In
     const newStep: OscArgSequence[] = [];
 
     const itemCount = oldStep.length;
-    if (itemCount === 1) {
+    if (itemCount === 0) {
+        newStep.push(item);
+    } else if (itemCount === 1) {
         if (itemsHaveSameValue(oldStep[0], item)) {
             newStep[0] = item;
         } else {

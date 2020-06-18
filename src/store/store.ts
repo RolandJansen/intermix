@@ -38,7 +38,7 @@ const preprocessOSC: Middleware = () => (next) => (action): AnyAction => {
     }
 
     // console.log("output action: ");
-    console.log(toBeDispatched);
+    // console.log(toBeDispatched);
     return next(toBeDispatched);
 };
 

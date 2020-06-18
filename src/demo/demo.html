@@ -156,7 +156,7 @@
         sequencer.matrix.populate.row(2, [0, 0, 1, 0]);
 
         // add notes to the seqParts
-        populateSeqParts(sequencer.matrix.pattern);
+        // populateSeqParts(sequencer.matrix.pattern);
 
         // add parts to sequencer and to the score
         seqPartUID.forEach((seqPartId, index) => {
@@ -166,7 +166,8 @@
         })
 
         // play in loop mode
-        seqActionCreators.loopActive();
+        // seqActionCreators.loopActive();
+        seqActionCreators.loopActivate();
 
     }
 
@@ -196,7 +197,7 @@
             const seqPartId = seqPartUID[rowIndex];
             const samplerId = instrumentUID[rowIndex];
             const seqPartActionCreators = intermix.getActionCreators(seqPartId);
-            const duration = get16thDuration()
+            // const duration = get16thDuration()
 
             seqRow.forEach((seqStep, stepIndex) => {
                 if (seqRow[stepIndex] === true) {

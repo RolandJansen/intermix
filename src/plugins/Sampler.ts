@@ -13,12 +13,12 @@ export default class Sampler extends AbstractPlugin implements IPlugin {
     };
 
     public readonly actionDefs: IOscActionDef[] = [
-        {
-            address: Sampler.PREFIX + "volume",
-            typeTag: ",i",
-            range: [0, 127],
-            description: "Loudness of the output signal",
-        },
+        // {
+        //     address: Sampler.PREFIX + "volume",
+        //     typeTag: ",i",
+        //     range: [0, 127],
+        //     description: "Loudness of the output signal",
+        // },
         {
             address: Sampler.PREFIX + "audioData",
             typeTag: ",b",
@@ -65,18 +65,18 @@ export default class Sampler extends AbstractPlugin implements IPlugin {
     // on every state change
     public onChange(changed: Tuple): boolean {
         switch (changed[0]) {
-            case "NOTE":
+            case "note":
                 const note: IntermixNote = changed[1];
                 this.handleNote(note);
                 return true;
-            case "VOLUME":
+            case "volume":
                 this.handleVolume(changed[1]);
                 return true;
-            case "STOP":
+            case "stop":
                 this.stop();
                 return true;
-            case "AUDIODATA":
-                const buffer: AudioBuffer = changed[1].payload;
+            case "audioData":
+                const buffer: AudioBuffer = changed[1];
                 this.handleAudioData(buffer);
                 return true;
             default:

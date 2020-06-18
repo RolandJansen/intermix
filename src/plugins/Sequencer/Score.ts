@@ -1,7 +1,7 @@
 import { IQueuePosition } from "./Sequencer";
 import { ILoop, IAction, IState, OscArgSequence } from "../../registry/interfaces";
 
-type Pattern = OscArgSequence[][];
+export type Pattern = OscArgSequence[][];
 
 export interface IRunqueue {
     [pointerId: string]: Pattern;
@@ -19,7 +19,7 @@ interface IPointerTable {
 
 type SeqPartID = string;
 type PluginID = string;
-type PartAndPlugin = [SeqPartID, PluginID];
+export type PartAndPlugin = [SeqPartID, PluginID];
 
 /**
  * One concept that may needs explanation:
@@ -31,8 +31,8 @@ type PartAndPlugin = [SeqPartID, PluginID];
 export default class Score {
     // public parts: RegistryItemList<SeqPart>; // Lookup table with all available parts
     public activeStep = 0; // step in the queue where parts can be inserted or removed
-    private mainQueue: PartAndPlugin[][] = []; // main queue that only holds part ids
     private nextStep = 0; // position in the queue that will get triggered next
+    private mainQueue: PartAndPlugin[][] = []; // main queue that only holds part ids
     private loopActive = false; // play a section of the queue in a loop
     private loopStart = 0; // first step of the loop
     private loopEnd = 63; // last step of the loop
@@ -42,6 +42,13 @@ export default class Score {
     private pointers: IPointerTable = {};
 
     public constructor(private getGlobalState: () => IState) {}
+
+    public get nextStepPartsInScore(): PartAndPlugin[] {
+        if (typeof this.mainQueue[this.nextStep] !== "undefined") {
+            return this.mainQueue[this.nextStep];
+        }
+        return [];
+    }
 
     public set loop(loop: ILoop) {
         if (loop.start < loop.end) {
@@ -116,18 +123,17 @@ export default class Score {
      * Looks in the master queue for parts and adds
      * their pattern to the runqueue.
      */
-    public addPatternsToRunqueue(): void {
-        if (typeof this.mainQueue[this.nextStep] !== "undefined") {
-            if (this.mainQueue[this.nextStep].length !== 0) {
-                this.mainQueue[this.nextStep].forEach((item: PartAndPlugin) => {
-                    this.addPatternToRunqueue(item);
-                });
-            }
-        }
-    }
+    // public addPatternsToRunqueue(): void {
+    //     if (typeof this.mainQueue[this.nextStep] !== "undefined") {
+    //         if (this.mainQueue[this.nextStep].length !== 0) {
+    //             this.mainQueue[this.nextStep].forEach((item: PartAndPlugin) => {
+    //                 this.addPatternToRunqueue(item);
+    //             });
+    //         }
+    //     }
+    // }
 
-    private addPatternToRunqueue(item: PartAndPlugin): void {
-        const pattern: Pattern = this.getGlobalState()[item[0]].pattern;
+    public addPatternToRunqueue(item: PartAndPlugin, pattern: Pattern): void {
         this.patternPointerId++;
 
         this.pointers[this.patternPointerId] = {
@@ -149,9 +155,8 @@ export default class Score {
             // could be refactored into a function
             if (pointer.position < pattern.length - 1) {
                 const events = pattern[pointer.position];
-                // console.log(events);
 
-                actionList = this.buildActionsFromEvents(events, pointer);
+                actionList = actionList.concat(this.buildActionsFromEvents(events, pointer));
                 this.pointers[pointerId].position++;
             } else {
                 delete this.pointers[pointerId];

@@ -13,7 +13,7 @@ import {
 } from "../../registry/interfaces";
 import SeqPart from "../../seqpart/SeqPart";
 import ClockWorker from "./clock.worker";
-import Score from "./Score";
+import Score, { PartAndPlugin, Pattern } from "./Score";
 import seqActionDefs from "./SeqActionDefs";
 
 export interface IQueuePosition {
@@ -109,14 +109,6 @@ export default class Sequencer extends AbstractControllerPlugin implements ICont
             case "BPM":
                 this.setBpmAndTimePerStep(changed[1]);
                 return true;
-            // case "ADD_PART":
-            //     const newPart: SeqPart = changed[1];
-            //     this.score.parts.add(newPart);
-            //     return true;
-            // case "REMOVE_PART":
-            //     const partID: string = changed[1];
-            //     this.score.parts.remove(partID);
-            //     return true;
             case "activeStep":
                 this.score.activeStep = changed[1] as number;
                 return true;
@@ -134,8 +126,8 @@ export default class Sequencer extends AbstractControllerPlugin implements ICont
                 const loop: ILoop = changed[1];
                 this.score.loop = loop;
                 return true;
-            case "LOOP_ACTIVE":
-                const isActive: boolean = changed[1];
+            case "loopActive":
+                const isActive: boolean = changed[1] === 1 ? true : false;
                 if (isActive) {
                     this.score.activateLoop();
                 } else {
@@ -146,7 +138,7 @@ export default class Sequencer extends AbstractControllerPlugin implements ICont
                 const step: number = changed[1];
                 this.score.moveScorePointerTo(step);
                 return true;
-            case "ANIMATE":
+            case "animate":
                 const animeFunc: ReturnFunction<void> = changed[1];
                 this.updateFrame = animeFunc;
             default:
@@ -228,7 +220,7 @@ export default class Sequencer extends AbstractControllerPlugin implements ICont
         }
 
         while (this.nextStepTimeInSec < limit) {
-            this.score.addPatternsToRunqueue();
+            this.addPatternsToRunqueue();
             this.sendAllActionsInNextStep();
             this.triggeredSteps.push(this.score.getScorePosition(this.nextStepTimeInSec));
             this.nextStepTimeInSec += this.timePerStepInSec;
@@ -250,6 +242,16 @@ export default class Sequencer extends AbstractControllerPlugin implements ICont
                 this.triggeredSteps.shift();
             }
             window.requestAnimationFrame(this.draw.bind(this));
+        }
+    }
+
+    private addPatternsToRunqueue(): void {
+        const nextStepParts = this.score.nextStepPartsInScore;
+        if (nextStepParts.length !== 0) {
+            nextStepParts.forEach((item: PartAndPlugin) => {
+                const pattern: Pattern = this.getGlobalState()[item[0]].pattern;
+                this.score.addPatternToRunqueue(item, pattern);
+            });
         }
     }
 
@@ -275,6 +277,7 @@ export default class Sequencer extends AbstractControllerPlugin implements ICont
         // });
 
         const nextStepActions = this.score.getAllActionsForNextStep();
+        // console.log(nextStepActions);
         nextStepActions.forEach((action) => {
             this.prepareActionForDispatching(action, this.nextStepTimeInSec);
             this.sendAction(action);
