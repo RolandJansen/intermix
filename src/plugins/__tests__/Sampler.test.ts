@@ -1,6 +1,6 @@
 /// <reference path="../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
-import { IAction, IOscActionDef, IntermixNote } from "../../registry/interfaces";
+import { IOscActionDef, IntermixNote } from "../../registry/interfaces";
 import DemoSampler from "../Sampler";
 
 describe("DemoSampler", () => {
@@ -23,10 +23,8 @@ describe("DemoSampler", () => {
 
     test("has action definitions", () => {
         const actionDef: IOscActionDef = {
-            address: `/intermix/plugin/{UID}/volume`,
-            typeTag: ",i",
-            range: [0, 127],
-            description: "Loudness of the output signal",
+            address: `/intermix/plugin/{UID}/audioData`,
+            typeTag: ",b",
         };
         expect(sampler.actionDefs).toContainEqual(actionDef);
     });
@@ -52,7 +50,7 @@ describe("DemoSampler", () => {
     describe("onChange", () => {
         let note: IntermixNote;
         let buffer: AudioBuffer;
-        let audioDataAction: IAction;
+        // let audioDataAction: IAction;
 
         beforeEach(() => {
             note = ["note", 23, 1, 1, 1];
@@ -64,11 +62,11 @@ describe("DemoSampler", () => {
             //     startTime: 1,
             // };
             buffer = ac.createBuffer(1, 22050, 44100); // create a buffer of 0.5s length
-            audioDataAction = {
-                type: "AUDIODATA",
-                listener: sampler.uid,
-                payload: buffer,
-            };
+            // audioDataAction = {
+            //     type: "AUDIODATA",
+            //     listener: sampler.uid,
+            //     payload: buffer,
+            // };
 
             sampler["ac"].$processTo("00:00.000");
         });
@@ -79,20 +77,20 @@ describe("DemoSampler", () => {
         });
 
         test("should replace the default audio buffer", () => {
-            sampler.onChange(["AUDIODATA", audioDataAction]);
+            sampler.onChange(["audioData", buffer]);
             expect(sampler["audioData"]).toBe(buffer);
         });
 
         test("should add and delete BufferSourceNodes from the queue", () => {
-            sampler.onChange(["NOTE", note]);
+            sampler.onChange(["note", note]);
             expect(sampler["queue"].length).toEqual(1);
-            sampler.onChange(["STOP", true]);
+            sampler.onChange(["stop", true]);
             expect(sampler["queue"].length).toEqual(0);
         });
 
         test("should start a BufferSourceNode at a given time", () => {
-            sampler.onChange(["AUDIODATA", audioDataAction]);
-            sampler.onChange(["NOTE", note]);
+            sampler.onChange(["audioData", buffer]);
+            sampler.onChange(["note", note]);
 
             const node = sampler["queue"][0];
             expect(node.$stateAtTime("00:00.000")).toBe("SCHEDULED");
@@ -103,25 +101,25 @@ describe("DemoSampler", () => {
         });
 
         test("should stop a BufferSourceNode immediately", () => {
-            sampler.onChange(["AUDIODATA", audioDataAction]);
-            sampler.onChange(["NOTE", note]);
+            sampler.onChange(["audioData", buffer]);
+            sampler.onChange(["note", note]);
             expect(sampler["queue"][0].$stateAtTime("00:01.000")).toBe("PLAYING");
 
-            sampler.onChange(["STOP", true]);
+            sampler.onChange(["stop", true]);
             expect(sampler["queue"][0]).not.toBeDefined();
         });
 
         test("should stop a BufferSourceNode even if it's just scheduled.", () => {
-            sampler.onChange(["AUDIODATA", audioDataAction]);
-            sampler.onChange(["NOTE", note]);
+            sampler.onChange(["audioData", buffer]);
+            sampler.onChange(["note", note]);
             expect(sampler["queue"][0].$stateAtTime("00:00.500")).toBe("SCHEDULED");
 
-            sampler.onChange(["STOP", true]);
+            sampler.onChange(["stop", true]);
             expect(sampler["queue"][0]).not.toBeDefined();
         });
 
         test("should set the volume", () => {
-            sampler.onChange(["VOLUME", 64]);
+            sampler.onChange(["volume", 64]);
             expect(sampler["gainNode"].gain.value).toEqual(0.5);
         });
     });

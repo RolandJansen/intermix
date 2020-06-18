@@ -22,7 +22,6 @@ export default class Sampler extends AbstractPlugin implements IPlugin {
         {
             address: Sampler.PREFIX + "audioData",
             typeTag: ",b",
-            description: "audio data",
         },
     ];
 

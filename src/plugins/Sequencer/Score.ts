@@ -1,5 +1,5 @@
 import { IQueuePosition } from "./Sequencer";
-import { ILoop, IAction, IState, OscArgSequence } from "../../registry/interfaces";
+import { ILoop, IAction, OscArgSequence } from "../../registry/interfaces";
 
 export type Pattern = OscArgSequence[][];
 
@@ -41,7 +41,7 @@ export default class Score {
     private patternPointerId = 0; // every pointer in the runqueue has a unique id
     private pointers: IPointerTable = {};
 
-    public constructor(private getGlobalState: () => IState) {}
+    // public constructor() {}
 
     public get nextStepPartsInScore(): PartAndPlugin[] {
         if (typeof this.mainQueue[this.nextStep] !== "undefined") {

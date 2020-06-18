@@ -27,7 +27,7 @@ beforeEach(() => {
         efgh: { pattern: pattern2 },
     });
 
-    testScore = new Score(getState);
+    testScore = new Score();
 });
 
 test("move the score pointer", () => {
@@ -157,10 +157,11 @@ describe("runqueue", () => {
         pattern2[1].push(Array.from(note1));
 
         // add them to the queue
-        testScore.addPartToScore([partId1, pluginId]);
-        testScore.addPartToScore([partId2, pluginId]);
-        testScore.resetScorePointer();
-        testScore.addPatternsToRunqueue();
+        // testScore.addPartToScore([partId1, pluginId]);
+        // testScore.addPartToScore([partId2, pluginId]);
+        // testScore.resetScorePointer();
+        testScore.addPatternToRunqueue([partId1, pluginId], pattern1);
+        testScore.addPatternToRunqueue([partId2, pluginId], pattern2);
 
         runqueue = testScore["runQueue"];
     });

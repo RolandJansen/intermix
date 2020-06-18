@@ -116,13 +116,13 @@ describe("Sequencer", () => {
 
         test("activates loop mode", () => {
             sequencer["score"]["loopActive"] = false;
-            sequencer.onChange(["LOOP_ACTIVE", true]);
+            sequencer.onChange(["loopActive", 1]);
             expect(sequencer["score"]["loopActive"]).toBeTruthy();
         });
 
         test("deactivates loop mode", () => {
             sequencer["score"]["loopActive"] = true;
-            sequencer.onChange(["LOOP_ACTIVE", false]);
+            sequencer.onChange(["loopActive", 0]);
             expect(sequencer["score"]["loopActive"]).toBeFalsy();
         });
 
@@ -140,31 +140,31 @@ describe("Sequencer", () => {
         });
 
         test("starts", () => {
-            sequencer.onChange(["STATE", 1]);
+            sequencer.onChange(["running", 1]);
             expect(sequencer["clock"].postMessage).toBeCalledWith("start");
             expect(sequencer["isRunning"]).toBeTruthy();
             expect(window.requestAnimationFrame).toBeCalled();
         });
 
         test("stops", () => {
-            sequencer.onChange(["STATE", 1]);
+            sequencer.onChange(["running", 1]);
             expect(sequencer["isRunning"]).toBeTruthy();
 
-            sequencer.onChange(["STATE", 0]);
+            sequencer.onChange(["running", 0]);
             expect(sequencer["ac"].state).toMatch("suspended");
             expect(sequencer["isRunning"]).toBeFalsy();
         });
 
         test("doesn't stop if sequencer is not running", () => {
-            sequencer.onChange(["STATE", 0]);
+            sequencer.onChange(["running", 0]);
             expect(sequencer["ac"].state).toMatch("running");
         });
 
         test("reactivates audio context when restarted", () => {
-            sequencer.onChange(["STATE", 1]);
-            sequencer.onChange(["STATE", 0]);
+            sequencer.onChange(["running", 1]);
+            sequencer.onChange(["running", 0]);
             expect(sequencer["ac"].state).toMatch("suspended");
-            sequencer.onChange(["STATE", 1]);
+            sequencer.onChange(["running", 1]);
             expect(sequencer["ac"].state).toMatch("running");
         });
 
@@ -201,8 +201,8 @@ describe("Sequencer", () => {
             const pattern = Array(64).fill([]);
             pattern[0].push(noteVal1);
             pattern[1].push(noteVal2);
-            sequencer["score"]["getGlobalState"] = jest.fn();
-            (sequencer["score"]["getGlobalState"] as jest.Mock).mockReturnValue({
+            sequencer["getGlobalState"] = jest.fn();
+            (sequencer["getGlobalState"] as jest.Mock).mockReturnValue({
                 abcd: {
                     pattern,
                 },
@@ -300,8 +300,8 @@ describe("Sequencer", () => {
             pattern[2].push(saneNote);
             pattern[2].push(brokenNote);
 
-            sequencer["score"]["getGlobalState"] = jest.fn();
-            (sequencer["score"]["getGlobalState"] as jest.Mock).mockReturnValue({
+            sequencer["getGlobalState"] = jest.fn();
+            (sequencer["getGlobalState"] as jest.Mock).mockReturnValue({
                 abcd: {
                     pattern,
                 },
