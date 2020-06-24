@@ -1,12 +1,20 @@
-# temp files
-.DS_Store
-.tmp
-/doc/
-/docs/
+# Dependencies
+/node_modules
 
-# local files
-/node_modules/
-.next/
-/dist
-/**/_site
-/coverage/
+# Production
+/build
+
+# Generated files
+.docusaurus
+.cache-loader
+
+# Misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

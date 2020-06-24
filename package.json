@@ -1,35 +1,30 @@
 {
   "name": "intermix",
-  "version": "0.4.0",
-  "description": "Javascript library for building music apps",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
-    "dev": "next",
-    "build": "next build",
-    "start": "next start",
-    "export": "next export",
-    "fetchdocs": "fetchDocs.sh",
-    "deploy": "next build && next export && git add out/ && git commit -m \"Deploy gh-pages\" && git subtree push --prefix out origin gh-pages"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/RolandJansen/intermix.js.git"
-  },
-  "author": "Roland Jansen",
-  "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/RolandJansen/intermix.js/issues"
-  },
-  "homepage": "https://github.com/RolandJansen/intermix.js#readme",
-  "devDependencies": {
-    "@types/node": "^13.1.1",
-    "@types/react": "^16.9.17",
-    "raw-loader": "^4.0.0",
-    "react-markdown": "^4.2.2",
-    "typescript": "^3.7.4"
+    "start": "docusaurus start",
+    "build": "docusaurus build",
+    "swizzle": "docusaurus swizzle",
+    "deploy": "docusaurus deploy"
   },
   "dependencies": {
-    "next": "^9.1.6",
-    "react": "^16.12.0",
-    "react-dom": "^16.12.0"
+    "@docusaurus/core": "^2.0.0-alpha.58",
+    "@docusaurus/preset-classic": "^2.0.0-alpha.58",
+    "clsx": "^1.1.1",
+    "react": "^16.8.4",
+    "react-dom": "^16.8.4"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
