@@ -1,7 +1,9 @@
 {
   "name": "intermix",
   "version": "0.4.0",
-  "description": "Javascript library for building music apps",
+  "description": "Javascript/Typescript framework for building music apps",
+  "author": "Roland Jansen",
+  "license": "LGPL-3.0-or-later",
   "main": "dist/intermix.js",
   "types": "dist/intermix.d.ts",
   "scripts": {
@@ -19,8 +21,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/RolandJansen/intermix.js.git"
+    "url": "git+https://github.com/RolandJansen/intermix.git"
   },
+  "bugs": {
+    "url": "https://github.com/RolandJansen/intermix/issues"
+  },
+  "homepage": "https://rolandjansen.github.io/intermix/",
   "keywords": [
     "intermix.js",
     "sound",
@@ -32,12 +38,6 @@
     "synthesis",
     "music"
   ],
-  "author": "Roland Jansen",
-  "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/RolandJansen/intermix.js/issues"
-  },
-  "homepage": "https://github.com/RolandJansen/intermix.js#readme",
   "jest": {
     "transform": {
       "^.+\\.(t|j)sx?$": "ts-jest"
