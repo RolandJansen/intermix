@@ -1,55 +1,59 @@
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const HtmlWebpackExternalsPlugin = require('html-webpack-externals-plugin');
-const DtsBundleWebpack = require('dts-bundle-webpack');
-const webpack = require('webpack');
+/* eslint-disable @typescript-eslint/no-var-requires */
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const HtmlWebpackExternalsPlugin = require("html-webpack-externals-plugin");
+const DtsBundleWebpack = require("dts-bundle-webpack");
+const webpack = require("webpack");
 
 module.exports = {
     entry: {
-        intermix: './src/index.ts',
-        demo: './src/demo/demo.ts'
+        intermix: "./src/index.ts",
+        demo: "./src/demo/demo.ts",
     },
     output: {
-        devtoolModuleFilenameTemplate: '[absolute-resource-path]',  // for vs debugger
-        path: path.resolve(__dirname, './dist'),
-        filename: '[name].js',
-        library: '[name]',
-        libraryTarget: 'umd',
-        globalObject: 'this'
+        devtoolModuleFilenameTemplate: "[absolute-resource-path]", // for vs debugger
+        path: path.resolve(__dirname, "./dist"),
+        filename: "[name].js",
+        library: "[name]",
+        libraryTarget: "umd",
+        globalObject: "this",
     },
     resolve: {
-        extensions: ['.tsx', '.ts', '.js', '.json']
+        extensions: [".tsx", ".ts", ".js", ".json"],
     },
     module: {
         rules: [
             {
                 test: /\.worker\.ts$/,
-                use: 'worker-loader'
+                use: {
+                    loader: "worker-loader",
+                    options: { inline: true },
+                },
             },
             {
                 test: /\.tsx?$/,
-                use: 'ts-loader',
-                exclude: /(node-modules|bower_components)/
+                use: "ts-loader",
+                exclude: /(node-modules|bower_components)/,
             },
             {
                 test: /\.(wav|mp3|ogg)$/,
-                use: 'file-loader'
-            }
-        ]
+                use: "file-loader",
+            },
+        ],
     },
     plugins: [
         new DtsBundleWebpack({
             // see dts-bundle-webpack npm page for options
-            name: 'Intermix',
-            main: './src/index.ts',
-            out: '../dist/intermix.d.ts',
+            name: "Intermix",
+            main: "./src/index.ts",
+            out: "../dist/intermix.d.ts",
             removeSource: true,
-            outputAsModuleFolder: true
-        }),  // bundle type files
-        new webpack.NamedModulesPlugin(),  // clean build logs
+            outputAsModuleFolder: true,
+        }), // bundle type files
+        new webpack.NamedModulesPlugin(), // clean build logs
         new HtmlWebpackPlugin({
-            template: './src/demo/demo.html'
-        }),  // use a html template for the demo
+            template: "./src/demo/demo.html",
+        }), // use a html template for the demo
         new HtmlWebpackExternalsPlugin({
             externals: [
                 {
@@ -59,7 +63,6 @@ module.exports = {
                 },
             ],
         }),
-        new webpack.HotModuleReplacementPlugin()  // use hot resync
+        new webpack.HotModuleReplacementPlugin(), // use hot resync
     ],
-
 };
