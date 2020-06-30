@@ -38,6 +38,11 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
             value: ["Envelope Decay", 0.0, 0.0],
             description: "Filter-Envelope Decay",
         },
+        {
+            address: DemoSynth.PREFIX + "stop",
+            typeTag: ",N",
+            description: "immediately disconnect all nodes from audio output",
+        }
     ];
 
     private myState: IState = {};
@@ -86,18 +91,18 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
     public onChange(changed: Tuple): boolean {
         // console.log(changed);
         switch (changed[0]) {
-            case "NOTE":
+            case "note":
                 const note: IntermixNote = changed[1];
                 this.handleNote(note);
                 return true;
-            case "STOP":
+            case "stop":
                 this.stop();
                 return true;
-            case "ENV_ATTACK":
+            case "envAttack":
                 const attack: IntermixCtrl = changed[1];
                 this.handleAttack(attack);
                 return true;
-            case "ENV_DECAY":
+            case "envDecay":
                 const decay: IntermixCtrl = changed[1];
                 this.handleDecay(decay);
                 return true;
