@@ -6,6 +6,7 @@
   "license": "LGPL-3.0-or-later",
   "main": "dist/intermix.js",
   "types": "dist/intermix.d.ts",
+  "publishConfig": { "registry": "https://npm.pkg.github.com/" },
   "scripts": {
     "lint": "eslint src/**/*.{js,ts}",
     "prettify": "eslint src/**/*.{js,ts} --fix",
