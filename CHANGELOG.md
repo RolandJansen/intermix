@@ -4,36 +4,62 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.0] - 2020-06-29
+
 ### Added
+- New API based on OSC-like messages
+- Redux middleware for parsing OSC-like messages
+- Custom reducer composition
+- Sequencer parts (SeqPart) state is managed in the Redux store
+- Demo: HTML Stepsequencer based on NexusUI
+- All instrument plugins have a volume action by default
+- Abstract class for controller plugins
+- Prettier
+- ESLint (switched back)
 
 ### Changed
-- Sequencer refactoring ()
+- License switched: Apache License v2.0 -> LGPL v3
+- New release plan for shorter dev cycles
+- Sequencer refactoring
 - Score refactoring (new, memory efficient datastructure)
+- SeqPart refactoring
 - Runqueue completely rewritten (new datastructure and pointer management)
-- Sequencer parts (SeqPart) are now redux objects
--
+- New registry architecture (master-registry, item-registries)
+- Redux store normalized
 
 ### Removed
-- Bower
+- Bower support
 - TSLint
+- Old HTML Demos
+- Old registry
 
-## [0.4.0]
+## [0.4.0] - 2019-12-12
 
 ### Added
 - Webpack
 - Typescript
+- TSLint
 - Redux
-- An event bus instance is now available by default at "window.intermix.eventBus".
-- Helper functions available at "window.intermix.helper".
-- Sequencer: Frame animation stall/resume when user switches browser tab.
+- Github CI actions
+- Benchmark tests
+- Registry that generates Redux action-creators, state and reducers at runtime
 
 ### Changed
+- Project Code migrated from Javascript (ES5) to Typescript
+- Tests migrated from Jasmine to Jest
 - Sequencer: New algorithm for frame animation that runs
   at least 6 times faster (@120bpm without stall/resume).
   In reality, speed improvement should be even higher.
 - Sequencer: Minor speed optimizations.
 - README.md improved.
 - CHANGELOG.md improved.
+- Refactoring of nearly everything
+
+### Removed
+- Old Dispatcher
+- SoundWave class
+- ESLint
+- Travis CI jobs
 
 ## [0.3.0] - 2016-05-27
 ### Fixed
@@ -70,7 +96,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Sound demo
 - Stepsequencer demo
 
-[Unreleased]: https://github.com/RolandJansen/intermix.js/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/RolandJansen/intermix.js/compare/v0.4.0...HEAD
+[0.5.0]: https://github.com/RolandJansen/intermix.js/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/RolandJansen/intermix.js/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/RolandJansen/intermix.js/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/RolandJansen/intermix.js/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/RolandJansen/intermix.js/compare/ae47095652376e5c541b674bc064bddb64e7162b...5d4c9e61b8d74a285e1404588d50bed970e7713c
