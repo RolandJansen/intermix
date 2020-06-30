@@ -42,7 +42,7 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
             address: DemoSynth.PREFIX + "stop",
             typeTag: ",N",
             description: "immediately disconnect all nodes from audio output",
-        }
+        },
     ];
 
     private myState: IState = {};

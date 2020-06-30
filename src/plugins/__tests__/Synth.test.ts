@@ -66,15 +66,15 @@ describe("DemoSynth", () => {
         });
 
         test("should add and delete OscillatorNodes from the queue", () => {
-            synth.onChange(["NOTE", testNote]);
-            synth.onChange(["NOTE", testNote]);
+            synth.onChange(["note", testNote]);
+            synth.onChange(["note", testNote]);
             expect(synth["queue"].length).toEqual(2);
-            synth.onChange(["STOP", true]);
+            synth.onChange(["stop", true]);
             expect(synth["queue"].length).toEqual(0);
         });
 
         test("should start and stop an OscillatorNode at given times", () => {
-            synth.onChange(["NOTE", testNote]);
+            synth.onChange(["note", testNote]);
 
             const node = synth["queue"][0];
             expect(node.$stateAtTime("00:00.000")).toBe("SCHEDULED");
@@ -85,29 +85,29 @@ describe("DemoSynth", () => {
         });
 
         test("should disconnect nodes on stop", () => {
-            synth.onChange(["NOTE", testNote]);
+            synth.onChange(["note", testNote]);
             const oscNode = synth["queue"][0];
             oscNode.disconnect = jest.fn(); // fake disconnect call
-            synth.onChange(["STOP", true]);
+            synth.onChange(["stop", true]);
             expect(oscNode.disconnect).toHaveBeenCalledTimes(1);
         });
 
         test("should remove nodes from queue on stop", () => {
-            synth.onChange(["NOTE", testNote]);
+            synth.onChange(["note", testNote]);
             expect(synth["queue"].length).toEqual(1);
-            synth.onChange(["STOP", true]);
+            synth.onChange(["stop", true]);
             expect(synth["queue"].length).toEqual(0);
         });
 
         test("should handle envelope attack", () => {
             // there's no check if value is within range (covered by actionDef)
-            synth.onChange(["ENV_ATTACK", testCtrl]);
+            synth.onChange(["envAttack", testCtrl]);
             expect(synth["attack"]).toEqual(0.23);
         });
 
         test("should handle envelope decay", () => {
             // there's no check if value is within range (covered by actionDef)
-            synth.onChange(["ENV_DECAY", testCtrl]);
+            synth.onChange(["envDecay", testCtrl]);
             expect(synth["decay"]).toEqual(0.23);
         });
     });
