@@ -18,6 +18,9 @@
             height: 20px;
             border-style: solid;
         }
+        .note {
+            font-size: small;
+        }
     </style>
 </head>
 
@@ -28,10 +31,16 @@
     <div class="button-group">
         <div id="start-button"></div>
         <div id="stop-button"></div>
-        <div id="reset-button"></div>
+        <!-- <div id="reset-button"></div> -->
         <div id="set-bpm"></div>
     </div>
     <!-- <div id="blink"></div> -->
+    <p class="note">Note: This demo is done with NexusUI which turned out to be not ideal.
+        The sequencer UI doesn't work well together with the
+        intermix sequencer and will soon be replaced with more
+        suitable elements.
+
+    </p>
 </body>
 <script>
 
@@ -48,9 +57,9 @@
     const stopButton = new Nexus.TextButton('#stop-button', {
         text: 'Stop',
     })
-    const resetButton = new Nexus.TextButton('#reset-button', {
-        text: 'Reset',
-    })
+    // const resetButton = new Nexus.TextButton('#reset-button', {
+    //     text: 'Reset',
+    // })
     const setBpm = new Nexus.Number('#set-bpm', {
         size: [80, 50],
         value: BPM,
@@ -70,19 +79,20 @@
         // e: true -> mousedown
         if (e) {
             seqActionCreators.stop();
+            seqActionCreators.reset();
         }
     })
 
-    resetButton.on('change', (e) => {
-        // e: true -> mousedown
-        if (e) {
-            seqActionCreators.reset();
-            // sequencer.stepper.value = -1;
-            // const counter = new Nexus.Counter(0, 1);
-            // counter.value = 0;
-            // sequencer.stepper(counter);
-        }
-    })
+    // resetButton.on('change', (e) => {
+    //     // e: true -> mousedown
+    //     if (e) {
+    //         seqActionCreators.reset();
+    //         // sequencer.stepper.value = -1;
+    //         // const counter = new Nexus.Counter(0, 1);
+    //         // counter.value = 0;
+    //         // sequencer.stepper(counter);
+    //     }
+    // })
 
     setBpm.on('change', (e) => {
         // e: true -> mousedown
