@@ -9,31 +9,33 @@ import styles from './styles.module.css';
 const features = [
   {
     title: <>Easy to Use</>,
-    imageUrl: 'img/undraw_docusaurus_mountain.svg',
+    // imageUrl: 'img/undraw_docusaurus_mountain.svg',
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Intermix uses a message-based API very similar to
+        the popular <a href="https://en.wikipedia.org/wiki/Open_Sound_Control" target="_blank">OSC</a> format.
+        Dispatching is made easy with high level abstractions.
       </>
     ),
   },
   {
-    title: <>Focus on What Matters</>,
-    imageUrl: 'img/undraw_docusaurus_tree.svg',
+    title: <>Audio Plugin Registry</>,
+    // imageUrl: 'img/undraw_docusaurus_tree.svg',
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Audio-Plugins can be
+        attached/detached at runtime. A plugin once written for intermix
+        runs in every app that's build on top of it.
       </>
     ),
   },
   {
-    title: <>Powered by React</>,
-    imageUrl: 'img/undraw_docusaurus_react.svg',
+    title: <>Powered by Redux</>,
+    // imageUrl: 'img/undraw_docusaurus_react.svg',
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Intermix manages the state of all components in a predictable way.
+        This means you don't have to care about the state of your audio plugins.
       </>
     ),
   },
