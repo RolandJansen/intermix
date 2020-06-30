@@ -4,7 +4,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [0.5.0] - 2020-06-29
+## [0.5.0] - 2020-07-01
 
 ### Added
 - New API based on OSC-like messages
