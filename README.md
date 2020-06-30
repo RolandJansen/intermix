@@ -30,7 +30,7 @@ or if you prefer yarn
 
 Load intermix into your module with ES2015 module syntax
 ```javascript
-    import * as intermix from "intermix";
+import * as intermix from "intermix";
 ```
 
 or with CommonJS module require
