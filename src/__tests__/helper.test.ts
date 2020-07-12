@@ -29,6 +29,16 @@ describe("isKeyUnique()", () => {
     });
 });
 
+/**
+ * The problem with copy-by-value is that
+ * complex data inside the copy is still referenced, not copied.
+ * The "toBe" matcher uses Object.is to compare object equality.
+ * This means that a "not.toBe" check passes even if data
+ * inside the object is the same by reference.
+ *
+ * If a deeply nested copy is examined, there have to be additional
+ * tests for one or more data objects.
+ */
 describe("deepCopy()", () => {
     const testArrayFlat: number[] = [23, 42, 237];
     const testArrayNested: number[][] = [[23], [42], [237]];
@@ -41,14 +51,28 @@ describe("deepCopy()", () => {
         one: { two: "zwei" },
         three: { drei: true },
     };
-    const testMixedArray: any = ["astring", 23, testArrayNested, testObjectNested];
-    const testMixedObject: any = {
+    const testArrayMixed: any = ["astring", 23, testArrayNested, testObjectNested];
+    const testObjectMixed: any = {
         one: "eins",
         two: 2,
         superList: testArrayNested,
-        superDuperList: testMixedArray,
+        superDuperList: testArrayMixed,
         superDuperObject: { testObjectNested },
     };
+    const testMapFlat = new Map();
+    testMapFlat.set("one", "eins");
+    testMapFlat.set("two", "zwei");
+    testMapFlat.set("three", "drei");
+    const testMapNested = new Map();
+    testMapNested.set("one", testArrayNested);
+    testMapNested.set("two", testObjectNested);
+    testMapNested.set("three", testMapFlat);
+    const testSetFlat = new Set();
+    testSetFlat.add(23).add(42).add(237);
+    const testSetMixed = new Set();
+    testSetMixed.add(testArrayNested);
+    testSetMixed.add(testObjectNested);
+    testSetMixed.add(5);
 
     test("returns undefined if undefined is given", () => {
         const testValue = undefined;
@@ -112,15 +136,63 @@ describe("deepCopy()", () => {
         expect(result).not.toBe(testValue);
     });
 
+    test("copies empty maps", () => {
+        const testValue = new Map();
+        const result = deepCopy(testValue);
+        expect(result).toEqual(testValue);
+        expect(result).not.toBe(testValue);
+    });
+
+    test("copies flat maps", () => {
+        const testValue = testMapFlat;
+        const result = deepCopy(testValue);
+        expect(result).toEqual(testValue);
+        expect(result).not.toBe(testValue);
+    });
+
+    test("copies nested maps", () => {
+        const testValue = testMapNested;
+        const result = deepCopy(testValue);
+        expect(result).toEqual(testValue);
+        expect(result).not.toBe(testValue);
+
+        // the former 'toBe' doesn't check for deep equality
+        // so we have to examine one data object, too:
+        expect(result.get("one")).toEqual(testArrayNested);
+        expect(result.get("one")).not.toBe(testArrayNested);
+    });
+
+    test("copies empty sets", () => {
+        testFlatInput(new Set());
+    });
+
+    test("copies flat sets", () => {
+        testFlatInput(testSetFlat);
+    });
+
+    test("copies nested sets", () => {
+        const testValue = testSetMixed;
+        const result = deepCopy(testValue);
+        expect(result).toEqual(testValue);
+        expect(result).not.toBe(testValue);
+
+        // the former 'toBe' doesn't check for deep equality
+        // so we have to examine one data object, too:
+        expect(result.has(testObjectNested)).toBeFalsy();
+        expect(result.has(5)).toBeTruthy();
+    });
+
+    test("copies empty arrays", () => {
+        const testValue: any[] = [];
+        const result = deepCopy(testValue);
+        expect(result).toEqual(testValue);
+        expect(result).not.toBe(testValue);
+    });
+
     test("copies flat arrays", () => {
         const result = deepCopy(testArrayFlat);
         expect(result).toEqual(testArrayFlat);
         expect(result).not.toBe(testArrayFlat);
-    });
-
-    test("copies flat objects", () => {
-        const result = deepCopy(testObjectFlat);
-        expect(result).toEqual(testObjectFlat);
     });
 
     test("copies nested arrays", () => {
@@ -129,23 +201,51 @@ describe("deepCopy()", () => {
         expect(result).not.toBe(testArrayNested);
     });
 
+    test("copies mixed arrays", () => {
+        const result = deepCopy(testArrayMixed);
+        expect(result).toEqual(testArrayMixed);
+        expect(result).not.toBe(testArrayMixed);
+
+        // the former 'toBe' doesn't check for deep equality
+        // so we have to examine one data object, too:
+        expect(result[2]).toEqual(testArrayNested);
+        expect(result[2]).not.toBe(testArrayNested);
+    });
+
+    test("copies empty objects", () => {
+        const testValue = {};
+        const result = deepCopy(testValue);
+        expect(result).toEqual(testValue);
+        expect(result).not.toBe(testValue);
+    });
+
+    test("copies flat objects", () => {
+        const result = deepCopy(testObjectFlat);
+        expect(result).toEqual(testObjectFlat);
+    });
+
     test("copies nested objects", () => {
         const result = deepCopy(testObjectNested);
         expect(result).toEqual(testObjectNested);
         expect(result).not.toBe(testObjectNested);
     });
 
-    test("copies mixed arrays", () => {
-        const result = deepCopy(testMixedArray);
-        expect(result).toEqual(testMixedArray);
-        expect(result).not.toBe(testMixedArray);
+    test("copies mixed objects", () => {
+        const result = deepCopy(testObjectMixed);
+        expect(result).toEqual(testObjectMixed);
+        expect(result).not.toBe(testObjectMixed);
+
+        // the former 'toBe' doesn't check for deep equality
+        // so we have to examine one data object, too:
+        expect(result.superList).toEqual(testArrayNested);
+        expect(result.superList).not.toBe(testArrayNested);
     });
 
-    test("copies mixed objects", () => {
-        const result = deepCopy(testMixedObject);
-        expect(result).toEqual(testMixedObject);
-        expect(result).not.toBe(testMixedObject);
-    });
+    const testFlatInput = <T>(flatInput: T): void => {
+        const result = deepCopy(flatInput);
+        expect(result).toEqual(flatInput);
+        expect(result).not.toBe(flatInput);
+    };
 
     // TypedArrays are array-like "views" for ArrayBuffers
     // we create then with data from a flat array

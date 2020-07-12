@@ -42,10 +42,7 @@ export type TypedArray =
  */
 export const deepCopy = <T>(original: T): T => {
     // what about:
-    // * maps
-    // * sets
     // * img data
-    // are the results still of same type after casting to any?
 
     // null and undefined (==) should be returned not copied.
     if (original == null) {
@@ -69,11 +66,28 @@ export const deepCopy = <T>(original: T): T => {
         return copyTypedArray(original) as any;
     }
 
-    if (original instanceof Array && original.length !== 0) {
-        const clone: T = original.map(<N>(arrayElement: N) => {
-            return deepCopy(arrayElement);
-        }) as any;
-        return clone;
+    if (original instanceof Map) {
+        if (original.size !== 0) {
+            return new Map(deepCopy(Array.from(original))) as any;
+        }
+        return new Map() as any;
+    }
+
+    if (original instanceof Set) {
+        if (original.size !== 0) {
+            return new Set(deepCopy(Array.from(original))) as any;
+        }
+        return new Set() as any;
+    }
+
+    if (original instanceof Array) {
+        if (original.length !== 0) {
+            const clone: T = original.map(<N>(arrayElement: N) => {
+                return deepCopy(arrayElement);
+            }) as any;
+            return clone;
+        }
+        return [] as any;
     }
 
     // objects have to be handled last since all other values
