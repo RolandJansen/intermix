@@ -116,24 +116,15 @@ describe("deepCopy()", () => {
     });
 
     test("copies date objects", () => {
-        const testValue = new Date();
-        const result = deepCopy(testValue);
-        expect(result).toEqual(testValue);
-        expect(result).not.toBe(testValue);
+        testDeepCopyShallow(new Date());
     });
 
     test("copies regular expressions", () => {
-        const testValue = new RegExp(/ab+c/, "i");
-        const result = deepCopy(testValue);
-        expect(result).toEqual(testValue);
-        expect(result).not.toBe(testValue);
+        testDeepCopyShallow(new RegExp(/ab+c/, "i"));
     });
 
     test("copies array buffers", () => {
-        const testValue = new ArrayBuffer(8);
-        const result = deepCopy(testValue);
-        expect(result).toEqual(testValue);
-        expect(result).not.toBe(testValue);
+        testDeepCopyShallow(new ArrayBuffer(8));
     });
 
     test("copies empty maps", () => {
@@ -144,10 +135,7 @@ describe("deepCopy()", () => {
     });
 
     test("copies flat maps", () => {
-        const testValue = testMapFlat;
-        const result = deepCopy(testValue);
-        expect(result).toEqual(testValue);
-        expect(result).not.toBe(testValue);
+        testDeepCopyShallow(testMapFlat);
     });
 
     test("copies nested maps", () => {
@@ -163,11 +151,11 @@ describe("deepCopy()", () => {
     });
 
     test("copies empty sets", () => {
-        testFlatInput(new Set());
+        testDeepCopyShallow(new Set());
     });
 
     test("copies flat sets", () => {
-        testFlatInput(testSetFlat);
+        testDeepCopyShallow(testSetFlat);
     });
 
     test("copies nested sets", () => {
@@ -183,22 +171,15 @@ describe("deepCopy()", () => {
     });
 
     test("copies empty arrays", () => {
-        const testValue: any[] = [];
-        const result = deepCopy(testValue);
-        expect(result).toEqual(testValue);
-        expect(result).not.toBe(testValue);
+        testDeepCopyShallow([]);
     });
 
     test("copies flat arrays", () => {
-        const result = deepCopy(testArrayFlat);
-        expect(result).toEqual(testArrayFlat);
-        expect(result).not.toBe(testArrayFlat);
+        testDeepCopyShallow(testArrayFlat);
     });
 
     test("copies nested arrays", () => {
-        const result = deepCopy(testArrayNested);
-        expect(result).toEqual(testArrayNested);
-        expect(result).not.toBe(testArrayNested);
+        testDeepCopyShallow(testArrayNested);
     });
 
     test("copies mixed arrays", () => {
@@ -213,10 +194,7 @@ describe("deepCopy()", () => {
     });
 
     test("copies empty objects", () => {
-        const testValue = {};
-        const result = deepCopy(testValue);
-        expect(result).toEqual(testValue);
-        expect(result).not.toBe(testValue);
+        testDeepCopyShallow({});
     });
 
     test("copies flat objects", () => {
@@ -225,9 +203,7 @@ describe("deepCopy()", () => {
     });
 
     test("copies nested objects", () => {
-        const result = deepCopy(testObjectNested);
-        expect(result).toEqual(testObjectNested);
-        expect(result).not.toBe(testObjectNested);
+        testDeepCopyShallow(testObjectNested);
     });
 
     test("copies mixed objects", () => {
@@ -241,7 +217,7 @@ describe("deepCopy()", () => {
         expect(result.superList).not.toBe(testArrayNested);
     });
 
-    const testFlatInput = <T>(flatInput: T): void => {
+    const testDeepCopyShallow = <T>(flatInput: T): void => {
         const result = deepCopy(flatInput);
         expect(result).toEqual(flatInput);
         expect(result).not.toBe(flatInput);
