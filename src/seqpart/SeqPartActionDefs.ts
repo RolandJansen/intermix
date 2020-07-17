@@ -1,7 +1,7 @@
 import { IOscActionDef } from "../registry/interfaces";
 import { addItem, removeItem, setStepActive } from "./seqPartReducerLogic";
 
-const PREFIX = "/intermix/seqpart/{UID}/";
+const PREFIX = "/intermix/seqpart/<UID>/";
 
 export const actionDefs: IOscActionDef[] = [
     {

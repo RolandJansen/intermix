@@ -83,7 +83,7 @@ A plugin developer can write action definitions that are consumed by intermix to
 
 ```javascript
 {
-    address: "/intermix/plugin/#{UID}/envAttack",
+    address: "/intermix/plugin/<UID>/envAttack",
     typeTag: ",sff",
     description: "Envelope Attack with name, value and start time",
 }

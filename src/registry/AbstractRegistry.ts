@@ -125,10 +125,10 @@ export default abstract class AbstractRegistry {
 
         actionDefs.forEach((actionDef) => {
             // make a physical copy of actionDef. If not, we would
-            // replace {UID} in the original and all following instances
+            // replace <UID> in the original and all following instances
             // would have the same UID in its address.
             const actionDefCopy = Object.assign({}, actionDef);
-            actionDefCopy.address = actionDefCopy.address.replace("{UID}", uid);
+            actionDefCopy.address = actionDefCopy.address.replace("<UID>", uid);
             const addressParts = actionDefCopy.address.split("/");
             const method = addressParts[addressParts.length - 1];
 

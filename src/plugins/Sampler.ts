@@ -2,7 +2,7 @@ import AbstractPlugin from "../registry/AbstractPlugin";
 import { IPlugin, IPluginMetaData, Tuple, IOscActionDef, IState, IntermixNote } from "../registry/interfaces";
 
 export default class Sampler extends AbstractPlugin implements IPlugin {
-    private static readonly PREFIX = "/intermix/plugin/{UID}/";
+    private static readonly PREFIX = "/intermix/plugin/<UID>/";
 
     public readonly metaData: IPluginMetaData = {
         type: "instrument",

@@ -11,7 +11,7 @@ jest.mock("../../store/store");
 
 const testActionDefs: IOscActionDef[] = [
     {
-        address: "/test/{UID}/ACTION1",
+        address: "/test/<UID>/ACTION1",
         typeTag: "i",
         value: 23,
         description: "Does nothing",

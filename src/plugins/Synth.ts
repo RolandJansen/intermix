@@ -15,7 +15,7 @@ import {
  * https://developer.mozilla.org/de/docs/Web/API/AudioContext
  */
 export default class DemoSynth extends AbstractPlugin implements IPlugin {
-    private static readonly PREFIX = "/intermix/plugin/{UID}/";
+    private static readonly PREFIX = "/intermix/plugin/<UID>/";
 
     public readonly metaData: IPluginMetaData = {
         type: "instrument",

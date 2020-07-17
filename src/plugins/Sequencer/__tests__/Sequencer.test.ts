@@ -34,7 +34,7 @@ describe("Sequencer", () => {
 
     test("has action definitions", () => {
         const testActionDef: IOscActionDef = {
-            address: "/intermix/plugin/{UID}/position",
+            address: "/intermix/plugin/<UID>/position",
             typeTag: ",i",
             description: "jump to a specific step in the masterqueue",
         };

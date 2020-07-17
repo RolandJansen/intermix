@@ -23,7 +23,7 @@ describe("DemoSynth", () => {
 
     test("has action definitions", () => {
         const actionDef = {
-            address: "/intermix/plugin/{UID}/envAttack",
+            address: "/intermix/plugin/<UID>/envAttack",
             typeTag: ",sff",
             value: ["Envelope Attack", 0.0, 0.0],
             description: "Filter-Envelope Attack",

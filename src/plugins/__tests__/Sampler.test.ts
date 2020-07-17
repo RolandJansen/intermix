@@ -23,7 +23,7 @@ describe("DemoSampler", () => {
 
     test("has action definitions", () => {
         const actionDef: IOscActionDef = {
-            address: `/intermix/plugin/{UID}/audioData`,
+            address: `/intermix/plugin/<UID>/audioData`,
             typeTag: ",b",
         };
         expect(sampler.actionDefs).toContainEqual(actionDef);

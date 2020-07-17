@@ -19,14 +19,14 @@ export default class TestPlugin extends AbstractPlugin implements IControllerPlu
     };
     public readonly actionDefs: IOscActionDef[] = [
         {
-            address: "/intermix/plugin/{UID}/ACTION1",
+            address: "/intermix/plugin/<UID>/ACTION1",
             typeTag: ",i",
             value: 0,
             range: [0, 127],
             description: "action one",
         },
         {
-            address: "/intermix/plugin/{UID}/ACTION2",
+            address: "/intermix/plugin/<UID>/ACTION2",
             typeTag: ",i",
             value: 1,
             range: [0, 127],

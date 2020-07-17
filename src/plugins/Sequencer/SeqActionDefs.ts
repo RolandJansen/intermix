@@ -4,7 +4,7 @@
 
 import { IOscActionDef, IState } from "../../registry/interfaces";
 
-const PREFIX = "/intermix/plugin/{UID}/";
+const PREFIX = "/intermix/plugin/<UID>/";
 
 // to reset the sequencer we have to reset "state" and "pointer" at once
 const reset = (): IState => {
