@@ -56,11 +56,11 @@ abstract class AbstractPlugin implements IPlugin {
      */
     public getNoteNumber(tone: string): number {
         const notes = ["c", "c#", "d", "d#", "e", "f", "f#", "g", "g#", "a", "a#", "b"];
-        const str = tone.toLowerCase();
+        const noteName = tone.toLowerCase();
 
-        if (str.match(/^[a-h]#?[0-9]$/)) {
-            let note = str.substring(0, str.length - 1);
-            const oct = parseInt(str.slice(-1), 10);
+        if (noteName.match(/^[a-h]#?[0-9]$/)) {
+            let note = noteName.substring(0, noteName.length - 1);
+            const oct = parseInt(noteName.slice(-1), 10);
 
             if (note === "h") {
                 note = "b";
@@ -88,10 +88,10 @@ abstract class AbstractPlugin implements IPlugin {
      */
     private getNoteFrequencies(): number[] {
         const frequencies = new Array(128);
-        const a4 = 440;
-        const posa4 = 69;
+        const pitchA4 = 440;
+        const positionA4 = 69;
         for (let i = 0; i < 128; i++) {
-            frequencies[i] = a4 * Math.pow(2, (i - posa4) / 12);
+            frequencies[i] = pitchA4 * Math.pow(2, (i - positionA4) / 12);
         }
         return frequencies;
     }

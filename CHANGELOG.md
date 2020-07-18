@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - Plugin Preset Management
+- Action Definitions are now part of the state
 
 ### Changed
 - Plugin ID placeholder renamed from _{UID}_ to _\<UID>_ since curly braces have a meaning in OSC semantics

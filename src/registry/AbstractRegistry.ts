@@ -13,7 +13,7 @@ import {
     procedure,
 } from "./interfaces";
 import RegistryItemList from "./RegistryItemList";
-import { getRandomString } from "../helper";
+import { getRandomString, deepCopy } from "../helper";
 import SeqPart from "../seqpart/SeqPart";
 
 /**
@@ -121,7 +121,6 @@ export default abstract class AbstractRegistry {
      */
     protected getActionCreators(actionDefs: IOscActionDef[], uid: string): ActionCreatorsMapObject {
         const actionCreators: ActionCreatorsMapObject = {};
-        // console.log("uid in action creator (should be displaye before the other): " + uid);
 
         actionDefs.forEach((actionDef) => {
             // make a physical copy of actionDef. If not, we would
@@ -230,6 +229,7 @@ export default abstract class AbstractRegistry {
         const iState: IState = {};
 
         iState.uid = uid; // readonly field
+        iState.actionDefs = deepCopy(actionDefs);
         actionDefs.forEach((actionDef) => {
             const addressParts = actionDef.address.split("/");
             const method = addressParts[addressParts.length - 1];
