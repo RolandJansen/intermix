@@ -1,21 +1,26 @@
 import { ActionCreatorsMapObject } from "redux";
 import { getRandomString } from "../helper";
-import { IPlugin } from "./interfaces";
+import { IPlugin, IPluginMetaData, IOscActionDef, Tuple, IState } from "./interfaces";
 
 /**
  * In the following we use declaration merging to
  * not beeing forced to add members of IPlugin
  * to the abstract class (just in the derived classes)
+ *
+ * note: this seems to be a bad idea since the infered
+ * classes don't have to implement the interface also.
+ * So it makes the idea of interfaces and abstract classes pretty useless.
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface AbstractPlugin extends IPlugin {}
+// interface AbstractPlugin extends IPlugin {}
 
 /**
  * The basic skeleton of an Intermix Plugin
  */
 abstract class AbstractPlugin implements IPlugin {
-    // public abstract readonly metaData: IPluginMetaData;
-    // public abstract readonly actionDefs: IOscActionDef[];
+    public abstract readonly uid: string;
+    public abstract readonly metaData: IPluginMetaData;
+    public abstract readonly actionDefs: IOscActionDef[];
 
     public readonly frequencyLookup: number[];
 
@@ -35,7 +40,7 @@ abstract class AbstractPlugin implements IPlugin {
      * has changed.
      * @param changed Parameter with new value from store
      */
-    // public abstract onChange(changed: Tuple): boolean;
+    public abstract onChange(changed: Tuple): boolean;
 
     /**
      * Unsubscribe from the dispatcher.
@@ -43,7 +48,41 @@ abstract class AbstractPlugin implements IPlugin {
      * be overridden by the registry.
      */
     public unsubscribe(): void {
-        // will be overridden by the registry
+        // will be overridden by the registry (observeStore)
+    }
+
+    /**
+     * A wrapper for getState that returns
+     * the substate of the plugin.
+     */
+    public getMyState(): IState {
+        // will be overridden by the registry (observeStore)
+        return {};
+    }
+
+    /**
+     * Reads all fields defined in actionDefs
+     * from the plugin state and sends them to
+     * the onChange function to get the plugin
+     * in sync with its state.
+     * This is needed on unexpected state change
+     * like when a preset is loaded.
+     */
+    public refreshAllValues(): void {
+        const myState = this.getMyState();
+
+        this.actionDefs.forEach((actionDef: IOscActionDef) => {
+            const addressParts = actionDef.address.split("/");
+            const method = addressParts[addressParts.length - 1];
+
+            let type: string;
+            actionDef.type ? (type = actionDef.type) : (type = method);
+
+            if (myState.hasOwnProperty(type)) {
+                const changed: Tuple = [type, myState[type]];
+                this.onChange(changed);
+            }
+        });
     }
 
     /**

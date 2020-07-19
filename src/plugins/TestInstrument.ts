@@ -1,5 +1,5 @@
 import AbstractPlugin from "../registry/AbstractPlugin";
-import { IPlugin, IPluginMetaData, Tuple, IOscActionDef, IState } from "../registry/interfaces";
+import { IPlugin, IPluginMetaData, Tuple, IOscActionDef } from "../registry/interfaces";
 
 /**
  * This class will be used to indirectly
@@ -35,17 +35,6 @@ export default class TestInstrument extends AbstractPlugin implements IPlugin {
     // here we can check if onChange was called correctly
     public testValue: Tuple = ["", 0];
 
-    private myState: IState = {};
-
-    /**
-     * Used by the master registry to inject the state from the store
-     * This is ment to be readonly.
-     * Never ever manipulate the state from within the plugin!
-     */
-    public set pluginState(subState: IState) {
-        this.myState = subState;
-    }
-
     public get inputs(): AudioNode[] {
         return [];
     }
@@ -60,6 +49,9 @@ export default class TestInstrument extends AbstractPlugin implements IPlugin {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public onChange(changed: Tuple): boolean {
+        if (changed[0] === "loadPreset") {
+            this.refreshAllValues();
+        }
         this.testValue = changed;
         return true;
     }

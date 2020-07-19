@@ -39,6 +39,11 @@ export default class PluginRegistry extends AbstractRegistry {
         // bind action creators to dispatch
         newItem.actionCreators = bindActionCreators(actionCreators, store.dispatch);
 
+        // add an implementation for getMyState
+        newItem.getMyState = (): IState => {
+            return this.selectSubState(store.getState(), itemId);
+        };
+
         this.setupControllerPlugin(newItem);
 
         // plugins have audio outputs

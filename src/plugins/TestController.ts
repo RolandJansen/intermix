@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { ActionCreatorsMapObject } from "redux";
 import AbstractPlugin from "../registry/AbstractPlugin";
-import { IPluginMetaData, Tuple, IControllerPlugin, IAction, IOscActionDef, IState } from "../registry/interfaces";
+import { IPluginMetaData, Tuple, IControllerPlugin, IAction, IOscActionDef } from "../registry/interfaces";
 
 /**
  * This class will be used to indirectly
@@ -33,17 +32,6 @@ export default class TestPlugin extends AbstractPlugin implements IControllerPlu
             description: "action two",
         },
     ];
-
-    private myState: IState = {};
-
-    /**
-     * Used by the master registry to inject the state from the store
-     * This is ment to be readonly.
-     * Never ever manipulate the state from within the plugin!
-     */
-    public set pluginState(subState: IState) {
-        this.myState = subState;
-    }
 
     public get inputs(): AudioNode[] {
         return [];

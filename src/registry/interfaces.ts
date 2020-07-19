@@ -23,6 +23,7 @@ export interface IPlugin extends IRegistryItem {
     readonly frequencyLookup: number[];
     inputs: AudioNode[];
     outputs: AudioNode[];
+    getMyState(): IState;
     [propName: string]: any;
 }
 

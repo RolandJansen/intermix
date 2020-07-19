@@ -2,7 +2,6 @@
 import AbstractControllerPlugin from "../../registry/AbstractControllerPlugin";
 import {
     IAction,
-    IActionDef,
     IControllerPlugin,
     ILoop,
     Tuple,
@@ -11,7 +10,6 @@ import {
     IState,
     OscArgSequence,
 } from "../../registry/interfaces";
-import SeqPart from "../../seqpart/SeqPart";
 import ClockWorker from "./clock.worker";
 import Score, { PartAndPlugin, Pattern } from "./Score";
 import seqActionDefs from "./SeqActionDefs";

@@ -43,6 +43,7 @@ export type TypedArray =
 export const deepCopy = <T>(original: T): T => {
     // what about:
     // * img data
+    // * functions
 
     // null and undefined (==) should be returned not copied.
     if (original == null) {

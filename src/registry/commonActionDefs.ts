@@ -1,11 +1,31 @@
 import { IOscActionDef, reducerLogic, IState, IAction } from "./interfaces";
 import { AnyAction } from "redux";
+import { deepCopy } from "../helper";
 
-// const savePreset: reducerLogic = (mySubState: IState, action: AnyAction | IAction): IState => {
-//     const newSubState: IState = {};
+const savePreset: reducerLogic = (mySubState: IState, action: AnyAction | IAction): IState => {
+    const actionDefs: IOscActionDef[] = mySubState.actionDefs as IOscActionDef[];
+    const newPreset: IState = {};
 
-//     return newSubState;
-// };
+    actionDefs.forEach((actionDef: IOscActionDef) => {
+        const addressParts = actionDef.address.split("/");
+        const method = addressParts[addressParts.length - 1];
+        let type: string;
+
+        if (actionDef.type) {
+            type = actionDef.type;
+        } else {
+            type = method;
+        }
+
+        newPreset[type] = deepCopy(mySubState[type]);
+    });
+
+    const newPresets = new Map<string, IState>(mySubState.presets as Map<string, IState>);
+    newPresets.set(action.payload, newPreset);
+    const newSubState = Object.assign({}, mySubState, newPresets);
+
+    return newSubState;
+};
 
 // const loadPreset: reducerLogic = (mySubState: IState, action: AnyAction | IAction): IState => {
 //     const newSubState: IState = {};
@@ -33,21 +53,16 @@ const commonActionDefs: IOscActionDef[] = [
         description: "name, loudness-value, starttime",
     },
     {
-        address: PREFIX + "change",
-        typeTag: ",i",
-        description: "changes the preset number",
-    },
-    {
         address: PREFIX + "savePreset",
         typeTag: ",s",
-        // process: savePreset,
-        description: "saves all properties defined in 'actionDefs' and changes the preset number accordingly",
+        process: savePreset,
+        description: "saves all properties defined in 'actionDefs' to a preset. The payload is the preset-name",
     },
     {
         address: PREFIX + "loadPreset",
-        typeTag: ",N",
+        typeTag: ",s",
         // process: loadPreset,
-        description: "loads a preset and changes the preset number accordingly",
+        description: "loads a preset and changes plugin settings accordingly",
     },
     {
         address: PREFIX + "exportPreset",
@@ -60,12 +75,12 @@ const commonActionDefs: IOscActionDef[] = [
         description: "deserializes a json string into a preset object",
     },
     {
-        address: PREFIX + "exportPresetList",
+        address: PREFIX + "exportAllPresets",
         typeTag: ",s",
         description: "serializes all current presets into a json string",
     },
     {
-        address: PREFIX + "importPresetList",
+        address: PREFIX + "importAllPresets",
         typeTag: ",s",
         description: "deserializes a json string into an array of presets and replaces the current one",
     },

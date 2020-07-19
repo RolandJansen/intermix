@@ -13,12 +13,6 @@ export default class Sampler extends AbstractPlugin implements IPlugin {
     };
 
     public readonly actionDefs: IOscActionDef[] = [
-        // {
-        //     address: Sampler.PREFIX + "volume",
-        //     typeTag: ",i",
-        //     range: [0, 127],
-        //     description: "Loudness of the output signal",
-        // },
         {
             address: Sampler.PREFIX + "audioData",
             typeTag: ",b",
@@ -39,15 +33,6 @@ export default class Sampler extends AbstractPlugin implements IPlugin {
 
         // create an empty audio buffer to prevent potential errors
         this.audioData = ac.createBuffer(1, 1, ac.sampleRate);
-    }
-
-    /**
-     * Used by the master registry to inject the state from the store
-     * This is ment to be readonly.
-     * Never ever manipulate the state from within the plugin!
-     */
-    public set pluginState(subState: IState) {
-        this.myState = subState;
     }
 
     // list of all audio output nodes

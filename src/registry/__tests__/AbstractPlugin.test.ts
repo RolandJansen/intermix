@@ -47,3 +47,17 @@ test("getNoteNumber gets a midi note number from a string", () => {
     expect(gis5).toEqual(80);
     expect(fis9).toEqual(126);
 });
+
+test("refreshAllValues", () => {
+    plug.getMyState = jest.fn(() => {
+        return {
+            ACTION1: 23,
+            ACTION2: 42,
+        };
+    });
+    plug.onChange = jest.fn();
+    plug.refreshAllValues();
+    expect(plug.onChange).toHaveBeenCalledTimes(2);
+    expect(plug.onChange).toHaveBeenCalledWith(["ACTION1", 23]);
+    expect(plug.onChange).toHaveBeenCalledWith(["ACTION2", 42]);
+});

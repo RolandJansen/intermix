@@ -45,7 +45,6 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
         },
     ];
 
-    private myState: IState = {};
     private attack: number;
     private decay: number;
     private filter: BiquadFilterNode;
@@ -65,15 +64,6 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
 
         // Initialize filter
         this.initFilter();
-    }
-
-    /**
-     * Used by the master registry to inject the state from the store
-     * This is ment to be readonly.
-     * Never ever manipulate the state from within the plugin!
-     */
-    public set pluginState(subState: IState) {
-        this.myState = subState;
     }
 
     // list of all audio output nodes
