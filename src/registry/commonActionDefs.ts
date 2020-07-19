@@ -22,16 +22,18 @@ const savePreset: reducerLogic = (mySubState: IState, action: AnyAction | IActio
 
     const newPresets = new Map<string, IState>(mySubState.presets as Map<string, IState>);
     newPresets.set(action.payload, newPreset);
-    const newSubState = Object.assign({}, mySubState, newPresets);
+    const newSubState = Object.assign({}, mySubState, { presets: newPresets });
 
     return newSubState;
 };
 
-// const loadPreset: reducerLogic = (mySubState: IState, action: AnyAction | IAction): IState => {
-//     const newSubState: IState = {};
+const loadPreset: reducerLogic = (mySubState: IState, action: AnyAction | IAction): IState => {
+    const presetName: string = action.payload as string;
+    const preset = deepCopy(mySubState.presets.get(presetName)) as IState;
+    const newSubState = Object.assign({}, mySubState, preset);
 
-//     return newSubState;
-// };
+    return newSubState;
+};
 
 const PREFIX = "/intermix/plugin/<UID>/";
 
@@ -61,7 +63,7 @@ const commonActionDefs: IOscActionDef[] = [
     {
         address: PREFIX + "loadPreset",
         typeTag: ",s",
-        // process: loadPreset,
+        process: loadPreset,
         description: "loads a preset and changes plugin settings accordingly",
     },
     {
