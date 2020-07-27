@@ -20,7 +20,7 @@ import { IPlugin, IPluginMetaData, IOscActionDef, Tuple, IState } from "./interf
 abstract class AbstractPlugin implements IPlugin {
     public abstract readonly uid: string;
     public abstract readonly metaData: IPluginMetaData;
-    public abstract readonly actionDefs: IOscActionDef[];
+    public abstract actionDefs: IOscActionDef[]; // will be extended with commonActionDefs
 
     public readonly frequencyLookup: number[];
 

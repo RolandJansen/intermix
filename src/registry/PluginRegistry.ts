@@ -21,7 +21,6 @@ export default class PluginRegistry extends AbstractRegistry {
      * action creators and returns the new plugin instance.
      * @param pluginClass The class from which the plugin will be derived
      */
-    // public add<P extends IPlugin>(pluginClass: new (itemId: string, ac: AudioContext) => P): P {
     public add(pluginClass: IPluginConstructor): IPlugin {
         const itemId = this.getUniqueItemKey();
         const newItem = new pluginClass(itemId, this.ac);

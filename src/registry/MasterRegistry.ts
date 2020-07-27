@@ -41,7 +41,7 @@ export default class MasterRegistry {
         store.dispatch(addPluginAction(newPlugin.uid));
 
         // make the new item observe the store
-        newPlugin.unsubscribe = this.seqParts.observeStore(store, newPlugin);
+        newPlugin.unsubscribe = this.plugins.observeStore(store, newPlugin);
         return newPlugin.uid;
         // } catch (error) {
         //     // not implemented yet
