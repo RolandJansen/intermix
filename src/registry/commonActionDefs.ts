@@ -33,10 +33,10 @@ const savePreset: reducerLogic = (mySubState: IState, action: AnyAction | IActio
 
     const newPresets = new Map<string, IState>(mySubState.presets as Map<string, IState>);
     newPresets.set(action.payload, newPreset);
-    const newSubState = Object.assign({}, mySubState, {
+    const newSubState = {
         savePreset: action.payload,
         presets: newPresets,
-    });
+    };
 
     return newSubState;
 };
@@ -48,11 +48,43 @@ const loadPreset: reducerLogic = (mySubState: IState, action: AnyAction | IActio
     if (mySubState.hasOwnProperty("presets")) {
         preset = deepCopy(mySubState.presets.get(presetName)) as IState;
     }
-    const newSubState = Object.assign({}, mySubState, preset, {
+    const newSubState = Object.assign({}, preset, {
         loadPreset: action.payload,
     });
 
     return newSubState;
+};
+
+const savePresetToSlot: reducerLogic = (mySubState: IState, action: AnyAction | IAction): IState => {
+    const currentSlot: number = mySubState.presetSlotNumber;
+    let presetSlots: string[] = [];
+
+    if (mySubState.hasOwnProperty("presetSlots")) {
+        presetSlots = Array.from(mySubState.presetSlots);
+        presetSlots[currentSlot] = action.payload;
+    }
+
+    const newSubState = { presetSlots };
+    return newSubState;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const loadPresetFromSlot: reducerLogic = (mySubState: IState, action: AnyAction | IAction): IState => {
+    const currentSlot: number = mySubState.presetSlotNumber;
+
+    if (mySubState.hasOwnProperty("presetSlots")) {
+        const presetName: string = mySubState.presetSlots[currentSlot];
+        if (presetName.length > 0) {
+            const newSubState = loadPreset(mySubState, {
+                type: "doesnt_matter",
+                payload: presetName,
+            });
+
+            return newSubState;
+        }
+    }
+
+    return mySubState;
 };
 
 const PREFIX = "/intermix/plugin/<UID>/";
@@ -86,22 +118,23 @@ const commonActionDefs: IOscActionDef[] = [
         process: loadPreset,
         description: "loads a preset and changes plugin settings accordingly. Payload is the preset name.",
     },
-    // {
-    //     address: PREFIX + "presetSlotNumber",
-    //     typeTag: ",i",
-    //     description: "changes the current preset slot that presets can be loaded from or saved to.",
-    // },
-    // {
-    //     address: PREFIX + "savePresetToSlot",
-    //     typeTag: ",s",
-    //     process:
-    //     description: "saves the name of a preset to the current slot",
-    // },
-    // {
-    //     address: PREFIX + "loadPresetFromSlot",
-    //     typeTag: ",N",
-    //     description: "load the preset stored in the current slot",
-    // },
+    {
+        address: PREFIX + "presetSlotNumber",
+        typeTag: ",i",
+        description: "changes the current preset slot that presets can be loaded from or saved to.",
+    },
+    {
+        address: PREFIX + "savePresetToSlot",
+        typeTag: ",s",
+        process: savePresetToSlot,
+        description: "saves the name of a preset to the current slot",
+    },
+    {
+        address: PREFIX + "loadPresetFromSlot",
+        typeTag: ",N",
+        process: loadPresetFromSlot,
+        description: "load the preset stored in the current slot",
+    },
     // {
     //     address: PREFIX + "exportPreset",
     //     typeTag: ",s",

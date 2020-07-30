@@ -31,7 +31,8 @@ describe("PluginRegistry", () => {
 
     beforeEach(() => {
         pluginId = registry.addPlugin(TestInstrument);
-        plugin = registry["plugins"]["itemList"].getItem(pluginId);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        plugin = registry["plugins"]["itemList"].get(pluginId)!;
     });
 
     describe("addPlugin", () => {
@@ -99,7 +100,7 @@ describe("PluginRegistry", () => {
         });
 
         test("removes the plugin from the plugin registry", () => {
-            const allPluginIds = registry["plugins"]["itemList"].getUidList();
+            const allPluginIds = registry["plugins"].getUidList();
             expect(allPluginIds).not.toContain(pluginId);
         });
 
@@ -133,7 +134,8 @@ describe("SeqPart Registry", () => {
 
     beforeEach(() => {
         partId = registry.addSeqPart();
-        part = registry["seqParts"]["itemList"].getItem(partId);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        part = registry["seqParts"]["itemList"].get(partId)!;
     });
 
     describe("addSeqPart", () => {
@@ -195,7 +197,7 @@ describe("SeqPart Registry", () => {
         });
 
         test("removes the part from the seqpart registry", () => {
-            const allPartsIds = registry["seqParts"]["itemList"].getUidList();
+            const allPartsIds = registry["seqParts"].getUidList();
             expect(allPartsIds).not.toContain(partId);
         });
 

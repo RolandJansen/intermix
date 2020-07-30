@@ -12,7 +12,6 @@ import {
     OscArgSequence,
     procedure,
 } from "./interfaces";
-import RegistryItemList from "./RegistryItemList";
 import { getRandomString, deepCopy } from "../helper";
 import SeqPart from "../seqpart/SeqPart";
 
@@ -24,23 +23,29 @@ import SeqPart from "../seqpart/SeqPart";
 export default abstract class AbstractRegistry {
     private static keyLength = 5;
 
-    public abstract itemList: RegistryItemList<IRegistryItem>;
+    public abstract itemList: Map<string, IRegistryItem>;
     public abstract add(optionalParameter?: any): IRegistryItem;
     public abstract remove(itemId: string): void;
 
+    public getUidList(): string[] {
+        return Array.from(this.itemList.keys());
+    }
+
     public getAllSubReducers(): ReducersMapObject {
         const subReducers: ReducersMapObject = {};
-        const allUids = this.itemList.getUidList();
+        const allUids = this.getUidList();
 
         allUids.forEach((uid: string) => {
-            const item: IRegistryItem = this.itemList.getItem(uid);
-            let initState: IState = {};
-            if (this.isSeqPart(item)) {
-                initState = this.getInitialState(uid, item.actionDefs, item.initState);
-            } else {
-                initState = this.getInitialState(uid, item.actionDefs);
+            const item = this.itemList.get(uid);
+            if (item) {
+                let initState: IState = {};
+                if (this.isSeqPart(item)) {
+                    initState = this.getInitialState(uid, item.actionDefs, item.initState);
+                } else {
+                    initState = this.getInitialState(uid, item.actionDefs);
+                }
+                subReducers[uid] = this.getSubReducer(item.actionDefs, initState);
             }
-            subReducers[uid] = this.getSubReducer(item.actionDefs, initState);
         });
 
         return subReducers;
@@ -93,7 +98,7 @@ export default abstract class AbstractRegistry {
         if (globalState.hasOwnProperty(uid)) {
             return globalState[uid];
         }
-        throw new Error(`Item with ID ${uid} not found in state object.`);
+        return {};
     }
 
     /**

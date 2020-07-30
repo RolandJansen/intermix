@@ -16,9 +16,9 @@ describe("RegistryItemList", () => {
         key2 = itemList.add(item2);
     });
 
-    // test("has a default keylength of 5", () => {
-    //     expect(key1).toHaveLength(5);
-    // });
+    test("has a length property", () => {
+        expect(itemList.length).toBe(2);
+    });
 
     test("exposes a list of all keys", () => {
         const keyList = itemList.getUidList();
@@ -27,14 +27,8 @@ describe("RegistryItemList", () => {
         expect(keyList).toContain(key2);
     });
 
-    test("getItem throws", () => {
-        expect(itemList.getItem).toThrow();
-    });
-
-    test("getItem throws if key is not in store", () => {
-        expect(() => {
-            itemList.getItem("12345");
-        }).toThrow();
+    test("getItem returns undefined if key is not in store", () => {
+        expect(itemList.getItem("12345")).toBe(undefined);
     });
 
     test("getItem returns an item", () => {
@@ -56,14 +50,10 @@ describe("RegistryItemList", () => {
         expect(newItemInStore).toEqual(item3);
     });
 
-    test("remove throws", () => {
-        expect(itemList.remove).toThrow();
-    });
-
-    test("remove throws if key is not in store", () => {
-        expect(() => {
-            itemList.remove("12345");
-        }).toThrow();
+    test("remove does nothing if key is not in store", () => {
+        expect(itemList.length).toBe(2);
+        itemList.remove("12345");
+        expect(itemList.length).toBe(2);
     });
 
     test("remove removes an item", () => {

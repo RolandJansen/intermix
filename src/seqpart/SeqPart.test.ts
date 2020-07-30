@@ -72,10 +72,12 @@ describe("SeqPart", () => {
             expect(actions[0]).toBe(noteEvent);
         });
 
-        it("throws if position is out of pattern bounds", () => {
-            expect(() => {
-                part.addEvent(noteEvent, 16);
-            }).toThrow();
+        it("doesn't add anything if position is out of pattern bounds", () => {
+            part.addEvent(noteEvent, 16);
+
+            const stepMultiplyer = 64 / part.stepsPerBar;
+            const actions = part.seqPattern[16 * stepMultiplyer];
+            expect(actions).not.toBeDefined();
         });
     });
 
@@ -91,7 +93,7 @@ describe("SeqPart", () => {
         });
     });
 
-    describe(".removeAction", () => {
+    describe(".removeEvent", () => {
         beforeEach(() => {
             part.addEvent(noteEvent, 4).addEvent(action2, 4);
         });

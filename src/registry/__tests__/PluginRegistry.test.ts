@@ -112,11 +112,11 @@ describe("remove", () => {
     });
 
     test("removes the plugin from this registry", () => {
-        const uidList = registry["itemList"].getUidList();
+        const uidList = registry.getUidList();
         expect(uidList).toContain(testPlugin.uid);
 
         registry.remove(testPlugin.uid);
-        const newUidList = registry["itemList"].getUidList();
+        const newUidList = registry.getUidList();
         expect(newUidList).not.toContain(testPlugin.uid);
     });
 });

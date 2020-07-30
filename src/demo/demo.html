@@ -170,8 +170,6 @@
 
         // add parts to sequencer and to the score
         seqPartUID.forEach((seqPartId, index) => {
-            const part = intermix.getSeqPart(seqPartId);
-            // seqActionCreators.ADD_PART(part);
             seqActionCreators.addToScore([seqPartId, instrumentUID[index]])
         })
 

@@ -1,5 +1,4 @@
 import AbstractRegistry from "./AbstractRegistry";
-import RegistryItemList from "./RegistryItemList";
 import { IPlugin, IControllerPlugin, IAction, IPluginConstructor, IState } from "./interfaces";
 import { store } from "../store/store";
 import { bindActionCreators } from "redux";
@@ -9,11 +8,11 @@ import commonActionDefs from "./commonActionDefs";
  * The registry for plugins of all kind.
  */
 export default class PluginRegistry extends AbstractRegistry {
-    public itemList: RegistryItemList<IPlugin>;
+    public itemList: Map<string, IPlugin>;
 
     public constructor(private ac: AudioContext) {
         super();
-        this.itemList = new RegistryItemList<IPlugin>();
+        this.itemList = new Map<string, IPlugin>();
     }
 
     /**
@@ -24,7 +23,7 @@ export default class PluginRegistry extends AbstractRegistry {
     public add(pluginClass: IPluginConstructor): IPlugin {
         const itemId = this.getUniqueItemKey();
         const newItem = new pluginClass(itemId, this.ac);
-        this.itemList.add(newItem);
+        this.itemList.set(newItem.uid, newItem);
 
         // add commonActionDefs to the plugin if its an instrument
         if (newItem.metaData.type === "instrument") {
@@ -57,13 +56,15 @@ export default class PluginRegistry extends AbstractRegistry {
      * @param itemId The unique id of the item to be removed
      */
     public remove(itemId: string): void {
-        const oldItem: IPlugin = this.itemList.getItem(itemId);
+        const oldItem = this.itemList.get(itemId);
 
-        // trigger the items unsubscribe method (decouple from dispatch)
-        oldItem.unsubscribe();
+        if (oldItem) {
+            // trigger the items unsubscribe method (decouple from dispatch)
+            oldItem.unsubscribe();
 
-        // remove from item list
-        this.itemList.remove(itemId);
+            // remove from item list
+            this.itemList.delete(itemId);
+        }
     }
 
     private setupControllerPlugin(newItem: IPlugin): void {

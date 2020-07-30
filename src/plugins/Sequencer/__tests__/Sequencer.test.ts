@@ -429,10 +429,6 @@ describe("Sequencer", () => {
 
     //     });
 
-    //     it("throws if stepList is empty", function () {
-    //         expect(sequencer.draw).toThrow();
-    //     });
-
     // });
 
     // describe(".updateFrame", function () {

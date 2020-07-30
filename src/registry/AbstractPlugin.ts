@@ -106,7 +106,7 @@ abstract class AbstractPlugin implements IPlugin {
             }
             return notes.indexOf(note) + (oct + 1) * 12; // +1: because 1st midi octave is -1
         } else {
-            throw new Error("Unvalid string. Has to be like [a-h]<#>[0-9]");
+            return -1;
         }
     }
 

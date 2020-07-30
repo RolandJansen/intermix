@@ -7,8 +7,6 @@ export const setStepActive: reducerLogic = (mySubState: IState, action: AnyActio
     const maxStepValue = mySubState.pattern.length / mySubState.stepMultiplier - 1;
     if (step <= maxStepValue) {
         newSubState["activeStep"] = step;
-    } else {
-        throw new Error(`Position out of pattern bounds. Step is ${step} but should be within 0 and ${maxStepValue}`);
     }
     return newSubState;
 };

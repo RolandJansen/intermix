@@ -3,7 +3,6 @@ import { ActionCreatorsMapObject, Reducer, ReducersMapObject } from "redux";
 import { store } from "../../store/store";
 import AbstractRegistry from "../AbstractRegistry";
 import { IAction, IActionHandlerMap, IRegistryItem, IState, Tuple, IOscActionDef } from "../interfaces";
-import RegistryItemList from "../RegistryItemList";
 
 // instruct Jest to use the mock class
 // instead of the real one globaly.
@@ -51,24 +50,23 @@ class TestItem implements IRegistryItem {
  * object under test.
  */
 class TestRegistry extends AbstractRegistry {
-    public itemList: RegistryItemList<TestItem>;
+    public itemList = new Map<string, TestItem>();
     public itemActionDefs: IOscActionDef[];
 
     constructor() {
         super();
-        this.itemList = new RegistryItemList();
         this.itemActionDefs = testActionDefs;
     }
 
     public add(): TestItem {
         const newItem = new TestItem();
         newItem.uid = this.getUniqueItemKey();
-        this.itemList.add(newItem);
+        this.itemList.set(newItem.uid, newItem);
         return newItem;
     }
 
     public remove(uid: string): void {
-        this.itemList.remove(uid);
+        this.itemList.delete(uid);
     }
 
     // from here on downwards are methods
@@ -182,7 +180,6 @@ describe("getSubReducer -> reducer", () => {
     });
 
     test("returns the original state if action.dest doesn't match", () => {
-        // why doesn't this throw? "dest" should be "listener"!!!
         expect(
             testReducer(iniState, {
                 dest: "123",
@@ -222,10 +219,8 @@ describe("getSubReducer -> reducer", () => {
 });
 
 describe("selectSubState and getChanged", () => {
-    test("selectSubState throws if uid is not in state", () => {
-        expect(() => {
-            registry.selectSubState_Test(testState, "abcd");
-        }).toThrow();
+    test("selectSubState returns an empty object if uid is not in state", () => {
+        expect(registry.selectSubState_Test(testState, "abcd")).toEqual({});
     });
 
     test("selectSubState returns the corresponding sub-state", () => {

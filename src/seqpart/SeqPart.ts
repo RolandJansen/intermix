@@ -116,10 +116,6 @@ export default class SeqPart implements ISeqPart {
         if (step <= maxStepValue) {
             const pos = step * this.stepMultiplier;
             this.pattern[pos].push(event);
-        } else {
-            throw new Error(
-                `Position out of pattern bounds. Step is ${step} but should be within 0 and ${maxStepValue}`
-            );
         }
         return this;
     }

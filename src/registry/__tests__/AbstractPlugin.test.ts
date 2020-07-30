@@ -48,6 +48,11 @@ test("getNoteNumber gets a midi note number from a string", () => {
     expect(fis9).toEqual(126);
 });
 
+test("getNoteNumber returns -1 if string is not valid", () => {
+    const y23 = plug.getNoteNumber("y23");
+    expect(y23).toEqual(-1);
+});
+
 test("refreshAllValues", () => {
     plug.getMyState = jest.fn(() => {
         return {

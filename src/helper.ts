@@ -9,7 +9,7 @@ export const getRandomString = (length: number): string => {
 
         return randomChars.join("");
     }
-    throw new Error("Length must be > 0.");
+    return "";
 };
 
 export const isKeyUnique = (key: string, hashMap: object): boolean => {

@@ -7,8 +7,12 @@ describe("getRandomString()", () => {
         expect(five).toHaveLength(5);
     });
 
-    test("throws if length is <= 0", () => {
-        expect(getRandomString).toThrow();
+    test("returns an empty string if length is = 0", () => {
+        expect(getRandomString(0)).toMatch("");
+    });
+
+    test("returns an empty string if length is < 0", () => {
+        expect(getRandomString(-1)).toMatch("");
     });
 });
 

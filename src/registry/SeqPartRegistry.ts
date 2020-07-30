@@ -2,17 +2,16 @@ import { bindActionCreators } from "redux";
 import SeqPart from "../seqpart/SeqPart";
 import { store } from "../store/store";
 import AbstractRegistry from "./AbstractRegistry";
-import RegistryItemList from "./RegistryItemList";
 
 /**
  * The registry for sequencer parts.
  */
 export default class SeqPartRegistry extends AbstractRegistry {
-    public itemList: RegistryItemList<SeqPart>;
+    public itemList: Map<string, SeqPart>;
 
     public constructor() {
         super();
-        this.itemList = new RegistryItemList<SeqPart>();
+        this.itemList = new Map<string, SeqPart>();
     }
 
     /**
@@ -22,18 +21,18 @@ export default class SeqPartRegistry extends AbstractRegistry {
      */
     public add(lengthInStepsPerBar?: number): SeqPart {
         // get a new unique id
-        const uid = this.getUniqueItemKey();
+        const itemId = this.getUniqueItemKey();
 
         // create the new part
         let newPart: SeqPart;
         if (lengthInStepsPerBar) {
-            newPart = new SeqPart(uid, lengthInStepsPerBar);
+            newPart = new SeqPart(itemId, lengthInStepsPerBar);
         } else {
-            newPart = new SeqPart(uid);
+            newPart = new SeqPart(itemId);
         }
 
         // add to item list
-        const itemId = this.itemList.add(newPart);
+        this.itemList.set(itemId, newPart);
 
         // build action creators
         const actionCreators = this.getActionCreators(newPart.actionDefs, itemId);
@@ -51,12 +50,14 @@ export default class SeqPartRegistry extends AbstractRegistry {
      * @param itemId The unique id of the item to be removed
      */
     public remove(itemId: string): void {
-        const oldItem: SeqPart = this.itemList.getItem(itemId);
+        const oldItem = this.itemList.get(itemId);
 
-        // trigger the items unsubscribe method (decouple from dispatch)
-        oldItem.unsubscribe();
+        if (oldItem) {
+            // trigger the items unsubscribe method (decouple from dispatch)
+            oldItem.unsubscribe();
 
-        // remove from item list
-        this.itemList.remove(itemId);
+            // remove from item list
+            this.itemList.delete(itemId);
+        }
     }
 }

@@ -5,7 +5,6 @@ import { store } from "./store/store";
 import Sequencer from "./plugins/Sequencer/Sequencer";
 import Sampler from "./plugins/Sampler";
 import Synth from "./plugins/Synth";
-import SeqPart from "./seqpart/SeqPart";
 
 // system components
 const audioContext: AudioContext = new AudioContext();
@@ -44,19 +43,13 @@ export function getAudioContext(): AudioContext {
  * @param pluginClassName The name of the class from which a plugin instance should be created
  */
 export function addPlugin(pluginClassName: string): string {
-    try {
-        if (plugins.hasOwnProperty(pluginClassName)) {
-            const possibleClass: any = (plugins as any)[pluginClassName];
-            const pluginClass: IPluginConstructor = possibleClass as IPluginConstructor;
+    if (plugins.hasOwnProperty(pluginClassName)) {
+        const possibleClass: any = (plugins as any)[pluginClassName];
+        const pluginClass: IPluginConstructor = possibleClass as IPluginConstructor;
 
-            return registry.addPlugin(pluginClass);
-        }
-        return "";
-    } catch (error) {
-        // not implemented yet
-        console.log(error);
-        return "";
+        return registry.addPlugin(pluginClass);
     }
+    return "";
 }
 
 export function removePlugin(itemId: string): void {
@@ -83,9 +76,9 @@ export function getUnboundActionCreators(itemId: string): ActionCreatorsMapObjec
     return registry.getActionCreators(itemId, "unbound");
 }
 
-export function getSeqPart(itemId: string): SeqPart {
-    return registry.getSeqPart(itemId);
-}
+// export function getSeqPart(itemId: string): SeqPart {
+//     return registry.getSeqPart(itemId);
+// }
 
 // export function animate(animeFunc: (lastPlayedStep: number) => void): void {
 //     defaultSequencer.updateFrame = animeFunc;

@@ -30,10 +30,7 @@ export default class MasterRegistry {
     }
 
     public addPlugin<P extends IPlugin>(pluginClass: new (itemId: string, ac: AudioContext) => P): string {
-        // try {
-        // console.log(store.getState());
         const newPlugin: IPlugin = this.plugins.add(pluginClass);
-        // console.log("new plugin added: " + newPlugin.uid);
 
         // build a new root reducer and replace the current one
         this.replaceReducer();
@@ -43,26 +40,15 @@ export default class MasterRegistry {
         // make the new item observe the store
         newPlugin.unsubscribe = this.plugins.observeStore(store, newPlugin);
         return newPlugin.uid;
-        // } catch (error) {
-        //     // not implemented yet
-        //     console.log(error);
-        //     return "";
-        // }
     }
 
     public removePlugin(itemId: string): void {
-        // try {
         this.plugins.remove(itemId);
         this.replaceReducer();
         store.dispatch(removePluginAction(itemId));
-        // } catch (error) {
-        //     console.log(error);
-        //     // not implemented yet
-        // }
     }
 
     public addSeqPart(lengthInStepsPerBar?: number): string {
-        // try {
         let newPart: SeqPart;
 
         // add new item to the seqPart Registry
@@ -81,41 +67,30 @@ export default class MasterRegistry {
         newPart.unsubscribe = this.seqParts.observeStore(store, newPart);
 
         return newPart.uid;
-        // } catch (error) {
-        //     // not implemented yet
-        //     console.log(error);
-        //     return "";
-        // }
     }
 
     public removeSeqPart(itemId: string): void {
-        // try {
         this.seqParts.remove(itemId);
         this.replaceReducer();
         store.dispatch(removePart(itemId));
-        // } catch (error) {
-        //     console.log(error);
-        //     // not implemented yet
-        // }
-    }
-
-    // this is probably not the best idea
-    public getSeqPart(itemId: string): SeqPart {
-        return this.seqParts.itemList.getItem(itemId);
     }
 
     public getActionCreators(itemId: string, bound?: string): ActionCreatorsMapObject {
-        const pluginKeys = this.plugins.itemList.getUidList();
-        const seqPartKeys = this.seqParts.itemList.getUidList();
+        const pluginKeys = this.plugins.getUidList();
+        const seqPartKeys = this.seqParts.getUidList();
         const actionCreatorsType = bound === "unbound" ? "unboundActionCreators" : "actionCreators";
         let actionCreators: ActionCreatorsMapObject = {};
 
         if (pluginKeys.includes(itemId)) {
-            const item = this.plugins.itemList.getItem(itemId);
-            actionCreators = Object.assign({}, item[actionCreatorsType]);
+            const item = this.plugins.itemList.get(itemId);
+            if (item) {
+                actionCreators = Object.assign({}, item[actionCreatorsType]);
+            }
         } else if (seqPartKeys.includes(itemId)) {
-            const item = this.seqParts.itemList.getItem(itemId);
-            actionCreators = Object.assign({}, item[actionCreatorsType]);
+            const item = this.seqParts.itemList.get(itemId);
+            if (item) {
+                actionCreators = Object.assign({}, item[actionCreatorsType]);
+            }
         }
 
         return actionCreators;

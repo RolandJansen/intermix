@@ -4,7 +4,6 @@ import { store } from "../../store/store";
 import commonActionDefs from "../commonActionDefs";
 import AbstractRegistry from "../AbstractRegistry";
 import { IPlugin, IPluginConstructor, IState } from "../interfaces";
-import RegistryItemList from "../RegistryItemList";
 import { bindActionCreators, Reducer } from "redux";
 import rootReducer from "../../store/rootReducer";
 import combineReducersWithRoot from "../combineReducersWithRoot";
@@ -19,7 +18,7 @@ const itemId = "abcd";
 let plug: IPlugin;
 
 class TestRegistry extends AbstractRegistry {
-    public itemList = new RegistryItemList();
+    public itemList = new Map<string, IPlugin>();
 
     public constructor() {
         super();
@@ -37,7 +36,7 @@ class TestRegistry extends AbstractRegistry {
         // we have to set a spy on onChange before it subscribes to store
         jest.spyOn(plugin, "onChange");
 
-        this.itemList.add(plugin);
+        this.itemList.set(itemId, plugin);
 
         // create action creators and bind them to dispatch
         plugin.actionDefs = [...plugin.actionDefs, ...commonActionDefs];
@@ -166,6 +165,19 @@ describe("preset actions", () => {
             expect((plug.onChange as jest.Mock).mock.calls[1][0]).toStrictEqual(["loadPreset", "myPreset"]);
             expect((plug.onChange as jest.Mock).mock.calls[2][0]).toStrictEqual(["ACTION1", 23]);
             expect((plug.onChange as jest.Mock).mock.calls[3][0]).toStrictEqual(["ACTION2", 42]);
+        });
+    });
+
+    describe("presetSlotNumber", () => {
+        test("changes the preset slot number", () => {
+            plug.actionCreators.presetSlotNumber(5);
+            expect(store.getState()[plug.uid].presetSlotNumber).toEqual(5);
+        });
+
+        test("plugin receives presetSlotNumber actions", () => {
+            plug.actionCreators.presetSlotNumber(23);
+            expect(plug.testValue[0]).toBe("presetSlotNumber");
+            expect(plug.testValue[1]).toBe(23);
         });
     });
 });

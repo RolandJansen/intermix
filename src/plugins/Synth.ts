@@ -1,13 +1,5 @@
 import AbstractPlugin from "../registry/AbstractPlugin";
-import {
-    IPlugin,
-    IPluginMetaData,
-    Tuple,
-    IOscActionDef,
-    IState,
-    IntermixNote,
-    IntermixCtrl,
-} from "../registry/interfaces";
+import { IPlugin, IPluginMetaData, Tuple, IOscActionDef, IntermixNote, IntermixCtrl } from "../registry/interfaces";
 /**
  * The builtin synthesizer plugin for intermix.js
  *
