@@ -55,36 +55,23 @@ const loadPreset: reducerLogic = (mySubState: IState, action: AnyAction | IActio
     return newSubState;
 };
 
-const savePresetToSlot: reducerLogic = (mySubState: IState, action: AnyAction | IAction): IState => {
+const presetSlotName: reducerLogic = (mySubState: IState, action: AnyAction | IAction): IState => {
     const currentSlot: number = mySubState.presetSlotNumber;
+    const presetName = action.payload;
     let presetSlots: string[] = [];
 
     if (mySubState.hasOwnProperty("presetSlots")) {
         presetSlots = Array.from(mySubState.presetSlots);
-        presetSlots[currentSlot] = action.payload;
     }
 
-    const newSubState = { presetSlots };
-    return newSubState;
-};
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const loadPresetFromSlot: reducerLogic = (mySubState: IState, action: AnyAction | IAction): IState => {
-    const currentSlot: number = mySubState.presetSlotNumber;
-
-    if (mySubState.hasOwnProperty("presetSlots")) {
-        const presetName: string = mySubState.presetSlots[currentSlot];
-        if (presetName.length > 0) {
-            const newSubState = loadPreset(mySubState, {
-                type: "doesnt_matter",
-                payload: presetName,
-            });
-
-            return newSubState;
-        }
+    if (mySubState.hasOwnProperty("presets") && mySubState.presets.has(presetName)) {
+        presetSlots[currentSlot] = presetName;
+        return {
+            presetSlotName: presetName,
+            presetSlots,
+        };
     }
-
-    return mySubState;
+    return {};
 };
 
 const PREFIX = "/intermix/plugin/<UID>/";
@@ -124,37 +111,11 @@ const commonActionDefs: IOscActionDef[] = [
         description: "changes the current preset slot that presets can be loaded from or saved to.",
     },
     {
-        address: PREFIX + "savePresetToSlot",
+        address: PREFIX + "presetSlotName",
         typeTag: ",s",
-        process: savePresetToSlot,
-        description: "saves the name of a preset to the current slot",
+        process: presetSlotName,
+        description: "sets the name of a preset to the current slot",
     },
-    {
-        address: PREFIX + "loadPresetFromSlot",
-        typeTag: ",N",
-        process: loadPresetFromSlot,
-        description: "load the preset stored in the current slot",
-    },
-    // {
-    //     address: PREFIX + "exportPreset",
-    //     typeTag: ",s",
-    //     description: "serializes a preset object into a json string",
-    // },
-    // {
-    //     address: PREFIX + "importPreset",
-    //     typeTag: ",s",
-    //     description: "deserializes a json string into a preset object",
-    // },
-    // {
-    //     address: PREFIX + "exportAllPresets",
-    //     typeTag: ",s",
-    //     description: "serializes all current presets into a json string",
-    // },
-    // {
-    //     address: PREFIX + "importAllPresets",
-    //     typeTag: ",s",
-    //     description: "deserializes a json string into an array of presets and replaces the current one",
-    // },
 ];
 
 export default commonActionDefs;

@@ -180,4 +180,34 @@ describe("preset actions", () => {
             expect(plug.testValue[1]).toBe(23);
         });
     });
+
+    describe("presetSlotName", () => {
+        test("adds a preset name to a slot", () => {
+            plug.actionCreators.savePreset("fifthPreset");
+            plug.actionCreators.presetSlotNumber(5);
+            plug.actionCreators.presetSlotName("fifthPreset");
+            expect(store.getState()[plug.uid].presetSlots[5]).toEqual("fifthPreset");
+        });
+
+        test("adds its value to the state", () => {
+            plug.actionCreators.savePreset("sixthPreset");
+            plug.actionCreators.presetSlotNumber(6);
+            plug.actionCreators.presetSlotName("sixthPreset");
+            expect(store.getState()[plug.uid].presetSlotName).toEqual("sixthPreset");
+        });
+
+        test("doesn't add a name if it's not a preset name", () => {
+            plug.actionCreators.presetSlotNumber(7);
+            plug.actionCreators.savePreset("notAPreset");
+            expect(store.getState()[plug.uid].presetSlots[7]).not.toBeDefined();
+        });
+
+        test.only("plugin receives presetSlotName actions", () => {
+            plug.actionCreators.savePreset("seventhPreset");
+            plug.actionCreators.presetSlotNumber(7);
+            plug.actionCreators.presetSlotName("seventhPreset");
+            expect(plug.testValue[0]).toBe("presetSlotName");
+            expect(plug.testValue[1]).toBe("seventhPreset");
+        });
+    });
 });
