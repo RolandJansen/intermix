@@ -75,7 +75,7 @@ class TestRegistry extends AbstractRegistry {
         return this.selectSubState(globalState, uid);
     }
 
-    public getChanged_Test(currentState: IState, nextState: IState): Tuple {
+    public getChanged_Test(currentState: IState, nextState: IState): Tuple[] {
         return this.getChanged(currentState, nextState);
     }
 
@@ -231,15 +231,26 @@ describe("selectSubState and getChanged", () => {
     test("getChanged diffs two states and returns the changed value", () => {
         const nextState = Object.assign({}, testState, { ACTION2: { uid: 23 } });
         const changed = registry.getChanged_Test(testState, nextState);
-        expect(changed[0]).toMatch("ACTION2");
-        expect(changed[1]).toEqual({ uid: 23 });
+        expect(changed[0][0]).toEqual("ACTION2");
+        expect(changed[0][1]).toEqual({ uid: 23 });
     });
 
-    test("getChanged returns an emtpy tuple if no change happened", () => {
+    test("getChanged returns all changed values", () => {
+        const nextState = Object.assign({}, testState, {
+            ACTION1: 23,
+            ACTION2: 42,
+        });
+        const changed = registry.getChanged_Test(testState, nextState);
+        expect(changed[0][0]).toEqual("ACTION1");
+        expect(changed[0][1]).toEqual(23);
+        expect(changed[1][0]).toEqual("ACTION2");
+        expect(changed[1][1]).toEqual(42);
+    });
+
+    test("getChanged returns an emtpy array if no change happened", () => {
         const nextState = Object.assign({}, testState);
         const changed = registry.getChanged_Test(testState, nextState);
-        expect(changed[0]).toMatch("");
-        expect(changed[1]).toMatch("");
+        expect(changed).toHaveLength(0);
     });
 });
 

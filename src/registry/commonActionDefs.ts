@@ -108,7 +108,7 @@ const commonActionDefs: IOscActionDef[] = [
     {
         address: PREFIX + "presetSlotNumber",
         typeTag: ",i",
-        description: "changes the current preset slot that presets can be loaded from or saved to.",
+        description: "sets the preset slot that presets can be loaded from or saved to.",
     },
     {
         address: PREFIX + "presetSlotName",

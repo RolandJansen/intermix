@@ -9,11 +9,11 @@ const initialState: IState = {
 
 const rootReducer = (state: IState = initialState, action: AnyAction): IState => {
     if (action.type === ADD_PLUGIN) {
-        const newPluginRefs: string[] = Array.from(state.plugins);
-        const pluginRef = action.payload as string;
-        newPluginRefs.push(pluginRef);
+        // const newPluginRefs: string[] = Array.from(state.plugins);
+        // const pluginRef = action.payload as string;
+        // newPluginRefs.push(pluginRef);
+        const newPluginRefs = addItem(state.plugins, action.payload);
         const newState: IState = { ...state, plugins: newPluginRefs };
-        // newState[pluginRef] = {};
         return newState;
     } else if (action.type === REMOVE_PLUGIN) {
         const newState = JSON.parse(JSON.stringify(state));
@@ -26,11 +26,11 @@ const rootReducer = (state: IState = initialState, action: AnyAction): IState =>
         delete newState[pluginRef];
         return newState;
     } else if (action.type === ADD_PART) {
-        const newPartRefs: string[] = Array.from(state.seqparts);
-        const partRef = action.payload as string;
-        newPartRefs.push(partRef);
+        // const newPartRefs: string[] = Array.from(state.seqparts);
+        // const partRef = action.payload as string;
+        // newPartRefs.push(partRef);
+        const newPartRefs = addItem(state.seqparts, action.payload);
         const newState: IState = { ...state, seqparts: newPartRefs };
-        // newState[partRef] = {};
         return newState;
     } else if (action.type === REMOVE_PART) {
         const newState = JSON.parse(JSON.stringify(state));
@@ -44,6 +44,12 @@ const rootReducer = (state: IState = initialState, action: AnyAction): IState =>
         return newState;
     }
     return state;
+};
+
+const addItem = (oldItemRefs: string[], newItemId: string): string[] => {
+    const newItemRefs: string[] = Array.from(oldItemRefs);
+    newItemRefs.push(newItemId);
+    return newItemRefs;
 };
 
 export default rootReducer;

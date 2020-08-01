@@ -80,7 +80,13 @@ export default abstract class AbstractRegistry {
             if (nextState !== currentState) {
                 const changed = getChanged(currentState, nextState);
                 currentState = nextState;
-                onChange(changed);
+                if (changed.length === 1) {
+                    onChange(changed[0]);
+                } else if (changed.length > 1) {
+                    changed.forEach((tuple: Tuple) => {
+                        onChange(tuple);
+                    });
+                }
             }
         }
 
@@ -107,12 +113,12 @@ export default abstract class AbstractRegistry {
      * @param currentState Original item state
      * @param nextState New item state
      */
-    protected getChanged(currentState: IState, nextState: IState): Tuple {
+    protected getChanged(currentState: IState, nextState: IState): Tuple[] {
         let prop: string;
-        let change: Tuple = ["", ""];
+        const change: Tuple[] = [];
         for (prop in currentState) {
             if (currentState[prop] !== nextState[prop]) {
-                change = [prop, nextState[prop]];
+                change.push([prop, nextState[prop]]);
             }
         }
         return change;

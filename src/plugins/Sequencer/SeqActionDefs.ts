@@ -8,7 +8,7 @@ const PREFIX = "/intermix/plugin/<UID>/";
 
 // to reset the sequencer we have to reset "state" and "pointer" at once
 const reset = (): IState => {
-    return { running: 0, pointer: 0 };
+    return { running: 0, position: 0 };
 };
 
 const actionDefs: IOscActionDef[] = [

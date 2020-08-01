@@ -131,7 +131,7 @@ export default class Sequencer extends AbstractControllerPlugin implements ICont
                     this.score.deactivateLoop();
                 }
                 return true;
-            case "JUMP_TO_POSITION":
+            case "position":
                 const step: number = changed[1];
                 this.score.moveScorePointerTo(step);
                 return true;
