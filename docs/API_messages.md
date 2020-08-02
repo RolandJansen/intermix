@@ -36,7 +36,7 @@ Messages that get processed by the intermix core. They're normally just used int
 
 **Plugin Type:** Instrument
 
-**Prefix:** /intermix/plugin/<UID>
+**Prefix:** /intermix/plugin/&lt;UID&gt;
 
 Common tasks. Every instrument plugin will have these messages attached when added to the registry.
 
@@ -53,7 +53,7 @@ Common tasks. Every instrument plugin will have these messages attached when add
 
 **Plugin Type:** Controller
 
-**Prefix:** /intermix/plugin/<UID>
+**Prefix:** /intermix/plugin/&lt;UID&gt;
 
 | OSC Address     | Value Name       | Type | Range   | Since | Comment |
 | ---             | ---              | ---  | ---     | ---   | ---     |
@@ -74,7 +74,7 @@ Common tasks. Every instrument plugin will have these messages attached when add
 
 SeqParts are not plugins but behave similarly.
 
-**Prefix:** /intermix/seqpart/<UID>
+**Prefix:** /intermix/seqpart/&lt;UID&gt;
 
 | OSC Address   | Value Name  | Type       | Range   | Since | Comment |
 | ---           | ---         | ---        | ---     | ---   | ---     |
@@ -90,7 +90,7 @@ You can bundle _/activateStep_ with any of the other actions.
 
 **Plugin Type:** Instrument
 
-**Prefix:** /intermix/plugin/<UID>
+**Prefix:** /intermix/plugin/&lt;UID&gt;
 
 | OSC Address | Value Name | Type | Range | Since | Comment |
 | ---         | ---        | ---  | ---   | ---   | ---     |
@@ -101,7 +101,7 @@ You can bundle _/activateStep_ with any of the other actions.
 
 **Plugin Type:** Instrument
 
-**Prefix:** /intermix/plugin/<UID>
+**Prefix:** /intermix/plugin/&lt;UID&gt;
 
 | OSC Address | Value Name | Type | Range | Since | Comment |
 | ---         | ---        | ---  | ---   | ---   | ---     |
