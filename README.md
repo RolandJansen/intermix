@@ -8,7 +8,7 @@
 
 ## Warning
 
-This software is in an early stage and the API is still under development. The current release (0.5.0) is just a milestone and not ment to be used in production environments. External plugin support will be added in v0.7.0.
+This software is in an early stage and the API is still under development. The current release (0.6.0) is just a milestone and not ment to be used in production environments. External plugin support will be added in v0.7.0.
 
 ---
 

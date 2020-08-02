@@ -33,7 +33,7 @@ const actionDefs: IOscActionDef[] = [
     {
         address: PREFIX + "position",
         typeTag: ",i",
-        description: "jump to a specific step in the masterqueue",
+        description: "jump to a specific step in the score",
     },
     {
         address: PREFIX + "BPM",

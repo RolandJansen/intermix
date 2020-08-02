@@ -36,7 +36,7 @@ describe("Sequencer", () => {
         const testActionDef: IOscActionDef = {
             address: "/intermix/plugin/<UID>/position",
             typeTag: ",i",
-            description: "jump to a specific step in the masterqueue",
+            description: "jump to a specific step in the score",
         };
         expect(sequencer.actionDefs).toContainEqual(testActionDef);
     });
@@ -127,7 +127,7 @@ describe("Sequencer", () => {
         });
 
         test("moves the score pointer to a certain position", () => {
-            sequencer.onChange(["JUMP_TO_POSITION", 23]);
+            sequencer.onChange(["position", 23]);
             expect(sequencer["score"]["nextStep"]).toEqual(23);
         });
     });
