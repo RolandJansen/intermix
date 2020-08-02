@@ -11,7 +11,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Plugin ID placeholder renamed from _{UID}_ to _\\&lt;UID&gt;_ since curly braces have a meaning in OSC semantics
-- Sequencer Actions _pointer_ and _JUMP_TO_POSITION_ are now unified in one action called _position_.
+- Sequencer Actions _pointer_ and _JUMP_TO_POSITION_ are now unified in a new _position_ action.
+
+### Fixed
+- [Webpage](https://rolandjansen.github.io/intermix/) - all known bugs fixes and framework (Docusaurus) upgraded.
 
 ## [0.5.0] - 2020-07-01
 

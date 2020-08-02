@@ -1,7 +1,7 @@
 module.exports = {
   title: 'intermix',
   tagline: 'A Framework for Web Based Audio Apps',
-  url: ' https://rolandjansen.github.io',
+  url: 'https://rolandjansen.github.io',
   baseUrl: '/intermix/',
   favicon: 'img/favicon.ico',
   organizationName: 'RolandJansen', // Usually your GitHub org/user name.
@@ -13,7 +13,7 @@ module.exports = {
       //   alt: 'My Site Logo',
       //   src: 'img/logo.svg',
       // },
-      links: [
+      items: [
         {
           to: 'docs/',
           activeBasePath: 'docs',
@@ -88,7 +88,7 @@ module.exports = {
       {
         docs: {
           // It is recommended to set document id as docs home page (`docs/` path).
-          homePageId: 'API messages',
+          homePageId: 'API_messages',
           sidebarPath: require.resolve('./sidebars.js'),
           // Please change this to your repo.
           editUrl:
