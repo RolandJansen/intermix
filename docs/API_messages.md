@@ -1,9 +1,3 @@
----
-id: "API messages"
----
-
-## Type Definitions
-
 Type can be one of the following:
 
 Basic Types:
@@ -29,33 +23,43 @@ Additional Types
 
 **Prefix:** /intermix/system
 
-| OSC Address  | Value Name | Type  | Range | Since | Comment |
-| ---          | ---        | ---   | ---   | ---   | ---     |
-| /remove      | -          | s     | none  | 0.5.0 | Deletes an item from the store (payload is the item ID) |
+Messages that get processed by the intermix core. They're normally just used intermally so app/plugin developers don't have to deal with them.
 
+| OSC Address   | Value Name   | Type | Range | Since | Comment |
+| ---           | ---          | ---  | ---   | ---   | ---     |
+| /addPlugin    | addPlugin    | s    | none  | 0.5.0 | Adds a plugin-reference to the store. Payload is the item ID. |
+| /removePlugin | removePlugin | s    | none  | 0.5.0 | Removes a plugin-reference from the store. Payload is the item ID. |
+| /addPart      | addPart      | s    | none  | 0.5.0 | Adds a part-reference to the store. Payload is the item ID. |
+| /removePart   | removePart   | s    | none  | 0.5.0 | Removes a part-reference to the store. Payload is the item ID. |
 
 ## Common Messages for Instruments
 
 **Plugin Type:** Instrument
 
-**Prefix:** /intermix/plugin/{UID}
+**Prefix:** /intermix/plugin/<UID>
+
+Common tasks. Every instrument plugin will have these messages attached when added to the registry.
 
 | OSC Address  | Value Name | Type  | Range | Since | Comment |
 | ---          | ---        | ---   | ---   | ---   | ---     |
-| /note        | note       | siiff | none  | 0.5.0 | A note value with velocity |
-| /volume      | volume     | sff   | none  | 0.5.0 | loudness of all plugin voices |
+| /note        | note       | siiff | none  | 0.5.0 | name, note-value, velocity, duration, starttime |
+| /volume      | volume     | sff   | none  | 0.5.0 | name, loudness-value, starttime |
+| /savePreset  | savePreset | s     | none  | 0.6.0 | saves all properties defined in 'actionDefs' to a preset |
+| /loadPreset  | loadPreset | s     | none  | 0.6.0 | loads a preset and changes plugin settings accordingly |
+| /presetSlotNumber | presetSlotNumber | i | none | 0.6.0 | sets the preset slot that presets can be loaded from or saved to |
+| /presetSlotName | presetSlotName | s | none | 0.6.0 | sets the name of a preset to the current slot |
 
 ## Sequencer
 
 **Plugin Type:** Controller
 
-**Prefix:** /intermix/plugin/{UID}
+**Prefix:** /intermix/plugin/<UID>
 
 | OSC Address     | Value Name       | Type | Range   | Since | Comment |
 | ---             | ---              | ---  | ---     | ---   | ---     |
 | /start          | running          | T    | none    | 0.5.0 | starts sequencing |
 | /stop           | running          | F    | none    | 0.5.0 | stops sequencing |
-| /pointer        | pointer          | i    | none    | 0.5.0 | jump to a specific step in the score |
+| /position       | position         | i    | none    | 0.6.0 | jump to a specific step in the score |
 | /reset          | running, pointer | N    | none    | 0.5.0 | stops sequencing and sets the score pointer to 0 |
 | /bpm            | bpm              | f    | [0;240] | 0.5.0 | sets tempo in BeatsPerMinute |
 | /loopStart      | loopStart        | i    | none    | 0.5.0 | sets the loop startpoint in steps |
@@ -70,7 +74,7 @@ Additional Types
 
 SeqParts are not plugins but behave similarly.
 
-**Prefix:** /intermix/seqpart/{UID}
+**Prefix:** /intermix/seqpart/<UID>
 
 | OSC Address   | Value Name  | Type       | Range   | Since | Comment |
 | ---           | ---         | ---        | ---     | ---   | ---     |
@@ -86,7 +90,7 @@ You can bundle _/activateStep_ with any of the other actions.
 
 **Plugin Type:** Instrument
 
-**Prefix:** /intermix/plugin/{UID}
+**Prefix:** /intermix/plugin/<UID>
 
 | OSC Address | Value Name | Type | Range | Since | Comment |
 | ---         | ---        | ---  | ---   | ---   | ---     |
@@ -97,7 +101,7 @@ You can bundle _/activateStep_ with any of the other actions.
 
 **Plugin Type:** Instrument
 
-**Prefix:** /intermix/plugin/{UID}
+**Prefix:** /intermix/plugin/<UID>
 
 | OSC Address | Value Name | Type | Range | Since | Comment |
 | ---         | ---        | ---  | ---   | ---   | ---     |
