@@ -10,7 +10,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Integration Test for common Action Definitions (action defs that all plugins have by default).
 
 ### Changed
-- Plugin ID placeholder renamed from _{UID}_ to _\\&lt;UID&gt;_ since curly braces have a meaning in OSC semantics
+- Plugin ID placeholder renamed from `{UID}` to `<UID>` since curly braces have a meaning in OSC semantics
 - Sequencer Actions _pointer_ and _JUMP_TO_POSITION_ are now unified in a new _position_ action.
 
 ### Fixed
