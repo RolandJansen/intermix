@@ -7,6 +7,9 @@ module.exports = {
   organizationName: 'RolandJansen', // Usually your GitHub org/user name.
   projectName: 'intermix', // Usually your repo name.
   themeConfig: {
+    colorMode: {
+      defaultMode: 'dark',
+    },
     navbar: {
       title: 'intermix',
       // logo: {
