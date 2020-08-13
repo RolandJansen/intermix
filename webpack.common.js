@@ -44,8 +44,8 @@ module.exports = {
     plugins: [
         new DtsBundleWebpack({
             // see dts-bundle-webpack npm page for options
-            name: "Intermix",
-            main: "./src/index.ts",
+            name: "intermix",
+            main: "./src/index.d.ts",
             out: "../dist/intermix.d.ts",
             removeSource: true,
             outputAsModuleFolder: true,

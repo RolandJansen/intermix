@@ -1,10 +1,11 @@
 import { Action, ActionCreatorsMapObject } from "redux";
-import { IState, IPluginConstructor } from "./registry/interfaces";
+import { IState, IPluginConstructor, IPlugin, IPluginMetaData, IOscActionDef } from "./registry/interfaces";
 import MasterRegistry from "./registry/MasterRegistry";
 import { store } from "./store/store";
 import Sequencer from "./plugins/Sequencer/Sequencer";
 import Sampler from "./plugins/Sampler";
 import Synth from "./plugins/Synth";
+import AbstractPlugin from "./registry/AbstractPlugin";
 
 // system components
 const audioContext: AudioContext = new AudioContext();
@@ -76,15 +77,8 @@ export function getUnboundActionCreators(itemId: string): ActionCreatorsMapObjec
     return registry.getActionCreators(itemId, "unbound");
 }
 
-// export function getSeqPart(itemId: string): SeqPart {
-//     return registry.getSeqPart(itemId);
-// }
+// API for plugin developers
+export { AbstractPlugin };
 
-// export function animate(animeFunc: (lastPlayedStep: number) => void): void {
-//     defaultSequencer.updateFrame = animeFunc;
-// }
-
-// export const react = {
-//     store,
-//     actionCreators: getActionCreators("unbound"),
-// };
+// Interfaces for plugin developers
+// export { IOscActionDef, IPlugin, IPluginMetaData };
