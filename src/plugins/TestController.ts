@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import AbstractPlugin from "../registry/AbstractPlugin";
+import { AbstractPlugin } from "../registry/AbstractPlugin";
 import { IPluginMetaData, Tuple, IControllerPlugin, IAction, IOscActionDef } from "../registry/interfaces";
 
 /**
@@ -8,7 +8,7 @@ import { IPluginMetaData, Tuple, IControllerPlugin, IAction, IOscActionDef } fro
  * Implementation doesn't matter and
  * is not subject to tests.
  */
-export default class TestPlugin extends AbstractPlugin implements IControllerPlugin {
+export class TestPlugin extends AbstractPlugin implements IControllerPlugin {
     public readonly metaData: IPluginMetaData = {
         type: "controller",
         name: "Test-Controller",

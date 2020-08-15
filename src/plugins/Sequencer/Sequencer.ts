@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import AbstractControllerPlugin from "../../registry/AbstractControllerPlugin";
+import { AbstractControllerPlugin } from "../../registry/AbstractControllerPlugin";
 import {
     IAction,
     IControllerPlugin,
@@ -24,7 +24,7 @@ export interface IQueuePosition {
  * parts, runs the scheduler that fires actions
  * and draws to the screen.
  */
-export default class Sequencer extends AbstractControllerPlugin implements IControllerPlugin {
+export class Sequencer extends AbstractControllerPlugin implements IControllerPlugin {
     public static bpmDefault = 120;
 
     public readonly metaData = {

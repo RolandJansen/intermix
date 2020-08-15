@@ -1,4 +1,4 @@
-import AbstractPlugin from "../registry/AbstractPlugin";
+import { AbstractPlugin } from "../registry/AbstractPlugin";
 import { IPlugin, IPluginMetaData, Tuple, IOscActionDef, IntermixNote, IntermixCtrl } from "../registry/interfaces";
 /**
  * The builtin synthesizer plugin for intermix.js
@@ -6,7 +6,7 @@ import { IPlugin, IPluginMetaData, Tuple, IOscActionDef, IntermixNote, IntermixC
  * For API docs of the AudioContext see
  * https://developer.mozilla.org/de/docs/Web/API/AudioContext
  */
-export default class DemoSynth extends AbstractPlugin implements IPlugin {
+export class Synth extends AbstractPlugin implements IPlugin {
     private static readonly PREFIX = "/intermix/plugin/<UID>/";
 
     public readonly metaData: IPluginMetaData = {
@@ -19,19 +19,19 @@ export default class DemoSynth extends AbstractPlugin implements IPlugin {
 
     public readonly actionDefs: IOscActionDef[] = [
         {
-            address: DemoSynth.PREFIX + "envAttack",
+            address: Synth.PREFIX + "envAttack",
             typeTag: ",sff",
             value: ["Envelope Attack", 0.0, 0.0],
             description: "Filter-Envelope Attack",
         },
         {
-            address: DemoSynth.PREFIX + "envDecay",
+            address: Synth.PREFIX + "envDecay",
             typeTag: ",sff",
             value: ["Envelope Decay", 0.0, 0.0],
             description: "Filter-Envelope Decay",
         },
         {
-            address: DemoSynth.PREFIX + "stop",
+            address: Synth.PREFIX + "stop",
             typeTag: ",N",
             description: "immediately disconnect all nodes from audio output",
         },

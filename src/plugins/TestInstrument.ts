@@ -1,4 +1,4 @@
-import AbstractPlugin from "../registry/AbstractPlugin";
+import { AbstractPlugin } from "../registry/AbstractPlugin";
 import { IPlugin, IPluginMetaData, Tuple, IOscActionDef } from "../registry/interfaces";
 
 /**
@@ -7,7 +7,7 @@ import { IPlugin, IPluginMetaData, Tuple, IOscActionDef } from "../registry/inte
  * Implementation doesn't matter and
  * is not subject to tests.
  */
-export default class TestInstrument extends AbstractPlugin implements IPlugin {
+export class TestInstrument extends AbstractPlugin implements IPlugin {
     public readonly metaData: IPluginMetaData = {
         type: "instrument",
         name: "Test-Instrument",

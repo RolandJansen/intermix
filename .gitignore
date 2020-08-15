@@ -6,6 +6,7 @@
 
 # local files
 /node_modules/
+/build
 /dist
 /**/_site
 /coverage/

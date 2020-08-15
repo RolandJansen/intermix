@@ -1,21 +1,17 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require("path");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const HtmlWebpackExternalsPlugin = require("html-webpack-externals-plugin");
 const DtsBundleWebpack = require("dts-bundle-webpack");
 const webpack = require("webpack");
 
 module.exports = {
-    entry: {
-        intermix: "./src/index.ts",
-        demo: "./src/demo/demo.ts",
-    },
+    // entry points which resolve to "[name]" are defined in the dev/prod files.
     output: {
         devtoolModuleFilenameTemplate: "[absolute-resource-path]", // for vs debugger
         path: path.resolve(__dirname, "./dist"),
         filename: "[name].js",
         library: "[name]",
         libraryTarget: "umd",
+        umdNamedDefine: true,
         globalObject: "this",
     },
     resolve: {
@@ -43,26 +39,12 @@ module.exports = {
     },
     plugins: [
         new DtsBundleWebpack({
-            // see dts-bundle-webpack npm page for options
             name: "intermix",
-            main: "./src/index.d.ts",
+            main: "./build/index.d.ts",
             out: "../dist/intermix.d.ts",
             removeSource: true,
             outputAsModuleFolder: true,
         }), // bundle type files
         new webpack.NamedModulesPlugin(), // clean build logs
-        new HtmlWebpackPlugin({
-            template: "./src/demo/demo.html",
-        }), // use a html template for the demo
-        new HtmlWebpackExternalsPlugin({
-            externals: [
-                {
-                    module: "Nexus",
-                    entry: "https://cdn.jsdelivr.net/npm/nexusui@2.0.13/dist/NexusUI.min.js",
-                    global: "Nexus",
-                },
-            ],
-        }),
-        new webpack.HotModuleReplacementPlugin(), // use hot resync
     ],
 };

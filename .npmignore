@@ -3,6 +3,8 @@
 package-lock.json
 .github/
 node_modules/
+src/
+typings/
 
 # local stuff
 .tmp
@@ -10,3 +12,4 @@ coverage/
 data/
 doc/
 docs/
+build/

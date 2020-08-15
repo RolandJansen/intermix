@@ -5,12 +5,12 @@
         "moduleResolution": "node",  //search for imports in node_modules
         "sourceMap": true,
         "noEmitOnError": true,
-        "removeComments": true,
+        // "removeComments": true,
         "target": "ES6",
         "declaration": true,   //generate typings
-        // "experimentalDecorators": true,  //should be experimental no more
         "strict": true,
         "lib": [ "dom", "es7" ],  // used to get es7 lang features like [].includes()
+        "outDir": "build",
     },
     "files": [
         "./src/index.ts",

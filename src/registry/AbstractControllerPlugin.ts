@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { IControllerPlugin, IState, IAction } from "./interfaces";
-import AbstractPlugin from "./AbstractPlugin";
+import { AbstractPlugin } from "./AbstractPlugin";
 
-abstract class AbstractControllerPlugin extends AbstractPlugin implements IControllerPlugin {
+export abstract class AbstractControllerPlugin extends AbstractPlugin implements IControllerPlugin {
     /**
      * This is where you drop in actions that should be dispatched for
      * other plugins (not in this plugins actionCreators list).
@@ -19,5 +19,3 @@ abstract class AbstractControllerPlugin extends AbstractPlugin implements IContr
         return {};
     }
 }
-
-export default AbstractControllerPlugin;

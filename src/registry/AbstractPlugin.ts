@@ -17,7 +17,7 @@ import { IPlugin, IPluginMetaData, IOscActionDef, Tuple, IState } from "./interf
 /**
  * The basic skeleton of an Intermix Plugin
  */
-abstract class AbstractPlugin implements IPlugin {
+export abstract class AbstractPlugin implements IPlugin {
     public abstract readonly uid: string;
     public abstract readonly metaData: IPluginMetaData;
     public abstract actionDefs: IOscActionDef[]; // will be extended with commonActionDefs
@@ -135,5 +135,3 @@ abstract class AbstractPlugin implements IPlugin {
         return frequencies;
     }
 }
-
-export default AbstractPlugin;
