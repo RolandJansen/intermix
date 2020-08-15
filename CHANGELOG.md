@@ -2,6 +2,20 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [unreleased]
+
+### Added
+- File-loader that loads additional files (code, assets) at runtime
+
+### Changed
+- Project configuration improved:
+  - Typings fixed
+  - A non-minified version is included in the package
+  - Additional build step: TS-Compiler writes output to _build/_ folder
+  - Demo-stuff removed from production build
+  - Sourcemaps removed from production build
+- Package size reduced from 900kB to <200kB
+
 ## [0.6.0] - 2020-08-03
 
 ### Added
