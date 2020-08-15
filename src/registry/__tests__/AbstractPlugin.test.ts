@@ -1,5 +1,5 @@
 import "web-audio-test-api";
-import TestPlugin from "../../plugins/TestInstrument";
+import { TestInstrument } from "../../plugins/TestInstrument";
 
 // Tests the implemented public and
 // protected methods of the AbstractPlugin class.
@@ -7,10 +7,10 @@ import TestPlugin from "../../plugins/TestInstrument";
 // class which becomes the object under test.
 
 const ac = new AudioContext();
-let plug: TestPlugin;
+let plug: TestInstrument;
 
 beforeEach(() => {
-    plug = new TestPlugin("abcd", ac);
+    plug = new TestInstrument("abcd", ac);
 });
 
 // test("Generate a random unique ID", () => {

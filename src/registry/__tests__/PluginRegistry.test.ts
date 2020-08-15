@@ -2,8 +2,8 @@
 import "web-audio-test-api";
 import PluginRegistry from "../PluginRegistry";
 import { IPlugin, IState, IAction, IOscActionDef, IOscAction } from "../interfaces";
-import TestController from "../../plugins/TestController";
-import TestInstrument from "../../plugins/TestInstrument";
+import { TestController } from "../../plugins/TestController";
+import { TestInstrument } from "../../plugins/TestInstrument";
 import { store } from "../../store/store";
 import commonActionDefs from "../../registry/commonActionDefs";
 

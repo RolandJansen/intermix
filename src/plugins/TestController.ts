@@ -8,7 +8,7 @@ import { IPluginMetaData, Tuple, IControllerPlugin, IAction, IOscActionDef } fro
  * Implementation doesn't matter and
  * is not subject to tests.
  */
-export class TestPlugin extends AbstractPlugin implements IControllerPlugin {
+export class TestController extends AbstractPlugin implements IControllerPlugin {
     public readonly metaData: IPluginMetaData = {
         type: "controller",
         name: "Test-Controller",

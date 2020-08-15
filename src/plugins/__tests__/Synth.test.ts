@@ -1,15 +1,15 @@
 /// <reference path="../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
-import DemoSynth from "../Synth";
+import { Synth } from "../Synth";
 import { IntermixNote, IntermixCtrl } from "../../registry/interfaces";
 
 describe("DemoSynth", () => {
     let ac: AudioContext;
-    let synth: DemoSynth;
+    let synth: Synth;
 
     beforeEach(() => {
         ac = new AudioContext();
-        synth = new DemoSynth("abcd", ac);
+        synth = new Synth("abcd", ac);
     });
 
     test("ensure that we're testing against the WebAudioTestAPI", () => {

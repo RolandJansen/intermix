@@ -1,6 +1,6 @@
 /// <reference path="../../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
-import Sequencer from "../Sequencer";
+import { Sequencer } from "../Sequencer";
 import SeqPart from "../../../seqpart/SeqPart";
 import { ILoop, IOscActionDef, IntermixNote, OscArgSequence } from "../../../registry/interfaces";
 

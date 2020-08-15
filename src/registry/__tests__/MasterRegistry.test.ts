@@ -1,7 +1,7 @@
 /// <reference path="../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
 import MasterRegistry from "../MasterRegistry";
-import TestInstrument from "../../plugins/TestInstrument";
+import { TestInstrument } from "../../plugins/TestInstrument";
 import { IPlugin, IAction, IOscAction } from "../interfaces";
 import { store } from "../../store/store";
 import SeqPart from "../../seqpart/SeqPart";

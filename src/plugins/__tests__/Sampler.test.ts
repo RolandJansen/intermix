@@ -1,15 +1,15 @@
 /// <reference path="../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
 import { IOscActionDef, IntermixNote } from "../../registry/interfaces";
-import DemoSampler from "../Sampler";
+import { Sampler } from "../Sampler";
 
 describe("DemoSampler", () => {
     let ac: AudioContext;
-    let sampler: DemoSampler;
+    let sampler: Sampler;
 
     beforeEach(() => {
         ac = new AudioContext();
-        sampler = new DemoSampler("abcd", ac);
+        sampler = new Sampler("abcd", ac);
     });
 
     test("ensure that we're testing against the WebAudioTestAPI", () => {

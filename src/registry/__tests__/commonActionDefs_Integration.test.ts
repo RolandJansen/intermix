@@ -1,5 +1,5 @@
 import "web-audio-test-api";
-import TestPlugin from "../../plugins/TestInstrument";
+import { TestInstrument } from "../../plugins/TestInstrument";
 import { store } from "../../store/store";
 import commonActionDefs from "../commonActionDefs";
 import AbstractRegistry from "../AbstractRegistry";
@@ -65,7 +65,7 @@ const volumeValue = ["volume", 1, 5];
 
 beforeEach(() => {
     const registry = new TestRegistry();
-    plug = registry.add(TestPlugin);
+    plug = registry.add(TestInstrument);
 });
 
 afterEach(() => {
