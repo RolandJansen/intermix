@@ -5,11 +5,11 @@
   "author": "Roland Jansen",
   "license": "LGPL-3.0-or-later",
   "files": [
-    "lib"
+    "dist"
   ],
   "entry": "src/index.ts",
-  "main": "lib/cjs/index.js",
-  "module": "lib/esm/index.js",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
@@ -73,6 +73,7 @@
     ]
   },
   "devDependencies": {
+    "@surma/rollup-plugin-off-main-thread": "^1.4.1",
     "@types/benchmark": "^1.0.31",
     "@types/jest": "^23.3.1",
     "@types/node": "^12.12.14",

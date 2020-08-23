@@ -4,7 +4,8 @@ const typescript = require("@wessberg/rollup-plugin-ts");
 const resolve = require("rollup-plugin-node-resolve");
 const commonjs = require("rollup-plugin-commonjs");
 // const typescript = require("rollup-plugin-typescript2");
-const workerLoader = require("rollup-plugin-web-worker-loader");
+// const workerLoader = require("rollup-plugin-web-worker-loader");
+const omt = require("@surma/rollup-plugin-off-main-thread");
 const pkg = require("./package.json");
 
 // es2015 modules are currently not possible
@@ -33,7 +34,8 @@ module.exports = {
     input: pkg.entry,
     output: [
         {
-            file: path.resolve(__dirname, pkg.module),
+            // file: path.resolve(__dirname, pkg.module),
+            dir: "dist",
             format: "es",
             sourcemap: true,
         },
@@ -43,12 +45,13 @@ module.exports = {
     plugins: [
         resolve({ extensions }),
         commonjs(),
-        workerLoader({ extensions }),
+        // workerLoader({ extensions }),
         typescript({
             hook: {
                 declarationStats: (declarationStats) => console.log(declarationStats),
             },
         }),
+        omt(),
         // workerLoader({
         //     // input: path.resolve(__dirname, pkg.entry),
         //     extensions,

@@ -11,7 +11,7 @@ import {
     IState,
     OscArgSequence,
 } from "../../registry/interfaces";
-import ClockWorker from "worker-loader!./clock.worker";
+// import ClockWorker from "worker-loader!./clock.worker";
 import Score, { PartAndPlugin, Pattern } from "./Score";
 import seqActionDefs from "./SeqActionDefs";
 
@@ -61,7 +61,7 @@ export class Sequencer extends AbstractControllerPlugin implements IControllerPl
         this.score = new Score();
 
         // Initialize the timer
-        this.clock = new ClockWorker();
+        this.clock = new Worker("./clock.worker.js");
         this.clock.postMessage({ interval: this.intervalInMili });
         this.clock.onmessage = (e: MessageEvent): void => {
             if (e.data === "tick") {
