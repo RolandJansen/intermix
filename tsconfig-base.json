@@ -1,9 +1,14 @@
 {
+    /**
+     * This is the base configuration for typescript.
+     * It is extended by
+     *     "tsconfig-esm.json" for ES2020 module generation
+     *     "tsconfig-cjs.json" for CommonJS module generation
+     * References:
+     * https://www.typescriptlang.org/docs/handbook/compiler-options.html
+     * https://www.typescriptlang.org/docs/handbook/tsconfig-json.html
+     */
     "compilerOptions": {
-        // Reference:
-        // https://www.typescriptlang.org/docs/handbook/compiler-options.html
-        // https://www.typescriptlang.org/docs/handbook/tsconfig-json.html
-
         // Compile behaviour:
         "noEmitOnError": true,   // do not emit outputs if errors were reported
         "strict": true,          // enable all strict type checking options
@@ -15,19 +20,16 @@
         "moduleResolution": "node", // search for imports in node_modules
 
         // Output options:
-        "outDir": "./build", // redirect output to this relative path
-        "module": "ES2020",  // module system used in the output files
         "target": "ES2015",  // ECMA Script target version
         "sourceMap": true,   // generate source map files (*.map)
         "declaration": true, // generate typings (*.d.ts)
 
         // Not in use but sometimes handy for config tests:
-        // "allowSyntheticDefaultImports": true,
         // "declarationMap": true,
         // "declarationDir": "build",
     },
     "files": [
-        "./typings/custom.d.ts", // declaration for workers
+        "./typings/custom.d.ts",  // declaration for workers
         "./src/plugins/Sequencer/clock.worker.ts",  // web worker
         "./src/index.ts",
     ],

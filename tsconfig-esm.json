@@ -1,0 +1,11 @@
+{
+    /**
+     * This config extends "tsconfig-base.json".
+     * It generates ES2020 modules as output.
+     */
+    "extends": "./tsconfig-base.json",
+    "compilerOptions": {
+        "outDir": "./lib/esm", // redirect output to this relative path
+        "module": "ES2020",    // module system used in the output files
+    }
+}

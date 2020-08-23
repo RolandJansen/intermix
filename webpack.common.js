@@ -9,10 +9,10 @@ module.exports = {
         devtoolModuleFilenameTemplate: "[absolute-resource-path]", // for vs debugger
         path: path.resolve(__dirname, "./dist"),
         filename: "[name].js",
-        library: "[name]",
-        libraryTarget: "umd",
-        umdNamedDefine: true,
-        globalObject: "this",
+        // library: "[name]",
+        // libraryTarget: "umd",
+        // umdNamedDefine: true,
+        // globalObject: "this",
     },
     resolve: {
         extensions: [".tsx", ".ts", ".js", ".json"],

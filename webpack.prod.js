@@ -13,6 +13,7 @@ const common = require("./webpack.common.js");
  */
 module.exports = merge(common, {
     mode: "production",
+    devtool: "source-map",
     entry: {
         intermix: "./src/index.ts",
         "intermix.min": "./src/index.ts",

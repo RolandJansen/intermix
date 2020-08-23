@@ -1,9 +1,14 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-const ts = require("@wessberg/rollup-plugin-ts");
+const path = require("path");
+const typescript = require("@wessberg/rollup-plugin-ts");
+const resolve = require("rollup-plugin-node-resolve");
+const commonjs = require("rollup-plugin-commonjs");
+// const typescript = require("rollup-plugin-typescript2");
+const workerLoader = require("rollup-plugin-web-worker-loader");
 const pkg = require("./package.json");
 
 // es2015 modules are currently not possible
-// should be changed with the next node lts version (>=13)
+// should be changed with the next node lts version (>=13):
 // import ts from "@wessberg/rollup-plugin-ts";
 // import pkg from "./package.json";
 
@@ -17,18 +22,36 @@ const pkg = require("./package.json");
  * https://www.npmjs.com/package/rollup-plugin-web-worker-loader
  */
 
+// todo:
+// add common.js and node-resolve plugins to resolve
+// dependencies better
+
+const extensions = [".js", ".jsx", ".ts", ".tsx"];
+
 module.exports = {
-    input: "src/index.ts",
+    // input: path.resolve(__dirname, pkg.entry),
+    input: pkg.entry,
     output: [
         {
-            file: pkg.main,
+            file: path.resolve(__dirname, pkg.module),
             format: "es",
+            sourcemap: true,
         },
     ],
     external: [...Object.keys(pkg.dependencies || {}), ...Object.keys(pkg.peerDependencies || {})],
+    // eslint-disable-next-line prettier/prettier
     plugins: [
-        ts({
-            /* plugin options */
+        resolve({ extensions }),
+        commonjs(),
+        workerLoader({ extensions }),
+        typescript({
+            hook: {
+                declarationStats: (declarationStats) => console.log(declarationStats),
+            },
         }),
+        // workerLoader({
+        //     // input: path.resolve(__dirname, pkg.entry),
+        //     extensions,
+        // }),
     ],
 };

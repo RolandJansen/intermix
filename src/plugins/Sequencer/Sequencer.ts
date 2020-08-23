@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+// / <reference path="../../../typings/custom.d.ts" />
 import { AbstractControllerPlugin } from "../../registry/AbstractControllerPlugin";
 import {
     IAction,
@@ -10,7 +11,7 @@ import {
     IState,
     OscArgSequence,
 } from "../../registry/interfaces";
-import ClockWorker from "./clock.worker";
+import ClockWorker from "worker-loader!./clock.worker";
 import Score, { PartAndPlugin, Pattern } from "./Score";
 import seqActionDefs from "./SeqActionDefs";
 

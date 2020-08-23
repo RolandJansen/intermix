@@ -1,0 +1,11 @@
+{
+    /**
+     * This config extends "tsconfig-base.json".
+     * It generates CommonJS modules as output.
+     */
+    "extends": "./tsconfig-base.json",
+    "compilerOptions": {
+        "outDir": "./lib/cjs", // redirect output to this relative path
+        "module": "CommonJS",  // module system used in the output files
+    }
+}
