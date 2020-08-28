@@ -5,6 +5,7 @@
 /**/.jekyll-cache
 
 # local files
+package-lock.json
 /node_modules/
 /build
 /dist

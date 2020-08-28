@@ -1,10 +1,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-const path = require("path");
 const typescript = require("@wessberg/rollup-plugin-ts");
 const resolve = require("rollup-plugin-node-resolve");
 const commonjs = require("rollup-plugin-commonjs");
-// const typescript = require("rollup-plugin-typescript2");
-// const workerLoader = require("rollup-plugin-web-worker-loader");
+const liveServer = require("rollup-plugin-live-server");
 const omt = require("@surma/rollup-plugin-off-main-thread");
 const pkg = require("./package.json");
 
@@ -22,39 +20,34 @@ const pkg = require("./package.json");
  * https://github.com/darionco/rollup-plugin-web-worker-loader#readme
  * https://www.npmjs.com/package/rollup-plugin-web-worker-loader
  */
-
-// todo:
-// add common.js and node-resolve plugins to resolve
-// dependencies better
-
 const extensions = [".js", ".jsx", ".ts", ".tsx"];
+const input = pkg.entry;
+const output = [
+    {
+        dir: "dist",
+        name: pkg.name,
+        format: "es",
+        sourcemap: true,
+    },
+];
+let plugins = [resolve({ extensions }), commonjs(), typescript(), omt()];
+const external = [...Object.keys(pkg.dependencies || {}), ...Object.keys(pkg.peerDependencies || {})];
+const liveServerConfig = {
+    port: 5000,
+    open: false,
+    logLevel: 2,
+    root: "src/demo",
+    file: "index.html",
+    mount: [["/dist", "./dist"]],
+};
+
+if (process.env.TARGET === "debug") {
+    plugins = [...plugins, liveServer.liveServer(liveServerConfig)];
+}
 
 module.exports = {
-    // input: path.resolve(__dirname, pkg.entry),
-    input: pkg.entry,
-    output: [
-        {
-            // file: path.resolve(__dirname, pkg.module),
-            dir: "dist",
-            format: "es",
-            sourcemap: true,
-        },
-    ],
-    external: [...Object.keys(pkg.dependencies || {}), ...Object.keys(pkg.peerDependencies || {})],
-    // eslint-disable-next-line prettier/prettier
-    plugins: [
-        resolve({ extensions }),
-        commonjs(),
-        // workerLoader({ extensions }),
-        typescript({
-            hook: {
-                declarationStats: (declarationStats) => console.log(declarationStats),
-            },
-        }),
-        omt(),
-        // workerLoader({
-        //     // input: path.resolve(__dirname, pkg.entry),
-        //     extensions,
-        // }),
-    ],
+    input,
+    output,
+    external,
+    plugins,
 };
