@@ -1,5 +1,3 @@
-// import clock from "./clock.implementation";
-
 /**
  * This is a webworker that provides a timer
  * that fires the scheduler for the sequencer.
@@ -10,40 +8,37 @@
  * Usage: See Sequencer.ts for details
  */
 
-let timer = 0;
-let interval = 0;
+export interface IClockMessage {
+    interval?: number;
+    command?: string;
+}
 
-function clock(data: any, worker: any): void {
-    // "sendMessage" is a workaround for a bug in webpack-dev-server 3.8.1.
-    // Type "onMessage" expects two arguments which doesn't match with the api.
-    const sendMessage: any = worker.postMessage.bind(worker);
+export function clock(e: MessageEvent): void {
+    // we need an object that represents a worker context
+    // to tell the compiler to use the right types.
+    const ctx: Worker = self as any;
+    const data = e.data as IClockMessage;
+    let timer: any; // should be number but typescript has a problem with the setInterval context
+    let interval = 0;
 
     if (data.interval) {
         interval = data.interval;
-        sendMessage({ interval });
+        ctx.postMessage({ interval });
         if (timer) {
             clearInterval(timer);
-            timer = worker.setInterval(() => {
-                sendMessage("tick");
+            timer = setInterval(() => {
+                ctx.postMessage("tick");
             }, interval);
         }
     }
 
-    if (data === "start") {
-        timer = worker.setInterval(() => {
-            sendMessage("tick");
+    if (data.command === "start") {
+        timer = setInterval(() => {
+            ctx.postMessage("tick");
         }, interval);
-    } else if (data === "stop") {
+    } else if (data.command === "stop") {
         clearInterval(timer);
-    } else if (data === "getIntervalInMili") {
-        sendMessage({ interval });
+    } else if (data.command === "getIntervalInMili") {
+        ctx.postMessage({ interval });
     }
 }
-
-self.addEventListener("message", (e) => {
-    const data: any = e.data || e;
-    clock(data, self);
-});
-
-// we have to export anything to calm the compiler
-export default null;

@@ -14,6 +14,8 @@ import {
 // import ClockWorker from "worker-loader!./clock.worker";
 import Score, { PartAndPlugin, Pattern } from "./Score";
 import seqActionDefs from "./SeqActionDefs";
+import { clock, IClockMessage } from "./clock.worker";
+import { createInlineWorker } from "../../helper";
 
 export interface IQueuePosition {
     position: number;
@@ -61,8 +63,10 @@ export class Sequencer extends AbstractControllerPlugin implements IControllerPl
         this.score = new Score();
 
         // Initialize the timer
-        this.clock = new Worker("./clock.worker.js");
-        this.clock.postMessage({ interval: this.intervalInMili });
+        this.clock = createInlineWorker(clock);
+
+        const intervalMsg: IClockMessage = { interval: this.intervalInMili };
+        this.clock.postMessage(intervalMsg);
         this.clock.onmessage = (e: MessageEvent): void => {
             if (e.data === "tick") {
                 this.scheduler();
@@ -152,7 +156,9 @@ export class Sequencer extends AbstractControllerPlugin implements IControllerPl
             if (this.triggeredSteps.length === 0) {
                 this.triggeredSteps.push(this.score.getScorePosition(this.ac.currentTime + 0.1));
             }
-            this.clock.postMessage("start");
+
+            const startMsg: IClockMessage = { command: "start" };
+            this.clock.postMessage(startMsg);
             this.isRunning = true;
             window.requestAnimationFrame(this.draw.bind(this));
         }
@@ -180,7 +186,8 @@ export class Sequencer extends AbstractControllerPlugin implements IControllerPl
     }
 
     private halt(): void {
-        this.clock.postMessage("stop");
+        const haltMsg: IClockMessage = { command: "stop" };
+        this.clock.postMessage(haltMsg);
         this.nextStepTimeInSec = 0;
         this.isRunning = false;
     }

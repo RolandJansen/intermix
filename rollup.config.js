@@ -3,7 +3,6 @@ const typescript = require("@wessberg/rollup-plugin-ts");
 const resolve = require("rollup-plugin-node-resolve");
 const commonjs = require("rollup-plugin-commonjs");
 const liveServer = require("rollup-plugin-live-server");
-const omt = require("@surma/rollup-plugin-off-main-thread");
 const pkg = require("./package.json");
 
 // es2015 modules are currently not possible
@@ -15,39 +14,53 @@ const pkg = require("./package.json");
  * For details to the typescript plugin see
  * https://github.com/wessberg/rollup-plugin-ts
  * https://www.npmjs.com/package/@wessberg/rollup-plugin-ts
- *
- * For details to the worker loader see
- * https://github.com/darionco/rollup-plugin-web-worker-loader#readme
- * https://www.npmjs.com/package/rollup-plugin-web-worker-loader
  */
 const extensions = [".js", ".jsx", ".ts", ".tsx"];
 const input = pkg.entry;
 const output = [
     {
-        dir: "dist",
+        dir: "dist/cjs",
+        name: pkg.name,
+        format: "cjs",
+        sourcemap: true,
+    },
+    {
+        dir: "dist/esm",
         name: pkg.name,
         format: "es",
         sourcemap: true,
     },
 ];
-let plugins = [resolve({ extensions }), commonjs(), typescript(), omt()];
+let plugins = [resolve({ module: true, extensions }), commonjs(), typescript()];
 const external = [...Object.keys(pkg.dependencies || {}), ...Object.keys(pkg.peerDependencies || {})];
 const liveServerConfig = {
     port: 5000,
     open: false,
     logLevel: 2,
-    root: "src/demo",
+    root: "demo",
     file: "index.html",
-    mount: [["/dist", "./dist"]],
+    mount: [
+        ["/demo", "./demo"],
+        ["/dist", "./dist"],
+        ["/node_modules", "./node_modules"],
+    ],
 };
 
-if (process.env.TARGET === "debug") {
-    plugins = [...plugins, liveServer.liveServer(liveServerConfig)];
-}
-
-module.exports = {
+const config = {
     input,
     output,
     external,
     plugins,
 };
+
+if (process.env.TARGET === "debug") {
+    plugins = [...plugins, liveServer.liveServer(liveServerConfig)];
+    // output[0].format = "umd";
+    // config.globals = {
+    //     redux: "Redux",
+    // };
+    config.external = [];
+}
+
+console.log(config.external);
+module.exports = config;

@@ -24,7 +24,7 @@ export function loadFiles(fileList: string[]): void {
     });
 }
 
-function loadFile(fileName: string): void {
+export function loadFile(fileName: string): void {
     if (hasSuffix(fileName, "js")) {
         loadScript(fileName);
     }

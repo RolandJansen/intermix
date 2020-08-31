@@ -2,7 +2,8 @@
 
 <head>
     <title>Sequencer Demo</title>
-    <script type='text/javascript' src='dist/index.js'></script>
+    <script type='module' src='/dist/esm/index.js'></script>
+    <script type='text/javascript' src='https://cdn.jsdelivr.net/npm/nexusui@2.0.13/dist/NexusUI.min.js'></script>
     <style>
         html {
             font-family: Arial, Helvetica, sans-serif;
@@ -19,13 +20,16 @@
             height: 20px;
             border-style: solid;
         }
+
         .note {
             font-size: small;
         }
     </style>
 </head>
 
-<body onload="init();">
+<!-- <body onload="init();"> -->
+
+<body>
     <button id="resumeAudioContext">resume audio context</button>
     <button id="getstate">get current state</button>
     <div id="sequencer"></div>
@@ -44,6 +48,23 @@
     </p>
 </body>
 <script>
+    // redux is reading the 'process' global var
+    // that doesn't exists in the browser
+    const process = {
+        env: {
+            NODE_ENV: 'debug',
+        }
+    };
+</script>
+<script type="module">
+    import {
+        addPlugin,
+        addSeqPart,
+        getActionCreators,
+        getAudioContext,
+        getState,
+        resumeAudioContext,
+    } from "/dist/index.js";
 
     let BPM = 120;
 
@@ -106,7 +127,7 @@
     sequencer.on('change', (e) => {
         const partId = seqPartUID[e.row];
         const instrumentId = instrumentUID[e.row];
-        const partActionCreators = intermix.getActionCreators(partId);
+        const partActionCreators = getActionCreators(partId);
         const duration = get16thDuration(BPM);
         if (e.state) {
             // send an "addNote" action to the according part
@@ -125,7 +146,7 @@
         }
     }
 
-    const ac = intermix.getAudioContext();
+    const ac = getAudioContext();
     const instrumentUID = [];
     const seqPartUID = [];
     let sequencerUID = '';
@@ -135,28 +156,28 @@
     let samplerActionCreators = {};
 
     let samples = [
-        demo.skkick,
-        demo.sksnare,
-        demo.skclhat,
-        demo.skophat,
+        "/demo/assets/Casio SK-1/skkick.wav",
+        "/demo/assets/Casio SK-1/sksnare.wav",
+        "/demo/assets/Casio SK-1/skclhat.wav",
+        "/demo/assets/Casio SK-1/skophat.wav",
     ]
 
-    function init() {
+    export function init() {
 
-        // create sampler plugins and a sequencer part for each one
+        // create sampler plugins and a sequencer part for each sound
         for (let i = 0; i < 4; i++) {
-            instrumentUID.push(intermix.addPlugin('Sampler'))
-            seqPartUID.push(intermix.addSeqPart())  // 16 steps if not stated otherwise
+            instrumentUID.push(addPlugin('Sampler'))
+            seqPartUID.push(addSeqPart())  // 16 steps if not stated otherwise
         }
 
         // add a sample to each sampler
         samples.forEach((sample, index) => {
-            addAudioDataToSampler(instrumentUID[index], sample["default"]);
+            addAudioDataToSampler(instrumentUID[index], sample);
         })
 
         // setup the sequencer
-        sequencerUID = intermix.addPlugin('Sequencer');
-        seqActionCreators = intermix.getActionCreators(sequencerUID);
+        sequencerUID = addPlugin('Sequencer');
+        seqActionCreators = getActionCreators(sequencerUID);
         seqActionCreators.animate(selectNextSeqRow);  // animate the sequencer
 
         console.log(seqActionCreators);
@@ -196,7 +217,7 @@
             return ac.decodeAudioData(response);
         }).then((decoded) => {
             // send the audio buffer to the sampler
-            const actionCreators = intermix.getActionCreators(samplerUID)
+            const actionCreators = getActionCreators(samplerUID)
             actionCreators.audioData(decoded)
         })
     }
@@ -205,7 +226,7 @@
         matrix.forEach((seqRow, rowIndex) => {
             const seqPartId = seqPartUID[rowIndex];
             const samplerId = instrumentUID[rowIndex];
-            const seqPartActionCreators = intermix.getActionCreators(seqPartId);
+            const seqPartActionCreators = getActionCreators(seqPartId);
             // const duration = get16thDuration()
 
             seqRow.forEach((seqStep, stepIndex) => {
@@ -218,64 +239,19 @@
 
     const get16thDuration = (bpm) => {
         const divisor = bpm * 4;
-        return timePerBeat = 60 / divisor;
+        return 60 / divisor;
     }
 
     document.getElementById('resumeAudioContext').addEventListener('click', () => {
-        intermix.resumeAudioContext();
+        resumeAudioContext();
         console.log("Audio Context Resumed");
     });
 
     document.getElementById("getstate").addEventListener('click', () => {
-        console.log(intermix.getState());
+        console.log(getState());
     })
 
-    // const ac = intermix.getAudioContext();
-    // const synthPart1 = intermix.getNewPart();
-    // const synthPart2 = intermix.getNewPart();
-    // const hhatPart = intermix.getNewPart();
-
-    // function init() {
-
-    //     // const testNote = getNote(64, 4, samplerUID);
-    //     // samplerActionCreators["NOTE"](testNote);
-
-    //     // make a part and add it to the sequencer
-    //     const note1 = getNote(32, 4, synthUID);
-    //     const note2 = getNote(33, 4, synthUID);
-    //     const note3 = getNote(44, 4, synthUID);
-    //     const note4 = getNote(33, 8, synthUID);
-
-    //     console.log(samplerUID);
-    //     const hhNote = getNote(40, 8, samplerUID);
-
-    //     synthPart1.addAction(note1, 0)
-    //         .addAction(note1, 1)
-    //         .addAction(note1, 2)
-    //         .addAction(note1, 3)
-    //         .addAction(note2, 4)
-    //         .addAction(note3, 5)
-    //         .addAction(note1, 6)
-    //         .addAction(note1, 7)
-    //         .addAction(note1, 8)
-    //         .addAction(note1, 9)
-    //         .addAction(note1, 10)
-    //         .addAction(note1, 11)
-    //         .addAction(note2, 12)
-    //         .addAction(note3, 13)
-    //         .addAction(note4, 14);
-
-    //     hhatPart.addAction(hhNote, 0)
-    //         .addAction(hhNote, 4)
-    //         .addAction(hhNote, 8)
-    //         .addAction(hhNote, 12);
-
-    //     seqActionCreators["ADD_PART"]({ part: synthPart1, position: 0 });
-    //     seqActionCreators["ADD_PART"]({ part: hhatPart, position: 0 });
-    //     seqActionCreators["LOOP_ACTIVE"](true);
-
-    // }
-
+    init();
 
 </script>
 
