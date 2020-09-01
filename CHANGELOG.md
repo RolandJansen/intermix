@@ -6,15 +6,26 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - File-loader that loads additional files (code, assets) at runtime
+- Worker-loader that enables Dedicated Workers inside other scripts
+- Rollup replaces Webpack as bundler
+- Live-Server for hot reload in dev-mode (didn't work with Webpack)
+- Package-bundles as _CommonJS_ and _ES2015_ modules
+- Package contains non-minified bundles
+- cross-env for OS independent shell variables
 
 ### Changed
-- Project configuration improved:
-  - Typings fixed
-  - A non-minified version is included in the package
-  - Additional build step: TS-Compiler writes output to _build/_ folder
-  - Demo-stuff removed from production build
-  - Sourcemaps removed from production build
+- Typings fixed
+- `npm run compile` builds experimental non-bundled versions for _CommonJS_ and _ES2015_ in _lib/_ Folder
+- Dev-Demo (`npm run watch`) uses native _ES2015_ modules instead of browser globals
 - Package size reduced from 900kB to <200kB
+
+### Fixed
+- Typescript declarations
+
+### Removed
+- Demo and audio assets removed from production build
+- UMD build task
+- Webpack and its plugins (replaced by Rollup)
 
 ## [0.6.0] - 2020-08-03
 
@@ -24,7 +35,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Integration Test for common Action Definitions (action defs that all plugins have by default).
 
 ### Changed
-- Plugin ID placeholder renamed from _{UID}_ to _\\&lt;UID&gt;_ since curly braces have a meaning in OSC semantics
+- Plugin ID placeholder renamed from _{UID}_ to _&lt;UID&gt;_ since curly braces have a meaning in OSC semantics
 - Sequencer Actions _pointer_ and _JUMP_TO_POSITION_ are now unified in a new _position_ action.
 
 ### Fixed

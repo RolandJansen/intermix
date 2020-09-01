@@ -27,8 +27,6 @@
         // "declarationDir": "build",
     },
     "files": [
-        "./typings/custom.d.ts", // declaration for workers
-        "./src/plugins/Sequencer/clock.worker.ts",  // web worker
         "./src/index.ts",
     ],
     "typedocOptions": {
