@@ -3,9 +3,19 @@ import "web-audio-test-api";
 import { Sequencer } from "../Sequencer";
 import SeqPart from "../../../seqpart/SeqPart";
 import { ILoop, IOscActionDef, IntermixNote, OscArgSequence } from "../../../registry/interfaces";
+import { createInlineWorker } from "../../../helper";
+import { IClockMessage } from "../clock.worker";
 
 // mock dependencies of the module under test
 jest.mock("../clock.worker");
+jest.mock("../../../helper");
+
+const workerMock = {
+    postMessage: jest.fn(),
+    onMessage: jest.fn(),
+};
+
+(createInlineWorker as jest.Mock).mockReturnValue(workerMock);
 
 // WebAudioTestAPI Config
 WebAudioTestAPI.setState({
@@ -20,6 +30,8 @@ describe("Sequencer", () => {
     beforeEach(() => {
         ac = new AudioContext();
         sequencer = new Sequencer("abcd", ac);
+        workerMock.onMessage.mockClear();
+        workerMock.postMessage.mockClear();
         // sequencer.clock.mockClear();
     });
 
@@ -140,17 +152,20 @@ describe("Sequencer", () => {
         });
 
         test("starts", () => {
+            const msg: IClockMessage = { command: "start" };
             sequencer.onChange(["running", 1]);
-            expect(sequencer["clock"].postMessage).toBeCalledWith("start");
+            expect(sequencer["clock"].postMessage).toBeCalledWith(msg);
             expect(sequencer["isRunning"]).toBeTruthy();
             expect(window.requestAnimationFrame).toBeCalled();
         });
 
         test("stops", () => {
+            const msg: IClockMessage = { command: "stop" };
             sequencer.onChange(["running", 1]);
             expect(sequencer["isRunning"]).toBeTruthy();
 
             sequencer.onChange(["running", 0]);
+            expect(sequencer["clock"].postMessage).toBeCalledWith(msg);
             expect(sequencer["ac"].state).toMatch("suspended");
             expect(sequencer["isRunning"]).toBeFalsy();
         });
@@ -169,8 +184,9 @@ describe("Sequencer", () => {
         });
 
         test("resets (stop and reset queue pointer)", () => {
+            const msg: IClockMessage = { command: "stop" };
             sequencer.onChange(["reset", 1]);
-            expect(sequencer["clock"].postMessage).toBeCalledWith("stop");
+            expect(sequencer["clock"].postMessage).toBeCalledWith(msg);
             expect(sequencer["isRunning"]).toBeFalsy();
             // expect(sequencer["nextStep"]).toEqual(0);
             expect(sequencer["score"].resetScorePointer).toHaveBeenCalled();
