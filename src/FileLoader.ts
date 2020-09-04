@@ -48,33 +48,33 @@ function loadScript(file: File, onload: fn, onerror: fn): void {
     document.body.appendChild(script);
 }
 
-function loadDOM(file: File): void {
-    // not yet implemented
-    if (file.type === "text/html" ||
-        file.type === "text/xml" ||
-        file.type === "application/xml" ||
-        file.type === "application/xhtml+xml" ||
-        file.type === "image/svg+xml") {
-            //load DOM, see DOMParser at MSN for details;
-    }
-}
+// function loadDOM(file: File): void {
+//     // not yet implemented
+//     if (file.type === "text/html" ||
+//         file.type === "text/xml" ||
+//         file.type === "application/xml" ||
+//         file.type === "application/xhtml+xml" ||
+//         file.type === "image/svg+xml") {
+//             //load DOM, see DOMParser at MSN for details;
+//     }
+// }
 
-function loadCSS(file: File, onload: fn, onerror: fn): void {
-    // untested and experimental
-    if (file.type === "text/css") {
-        const url = URL.createObjectURL(file);
-        const link = document.createElement("link");
+// function loadCSS(file: File, onload: fn, onerror: fn): void {
+//     // untested and experimental
+//     if (file.type === "text/css") {
+//         const url = URL.createObjectURL(file);
+//         const link = document.createElement("link");
 
-        link.rel = "stylesheet";
-        link.type = "text/css";
-        link.href = url;
-        link.onload = onload;
-        link.onerror = onerror;
+//         link.rel = "stylesheet";
+//         link.type = "text/css";
+//         link.href = url;
+//         link.onload = onload;
+//         link.onerror = onerror;
 
-        const documentHead = document.getElementsByTagName("head")[0];
-        documentHead.append(link);
-    }
-}
+//         const documentHead = document.getElementsByTagName("head")[0];
+//         documentHead.append(link);
+//     }
+// }
 
 export function loadFileFromServer(url: string): Promise<ArrayBuffer> {
     return window.fetch(url)
