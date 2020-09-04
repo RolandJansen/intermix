@@ -32,6 +32,7 @@
 <body>
     <button id="resumeAudioContext">resume audio context</button>
     <button id="getstate">get current state</button>
+    <input type="file" id="file-selector" accept=".js, .mjs">
     <div id="sequencer"></div>
     <div class="button-group">
         <div id="start-button"></div>
@@ -57,14 +58,8 @@
     };
 </script>
 <script type="module">
-    import {
-        addPlugin,
-        addSeqPart,
-        getActionCreators,
-        getAudioContext,
-        getState,
-        resumeAudioContext,
-    } from "/dist/index.js";
+    import * as intermix from "/dist/esm/index.js";
+    window.intermix = intermix;
 
     let BPM = 120;
 
@@ -127,7 +122,7 @@
     sequencer.on('change', (e) => {
         const partId = seqPartUID[e.row];
         const instrumentId = instrumentUID[e.row];
-        const partActionCreators = getActionCreators(partId);
+        const partActionCreators = intermix.getActionCreators(partId);
         const duration = get16thDuration(BPM);
         if (e.state) {
             // send an "addNote" action to the according part
@@ -140,13 +135,34 @@
         }
     })
 
+    const fileSelector = document.getElementById("file-selector");
+    fileSelector.addEventListener("change", (event) => {
+        const file = event.target.files[0];
+        const onload = () => {
+
+        }
+        const filename = file.name;
+        console.log(filename);
+        const url = intermix.loadJSFile(file);
+        const pluginScript = document.createElement('script');
+        pluginScript.type = "text/javascript";
+        console.log(url);
+        pluginScript.src = url;
+        pluginScript.onload = () => {
+            const plug = new MyPlugin();
+            console.log(plug.metaData.name);
+            console.log(plug.metaData.desc);
+        }
+        document.body.appendChild(pluginScript);
+    });
+
     const selectNextSeqRow = (step) => {
         if (step % 4 === 0) {
             sequencer.next();
         }
     }
 
-    const ac = getAudioContext();
+    const ac = intermix.getAudioContext();
     const instrumentUID = [];
     const seqPartUID = [];
     let sequencerUID = '';
@@ -166,8 +182,8 @@
 
         // create sampler plugins and a sequencer part for each sound
         for (let i = 0; i < 4; i++) {
-            instrumentUID.push(addPlugin('Sampler'))
-            seqPartUID.push(addSeqPart())  // 16 steps if not stated otherwise
+            instrumentUID.push(intermix.addPlugin('Sampler'))
+            seqPartUID.push(intermix.addSeqPart())  // 16 steps if not stated otherwise
         }
 
         // add a sample to each sampler
@@ -176,8 +192,8 @@
         })
 
         // setup the sequencer
-        sequencerUID = addPlugin('Sequencer');
-        seqActionCreators = getActionCreators(sequencerUID);
+        sequencerUID = intermix.addPlugin('Sequencer');
+        seqActionCreators = intermix.getActionCreators(sequencerUID);
         seqActionCreators.animate(selectNextSeqRow);  // animate the sequencer
 
         console.log(seqActionCreators);
@@ -201,23 +217,23 @@
 
     }
 
-    const loadFile = (url) => {
-        return window.fetch(url)
-            .then((response) => {
-                if (response.ok) {
-                    return response.arrayBuffer();
-                } else {
-                    throw new Error('Server error. Couldn\'t load file: ' + url);
-                }
-            });
-    };
+    // const loadFile = (url) => {
+    //     return window.fetch(url)
+    //         .then((response) => {
+    //             if (response.ok) {
+    //                 return response.arrayBuffer();
+    //             } else {
+    //                 throw new Error('Server error. Couldn\'t load file: ' + url);
+    //             }
+    //         });
+    // };
 
     const addAudioDataToSampler = (samplerUID, rawData) => {
-        loadFile(rawData).then((response) => {
+        intermix.loadFileFromServer(rawData).then((response) => {
             return ac.decodeAudioData(response);
         }).then((decoded) => {
             // send the audio buffer to the sampler
-            const actionCreators = getActionCreators(samplerUID)
+            const actionCreators = intermix.getActionCreators(samplerUID)
             actionCreators.audioData(decoded)
         })
     }
@@ -243,7 +259,7 @@
     }
 
     document.getElementById('resumeAudioContext').addEventListener('click', () => {
-        resumeAudioContext();
+        intermix.resumeAudioContext();
         console.log("Audio Context Resumed");
     });
 

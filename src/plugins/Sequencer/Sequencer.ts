@@ -4,7 +4,7 @@ import { IAction, IControllerPlugin, ILoop, Tuple, ReturnFunction, IOscActionDef
 import Score, { PartAndPlugin, Pattern } from "./Score";
 import seqActionDefs from "./SeqActionDefs";
 import { clock, IClockMessage } from "./clock.worker";
-import { createInlineWorker } from "../../helper";
+import { createInlineWorker } from "../../fileLoader";
 
 export interface IQueuePosition {
     position: number;

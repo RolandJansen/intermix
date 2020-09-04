@@ -1,72 +1,93 @@
 /* eslint-disable prettier/prettier */
-// some usefull links:
-// https://www.html5rocks.com/en/tutorials/file/dndfiles/
-// https://scotch.io/tutorials/use-the-html5-file-api-to-work-with-files-locally-in-the-browser
-// https://developer.mozilla.org/en-US/docs/Web/API/File/Using_files_from_web_applications
-// in the last link see the section about object urls to load files without gui
+/**
+ * A collection of functions useful for
+ * loading files in the browser.
+ * It also contains a function that
+ * loads inline dedicated workers.
+ */
 
-// export default class FileLoader {
-//     public loadPlugin(pluginSrcFile: Blob): void {
-//         // not implemented yet
-//     }
+type fn = () => void;
 
-//     public loadAudio(audioFile: Blob): void {
-//         // not implemented yet
-//     }
-// }
+/**
+ * Creates a dedicated worker from a function without the need
+ * to put the worker code into an external file.
+ * The worker will inherit the content-security-policy of the
+ * script that spawns it.
+ * @param fn A function that makes the body of the new worker.
+ */
+export const createInlineWorker = (fn: (e: MessageEvent) => void): Worker => {
+    const blob = new Blob(["self.onmessage = ", fn.toString()], { type: "text/javascript" });
+    const url = URL.createObjectURL(blob);
+    return new Worker(url);
+};
 
-// baue eine funktion, die eine js oder ts datei via script-tag einbindet
-// einmal mit promise und einmal mit callback
-
-export function loadFiles(fileList: string[]): void {
-    fileList.forEach((fileName: string) => {
-        loadFile(fileName);
-    });
+/**
+ * Loads an intermix plugin class from a file and returns the class name.
+ * @param file An object that contains the binary content of a file.
+ * @param onload A function that will be called after the script was executed
+ * @param onerror A function that will be called if the execution of the script failed
+ */
+export function loadPlugin(file: File, onload: fn, onerror: fn): string {
+    let pluginClassName = "";
+    if (file.type === "text/javascript") {
+        pluginClassName = file.name.slice(0, -3);
+        loadScript(file, onload, onerror);
+    }
+    return pluginClassName;
 }
 
-export function loadFile(fileName: string): void {
-    if (hasSuffix(fileName, "js")) {
-        loadScript(fileName);
-    }
-    if (hasSuffix(fileName, "css")) {
-        loadCSS(fileName);
-    }
-}
-
-function loadScript(scriptFile: string): void {
+function loadScript(file: File, onload: fn, onerror: fn): void {
+    const url = URL.createObjectURL(file);
     const script = document.createElement('script');
+
     script.type = 'text/javascript';
-    script.src = scriptFile;
-    script.onload = () => {};
-    script.onerror = () => {};
+    script.src = url;
+    script.onload = onload;
+    script.onerror = onerror;
 
-    const documentHead = document.getElementsByTagName("head")[0];
-    documentHead.append(script);
+    document.body.appendChild(script);
 }
 
-// function loadDOM(htmlFile: string): HTMLElement {
+function loadDOM(file: File): void {
+    // not yet implemented
+    if (file.type === "text/html" ||
+        file.type === "text/xml" ||
+        file.type === "application/xml" ||
+        file.type === "application/xhtml+xml" ||
+        file.type === "image/svg+xml") {
+            //load DOM, see DOMParser at MSN for details;
+    }
+}
 
+function loadCSS(file: File, onload: fn, onerror: fn): void {
+    // untested and experimental
+    if (file.type === "text/css") {
+        const url = URL.createObjectURL(file);
+        const link = document.createElement("link");
+
+        link.rel = "stylesheet";
+        link.type = "text/css";
+        link.href = url;
+        link.onload = onload;
+        link.onerror = onerror;
+
+        const documentHead = document.getElementsByTagName("head")[0];
+        documentHead.append(link);
+    }
+}
+
+export function loadFileFromServer(url: string): Promise<ArrayBuffer> {
+    return window.fetch(url)
+        .then((response) => {
+            if (response.ok) {
+                return response.arrayBuffer();
+            } else {
+                throw new Error('Server error. Couldn\'t load file: ' + url);
+            }
+        });
+};
+
+// function hasSuffix(fileName: string, suffix: string): boolean {
+//     const fileSuffix = fileName.split(".").pop().toLowerCase();
+//     return suffix === fileSuffix;
 // }
-
-function loadCSS(cssFile: string): void {
-    // HTMLLinkElement
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.type = "text/css";
-    link.href = cssFile;
-    link.onload = () => {}; // do something when css is loaded
-    link.onerror = () => {};
-
-    // add css-link to document head element
-    const documentHead = document.getElementsByTagName("head")[0];
-    documentHead.append(link);
-}
-
-function loadImage(imgFile: string): void {
-
-}
-
-function hasSuffix(fileName: string, suffix: string): boolean {
-    const fileSuffix = fileName.split(".").pop().toLowerCase();
-    return suffix === fileSuffix;
-}

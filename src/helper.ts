@@ -19,19 +19,6 @@ export const isKeyUnique = (key: string, hashMap: object): boolean => {
     return true;
 };
 
-/**
- * Creates a dedicated worker from a function without the need
- * to put the worker code into an external file.
- * The worker will inherit the content-security-policy of the
- * script that spawns it.
- * @param fn A function that makes the body of the new worker.
- */
-export const createInlineWorker = (fn: (e: MessageEvent) => void): Worker => {
-    const blob = new Blob(["self.onmessage = ", fn.toString()], { type: "text/javascript" });
-    const url = URL.createObjectURL(blob);
-    return new Worker(url);
-};
-
 // this should be in the types or interfaces or sth
 export type TypedArray =
     | Int8Array

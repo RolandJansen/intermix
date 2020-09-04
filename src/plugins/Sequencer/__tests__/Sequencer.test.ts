@@ -3,12 +3,12 @@ import "web-audio-test-api";
 import { Sequencer } from "../Sequencer";
 import SeqPart from "../../../seqpart/SeqPart";
 import { ILoop, IOscActionDef, IntermixNote, OscArgSequence } from "../../../registry/interfaces";
-import { createInlineWorker } from "../../../helper";
+import { createInlineWorker } from "../../../fileLoader";
 import { IClockMessage } from "../clock.worker";
 
 // mock dependencies of the module under test
 jest.mock("../clock.worker");
-jest.mock("../../../helper");
+jest.mock("../../../fileLoader");
 
 const workerMock = {
     postMessage: jest.fn(),

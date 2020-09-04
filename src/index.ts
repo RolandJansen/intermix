@@ -80,3 +80,4 @@ export function getUnboundActionCreators(itemId: string): ActionCreatorsMapObjec
 export * from "./registry/interfaces";
 export { AbstractPlugin } from "./registry/AbstractPlugin";
 export { AbstractControllerPlugin } from "./registry/AbstractControllerPlugin";
+export { loadPlugin, loadFileFromServer } from "./fileLoader";
