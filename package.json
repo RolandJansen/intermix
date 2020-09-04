@@ -106,8 +106,7 @@
     "typescript": "^3.8.3",
     "web-audio-test-api": "^0.5.2"
   },
-  "peerDependencies": {
-    "redux": "^4.0.5",
-    "intermix": "file:intermix-0.6.0.tgz"
+  "dependencies": {
+    "redux": "^4.0.5"
   }
 }
