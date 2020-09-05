@@ -62,5 +62,4 @@ if (process.env.TARGET === "debug") {
     config.external = [];
 }
 
-console.log(config.external);
 module.exports = config;
