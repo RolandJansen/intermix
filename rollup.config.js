@@ -31,7 +31,7 @@ const output = [
         sourcemap: true,
     },
 ];
-let plugins = [resolve({ module: true, extensions }), commonjs(), typescript()];
+const plugins = [resolve({ module: true, extensions }), commonjs(), typescript()];
 const external = [...Object.keys(pkg.dependencies || {}), ...Object.keys(pkg.peerDependencies || {})];
 const liveServerConfig = {
     port: 5000,
@@ -54,11 +54,7 @@ const config = {
 };
 
 if (process.env.TARGET === "debug") {
-    plugins = [...plugins, liveServer.liveServer(liveServerConfig)];
-    // output[0].format = "umd";
-    // config.globals = {
-    //     redux: "Redux",
-    // };
+    config.plugins = [...plugins, liveServer.liveServer(liveServerConfig)];
     config.external = [];
 }
 
