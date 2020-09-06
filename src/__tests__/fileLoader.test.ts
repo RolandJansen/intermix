@@ -31,4 +31,4 @@
 
 test("nothing", () => {
     // just to get this suite passed
-})
+});
