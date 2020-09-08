@@ -41,8 +41,6 @@ export default class Score {
     private patternPointerId = 0; // every pointer in the runqueue has a unique id
     private pointers: IPointerTable = {};
 
-    // public constructor() {}
-
     public get nextStepPartsInScore(): PartAndPlugin[] {
         if (typeof this.mainQueue[this.nextStep] !== "undefined") {
             return this.mainQueue[this.nextStep];

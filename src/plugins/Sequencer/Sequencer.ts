@@ -179,6 +179,11 @@ export class Sequencer extends AbstractControllerPlugin implements IControllerPl
         this.clock.postMessage(haltMsg);
         this.nextStepTimeInSec = 0;
         this.isRunning = false;
+        // sending actions from the plugin to itself
+        // is dangerous but there's no other way to
+        // set the position field in the store when
+        // the sequencer stops
+        this.actionCreators.position(this.score.getScorePosition(0).position);
     }
 
     private setBpmAndTimePerStep(bpm: number): void {
