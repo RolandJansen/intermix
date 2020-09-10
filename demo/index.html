@@ -138,22 +138,16 @@
     const fileSelector = document.getElementById("file-selector");
     fileSelector.addEventListener("change", (event) => {
         const file = event.target.files[0];
+        const pluginConstructor = file.name.slice(0, -3);
+        let pluginUid = "";
         const onload = () => {
-
+            pluginUid = intermix.addPlugin(pluginConstructor);
+            console.log(pluginUid);
         }
-        const filename = file.name;
-        console.log(filename);
-        const url = intermix.loadJSFile(file);
-        const pluginScript = document.createElement('script');
-        pluginScript.type = "text/javascript";
-        console.log(url);
-        pluginScript.src = url;
-        pluginScript.onload = () => {
-            const plug = new MyPlugin();
-            console.log(plug.metaData.name);
-            console.log(plug.metaData.desc);
+        const onerror = () => {
+            console.log(pluginConstructor + " could not be loaded.");
         }
-        document.body.appendChild(pluginScript);
+        const pluginName = intermix.loadPlugin(file, onload, onerror);
     });
 
     const selectNextSeqRow = (step) => {
@@ -216,17 +210,6 @@
         seqActionCreators.loopActivate();
 
     }
-
-    // const loadFile = (url) => {
-    //     return window.fetch(url)
-    //         .then((response) => {
-    //             if (response.ok) {
-    //                 return response.arrayBuffer();
-    //             } else {
-    //                 throw new Error('Server error. Couldn\'t load file: ' + url);
-    //             }
-    //         });
-    // };
 
     const addAudioDataToSampler = (samplerUID, rawData) => {
         intermix.loadFileFromServer(rawData).then((response) => {
