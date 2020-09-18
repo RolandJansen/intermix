@@ -2,8 +2,8 @@
 import "web-audio-test-api";
 import PluginRegistry from "../PluginRegistry";
 import { IPlugin, IState, IAction, IOscActionDef, IOscAction } from "../interfaces";
-import { TestController } from "../../plugins/TestController";
-import { TestInstrument } from "../../plugins/TestInstrument";
+import TestController from "../../plugins/TestController";
+import TestInstrument from "../../plugins/TestInstrument";
 import { store } from "../../store/store";
 import commonActionDefs from "../../registry/commonActionDefs";
 
@@ -36,7 +36,7 @@ beforeEach(() => {
 
 describe("add", () => {
     test("creates a plugin instance", () => {
-        expect(testPlugin.metaData.name).toMatch("Test-Instrument");
+        expect(testPlugin.uid.length).toBeGreaterThan(0);
     });
 
     test("adds action defs for common actions to the plugin instance", () => {

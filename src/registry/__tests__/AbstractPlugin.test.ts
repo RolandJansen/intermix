@@ -1,5 +1,6 @@
 import "web-audio-test-api";
-import { TestInstrument } from "../../plugins/TestInstrument";
+import TestInstrument from "../../plugins/TestInstrument";
+import { IPlugin } from "../interfaces";
 
 // Tests the implemented public and
 // protected methods of the AbstractPlugin class.
@@ -7,7 +8,7 @@ import { TestInstrument } from "../../plugins/TestInstrument";
 // class which becomes the object under test.
 
 const ac = new AudioContext();
-let plug: TestInstrument;
+let plug: IPlugin;
 
 beforeEach(() => {
     plug = new TestInstrument("abcd", ac);

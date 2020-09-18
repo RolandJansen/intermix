@@ -6,6 +6,8 @@
  * loads inline dedicated workers.
  */
 
+import { getPluginClassNames } from ".";
+
 type fn = () => void;
 
 /**
@@ -23,21 +25,22 @@ export const createInlineWorker = (fn: (e: MessageEvent) => void): Worker => {
 
 /**
  * Loads an intermix plugin class from a file and returns the class name.
- * @param file An object that contains the binary content of a file.
+ * @param data An object that contains the binary content of a file.
  * @param onload A function that will be called after the script was executed
  * @param onerror A function that will be called if the execution of the script failed
  */
-export function loadPlugin(file: File, onload: fn, onerror: fn): string {
-    let pluginClassName = "";
-    if (file.type === "text/javascript") {
-        pluginClassName = file.name.slice(0, -3);
-        loadScript(file, onload, onerror);
+export function loadPlugin(data: Blob | File, onload: fn, onerror: fn): string {
+    const pluginsBefore = getPluginClassNames();
+    if (data.type === "text/javascript") {
+        loadScript(data, onload, onerror);
     }
-    return pluginClassName;
+    const pluginsAfter = getPluginClassNames();
+    const diff = pluginsAfter.filter((item) => !pluginsBefore.includes(item));
+    return diff.toString();
 }
 
-function loadScript(file: File, onload: fn, onerror: fn): void {
-    const url = URL.createObjectURL(file);
+function loadScript(data: Blob | File, onload: fn, onerror: fn): void {
+    const url = URL.createObjectURL(data);
     const script = document.createElement('script');
 
     script.type = 'text/javascript';

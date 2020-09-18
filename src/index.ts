@@ -2,19 +2,23 @@ import { Action, ActionCreatorsMapObject } from "redux";
 import { IState, IPluginConstructor } from "./registry/interfaces";
 import MasterRegistry from "./registry/MasterRegistry";
 import { store } from "./store/store";
-import { Sequencer } from "./plugins/Sequencer/Sequencer";
-import { Sampler } from "./plugins/Sampler";
-import { Synth } from "./plugins/Synth";
+import Sequencer from "./plugins/Sequencer/Sequencer";
+import Sampler from "./plugins/Sampler";
+import Synth from "./plugins/Synth";
 
 // system components
 const audioContext: AudioContext = new AudioContext();
 const registry: MasterRegistry = new MasterRegistry(audioContext);
 
-export const plugins = {
+export const availablePlugins = {
     Sequencer,
     Sampler,
     Synth,
 };
+
+export function getPluginClassNames(): string[] {
+    return Object.keys(availablePlugins);
+}
 
 export function getState(): IState {
     return store.getState();
@@ -43,8 +47,8 @@ export function getAudioContext(): AudioContext {
  * @param pluginClassName The name of the class from which a plugin instance should be created
  */
 export function addPlugin(pluginClassName: string): string {
-    if (plugins.hasOwnProperty(pluginClassName)) {
-        const possibleClass: any = (plugins as any)[pluginClassName];
+    if (availablePlugins.hasOwnProperty(pluginClassName)) {
+        const possibleClass: any = (availablePlugins as any)[pluginClassName];
         const pluginClass: IPluginConstructor = possibleClass as IPluginConstructor;
 
         return registry.addPlugin(pluginClass);

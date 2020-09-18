@@ -1,10 +1,18 @@
 /// <reference path="../../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
-import { Sequencer } from "../Sequencer";
+import Sequencer from "../Sequencer";
 import SeqPart from "../../../seqpart/SeqPart";
-import { ILoop, IOscActionDef, IntermixNote, OscArgSequence } from "../../../registry/interfaces";
+import {
+    ILoop,
+    IOscActionDef,
+    IntermixNote,
+    OscArgSequence,
+    IPlugin,
+    IRegistryItem,
+} from "../../../registry/interfaces";
 import { createInlineWorker } from "../../../fileLoader";
 import { IClockMessage } from "../clock.worker";
+import AbstractRegistry from "../../../registry/AbstractRegistry";
 
 // mock dependencies of the module under test
 jest.mock("../clock.worker");
@@ -23,13 +31,21 @@ WebAudioTestAPI.setState({
     "AudioContext#resume": "enabled",
 });
 
+const createTestSequencer = (ac: AudioContext): IPlugin => {
+    const newSequencer = new Sequencer("abcd", ac);
+    newSequencer.actionCreators = {
+        position: jest.fn(),
+    };
+    return newSequencer;
+};
+
 describe("Sequencer", () => {
     let ac: AudioContext;
-    let sequencer: Sequencer;
+    let sequencer: IPlugin;
 
     beforeEach(() => {
         ac = new AudioContext();
-        sequencer = new Sequencer("abcd", ac);
+        sequencer = createTestSequencer(ac);
         workerMock.onMessage.mockClear();
         workerMock.postMessage.mockClear();
         // sequencer.clock.mockClear();
@@ -39,9 +55,9 @@ describe("Sequencer", () => {
         expect(ac.$name).toEqual("AudioContext");
     });
 
-    test("has a metadata section", () => {
-        expect(sequencer.metaData.type).toEqual("controller");
-        expect(sequencer.metaData.name).toEqual("Intermix Sequencer");
+    test("has a static metadata section", () => {
+        expect(Sequencer.metaData.type).toEqual("controller");
+        expect(Sequencer.metaData.name).toEqual("Intermix Sequencer");
     });
 
     test("has action definitions", () => {
@@ -168,6 +184,7 @@ describe("Sequencer", () => {
             expect(sequencer["clock"].postMessage).toBeCalledWith(msg);
             expect(sequencer["ac"].state).toMatch("suspended");
             expect(sequencer["isRunning"]).toBeFalsy();
+            expect(sequencer.actionCreators.position).toHaveBeenCalled();
         });
 
         test("doesn't stop if sequencer is not running", () => {

@@ -1,11 +1,11 @@
 /// <reference path="../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
-import { Synth } from "../Synth";
-import { IntermixNote, IntermixCtrl } from "../../registry/interfaces";
+import Synth from "../Synth";
+import { IntermixNote, IntermixCtrl, IPlugin } from "../../registry/interfaces";
 
 describe("DemoSynth", () => {
     let ac: AudioContext;
-    let synth: Synth;
+    let synth: IPlugin;
 
     beforeEach(() => {
         ac = new AudioContext();
@@ -16,9 +16,9 @@ describe("DemoSynth", () => {
         expect(ac.$name).toEqual("AudioContext");
     });
 
-    test("has a metadata section", () => {
-        expect(synth.metaData.type).toEqual("instrument");
-        expect(synth.metaData.name).toEqual("Intermix Synth");
+    test("has a metadata section (static)", () => {
+        expect(Synth.metaData.type).toEqual("instrument");
+        expect(Synth.metaData.name).toEqual("Intermix Synth");
     });
 
     test("has action definitions", () => {

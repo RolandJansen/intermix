@@ -1,7 +1,7 @@
 /// <reference path="../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
 import MasterRegistry from "../MasterRegistry";
-import { TestInstrument } from "../../plugins/TestInstrument";
+import TestInstrument from "../../plugins/TestInstrument";
 import { IPlugin, IAction, IOscAction } from "../interfaces";
 import { store } from "../../store/store";
 import SeqPart from "../../seqpart/SeqPart";
@@ -36,12 +36,8 @@ describe("PluginRegistry", () => {
     });
 
     describe("addPlugin", () => {
-        test("creates a new plugin instance from a given class", () => {
-            expect(plugin.metaData.name).toMatch("Test-Instrument");
-        });
-
-        test("returns the instance id", () => {
-            expect(pluginId).toMatch(plugin.uid);
+        test("creates a new plugin with a unique id", () => {
+            expect(plugin.uid).toMatch(pluginId);
         });
 
         test("adds an entry to the store", () => {

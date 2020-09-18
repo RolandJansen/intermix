@@ -1,15 +1,22 @@
 import { AbstractPlugin } from "../registry/AbstractPlugin";
-import { IPlugin, IPluginMetaData, Tuple, IOscActionDef, IntermixNote, IntermixCtrl } from "../registry/interfaces";
+import {
+    IPlugin,
+    IPluginMetaData,
+    Tuple,
+    IOscActionDef,
+    IntermixNote,
+    IntermixCtrl,
+    IPluginConstructor,
+} from "../registry/interfaces";
 /**
  * The builtin synthesizer plugin for intermix.js
  *
  * For API docs of the AudioContext see
  * https://developer.mozilla.org/de/docs/Web/API/AudioContext
  */
-export class Synth extends AbstractPlugin implements IPlugin {
+const Plugin: IPluginConstructor = class Synth extends AbstractPlugin implements IPlugin {
     private static readonly PREFIX = "/intermix/plugin/<UID>/";
-
-    public readonly metaData: IPluginMetaData = {
+    public static readonly metaData: IPluginMetaData = {
         type: "instrument",
         name: "Intermix Synth",
         version: "1.0.0",
@@ -159,4 +166,5 @@ export class Synth extends AbstractPlugin implements IPlugin {
         freq.linearRampToValueAtTime(22050, delay + this.attack);
         freq.linearRampToValueAtTime(1000, delay + this.decay);
     }
-}
+};
+export default Plugin;

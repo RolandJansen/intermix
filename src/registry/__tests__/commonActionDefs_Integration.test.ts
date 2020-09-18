@@ -1,5 +1,5 @@
 import "web-audio-test-api";
-import { TestInstrument } from "../../plugins/TestInstrument";
+import TestInstrument from "../../plugins/TestInstrument";
 import { store } from "../../store/store";
 import commonActionDefs from "../commonActionDefs";
 import AbstractRegistry from "../AbstractRegistry";

@@ -1,6 +1,6 @@
 import { ActionCreatorsMapObject } from "redux";
 import { getRandomString } from "../helper";
-import { IPlugin, IPluginMetaData, IOscActionDef, Tuple, IState } from "./interfaces";
+import { IPlugin, IOscActionDef, Tuple, IState } from "./interfaces";
 
 /**
  * In the following we use declaration merging to
@@ -19,7 +19,6 @@ import { IPlugin, IPluginMetaData, IOscActionDef, Tuple, IState } from "./interf
  */
 export abstract class AbstractPlugin implements IPlugin {
     public abstract readonly uid: string;
-    public abstract readonly metaData: IPluginMetaData;
     public abstract actionDefs: IOscActionDef[]; // will be extended with commonActionDefs
 
     public readonly frequencyLookup: number[];

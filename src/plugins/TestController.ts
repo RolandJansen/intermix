@@ -1,6 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { AbstractPlugin } from "../registry/AbstractPlugin";
-import { IPluginMetaData, Tuple, IControllerPlugin, IAction, IOscActionDef } from "../registry/interfaces";
+import {
+    IPluginMetaData,
+    Tuple,
+    IControllerPlugin,
+    IAction,
+    IOscActionDef,
+    IPluginConstructor,
+} from "../registry/interfaces";
 
 /**
  * This class will be used to indirectly
@@ -8,8 +15,8 @@ import { IPluginMetaData, Tuple, IControllerPlugin, IAction, IOscActionDef } fro
  * Implementation doesn't matter and
  * is not subject to tests.
  */
-export class TestController extends AbstractPlugin implements IControllerPlugin {
-    public readonly metaData: IPluginMetaData = {
+const Plugin: IPluginConstructor = class TestController extends AbstractPlugin implements IControllerPlugin {
+    public static readonly metaData: IPluginMetaData = {
         type: "controller",
         name: "Test-Controller",
         version: "1.0.0",
@@ -63,4 +70,5 @@ export class TestController extends AbstractPlugin implements IControllerPlugin 
     public onChange(changed: Tuple): boolean {
         return true;
     }
-}
+};
+export default Plugin;

@@ -1,6 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { AbstractControllerPlugin } from "../../registry/AbstractControllerPlugin";
-import { IAction, IControllerPlugin, ILoop, Tuple, ReturnFunction, IOscActionDef } from "../../registry/interfaces";
+import {
+    IAction,
+    IControllerPlugin,
+    ILoop,
+    Tuple,
+    ReturnFunction,
+    IOscActionDef,
+    IPluginConstructor,
+} from "../../registry/interfaces";
 import Score, { PartAndPlugin, Pattern } from "./Score";
 import seqActionDefs from "./SeqActionDefs";
 import { clock, IClockMessage } from "./clock.worker";
@@ -16,10 +24,9 @@ export interface IQueuePosition {
  * parts, runs the scheduler that fires actions
  * and draws to the screen.
  */
-export class Sequencer extends AbstractControllerPlugin implements IControllerPlugin {
+const Plugin: IPluginConstructor = class Sequencer extends AbstractControllerPlugin implements IControllerPlugin {
     public static bpmDefault = 120;
-
-    public readonly metaData = {
+    public static readonly metaData = {
         type: "controller",
         name: "Intermix Sequencer",
         version: "1.0.0-beta",
@@ -308,4 +315,5 @@ export class Sequencer extends AbstractControllerPlugin implements IControllerPl
     private getDurationTime(steps: number): number {
         return steps * this.timePerStepInSec;
     }
-}
+};
+export default Plugin;

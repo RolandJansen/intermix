@@ -4,7 +4,7 @@ import combineReducersWithRoot from "./combineReducersWithRoot";
 import SeqPartRegistry from "./SeqPartRegistry";
 import SeqPart from "../seqpart/SeqPart";
 import PluginRegistry from "./PluginRegistry";
-import { IPlugin } from "./interfaces";
+import { IPlugin, IPluginConstructor } from "./interfaces";
 import rootReducer from "../store/rootReducer";
 import { addPlugin, addPart, removePlugin, removePart } from "../store/rootActions";
 
@@ -29,7 +29,7 @@ export default class MasterRegistry {
         this.seqParts = new SeqPartRegistry();
     }
 
-    public addPlugin<P extends IPlugin>(pluginClass: new (itemId: string, ac: AudioContext) => P): string {
+    public addPlugin<P extends IPlugin>(pluginClass: IPluginConstructor): string {
         const newPlugin: IPlugin = this.plugins.add(pluginClass);
 
         // build a new root reducer and replace the current one

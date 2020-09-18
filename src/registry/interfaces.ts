@@ -15,11 +15,11 @@ export interface IRegistryItem {
 }
 
 export interface IPluginConstructor {
+    readonly metaData: IPluginMetaData;
     new (itemId: string, ac: AudioContext): IPlugin;
 }
 
 export interface IPlugin extends IRegistryItem {
-    readonly metaData: IPluginMetaData;
     readonly frequencyLookup: number[];
     inputs: AudioNode[];
     outputs: AudioNode[];

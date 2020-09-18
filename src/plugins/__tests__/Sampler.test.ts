@@ -1,11 +1,11 @@
 /// <reference path="../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
-import { IOscActionDef, IntermixNote } from "../../registry/interfaces";
-import { Sampler } from "../Sampler";
+import { IOscActionDef, IntermixNote, IPlugin } from "../../registry/interfaces";
+import Sampler from "../Sampler";
 
 describe("DemoSampler", () => {
     let ac: AudioContext;
-    let sampler: Sampler;
+    let sampler: IPlugin;
 
     beforeEach(() => {
         ac = new AudioContext();
@@ -16,9 +16,9 @@ describe("DemoSampler", () => {
         expect(ac.$name).toEqual("AudioContext");
     });
 
-    test("has a metadata section", () => {
-        expect(sampler.metaData.type).toEqual("instrument");
-        expect(sampler.metaData.name).toEqual("Intermix Sampler");
+    test("has a metadata section (static)", () => {
+        expect(Sampler.metaData.type).toEqual("instrument");
+        expect(Sampler.metaData.name).toEqual("Intermix Sampler");
     });
 
     test("has action definitions", () => {

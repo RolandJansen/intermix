@@ -1,5 +1,5 @@
 import { AbstractPlugin } from "../registry/AbstractPlugin";
-import { IPlugin, IPluginMetaData, Tuple, IOscActionDef } from "../registry/interfaces";
+import { IPlugin, IPluginMetaData, Tuple, IOscActionDef, IPluginConstructor } from "../registry/interfaces";
 
 /**
  * This class will be used to indirectly
@@ -7,8 +7,8 @@ import { IPlugin, IPluginMetaData, Tuple, IOscActionDef } from "../registry/inte
  * Implementation doesn't matter and
  * is not subject to tests.
  */
-export class TestInstrument extends AbstractPlugin implements IPlugin {
-    public readonly metaData: IPluginMetaData = {
+const Plugin: IPluginConstructor = class TestInstrument extends AbstractPlugin implements IPlugin {
+    public static readonly metaData: IPluginMetaData = {
         type: "instrument",
         name: "Test-Instrument",
         version: "1.0.0",
@@ -56,4 +56,5 @@ export class TestInstrument extends AbstractPlugin implements IPlugin {
         this.testValue = changed;
         return true;
     }
-}
+};
+export default Plugin;
