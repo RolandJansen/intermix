@@ -14,11 +14,6 @@ export interface IRegistryItem {
     unsubscribe(): void;
 }
 
-export interface IPluginConstructor {
-    readonly metaData: IPluginMetaData;
-    new (itemId: string, ac: AudioContext): IPlugin;
-}
-
 export interface IPlugin extends IRegistryItem {
     readonly frequencyLookup: number[];
     inputs: AudioNode[];
@@ -47,6 +42,15 @@ export interface IPluginMetaData {
     version: string;
     authors: string;
     desc: string;
+}
+
+export interface IPluginConstructor {
+    readonly metaData: IPluginMetaData;
+    new (itemId: string, ac: AudioContext): IPlugin;
+}
+
+export interface IPluginClassContainer {
+    [className: string]: IPluginConstructor;
 }
 
 export interface IGlobalActionCreators {

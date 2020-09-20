@@ -140,11 +140,9 @@
     fileSelector.addEventListener("change", (event) => {
         const file = event.target.files[0];
         const url = URL.createObjectURL(file);
-        import(url).then((PluginConstructor) => {
-            console.log(PluginConstructor);
-            const pluginName = PluginConstructor.default.metaData.name;
-            intermix.availablePlugins[pluginName] = PluginConstructor.default;
-            console.log(intermix.availablePlugins);
+        import(url).then((PluginModule) => {
+            intermix.addPluginClass(PluginModule.default);
+            console.log(intermix.pluginClasses);
         });
     });
 
@@ -245,7 +243,7 @@
     });
 
     document.getElementById("getstate").addEventListener('click', () => {
-        console.log(getState());
+        console.log(intermix.getState());
     })
 
     init();

@@ -1,5 +1,5 @@
 import { Action, ActionCreatorsMapObject } from "redux";
-import { IState, IPluginConstructor } from "./registry/interfaces";
+import { IState, IPluginConstructor, IPluginClassContainer } from "./registry/interfaces";
 import MasterRegistry from "./registry/MasterRegistry";
 import { store } from "./store/store";
 import Sequencer from "./plugins/Sequencer/Sequencer";
@@ -10,14 +10,14 @@ import Synth from "./plugins/Synth";
 const audioContext: AudioContext = new AudioContext();
 const registry: MasterRegistry = new MasterRegistry(audioContext);
 
-export const availablePlugins = {
+export const pluginClasses: IPluginClassContainer = {
     Sequencer,
     Sampler,
     Synth,
 };
 
 export function getPluginClassNames(): string[] {
-    return Object.keys(availablePlugins);
+    return Object.keys(pluginClasses);
 }
 
 export function getState(): IState {
@@ -39,6 +39,15 @@ export function getAudioContext(): AudioContext {
 
 // type GenericPluginClass = new (itemId: string, ac: AudioContext) => IPlugin;
 
+export function addPluginClass(PluginClass: IPluginConstructor): void {
+    const pluginName = PluginClass.metaData.name;
+    pluginClasses[pluginName] = PluginClass;
+}
+
+export function removePluginClass(className: string): boolean {
+    return delete pluginClasses[className];
+}
+
 /**
  * Tries to find a class (prototype) with the name of a given string (reflection),
  * then tries to cast it to a valid plugin class.
@@ -47,8 +56,8 @@ export function getAudioContext(): AudioContext {
  * @param pluginClassName The name of the class from which a plugin instance should be created
  */
 export function addPlugin(pluginClassName: string): string {
-    if (availablePlugins.hasOwnProperty(pluginClassName)) {
-        const possibleClass: any = (availablePlugins as any)[pluginClassName];
+    if (pluginClasses.hasOwnProperty(pluginClassName)) {
+        const possibleClass: any = (pluginClasses as any)[pluginClassName];
         const pluginClass: IPluginConstructor = possibleClass as IPluginConstructor;
 
         return registry.addPlugin(pluginClass);
@@ -84,4 +93,4 @@ export function getUnboundActionCreators(itemId: string): ActionCreatorsMapObjec
 export * from "./registry/interfaces";
 export { AbstractPlugin } from "./registry/AbstractPlugin";
 export { AbstractControllerPlugin } from "./registry/AbstractControllerPlugin";
-export { createInlineWorker, loadPlugin, loadFileFromServer } from "./fileLoader";
+export { createInlineWorker, loadFileFromServer } from "./fileLoader";
