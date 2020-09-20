@@ -97,8 +97,13 @@ module.exports = {
         blog: {
           showReadingTime: true,
           // Please change this to your repo.
-          editUrl:
-            'https://github.com/RolandJansen/intermix/tree/homepage/blog',
+          editUrl: 'https://github.com/RolandJansen/intermix/tree/homepage/blog',
+          feedOptions: {
+            type: 'all',
+            language: "en",
+            title: 'Intermix Blog',
+            copyright: `Copyright © ${new Date().getFullYear()} Roland Jansen.`,
+          },
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
