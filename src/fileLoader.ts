@@ -6,8 +6,6 @@
  * loads inline dedicated workers.
  */
 
-import { getPluginClassNames } from ".";
-
 type fn = () => void;
 
 /**
@@ -23,23 +21,7 @@ export const createInlineWorker = (fn: (e: MessageEvent) => void): Worker => {
     return new Worker(url);
 };
 
-/**
- * Loads an intermix plugin class from a file and returns the class name.
- * @param data An object that contains the binary content of a file.
- * @param onload A function that will be called after the script was executed
- * @param onerror A function that will be called if the execution of the script failed
- */
-export function loadPlugin(data: Blob | File, onload: fn, onerror: fn): string {
-    const pluginsBefore = getPluginClassNames();
-    if (data.type === "text/javascript") {
-        loadScript(data, onload, onerror);
-    }
-    const pluginsAfter = getPluginClassNames();
-    const diff = pluginsAfter.filter((item) => !pluginsBefore.includes(item));
-    return diff.toString();
-}
-
-function loadScript(data: Blob | File, onload: fn, onerror: fn): void {
+export function loadScriptFromFile(data: Blob | File, onload: fn, onerror: fn): void {
     const url = URL.createObjectURL(data);
     const script = document.createElement('script');
 
@@ -50,6 +32,17 @@ function loadScript(data: Blob | File, onload: fn, onerror: fn): void {
 
     document.body.appendChild(script);
 }
+
+export function loadFileFromServer(url: string): Promise<ArrayBuffer> {
+    return window.fetch(url)
+        .then((response) => {
+            if (response.ok) {
+                return response.arrayBuffer();
+            } else {
+                throw new Error('Server error. Couldn\'t load file: ' + url);
+            }
+        });
+};
 
 // function loadDOM(file: File): void {
 //     // not yet implemented
@@ -79,16 +72,6 @@ function loadScript(data: Blob | File, onload: fn, onerror: fn): void {
 //     }
 // }
 
-export function loadFileFromServer(url: string): Promise<ArrayBuffer> {
-    return window.fetch(url)
-        .then((response) => {
-            if (response.ok) {
-                return response.arrayBuffer();
-            } else {
-                throw new Error('Server error. Couldn\'t load file: ' + url);
-            }
-        });
-};
 
 // function hasSuffix(fileName: string, suffix: string): boolean {
 //     const fileSuffix = fileName.split(".").pop().toLowerCase();

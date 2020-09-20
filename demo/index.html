@@ -58,6 +58,7 @@
     };
 </script>
 <script type="module">
+    // import * as intermix from "intermix";
     import * as intermix from "/dist/esm/index.js";
     window.intermix = intermix;
 
@@ -138,16 +139,13 @@
     const fileSelector = document.getElementById("file-selector");
     fileSelector.addEventListener("change", (event) => {
         const file = event.target.files[0];
-        const pluginConstructor = file.name.slice(0, -3);
-        let pluginUid = "";
-        const onload = () => {
-            pluginUid = intermix.addPlugin(pluginConstructor);
-            console.log(pluginUid);
-        }
-        const onerror = () => {
-            console.log(pluginConstructor + " could not be loaded.");
-        }
-        const pluginName = intermix.loadPlugin(file, onload, onerror);
+        const url = URL.createObjectURL(file);
+        import(url).then((PluginConstructor) => {
+            console.log(PluginConstructor);
+            const pluginName = PluginConstructor.default.metaData.name;
+            intermix.availablePlugins[pluginName] = PluginConstructor.default;
+            console.log(intermix.availablePlugins);
+        });
     });
 
     const selectNextSeqRow = (step) => {

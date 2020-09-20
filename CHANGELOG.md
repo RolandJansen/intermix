@@ -6,16 +6,16 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - File-loader that loads additional files (code, assets) at runtime
-- Worker-loader that enables Dedicated Workers inside other scripts
-- Rollup replaces Webpack as bundler
+- Worker-loader that loads Dedicated Workers inside of other scripts
+- Rollup config
 - Live-Server for hot reload in dev-mode (didn't work with Webpack)
 - Package-bundles as _CommonJS_ and _ES2015_ modules
-- Package contains non-minified bundles
+- Non-minified bundles
 - cross-env for OS independent shell variables
 
 ### Changed
-- Typings fixed
 - `npm run compile` builds experimental non-bundled versions for _CommonJS_ and _ES2015_ in _lib/_ Folder
+- Switched bundler from Webpack to Rollup
 - Dev-Demo (`npm run watch`) uses native _ES2015_ modules instead of browser globals
 - Package size reduced from 900kB to <200kB
 
@@ -25,7 +25,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 - Demo and audio assets removed from production build
 - UMD build task
-- Webpack and its plugins (replaced by Rollup)
+- Webpack config
 
 ## [0.6.0] - 2020-08-03
 
