@@ -2,17 +2,9 @@
 import "web-audio-test-api";
 import Sequencer from "../Sequencer";
 import SeqPart from "../../../seqpart/SeqPart";
-import {
-    ILoop,
-    IOscActionDef,
-    IntermixNote,
-    OscArgSequence,
-    IPlugin,
-    IRegistryItem,
-} from "../../../registry/interfaces";
+import { ILoop, IOscActionDef, IntermixNote, OscArgSequence, IPlugin } from "../../../registry/interfaces";
 import { createInlineWorker } from "../../../fileLoader";
 import { IClockMessage } from "../clock.worker";
-import AbstractRegistry from "../../../registry/AbstractRegistry";
 
 // mock dependencies of the module under test
 jest.mock("../clock.worker");
