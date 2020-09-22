@@ -3,6 +3,7 @@
 .tmp
 /doc/
 /**/.jekyll-cache
+intermix-*.tgz
 
 # local files
 /node_modules/

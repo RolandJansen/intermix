@@ -1,6 +1,7 @@
 # things that are useless in the npm package
 *.yml
 package-lock.json
+intermix-*.tgz
 .github/
 node_modules/
 src/
