@@ -19,7 +19,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - `npm run compile` builds non-bundled versions of intermix in 'lib/' folder (experimental)
 - Switched bundler from Webpack to Rollup
 - Dev-Demo (`npm run watch`) uses native ES2015 modules instead of browser globals
-- Package size reduced from 900kB to <150kB
+- Package size reduced from 900kB to <200kB
 
 ### Fixed
 - Typescript declarations
