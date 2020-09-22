@@ -1,6 +1,31 @@
-# Change Log
-All notable changes to this project will be documented in this file.
-This project adheres to [Semantic Versioning](http://semver.org/).
+## [0.7.0] - 2020-09-22
+
+### Added
+- External plugins can be loaded as ES2015 modules at runtime
+- File-loader that loads additional files (code, assets) at runtime
+- Worker-loader that loads Dedicated Workers inside of other scripts
+- Rollup config
+- Live-Server for hot reload in dev-mode (didn't work with Webpack)
+- Package-bundles as _CommonJS_ and _ES2015_ modules (former _UMD_)
+- Non-minified bundles
+- cross-env for OS independent shell variables
+- `npm run doc` generates API doc in markdown format (experimental)
+
+### Changed
+- `npm run compile` builds non-bundled versions of intermix in 'lib/' folder (experimental)
+- Switched bundler from Webpack to Rollup
+- Dev-Demo (`npm run watch`) uses native ES2015 modules instead of browser globals
+- Package size reduced from 900kB to <150kB
+
+### Fixed
+- Typescript declarations
+- Sequencer position not saved in store
+
+### Removed
+- Demo and audio assets removed from production build
+- UMD package bundle
+- Webpack config
+- Legacy json API docs
 
 ## [0.6.0] - 2020-08-03
 
@@ -10,7 +35,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Integration Test for common Action Definitions (action defs that all plugins have by default).
 
 ### Changed
-- Plugin ID placeholder renamed from `{UID}` to `<UID>` since curly braces have a meaning in OSC semantics
+- Plugin ID placeholder renamed from _{UID}_ to _&lt;UID&gt;_ since curly braces have a meaning in OSC semantics
 - Sequencer Actions _pointer_ and _JUMP_TO_POSITION_ are now unified in a new _position_ action.
 
 ### Fixed
@@ -108,7 +133,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Sound demo
 - Stepsequencer demo
 
-[Unreleased]: https://github.com/RolandJansen/intermix.js/compare/v0.6.0...HEAD
+[0.7.0]: https://github.com/RolandJansen/intermix.js/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/RolandJansen/intermix.js/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/RolandJansen/intermix.js/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/RolandJansen/intermix.js/compare/v0.3.0...v0.4.0

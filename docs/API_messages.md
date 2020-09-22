@@ -92,10 +92,12 @@ You can bundle _/activateStep_ with any of the other actions.
 
 **Prefix:** /intermix/plugin/&lt;UID&gt;
 
-| OSC Address | Value Name | Type | Range | Since | Comment |
-| ---         | ---        | ---  | ---   | ---   | ---     |
-| /envAttack  | envAttack  | f    | [0;1] | 0.5.0 | Filter Envelope Attack |
-| /envDecay   | envDecay   | f    | [0;1] | 0.5.0 | Filter Envelope Decay |
+| OSC Address | Value Name | Type | Range  | Since | Comment |
+| ---         | ---        | ---  | ---    | ---   | ---     |
+| /note       | note       | siiff| [0;127]| 0.5.0 | plays a note |
+| /stop       | stop       | N    | none   | 0.5.0 | disconnects all nodes from audio output |
+| /envAttack  | envAttack  | f    | [0;1]  | 0.5.0 | Filter Envelope Attack |
+| /envDecay   | envDecay   | f    | [0;1]  | 0.5.0 | Filter Envelope Decay |
 
 ## Sampler
 
@@ -105,4 +107,5 @@ You can bundle _/activateStep_ with any of the other actions.
 
 | OSC Address | Value Name | Type | Range | Since | Comment |
 | ---         | ---        | ---  | ---   | ---   | ---     |
+| /note       | note       | siiff| [0;127]| 0.5.0 | Plays a note |
 | /stop       |
