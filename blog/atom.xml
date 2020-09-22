@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://rolandjansen.github.io/blog</id>
+    <title>Intermix Blog</title>
+    <updated>2020-09-22T00:00:00.000Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://rolandjansen.github.io/blog"/>
+    <subtitle>intermix Blog</subtitle>
+    <icon>https://rolandjansen.github.io/img/favicon.ico</icon>
+    <rights>Copyright © 2020 Roland Jansen.</rights>
+    <entry>
+        <title type="html"><![CDATA[Intermix v0.7.0 Released]]></title>
+        <id>Intermix v0.7.0 Released</id>
+        <link href="https://rolandjansen.github.io/intermix/blog/Intermix v0.7.0 Released"/>
+        <updated>2020-09-22T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[Intermix Version 0.7.0 introduces external plugins that can be loaded at runtime.]]></summary>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Intermix v0.6.0 Released]]></title>
+        <id>Intermix v0.6.0 Released</id>
+        <link href="https://rolandjansen.github.io/intermix/blog/Intermix v0.6.0 Released"/>
+        <updated>2020-08-05T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[Intermix Version 0.6.0 introduces preset management for plugins.]]></summary>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Intermix v0.5.0 Released]]></title>
+        <id>Intermix v0.5.0 Released</id>
+        <link href="https://rolandjansen.github.io/intermix/blog/Intermix v0.5.0 Released"/>
+        <updated>2020-07-01T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[Today, besides this website, Intermix Version 0.5.0 was released.]]></summary>
+    </entry>
+</feed>
