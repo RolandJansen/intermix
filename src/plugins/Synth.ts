@@ -78,7 +78,6 @@ const Plugin: IPluginConstructor = class Synth extends AbstractPlugin implements
     // onChange gets called
     // on every state change
     public onChange(changed: Tuple): boolean {
-        // console.log(changed);
         switch (changed[0]) {
             case "note":
                 const note: IntermixNote = changed[1];

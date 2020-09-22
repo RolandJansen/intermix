@@ -2,7 +2,8 @@
 const typescript = require("@wessberg/rollup-plugin-ts");
 const resolve = require("rollup-plugin-node-resolve");
 const commonjs = require("rollup-plugin-commonjs");
-const liveServer = require("rollup-plugin-live-server");
+const terser = require("rollup-plugin-terser").terser;
+const liveServer = require("rollup-plugin-live-server").liveServer;
 const pkg = require("./package.json");
 
 // es2015 modules are currently not possible
@@ -19,16 +20,24 @@ const extensions = [".js", ".jsx", ".ts", ".tsx"];
 const input = pkg.entry;
 const output = [
     {
-        dir: "dist/cjs",
-        name: pkg.name,
+        file: "dist/cjs/" + pkg.name + ".cjs.js",
         format: "cjs",
-        sourcemap: true,
     },
     {
-        dir: "dist/esm",
-        name: pkg.name,
+        file: "dist/cjs/" + pkg.name + ".cjs.min.js",
+        format: "cjs",
+        sourcemap: true,
+        plugins: [terser()],
+    },
+    {
+        file: "dist/esm/" + pkg.name + ".esm.js",
+        format: "es",
+    },
+    {
+        file: "dist/esm/" + pkg.name + ".esm.min.js",
         format: "es",
         sourcemap: true,
+        plugins: [terser()],
     },
 ];
 const plugins = [resolve({ module: true, extensions }), commonjs(), typescript()];
@@ -54,7 +63,7 @@ const config = {
 };
 
 if (process.env.TARGET === "debug") {
-    config.plugins = [...plugins, liveServer.liveServer(liveServerConfig)];
+    config.plugins = [...plugins, liveServer(liveServerConfig)];
     config.external = [];
 }
 
