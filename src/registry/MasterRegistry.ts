@@ -4,9 +4,9 @@ import combineReducersWithRoot from "./combineReducersWithRoot";
 import SeqPartRegistry from "./SeqPartRegistry";
 import SeqPart from "../seqpart/SeqPart";
 import PluginRegistry from "./PluginRegistry";
-import { IPlugin, IPluginConstructor } from "./interfaces";
+import { IPlugin, IPluginConstructor, Tuple } from "./interfaces";
 import rootReducer from "../store/rootReducer";
-import { addPlugin, addPart, removePlugin, removePart } from "../store/rootActions";
+import { addPlugin, addPart, removePlugin, removePart, connectAudioNodes } from "../store/rootActions";
 
 // this file has a method also called "addPlugin"
 // so we'll rename it to avoid confusion.
@@ -94,6 +94,28 @@ export default class MasterRegistry {
         }
 
         return actionCreators;
+    }
+
+    public connectAudioNodes(connection: Tuple): void {
+        const output = connection[0].split(":");
+        const input = connection[1].split(":");
+
+        const outputPluginId = output[0];
+        const inputPluginId = input[0];
+
+        const outputNodeNum = Number.parseInt(output[1]);
+        const inputNodeNum = Number.parseInt(input[1]);
+
+        const pluginOut = this.plugins.itemList.get(outputPluginId);
+        const pluginIn = this.plugins.itemList.get(inputPluginId);
+
+        if (typeof pluginOut !== "undefined" && typeof pluginIn !== "undefined") {
+            const audioNodeOut = pluginOut?.outputs[outputNodeNum];
+            const audioNodeIn = pluginIn.inputs[inputNodeNum];
+
+            audioNodeOut.connect(audioNodeIn);
+            store.dispatch(connectAudioNodes(connection));
+        }
     }
 
     /**

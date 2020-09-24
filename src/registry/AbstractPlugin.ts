@@ -22,6 +22,7 @@ export abstract class AbstractPlugin implements IPlugin {
     public abstract actionDefs: IOscActionDef[]; // will be extended with commonActionDefs
 
     public readonly frequencyLookup: number[];
+    public initState: IState;
 
     // actionCreators will be bound to dispatch by the registry
     public actionCreators: ActionCreatorsMapObject = {};
@@ -29,6 +30,7 @@ export abstract class AbstractPlugin implements IPlugin {
 
     constructor() {
         this.frequencyLookup = this.getNoteFrequencies();
+        this.initState = {};
     }
 
     public abstract get inputs(): AudioNode[];

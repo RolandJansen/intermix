@@ -30,6 +30,8 @@ export default class PluginRegistry extends AbstractRegistry {
             newItem.actionDefs = [...newItem.actionDefs, ...commonActionDefs];
         }
 
+        newItem.initState = this.buildBasicInitState(newItem);
+
         // build action creators
         const actionCreators = this.getActionCreators(newItem.actionDefs, itemId);
         newItem.unboundActionCreators = actionCreators;
@@ -65,6 +67,21 @@ export default class PluginRegistry extends AbstractRegistry {
             // remove from item list
             this.itemList.delete(itemId);
         }
+    }
+
+    private buildBasicInitState(newItem: IPlugin): IState {
+        const inputs: string[] = [];
+        const outputs: string[] = [];
+        for (let i = 0; i < newItem.outputs.length; i++) {
+            outputs[i] = "destination";
+        }
+
+        return {
+            inputCount: newItem.inputs.length,
+            outputCount: newItem.outputs.length,
+            inputs,
+            outputs,
+        };
     }
 
     private setupControllerPlugin(newItem: IPlugin): void {
@@ -110,15 +127,16 @@ export default class PluginRegistry extends AbstractRegistry {
     }
 
     /**
-     * There is no complex audio routing at the moment
-     * so we just connect the 1st audio output of the
+     * Connect all audio output of the
      * plugin with the audio destination.
      * @param pInstance The plugin to be wired
      */
     private wireAudioOutputs(pInstance: IPlugin): void {
         const outputs = pInstance.outputs;
         if (outputs.length !== 0) {
-            outputs[0].connect(this.ac.destination);
+            outputs.forEach((output: AudioNode) => {
+                output.connect(this.ac.destination);
+            });
         }
     }
 }

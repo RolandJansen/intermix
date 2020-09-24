@@ -32,6 +32,9 @@ const Plugin: IPluginConstructor = class TestInstrument extends AbstractPlugin i
         },
     ];
 
+    // something to test the inputs/outputs
+    private testNode: AudioNode;
+
     // here we can check if onChange was called correctly without mocking
     public testValue: Tuple = ["", 0];
 
@@ -40,11 +43,12 @@ const Plugin: IPluginConstructor = class TestInstrument extends AbstractPlugin i
     }
 
     public get outputs(): AudioNode[] {
-        return [];
+        return [this.testNode];
     }
 
     constructor(public readonly uid: string, private ac: AudioContext) {
         super();
+        this.testNode = ac.createGain();
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

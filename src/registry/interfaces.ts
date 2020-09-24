@@ -7,6 +7,7 @@ export type ReturnFunction<ValueType> = () => ValueType;
 
 export interface IRegistryItem {
     readonly uid: string;
+    initState: IState;
     actionDefs: IOscActionDef[];
     actionCreators: ActionCreatorsMapObject;
     unboundActionCreators: ActionCreatorsMapObject;

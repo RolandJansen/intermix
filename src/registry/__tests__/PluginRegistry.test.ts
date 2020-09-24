@@ -40,13 +40,20 @@ describe("add", () => {
     });
 
     test("adds action defs for common actions to the plugin instance", () => {
-        // testPlugin.actionDefs.forEach((actionDef: IOscActionDef) => {
-        //     if (actionDef.address === "NOTE") {
-        //         noteDef = actionDef;
-        //     }
-        // })
         const noteAction: IOscActionDef = commonActionDefs[0];
         expect(testPlugin.actionDefs).toContainEqual(noteAction);
+    });
+
+    test("populates the initState", () => {
+        expect(testPlugin.initState.inputCount).toEqual(0);
+        expect(testPlugin.initState.outputCount).toEqual(1);
+        expect(testPlugin.initState.inputs).toHaveLength(0);
+        expect(testPlugin.initState.outputs).toHaveLength(1);
+    });
+
+    test("output nodes get connected to output by default", () => {
+        const out1Dest = testPlugin.initState.outputs[0];
+        expect(out1Dest).toEqual("destination");
     });
 
     test("adds action creator functions to the plugin instance", () => {

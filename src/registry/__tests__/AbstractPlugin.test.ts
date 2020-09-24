@@ -14,10 +14,9 @@ beforeEach(() => {
     plug = new TestInstrument("abcd", ac);
 });
 
-// test("Generate a random unique ID", () => {
-//     expect(plug.uid).toBeDefined();
-//     expect(plug.uid.length).toEqual(plug.uidLength);
-// });
+test("has an empty initState object", () => {
+    expect(plug.initState).toBeDefined();
+});
 
 // See cheat sheet:
 // http://www.inspiredacoustics.com/en/MIDI_note_numbers_and_center_frequencies

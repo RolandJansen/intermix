@@ -38,12 +38,7 @@ export default abstract class AbstractRegistry {
         allUids.forEach((uid: string) => {
             const item = this.itemList.get(uid);
             if (item) {
-                let initState: IState = {};
-                if (this.isSeqPart(item)) {
-                    initState = this.getInitialState(uid, item.actionDefs, item.initState);
-                } else {
-                    initState = this.getInitialState(uid, item.actionDefs);
-                }
+                const initState = this.getInitialState(uid, item.actionDefs, item.initState);
                 subReducers[uid] = this.getSubReducer(item.actionDefs, initState);
             }
         });

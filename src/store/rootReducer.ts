@@ -1,6 +1,6 @@
-import { IState } from "../registry/interfaces";
+import { IState, Tuple } from "../registry/interfaces";
 import { AnyAction } from "redux";
-import { ADD_PLUGIN, REMOVE_PLUGIN, ADD_PART, REMOVE_PART } from "./rootActions";
+import { ADD_PLUGIN, REMOVE_PLUGIN, ADD_PART, REMOVE_PART, CONNECT_AUDIO_NODES } from "./rootActions";
 
 const initialState: IState = {
     plugins: [],
@@ -26,9 +26,6 @@ const rootReducer = (state: IState = initialState, action: AnyAction): IState =>
         delete newState[pluginRef];
         return newState;
     } else if (action.type === ADD_PART) {
-        // const newPartRefs: string[] = Array.from(state.seqparts);
-        // const partRef = action.payload as string;
-        // newPartRefs.push(partRef);
         const newPartRefs = addItem(state.seqparts, action.payload);
         const newState: IState = { ...state, seqparts: newPartRefs };
         return newState;
@@ -42,6 +39,13 @@ const rootReducer = (state: IState = initialState, action: AnyAction): IState =>
         });
         delete newState[partRef];
         return newState;
+    } else if (action.type === CONNECT_AUDIO_NODES) {
+        const output = (action.payload as Tuple)[0].split(":");
+        const input = (action.payload as Tuple)[1].split(":");
+        const outputPluginId = output[0];
+        const outputNodeNum = output[1];
+        const inputPluginId = input[0];
+        const inputNodeNum = input[1];
     }
     return state;
 };
