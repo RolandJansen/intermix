@@ -8,7 +8,7 @@ import { IPlugin, IPluginMetaData, Tuple, IOscActionDef, IPluginConstructor } fr
  * is not subject to tests.
  */
 const Plugin: IPluginConstructor = class TestInstrument extends AbstractPlugin implements IPlugin {
-    public static readonly metaData: IPluginMetaData = {
+    public static readonly METADATA: IPluginMetaData = {
         type: "instrument",
         name: "Test-Instrument",
         version: "1.0.0",
@@ -53,7 +53,6 @@ const Plugin: IPluginConstructor = class TestInstrument extends AbstractPlugin i
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public onChange(changed: Tuple): boolean {
-        // console.log(changed);
         if (changed[0] === "loadPreset") {
             this.refreshAllValues();
         }

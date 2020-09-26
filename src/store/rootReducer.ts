@@ -46,6 +46,8 @@ const rootReducer = (state: IState = initialState, action: AnyAction): IState =>
         const outputNodeNum = output[1];
         const inputPluginId = input[0];
         const inputNodeNum = input[1];
+        // do we have to clone something or just replace
+        // the values? Look in redux docs for answers.
     }
     return state;
 };

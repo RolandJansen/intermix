@@ -26,7 +26,7 @@ export default class PluginRegistry extends AbstractRegistry {
         this.itemList.set(newItem.uid, newItem);
 
         // add commonActionDefs to the plugin if its an instrument
-        if (pluginClass.metaData.type === "instrument") {
+        if (pluginClass.METADATA.type === "instrument") {
             newItem.actionDefs = [...newItem.actionDefs, ...commonActionDefs];
         }
 

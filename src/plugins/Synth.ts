@@ -15,14 +15,14 @@ import {
  * https://developer.mozilla.org/de/docs/Web/API/AudioContext
  */
 const Plugin: IPluginConstructor = class Synth extends AbstractPlugin implements IPlugin {
-    private static readonly PREFIX = "/intermix/plugin/<UID>/";
-    public static readonly metaData: IPluginMetaData = {
+    public static readonly METADATA: IPluginMetaData = {
         type: "instrument",
         name: "Intermix Synth",
         version: "1.0.0",
         authors: "R. Jansen",
         desc: "A simple synthesizer",
     };
+    private static readonly PREFIX = "/intermix/plugin/<UID>/";
 
     public readonly actionDefs: IOscActionDef[] = [
         {

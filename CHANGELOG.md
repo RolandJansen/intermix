@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [unreleased]
 
 ### Added
+ - Advanced audio routing
+ - An `onChangeDefault()` function that handles common events for plugins
+
+### Changed
+ - `npm run compile` now renders the results to the dist/ folder instead of lib/
 
 
 ## [0.7.0] - 2020-09-22
@@ -15,14 +20,14 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Worker-loader that loads Dedicated Workers inside of other scripts
 - Rollup config
 - Live-Server for hot reload in dev-mode (didn't work with Webpack)
-- Package-bundles as _CommonJS_ and _ES2015_ modules (former _UMD_)
 - Non-minified bundles
 - cross-env for OS independent shell variables
 - `npm run doc` generates API doc in markdown format (experimental)
 
 ### Changed
-- `npm run compile` builds non-bundled versions of intermix in 'lib/' folder (experimental)
 - Switched bundler from Webpack to Rollup
+- Packages are bundled to _CommonJS_ and _ES2015_ modules (former _UMD_)
+- `npm run compile` builds non-bundled versions of intermix in 'lib/' folder (experimental)
 - Dev-Demo (`npm run watch`) uses native ES2015 modules instead of browser globals
 - Package size reduced from 900kB to <200kB
 

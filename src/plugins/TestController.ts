@@ -16,7 +16,7 @@ import {
  * is not subject to tests.
  */
 const Plugin: IPluginConstructor = class TestController extends AbstractPlugin implements IControllerPlugin {
-    public static readonly metaData: IPluginMetaData = {
+    public static readonly METADATA: IPluginMetaData = {
         type: "controller",
         name: "Test-Controller",
         version: "1.0.0",

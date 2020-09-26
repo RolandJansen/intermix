@@ -46,7 +46,7 @@ export interface IPluginMetaData {
 }
 
 export interface IPluginConstructor {
-    readonly metaData: IPluginMetaData;
+    readonly METADATA: IPluginMetaData;
     new (itemId: string, ac: AudioContext): IPlugin;
 }
 

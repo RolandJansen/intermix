@@ -2,14 +2,14 @@ import { AbstractPlugin } from "../registry/AbstractPlugin";
 import { IPlugin, Tuple, IOscActionDef, IntermixNote, IPluginConstructor } from "../registry/interfaces";
 
 const Plugin: IPluginConstructor = class Sampler extends AbstractPlugin implements IPlugin {
-    private static readonly PREFIX = "/intermix/plugin/<UID>/";
-    public static readonly metaData = {
+    public static readonly METADATA = {
         type: "instrument",
         name: "Intermix Sampler",
         version: "1.0.0",
         authors: "R. Jansen",
         desc: "A sample player",
     };
+    private static readonly PREFIX = "/intermix/plugin/<UID>/";
 
     public readonly actionDefs: IOscActionDef[] = [
         {

@@ -40,7 +40,7 @@ export function getAudioContext(): AudioContext {
 // type GenericPluginClass = new (itemId: string, ac: AudioContext) => IPlugin;
 
 export function addPluginClass(PluginClass: IPluginConstructor): void {
-    const pluginName = PluginClass.metaData.name;
+    const pluginName = PluginClass.METADATA.name;
     pluginClasses[pluginName] = PluginClass;
 }
 

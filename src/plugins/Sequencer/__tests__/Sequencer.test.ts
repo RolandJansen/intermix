@@ -48,8 +48,8 @@ describe("Sequencer", () => {
     });
 
     test("has a static metadata section", () => {
-        expect(Sequencer.metaData.type).toEqual("controller");
-        expect(Sequencer.metaData.name).toEqual("Intermix Sequencer");
+        expect(Sequencer.METADATA.type).toEqual("controller");
+        expect(Sequencer.METADATA.name).toEqual("Intermix Sequencer");
     });
 
     test("has action definitions", () => {

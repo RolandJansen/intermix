@@ -17,8 +17,8 @@ describe("DemoSynth", () => {
     });
 
     test("has a metadata section (static)", () => {
-        expect(Synth.metaData.type).toEqual("instrument");
-        expect(Synth.metaData.name).toEqual("Intermix Synth");
+        expect(Synth.METADATA.type).toEqual("instrument");
+        expect(Synth.METADATA.name).toEqual("Intermix Synth");
     });
 
     test("has action definitions", () => {

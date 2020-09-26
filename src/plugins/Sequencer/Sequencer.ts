@@ -26,7 +26,7 @@ export interface IQueuePosition {
  */
 const Plugin: IPluginConstructor = class Sequencer extends AbstractControllerPlugin implements IControllerPlugin {
     public static bpmDefault = 120;
-    public static readonly metaData = {
+    public static readonly METADATA = {
         type: "controller",
         name: "Intermix Sequencer",
         version: "1.0.0-beta",

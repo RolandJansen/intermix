@@ -43,6 +43,16 @@ export abstract class AbstractPlugin implements IPlugin {
      */
     public abstract onChange(changed: Tuple): boolean;
 
+    protected onChangeDefault(changed: Tuple): boolean {
+        switch (changed[0]) {
+            case "loadPreset":
+                this.refreshAllValues();
+                return true;
+            default:
+                return false;
+        }
+    }
+
     /**
      * Unsubscribe from the dispatcher.
      * This is empty by default and will

@@ -17,8 +17,8 @@ describe("DemoSampler", () => {
     });
 
     test("has a metadata section (static)", () => {
-        expect(Sampler.metaData.type).toEqual("instrument");
-        expect(Sampler.metaData.name).toEqual("Intermix Sampler");
+        expect(Sampler.METADATA.type).toEqual("instrument");
+        expect(Sampler.METADATA.name).toEqual("Intermix Sampler");
     });
 
     test("has action definitions", () => {
