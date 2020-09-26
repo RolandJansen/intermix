@@ -33,6 +33,7 @@ class TestItem implements IRegistryItem {
     public readonly actionDefs: IOscActionDef[] = testActionDefs;
     public actionCreators: ActionCreatorsMapObject = {};
     public unboundActionCreators: ActionCreatorsMapObject = {};
+    public initState: IState = {};
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public onChange(changed: Tuple): boolean {
