@@ -5,6 +5,7 @@ import { store } from "./store/store";
 import Sequencer from "./plugins/Sequencer/Sequencer";
 import Sampler from "./plugins/Sampler";
 import Synth from "./plugins/Synth";
+import Delay from "./plugins/Delay";
 
 // system components
 const audioContext: AudioContext = new AudioContext();
@@ -14,6 +15,7 @@ export const pluginClasses: IPluginClassContainer = {
     Sequencer,
     Sampler,
     Synth,
+    Delay,
 };
 
 export function getPluginClassNames(): string[] {

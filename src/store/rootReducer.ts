@@ -40,14 +40,31 @@ const rootReducer = (state: IState = initialState, action: AnyAction): IState =>
         delete newState[partRef];
         return newState;
     } else if (action.type === CONNECT_AUDIO_NODES) {
-        const output = (action.payload as Tuple)[0].split(":");
-        const input = (action.payload as Tuple)[1].split(":");
-        const outputPluginId = output[0];
-        const outputNodeNum = output[1];
-        const inputPluginId = input[0];
-        const inputNodeNum = input[1];
-        // do we have to clone something or just replace
-        // the values? Look in redux docs for answers.
+        const outputIdAndChnnelNum = (action.payload as Tuple)[0];
+        const inputIdAndChannelNum = (action.payload as Tuple)[1];
+
+        const output = outputIdAndChnnelNum.split(":");
+        const input = inputIdAndChannelNum.split(":");
+        const outputPluginId: string = output[0];
+        const outputNumber = parseInt(output[1]);
+        const inputPluginId: string = input[0];
+        const inputNumber = parseInt(input[1]);
+
+        const newOutputState: string[] = Array.from(state[outputPluginId].outputs);
+        newOutputState[outputNumber] = inputIdAndChannelNum;
+        const newInputState: string[] = Array.from(state[inputPluginId].inputs);
+        newInputState[inputNumber] = outputIdAndChnnelNum;
+
+        const newOutputPlugin = Object.assign({}, state[outputPluginId], {
+            outputs: newOutputState,
+        });
+        const newInputPlugin = Object.assign({}, state[inputPluginId], {
+            inputs: newInputState,
+        });
+
+        state[outputPluginId] = newOutputPlugin;
+        state[inputPluginId] = newInputPlugin;
+        return state;
     }
     return state;
 };
