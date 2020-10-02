@@ -1,5 +1,5 @@
 import { Action, ActionCreatorsMapObject } from "redux";
-import { IState, IPluginConstructor, IPluginClassContainer } from "./registry/interfaces";
+import { IState, IPluginConstructor, IPluginClassContainer, AudioEndpoint } from "./registry/interfaces";
 import MasterRegistry from "./registry/MasterRegistry";
 import { store } from "./store/store";
 import Sequencer from "./plugins/Sequencer/Sequencer";
@@ -89,6 +89,16 @@ export function getActionCreators(itemId: string): ActionCreatorsMapObject {
 
 export function getUnboundActionCreators(itemId: string): ActionCreatorsMapObject {
     return registry.getActionCreators(itemId, "unbound");
+}
+
+/**
+ * Connects two audio endpoints and dispatches the new state.
+ * If the id of the input plugin is not valid, it connects to the soundcard input.
+ * If the id of the output plugin is not valid, it cancels the operation.
+ * @param connection Audio endpoints to be connected
+ */
+export function connectPlugins(connection: [AudioEndpoint, AudioEndpoint]): void {
+    registry.connectAudioNodes(connection);
 }
 
 // API for plugin developers

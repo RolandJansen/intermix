@@ -1,5 +1,5 @@
 import AbstractRegistry from "./AbstractRegistry";
-import { IPlugin, IControllerPlugin, IAction, IPluginConstructor, IState } from "./interfaces";
+import { IPlugin, IControllerPlugin, IAction, IPluginConstructor, IState, AudioEndpoint } from "./interfaces";
 import { store } from "../store/store";
 import { bindActionCreators } from "redux";
 import commonActionDefs from "./commonActionDefs";
@@ -70,10 +70,10 @@ export default class PluginRegistry extends AbstractRegistry {
     }
 
     private buildBasicInitState(newItem: IPlugin): IState {
-        const inputs: string[] = [];
-        const outputs: string[] = [];
+        const inputs: AudioEndpoint[] = [];
+        const outputs: AudioEndpoint[] = [];
         for (let i = 0; i < newItem.outputs.length; i++) {
-            outputs[i] = "destination";
+            outputs[i] = ["destination", 0];
         }
 
         return {

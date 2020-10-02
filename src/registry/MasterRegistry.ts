@@ -4,7 +4,7 @@ import combineReducersWithRoot from "./combineReducersWithRoot";
 import SeqPartRegistry from "./SeqPartRegistry";
 import SeqPart from "../seqpart/SeqPart";
 import PluginRegistry from "./PluginRegistry";
-import { IPlugin, IPluginConstructor, Tuple } from "./interfaces";
+import { AudioEndpoint, IPlugin, IPluginConstructor } from "./interfaces";
 import rootReducer from "../store/rootReducer";
 import { addPlugin, addPart, removePlugin, removePart, connectAudioNodes } from "../store/rootActions";
 
@@ -24,12 +24,12 @@ export default class MasterRegistry {
     private plugins: PluginRegistry;
     private seqParts: SeqPartRegistry;
 
-    public constructor(ac: AudioContext) {
+    public constructor(private ac: AudioContext) {
         this.plugins = new PluginRegistry(ac);
         this.seqParts = new SeqPartRegistry();
     }
 
-    public addPlugin<P extends IPlugin>(pluginClass: IPluginConstructor): string {
+    public addPlugin(pluginClass: IPluginConstructor): string {
         const newPlugin: IPlugin = this.plugins.add(pluginClass);
 
         // build a new root reducer and replace the current one
@@ -96,26 +96,31 @@ export default class MasterRegistry {
         return actionCreators;
     }
 
-    public connectAudioNodes(connection: Tuple): void {
-        const output = connection[0].split(":");
-        const input = connection[1].split(":");
+    /**
+     * Connects two audio endpoints and dispatches the new state.
+     * If the id of the input plugin is not valid, it connects to the soundcard input.
+     * If the id of the output plugin is not valid, it cancels the operation.
+     * @param connection Audio endpoints to be connected
+     */
+    public connectAudioNodes(connection: [AudioEndpoint, AudioEndpoint]): void {
+        const output = connection[0];
+        const input = connection[1];
 
-        const outputPluginId = output[0];
-        const inputPluginId = input[0];
-
-        const outputNodeNum = Number.parseInt(output[1]);
-        const inputNodeNum = Number.parseInt(input[1]);
-
-        const pluginOut = this.plugins.itemList.get(outputPluginId);
-        const pluginIn = this.plugins.itemList.get(inputPluginId);
-
-        if (typeof pluginOut !== "undefined" && typeof pluginIn !== "undefined") {
-            const audioNodeOut = pluginOut?.outputs[outputNodeNum];
-            const audioNodeIn = pluginIn.inputs[inputNodeNum];
-
-            audioNodeOut.connect(audioNodeIn);
-            store.dispatch(connectAudioNodes(connection));
+        const pluginOut = this.plugins.itemList.get(output[0]);
+        const pluginIn = this.plugins.itemList.get(input[0]);
+        if (typeof pluginOut === "undefined") {
+            return;
         }
+
+        const audioNodeOut = pluginOut.outputs[output[1]];
+        const audioNodeIn = pluginIn ? pluginIn.inputs[input[1]] : this.ac.destination;
+
+        if (audioNodeIn.numberOfOutputs === 0) {
+            input[0] = "destination"; // enshure that no wrong id will be dispatched
+        }
+        audioNodeOut.disconnect();
+        audioNodeOut.connect(audioNodeIn);
+        store.dispatch(connectAudioNodes(connection));
     }
 
     /**

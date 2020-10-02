@@ -1,4 +1,4 @@
-import { IOscAction, Tuple } from "../registry/interfaces";
+import { AudioEndpoint, IOscAction } from "../registry/interfaces";
 
 /**
  * action types
@@ -53,11 +53,12 @@ export const removePart = (itemId: string): IOscAction => {
     };
 };
 
-export const connectAudioNodes = (connection: Tuple): IOscAction => {
+export const connectAudioNodes = (connection: [AudioEndpoint, AudioEndpoint]): IOscAction => {
+    const payload = [connection[0][0], connection[0][1], connection[1][0], connection[1][1]];
     return {
         address: OSC_PREFIX + CONNECT_AUDIO_NODES,
         type: CONNECT_AUDIO_NODES,
-        typeTag: ",ss",
-        payload: connection,
+        typeTag: ",sisi",
+        payload,
     };
 };

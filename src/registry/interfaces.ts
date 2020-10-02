@@ -172,6 +172,12 @@ export interface IPartWithPosition {
     position: number;
 }
 
+/**
+ * First part is the plugin id,
+ * second part is the in/out audio-channel number.
+ */
+export type AudioEndpoint = [string, number];
+
 // registry functions
 export type Select = (state: IState, pluginUid: string) => any;
 export type GetChanged = (oldState: any, newState: any) => Tuple;

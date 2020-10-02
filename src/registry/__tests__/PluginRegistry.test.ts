@@ -51,9 +51,10 @@ describe("add", () => {
         expect(testPlugin.initState.outputs).toHaveLength(1);
     });
 
-    test("output nodes get connected to output by default", () => {
+    test("output nodes get connected to soundcard by default", () => {
         const out1Dest = testPlugin.initState.outputs[0];
-        expect(out1Dest).toEqual("destination");
+        expect(out1Dest[0]).toEqual("destination");
+        expect(out1Dest[1]).toEqual(0);
     });
 
     test("adds action creator functions to the plugin instance", () => {

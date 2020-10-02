@@ -1,4 +1,4 @@
-import { IState, Tuple } from "../registry/interfaces";
+import { AudioEndpoint, IState } from "../registry/interfaces";
 import { AnyAction } from "redux";
 import { ADD_PLUGIN, REMOVE_PLUGIN, ADD_PART, REMOVE_PART, CONNECT_AUDIO_NODES } from "./rootActions";
 
@@ -40,33 +40,55 @@ const rootReducer = (state: IState = initialState, action: AnyAction): IState =>
         delete newState[partRef];
         return newState;
     } else if (action.type === CONNECT_AUDIO_NODES) {
-        const outputIdAndChnnelNum = (action.payload as Tuple)[0];
-        const inputIdAndChannelNum = (action.payload as Tuple)[1];
+        const outEndpoint: AudioEndpoint = [action.payload[0], action.payload[1]];
+        const inEndpoint: AudioEndpoint = [action.payload[2], action.payload[3]];
+        // we also have to change the state of the former input
+        const formerInEndpoint: AudioEndpoint = state[outEndpoint[0]].outputs[outEndpoint[1]];
 
-        const output = outputIdAndChnnelNum.split(":");
-        const input = inputIdAndChannelNum.split(":");
-        const outputPluginId: string = output[0];
-        const outputNumber = parseInt(output[1]);
-        const inputPluginId: string = input[0];
-        const inputNumber = parseInt(input[1]);
+        if (
+            formerInEndpoint[0] !== "destination" &&
+            formerInEndpoint[0] !== "" &&
+            typeof formerInEndpoint !== "undefined"
+        ) {
+            const newFormerInputPluginState = buildAudioConnectionState(formerInEndpoint, ["", 0], "input", state);
+            state[formerInEndpoint[0]] = newFormerInputPluginState;
+        }
 
-        const newOutputState: string[] = Array.from(state[outputPluginId].outputs);
-        newOutputState[outputNumber] = inputIdAndChannelNum;
-        const newInputState: string[] = Array.from(state[inputPluginId].inputs);
-        newInputState[inputNumber] = outputIdAndChnnelNum;
+        const newOutputPluginState = buildAudioConnectionState(outEndpoint, inEndpoint, "output", state);
+        state[outEndpoint[0]] = newOutputPluginState;
 
-        const newOutputPlugin = Object.assign({}, state[outputPluginId], {
-            outputs: newOutputState,
-        });
-        const newInputPlugin = Object.assign({}, state[inputPluginId], {
-            inputs: newInputState,
-        });
+        if (inEndpoint[0] !== "destination") {
+            const newInputPluginState = buildAudioConnectionState(inEndpoint, outEndpoint, "input", state);
+            state[inEndpoint[0]] = newInputPluginState;
+        }
 
-        state[outputPluginId] = newOutputPlugin;
-        state[inputPluginId] = newInputPlugin;
         return state;
     }
     return state;
+};
+
+const buildAudioConnectionState = (
+    pluginEndpoint: AudioEndpoint,
+    destEndpoint: AudioEndpoint,
+    endpointType: string,
+    state: IState
+): IState => {
+    let channels: AudioEndpoint[];
+    let newSubState = {};
+
+    if (endpointType === "output") {
+        channels = Array.from(state[pluginEndpoint[0]].outputs);
+        newSubState = { outputs: channels };
+    } else if (endpointType === "input") {
+        channels = Array.from(state[pluginEndpoint[0]].inputs);
+        newSubState = { inputs: channels };
+    } else {
+        throw new Error("Unknown endpoint type " + endpointType + ".");
+    }
+
+    channels[pluginEndpoint[1]] = destEndpoint;
+    const newPluginState = Object.assign({}, state[pluginEndpoint[0]], newSubState);
+    return newPluginState;
 };
 
 const addItem = (oldItemRefs: string[], newItemId: string): string[] => {

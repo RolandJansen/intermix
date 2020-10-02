@@ -10,7 +10,7 @@ const Plugin: IPluginConstructor = class Delay extends AbstractPlugin implements
         desc: "A simple echo effect",
     };
     private static readonly PREFIX = "/intermix/plugin/<UID>/";
-    private static readonly DELAYTIME_SEC = 0.0042; // 1/8 note at 120bpm
+    private static readonly DELAYTIME_SEC = 0.125; // 1/8 note at 120bpm
 
     public readonly actionDefs: IOscActionDef[] = [
         {
@@ -38,6 +38,7 @@ const Plugin: IPluginConstructor = class Delay extends AbstractPlugin implements
         super();
         this.wireAudioNodes();
         this.delayBuffer.delayTime.value = Delay.DELAYTIME_SEC;
+        this.delayLoop.gain.value = 0.3;
     }
 
     public onChange(changed: Tuple): boolean {

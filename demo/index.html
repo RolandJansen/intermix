@@ -40,12 +40,18 @@
         <!-- <div id="reset-button"></div> -->
         <div id="set-bpm"></div>
     </div>
+    <div>
+        <span>Snare Drum goes to </span>
+        <select name="inputNodes" id="input-nodes">
+            <option value="destination">Soundcard</option>
+            <option value="delay">Delay FX</option>
+        </select>
+    </div>
     <!-- <div id="blink"></div> -->
     <p class="note">Note: This demo is done with NexusUI which turned out to be not ideal.
         The sequencer UI doesn't work well together with the
         intermix sequencer and will soon be replaced with more
         suitable elements.
-
     </p>
 </body>
 <script>
@@ -146,6 +152,17 @@
         });
     });
 
+    const inputSelector = document.getElementById("input-nodes");
+    inputSelector.addEventListener("change", (event) => {
+        const outNode = [instrumentUID[1], 0];
+        let inNode = ["destination", 0];
+        if (event.target.value === "delay") {
+            inNode = [delayUID, 0];
+        }
+
+        intermix.connectPlugins([outNode, inNode]);
+    });
+
     const selectNextSeqRow = (step) => {
         if (step % 4 === 0) {
             sequencer.next();
@@ -156,6 +173,7 @@
     const instrumentUID = [];
     const seqPartUID = [];
     let sequencerUID = '';
+    let delayUID = '';
 
     let synthUID = "";
     let seqActionCreators = {};
@@ -180,6 +198,9 @@
         samples.forEach((sample, index) => {
             addAudioDataToSampler(instrumentUID[index], sample);
         })
+
+        // add delay fx
+        delayUID = intermix.addPlugin('Delay');
 
         // setup the sequencer
         sequencerUID = intermix.addPlugin('Sequencer');
