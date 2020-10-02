@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
  - Advanced audio routing
  - An `onChangeDefault()` function that handles common events for plugins
+ - Sourcemaps for non-minified bundles
 
 ### Changed
  - `npm run compile` now renders the results to the dist/ folder instead of lib/

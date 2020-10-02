@@ -22,6 +22,7 @@ const output = [
     {
         file: "dist/cjs/" + pkg.name + ".cjs.js",
         format: "cjs",
+        sourcemap: true,
     },
     {
         file: "dist/cjs/" + pkg.name + ".cjs.min.js",
@@ -32,6 +33,7 @@ const output = [
     {
         file: "dist/esm/" + pkg.name + ".esm.js",
         format: "es",
+        sourcemap: true,
     },
     {
         file: "dist/esm/" + pkg.name + ".esm.min.js",
