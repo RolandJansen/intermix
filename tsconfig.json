@@ -30,9 +30,21 @@
         "./src/index.ts",
     ],
     "typedocOptions": {
-        "mode": "modules",
-        "out": "doc",
+        // "mode": "modules",
+        "mode": "library",
+        // "entryPoint": "src/index.ts",
         "excludePrivate": true,
         "excludeProtected": true,
+        "excludeNotExported": true,
+        "exclude": [
+            "src/fileLoader.ts",
+            "src/helper.ts",
+            "src/plugins/**/*",
+            "src/registry/*",
+            "src/seqpart/*",
+            "src/store/*"
+        ],
+        "out": "doc",
+        "disableSources": true,
     }
 }
