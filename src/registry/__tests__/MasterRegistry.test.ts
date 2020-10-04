@@ -2,7 +2,8 @@
 import "web-audio-test-api";
 import MasterRegistry from "../MasterRegistry";
 import TestInstrument from "../../plugins/TestInstrument";
-import { IPlugin, IAction, IOscAction } from "../interfaces";
+import { ICoreAction, IOscAction } from "../../interfaces/IActions";
+import { IPlugin } from "../../interfaces/IRegistryItems";
 import { store } from "../../store/store";
 import SeqPart from "../../seqpart/SeqPart";
 
@@ -54,12 +55,12 @@ describe("PluginRegistry", () => {
         test("adds reducers for the plugin to the store", () => {
             // STOP: Why does this work? It should NOT work!!!
             // or is it the middleware? -> Investigate!!!
-            const action1: IAction = {
+            const action1: ICoreAction = {
                 listener: pluginId,
                 type: "ACTION1",
                 payload: 23,
             };
-            const action2: IAction = {
+            const action2: ICoreAction = {
                 listener: pluginId,
                 type: "ACTION2",
                 payload: 42,

@@ -1,5 +1,7 @@
 import { AbstractPlugin } from "../registry/AbstractPlugin";
-import { IPlugin, IPluginMetaData, Tuple, IOscActionDef, IPluginConstructor } from "../registry/interfaces";
+import { Tuple } from "../interfaces/interfaces";
+import { IOscActionDef } from "../interfaces/IActions";
+import { IPlugin, IPluginMetaData, IPluginConstructor } from "../interfaces/IRegistryItems";
 
 /**
  * This class will be used to indirectly

@@ -1,4 +1,4 @@
-import { IntermixNote, IntermixCtrl } from "../registry/interfaces";
+import { IntermixNote, IntermixCtrl } from "../interfaces/interfaces";
 import SeqPart from "./SeqPart";
 
 describe("SeqPart", () => {

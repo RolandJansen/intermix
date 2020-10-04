@@ -1,6 +1,8 @@
 import { ActionCreatorsMapObject } from "redux";
 import { getRandomString } from "../helper";
-import { IPlugin, IOscActionDef, Tuple, IState } from "./interfaces";
+import { Tuple, IState } from "../interfaces/interfaces";
+import { IOscActionDef } from "../interfaces/IActions";
+import { IPlugin } from "../interfaces/IRegistryItems";
 
 /**
  * In the following we use declaration merging to

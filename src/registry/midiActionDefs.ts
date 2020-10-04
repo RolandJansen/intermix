@@ -1,4 +1,4 @@
-import { IActionDef } from "./interfaces";
+import { IInternalActionDef } from "../interfaces/IActions";
 
 // WARNING!: Currently not in use.
 
@@ -129,7 +129,7 @@ export const midiActionTypes: string[] = [
  * Controller numbers 102-119 are omited
  * because they are not in use.
  */
-export const midiActionDefs: IActionDef[] = [
+export const midiActionDefs: IInternalActionDef[] = [
     {
         type: "00_BANK_SELECT",
         desc: "",

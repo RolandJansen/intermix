@@ -1,5 +1,5 @@
 import { AnyAction, Middleware } from "redux";
-import { IOscAction, IOscBundleAction } from "../registry/interfaces";
+import { IOscAction, IOscBundleAction } from "../interfaces/IActions";
 
 /**
  * We don't want to preprocess OSC actions in every

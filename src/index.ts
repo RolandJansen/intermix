@@ -1,5 +1,6 @@
 import { Action, ActionCreatorsMapObject } from "redux";
-import { IState, IPluginConstructor, IPluginClassContainer, AudioEndpoint } from "./registry/interfaces";
+import { IState, AudioEndpoint } from "./interfaces/interfaces";
+import { IPluginConstructor, IPluginClassContainer } from "./interfaces/IRegistryItems";
 import MasterRegistry from "./registry/MasterRegistry";
 import { store } from "./store/store";
 import Sequencer from "./plugins/Sequencer/Sequencer";
@@ -102,7 +103,7 @@ export function connectPlugins(connection: [AudioEndpoint, AudioEndpoint]): void
 }
 
 // API for plugin developers
-export * from "./registry/interfaces";
-export { AbstractPlugin } from "./registry/AbstractPlugin";
-export { AbstractControllerPlugin } from "./registry/AbstractControllerPlugin";
-export { createInlineWorker, loadFileFromServer } from "./fileLoader";
+// export * from "./registry/interfaces";
+// export { AbstractPlugin } from "./registry/AbstractPlugin";
+// export { AbstractControllerPlugin } from "./registry/AbstractControllerPlugin";
+// export { createInlineWorker, loadFileFromServer } from "./fileLoader";

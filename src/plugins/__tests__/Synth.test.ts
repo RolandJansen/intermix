@@ -1,7 +1,8 @@
 /// <reference path="../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
 import Synth from "../Synth";
-import { IntermixNote, IntermixCtrl, IPlugin } from "../../registry/interfaces";
+import { IntermixNote, IntermixCtrl } from "../../interfaces/interfaces";
+import { IPlugin } from "../../interfaces/IRegistryItems";
 
 describe("DemoSynth", () => {
     let ac: AudioContext;

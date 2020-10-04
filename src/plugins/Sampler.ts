@@ -1,5 +1,7 @@
 import { AbstractPlugin } from "../registry/AbstractPlugin";
-import { IPlugin, Tuple, IOscActionDef, IntermixNote, IPluginConstructor } from "../registry/interfaces";
+import { Tuple, IntermixNote } from "../interfaces/interfaces";
+import { IOscActionDef } from "../interfaces/IActions";
+import { IPlugin, IPluginConstructor } from "../interfaces/IRegistryItems";
 
 const Plugin: IPluginConstructor = class Sampler extends AbstractPlugin implements IPlugin {
     public static readonly METADATA = {

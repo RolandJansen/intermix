@@ -1,39 +1,46 @@
-import { IState, reducerLogic, IAction, OscArgSequence, IntermixNote, IntermixCtrl } from "../registry/interfaces";
+import { IState, IntermixNote, IntermixCtrl, ISeqPartState } from "../interfaces/interfaces";
+import { reducerLogic, InternalAction, OscArgSequence } from "../interfaces/IActions";
 import { AnyAction } from "redux";
 
-export const setStepActive: reducerLogic = (mySubState: IState, action: AnyAction | IAction): IState => {
-    const newSubState: IState = {};
-    const step = action.payload as number;
-    const maxStepValue = mySubState.pattern.length / mySubState.stepMultiplier - 1;
-    if (step <= maxStepValue) {
-        newSubState["activeStep"] = step;
-    }
-    return newSubState;
-};
-
-export const addItem: reducerLogic = (mySubState: IState, action: AnyAction | IAction): IState => {
-    const newSubState: IState = {};
-    let newItem: IntermixNote | IntermixCtrl;
-
-    if (itsANote(action.payload)) {
-        newItem = action.payload as IntermixNote;
-        newSubState.addNote = newItem;
-    } else if (itsAController(action.payload)) {
-        newItem = action.payload as IntermixCtrl;
-        newSubState.addCtrl = newItem;
-    } else {
+export const setStepActive: reducerLogic = (mySubState: IState, action: InternalAction): IState => {
+    if (isSeqPartState(mySubState)) {
+        const newSubState: IState = {};
+        const step = action.payload as number;
+        const maxStepValue = mySubState.pattern.length / mySubState.stepMultiplier - 1;
+        if (step <= maxStepValue) {
+            newSubState["activeStep"] = step;
+        }
         return newSubState;
     }
+    return mySubState;
+};
 
-    const position = mySubState.activeStep * mySubState.stepMultiplier;
-    const oldStep: OscArgSequence[] = mySubState.pattern[position];
-    const newPatternStep = addItemToPatternStep(oldStep, newItem);
+export const addItem: reducerLogic = (mySubState: IState, action: InternalAction): IState => {
+    if (isSeqPartState(mySubState)) {
+        const newSubState: IState = {};
+        let newItem: IntermixNote | IntermixCtrl;
 
-    const newPattern = Array.from(mySubState.pattern);
-    newPattern[position] = newPatternStep;
-    newSubState.pattern = newPattern;
+        if (isIntermixNote(action.payload)) {
+            newItem = action.payload as IntermixNote;
+            newSubState.addNote = newItem;
+        } else if (isIntermixCtrl(action.payload)) {
+            newItem = action.payload as IntermixCtrl;
+            newSubState.addCtrl = newItem;
+        } else {
+            return newSubState;
+        }
 
-    return newSubState;
+        const position = mySubState.activeStep * mySubState.stepMultiplier;
+        const oldStep: OscArgSequence[] = mySubState.pattern[position];
+        const newPatternStep = addItemToPatternStep(oldStep, newItem);
+
+        const newPattern = Array.from(mySubState.pattern);
+        newPattern[position] = newPatternStep;
+        newSubState.pattern = newPattern;
+
+        return newSubState;
+    }
+    return mySubState;
 };
 
 /**
@@ -71,30 +78,32 @@ const addItemToPatternStep = (oldStep: OscArgSequence[], item: IntermixNote | In
     return newStep;
 };
 
-export const removeItem: reducerLogic = (mySubState: IState, action: AnyAction | IAction): IState => {
-    const newSubState: IState = {};
+export const removeItem: reducerLogic = (mySubState: IState, action: AnyAction | InternalAction): IState => {
+    if (isSeqPartState(mySubState)) {
+        const newSubState: IState = {};
+        let item: IntermixNote | IntermixCtrl;
 
-    let item: IntermixNote | IntermixCtrl;
+        if (isIntermixNote(action.payload)) {
+            item = action.payload as IntermixNote;
+            newSubState.removeNote = item;
+        } else if (isIntermixCtrl(action.payload)) {
+            item = action.payload as IntermixCtrl;
+            newSubState.removeCtrl = item;
+        } else {
+            return newSubState;
+        }
 
-    if (itsANote(action.payload)) {
-        item = action.payload as IntermixNote;
-        newSubState.removeNote = item;
-    } else if (itsAController(action.payload)) {
-        item = action.payload as IntermixCtrl;
-        newSubState.removeCtrl = item;
-    } else {
+        const position = mySubState.activeStep * mySubState.stepMultiplier;
+        const oldStep: OscArgSequence[] = mySubState.pattern[position];
+        const newStep: OscArgSequence[] = removeItemFromPatternStep(oldStep, item);
+
+        const newPattern = Array.from(mySubState.pattern);
+        newPattern[position] = newStep;
+        newSubState.pattern = newPattern;
+
         return newSubState;
     }
-
-    const position = mySubState.activeStep * mySubState.stepMultiplier;
-    const oldStep: OscArgSequence[] = mySubState.pattern[position];
-    const newStep: OscArgSequence[] = removeItemFromPatternStep(oldStep, item);
-
-    const newPattern = Array.from(mySubState.pattern);
-    newPattern[position] = newStep;
-    newSubState.pattern = newPattern;
-
-    return newSubState;
+    return mySubState;
 };
 
 const removeItemFromPatternStep = (oldStep: OscArgSequence[], item: IntermixNote | IntermixCtrl): OscArgSequence[] => {
@@ -120,12 +129,18 @@ const itemsHaveSameValue = (itemOne: OscArgSequence, itemTwo: OscArgSequence): b
     return itemOne[0] === itemTwo[0] && itemOne[1] === itemTwo[1] ? true : false;
 };
 
+// type guard for SeqPartState
+const isSeqPartState = (item: IState): item is ISeqPartState => {
+    const seqPartState = item as ISeqPartState;
+    return seqPartState.stepMultiplier !== undefined && seqPartState.stepsPerBar !== undefined;
+};
+
 // type guard for intermixNote
-const itsANote = (item: any): item is IntermixNote => {
+const isIntermixNote = (item: any): item is IntermixNote => {
     return (item as IntermixNote)[0] === "note" && (item as IntermixNote).length === 5;
 };
 
 // type guard for intermixCtrl
-const itsAController = (item: any): item is IntermixCtrl => {
+const isIntermixCtrl = (item: any): item is IntermixCtrl => {
     return typeof (item as IntermixCtrl)[0] === "string" && (item as IntermixCtrl).length === 3;
 };

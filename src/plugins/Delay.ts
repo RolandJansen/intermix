@@ -1,5 +1,7 @@
 import { AbstractPlugin } from "../registry/AbstractPlugin";
-import { IOscActionDef, IPlugin, IPluginConstructor, IPluginMetaData, Tuple } from "../registry/interfaces";
+import { Tuple } from "../interfaces/interfaces";
+import { IOscActionDef } from "../interfaces/IActions";
+import { IPlugin, IPluginConstructor, IPluginMetaData } from "../interfaces/IRegistryItems";
 
 const Plugin: IPluginConstructor = class Delay extends AbstractPlugin implements IPlugin {
     public static readonly METADATA: IPluginMetaData = {

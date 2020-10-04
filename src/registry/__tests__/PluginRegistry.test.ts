@@ -1,11 +1,13 @@
 /// <reference path="../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
 import PluginRegistry from "../PluginRegistry";
-import { IPlugin, IState, IAction, IOscActionDef, IOscAction } from "../interfaces";
+import { AudioEndpoint, IState } from "../../interfaces/interfaces";
+import { ICoreAction, IOscActionDef, IOscAction } from "../../interfaces/IActions";
+import { IPlugin } from "../../interfaces/IRegistryItems";
 import TestController from "../../plugins/TestController";
 import TestInstrument from "../../plugins/TestInstrument";
 import { store } from "../../store/store";
-import commonActionDefs from "../../registry/commonActionDefs";
+import commonActionDefs from "../../registry/commonPluginActionDefs";
 
 // instruct Jest to use the mock class
 // instead of the real one globaly.
@@ -15,6 +17,23 @@ let globalState: IState;
 let ac: AudioContext;
 let registry: PluginRegistry;
 let testPlugin: IPlugin;
+
+interface IInitState {
+    inputCount: number;
+    outputCount: number;
+    inputs: AudioEndpoint[];
+    outputs: AudioEndpoint[];
+}
+
+const isInitState = (value: unknown): value is IInitState => {
+    const initState = value as IInitState;
+    return (
+        initState.inputCount !== undefined &&
+        initState.outputCount !== undefined &&
+        initState.inputs !== undefined &&
+        initState.outputs !== undefined
+    );
+};
 
 beforeEach(() => {
     globalState = {
@@ -52,7 +71,10 @@ describe("add", () => {
     });
 
     test("output nodes get connected to soundcard by default", () => {
-        const out1Dest = testPlugin.initState.outputs[0];
+        let out1Dest: AudioEndpoint = ["", 0];
+        if (isInitState(testPlugin.initState)) {
+            out1Dest = testPlugin.initState.outputs[0];
+        }
         expect(out1Dest[0]).toEqual("destination");
         expect(out1Dest[1]).toEqual(0);
     });
@@ -84,7 +106,7 @@ describe("add", () => {
 
     test("unbound action creators are not bound to store.dispatch()", () => {
         const testPayload = 23;
-        const action: IAction = {
+        const action: ICoreAction = {
             listener: testPlugin.uid,
             type: "ACTION1",
             payload: testPayload,
@@ -96,7 +118,7 @@ describe("add", () => {
 
     test("implements the sendAction method for controller plugins", () => {
         const testController: IPlugin = registry.add(TestController);
-        const action: IAction = {
+        const action: ICoreAction = {
             listener: testPlugin.uid,
             type: "ACTION_UNKNOWN",
             payload: 23,

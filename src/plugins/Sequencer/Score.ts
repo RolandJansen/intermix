@@ -1,5 +1,5 @@
-import { IQueuePosition } from "./Sequencer";
-import { ILoop, IAction, OscArgSequence } from "../../registry/interfaces";
+import { ILoop, IQueuePosition } from "./Sequencer";
+import { ICoreAction, OscArgSequence } from "../../interfaces/IActions";
 
 export type Pattern = OscArgSequence[][];
 
@@ -142,8 +142,8 @@ export default class Score {
         this.runQueue[this.patternPointerId] = pattern;
     }
 
-    public getAllActionsForNextStep(): IAction[] {
-        let actionList: IAction[] = [];
+    public getAllActionsForNextStep(): ICoreAction[] {
+        let actionList: ICoreAction[] = [];
         let pointerId: string;
 
         for (pointerId in this.runQueue) {
@@ -170,8 +170,8 @@ export default class Score {
      * @param events List of "payloads" (notes or controller values)
      * @param pointer A runqueue pointer object
      */
-    private buildActionsFromEvents(events: OscArgSequence[], pointer: IPointer): IAction[] {
-        const actions: IAction[] = events.map((payload: OscArgSequence) => {
+    private buildActionsFromEvents(events: OscArgSequence[], pointer: IPointer): ICoreAction[] {
+        const actions: ICoreAction[] = events.map((payload: OscArgSequence) => {
             return {
                 listener: pointer.pluginId,
                 type: payload[0],

@@ -1,4 +1,5 @@
-import { AudioEndpoint, IOscAction } from "../registry/interfaces";
+import { AudioEndpoint } from "../interfaces/interfaces";
+import { IOscAction } from "../interfaces/IActions";
 
 /**
  * action types

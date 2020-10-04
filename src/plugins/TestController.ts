@@ -1,13 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { AbstractPlugin } from "../registry/AbstractPlugin";
-import {
-    IPluginMetaData,
-    Tuple,
-    IControllerPlugin,
-    IAction,
-    IOscActionDef,
-    IPluginConstructor,
-} from "../registry/interfaces";
+import { Tuple } from "../interfaces/interfaces";
+import { ICoreAction, IOscActionDef } from "../interfaces/IActions";
+import { IControllerPlugin, IPluginMetaData, IPluginConstructor } from "../interfaces/IRegistryItems";
 
 /**
  * This class will be used to indirectly
@@ -59,7 +54,7 @@ const Plugin: IPluginConstructor = class TestController extends AbstractPlugin i
      * provide an empty method here. It has to be public so the registry can see it.
      * @param action An action object that normally holds data for an audio device
      */
-    public sendAction(action: IAction): void {
+    public sendAction(action: ICoreAction): void {
         /* nothing */
     }
 

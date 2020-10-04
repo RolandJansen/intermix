@@ -4,7 +4,8 @@ import combineReducersWithRoot from "./combineReducersWithRoot";
 import SeqPartRegistry from "./SeqPartRegistry";
 import SeqPart from "../seqpart/SeqPart";
 import PluginRegistry from "./PluginRegistry";
-import { AudioEndpoint, IPlugin, IPluginConstructor } from "./interfaces";
+import { AudioEndpoint } from "../interfaces/interfaces";
+import { IPlugin, IPluginConstructor } from "../interfaces/IRegistryItems";
 import rootReducer from "../store/rootReducer";
 import { addPlugin, addPart, removePlugin, removePart, connectAudioNodes } from "../store/rootActions";
 

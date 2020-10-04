@@ -1,6 +1,7 @@
 import SeqPart from "../../seqpart/SeqPart";
 import { store } from "../../store/store";
-import { IState, IOscAction } from "../interfaces";
+import { IState } from "../../interfaces/interfaces";
+import { IOscAction } from "../../interfaces/IActions";
 import SeqPartRegistry from "../SeqPartRegistry";
 
 // instruct Jest to use the mock class

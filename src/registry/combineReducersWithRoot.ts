@@ -1,5 +1,6 @@
-import { AnyAction, Reducer, ReducersMapObject } from "redux";
-import { IAction, IState } from "./interfaces";
+import { Reducer, ReducersMapObject } from "redux";
+import { IState } from "../interfaces/interfaces";
+import { InternalAction } from "../interfaces/IActions";
 
 /**
  * This does basically the same like redux combineReducers
@@ -13,7 +14,7 @@ import { IAction, IState } from "./interfaces";
  * https://stackoverflow.com/questions/39261092/redux-create-root-reducer-from-combinereducers-and-loose-properties?answertab=active#tab-top
  */
 export default (reducers: ReducersMapObject, rootReducer: Reducer) => {
-    return (prevState: IState, action: AnyAction | IAction): IState => {
+    return (prevState: IState, action: InternalAction): IState => {
         // create an object that contains the
         // return value of the root reducer ...
         const nextState: IState = { ...rootReducer(prevState, action) };

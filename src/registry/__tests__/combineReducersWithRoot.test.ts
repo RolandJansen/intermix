@@ -1,6 +1,6 @@
 import { AnyAction, Reducer } from "redux";
 import combineReducersWithRoot from "../combineReducersWithRoot";
-import { IState } from "../interfaces";
+import { IState } from "../../interfaces/interfaces";
 
 // test-reducers are also from the posting by Chris Nitchi
 // see combineReducersWithRoot.ts

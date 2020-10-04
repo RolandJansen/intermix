@@ -1,8 +1,10 @@
 import AbstractRegistry from "./AbstractRegistry";
-import { IPlugin, IControllerPlugin, IAction, IPluginConstructor, IState, AudioEndpoint } from "./interfaces";
+import { ICoreAction } from "../interfaces/IActions";
+import { IState, AudioEndpoint } from "../interfaces/interfaces";
+import { IPlugin, IControllerPlugin, IPluginConstructor } from "../interfaces/IRegistryItems";
 import { store } from "../store/store";
 import { bindActionCreators } from "redux";
-import commonActionDefs from "./commonActionDefs";
+import commonActionDefs from "./commonPluginActionDefs";
 
 /**
  * The registry for plugins of all kind.
@@ -105,7 +107,7 @@ export default class PluginRegistry extends AbstractRegistry {
      */
     private bindSendActionMethod(newItem: IControllerPlugin): void {
         const actionRelay = this.getActionRelay();
-        newItem.sendAction = (action: IAction): IAction => store.dispatch(actionRelay(action));
+        newItem.sendAction = (action: ICoreAction): ICoreAction => store.dispatch(actionRelay(action));
     }
 
     private mapStoreToPlugin(newItem: IControllerPlugin): void {
@@ -120,8 +122,8 @@ export default class PluginRegistry extends AbstractRegistry {
      * fire actions without knowing anything about their consumers.
      * Will be wrapped in a dispatch and serves as a generic action creator.
      */
-    private getActionRelay(): (action: IAction) => IAction {
-        return (action: IAction): IAction => {
+    private getActionRelay(): (action: ICoreAction) => ICoreAction {
+        return (action: ICoreAction): ICoreAction => {
             return action;
         };
     }

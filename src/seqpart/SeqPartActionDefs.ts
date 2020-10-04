@@ -1,4 +1,4 @@
-import { IOscActionDef } from "../registry/interfaces";
+import { IOscActionDef } from "../interfaces/IActions";
 import { addItem, removeItem, setStepActive } from "./seqPartReducerLogic";
 
 const PREFIX = "/intermix/seqpart/<UID>/";

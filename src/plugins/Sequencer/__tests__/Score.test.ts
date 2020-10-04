@@ -1,5 +1,7 @@
 import Score, { IRunqueue } from "../Score";
-import { ILoop, OscArgSequence, IntermixNote } from "../../../registry/interfaces";
+import { IntermixNote } from "../../../interfaces/interfaces";
+import { OscArgSequence } from "../../../interfaces/IActions";
+import { ILoop } from "../Sequencer";
 
 const partId1 = "abcd";
 const partId2 = "efgh";

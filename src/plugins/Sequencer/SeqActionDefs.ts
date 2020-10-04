@@ -2,7 +2,8 @@
 // All actions that should be recognized
 // by the store (and the plugin) should be defined here.
 
-import { IOscActionDef, IState } from "../../registry/interfaces";
+import { IState } from "../../interfaces/interfaces";
+import { IOscActionDef } from "../../interfaces/IActions";
 
 const PREFIX = "/intermix/plugin/<UID>/";
 

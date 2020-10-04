@@ -1,8 +1,10 @@
 /// <reference path="../../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
-import Sequencer from "../Sequencer";
+import Sequencer, { ILoop } from "../Sequencer";
 import SeqPart from "../../../seqpart/SeqPart";
-import { ILoop, IOscActionDef, IntermixNote, OscArgSequence, IPlugin } from "../../../registry/interfaces";
+import { IntermixNote } from "../../../interfaces/interfaces";
+import { IOscActionDef, OscArgSequence } from "../../../interfaces/IActions";
+import { IPlugin } from "../../../interfaces/IRegistryItems";
 import { createInlineWorker } from "../../../fileLoader";
 import { IClockMessage } from "../clock.worker";
 
@@ -229,6 +231,8 @@ describe("Sequencer", () => {
             sequencer["getGlobalState"] = jest.fn();
             (sequencer["getGlobalState"] as jest.Mock).mockReturnValue({
                 abcd: {
+                    stepsPerBar: 0,
+                    stepMultiplier: 0,
                     pattern,
                 },
             });

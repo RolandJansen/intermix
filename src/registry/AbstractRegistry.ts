@@ -1,17 +1,15 @@
-import { ActionCreatorsMapObject, AnyAction, Reducer, ReducersMapObject, Store } from "redux";
+import { ActionCreatorsMapObject, Reducer, ReducersMapObject, Store } from "redux";
 import { store } from "../store/store";
+import { IActionHandlerMap, IState, Tuple } from "../interfaces/interfaces";
 import {
-    IAction,
-    IActionHandlerMap,
-    IRegistryItem,
-    IState,
-    Payload,
-    Tuple,
+    InternalAction,
     IOscAction,
     IOscActionDef,
     OscArgSequence,
     procedure,
-} from "./interfaces";
+    OscPayload,
+} from "../interfaces/IActions";
+import { IRegistryItem } from "../interfaces/IRegistryItems";
 import { getRandomString, deepCopy } from "../helper";
 import SeqPart from "../seqpart/SeqPart";
 
@@ -97,7 +95,9 @@ export default abstract class AbstractRegistry {
      */
     protected selectSubState(globalState: IState, uid: string): IState {
         if (globalState.hasOwnProperty(uid)) {
-            return globalState[uid];
+            // type assertion is not good but IState has
+            // no fixed members to build a type guard
+            return globalState[uid] as IState;
         }
         return {};
     }
@@ -155,7 +155,7 @@ export default abstract class AbstractRegistry {
                     };
                 };
             } else {
-                actionCreators[method] = (payload: Payload): IOscAction => {
+                actionCreators[method] = (payload: OscPayload): IOscAction => {
                     return {
                         address: actionDefCopy.address,
                         typeTag: actionDefCopy.typeTag,
@@ -180,7 +180,7 @@ export default abstract class AbstractRegistry {
     protected getSubReducer(actionDefs: IOscActionDef[], initialState: IState): Reducer {
         const actionHandlers: IActionHandlerMap = this.getActionHandlers(actionDefs);
 
-        return (state: IState = initialState, action: AnyAction | IAction): IState => {
+        return (state: IState = initialState, action: InternalAction): IState => {
             if (state.uid === action.listener && actionHandlers.hasOwnProperty(action.type)) {
                 const handler = actionHandlers[action.type];
                 const newState = handler(state, action);
@@ -212,11 +212,11 @@ export default abstract class AbstractRegistry {
 
             if (actionDef.process) {
                 const process = actionDef.process;
-                handlers[type] = (state: IState, action: AnyAction | IAction): IState => {
+                handlers[type] = (state: IState, action: InternalAction): IState => {
                     return Object.assign({}, state, process(state, action));
                 };
             } else {
-                handlers[type] = (state: IState, action: AnyAction | IAction): IState => {
+                handlers[type] = (state: IState, action: InternalAction): IState => {
                     return Object.assign({}, state, {
                         [type]: action.payload,
                     });

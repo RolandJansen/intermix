@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { IControllerPlugin, IState, IAction } from "./interfaces";
+import { IState } from "../interfaces/interfaces";
+import { ICoreAction } from "../interfaces/IActions";
+import { IControllerPlugin } from "../interfaces/IRegistryItems";
 import { AbstractPlugin } from "./AbstractPlugin";
 
 export abstract class AbstractControllerPlugin extends AbstractPlugin implements IControllerPlugin {
@@ -10,7 +12,7 @@ export abstract class AbstractControllerPlugin extends AbstractPlugin implements
      * provide an empty method here. It has to be public so the registry can see it.
      * @param action An action object that normally holds data for an audio device
      */
-    public sendAction(action: IAction): void {
+    public sendAction(action: ICoreAction): void {
         /* nothing */
     }
 

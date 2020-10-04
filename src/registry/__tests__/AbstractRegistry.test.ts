@@ -2,7 +2,9 @@
 import { ActionCreatorsMapObject, Reducer, ReducersMapObject } from "redux";
 import { store } from "../../store/store";
 import AbstractRegistry from "../AbstractRegistry";
-import { IAction, IActionHandlerMap, IRegistryItem, IState, Tuple, IOscActionDef } from "../interfaces";
+import { IActionHandlerMap, IState, Tuple } from "../../interfaces/interfaces";
+import { ICoreAction, IOscAction, IOscActionDef } from "../../interfaces/IActions";
+import { IRegistryItem } from "../../interfaces/IRegistryItems";
 
 // instruct Jest to use the mock class
 // instead of the real one globaly.
@@ -119,7 +121,7 @@ beforeEach(() => {
 test("creates action creators from action defs", () => {
     const adefs = testItem.actionDefs;
     const actionCreators = registry.getActionCreators_Test(adefs, testItemUid);
-    const action: IAction = actionCreators.ACTION1(555);
+    const action: IOscAction = actionCreators.ACTION1(555);
     expect(action.address).toMatch(`/test/${testItemUid}/ACTION1`);
     expect(action.type).toMatch("ACTION1");
     expect(action.payload).toEqual(555);
@@ -288,13 +290,13 @@ describe("getAllSubReducers", () => {
     let reducerMap: ReducersMapObject;
     let allUids: string[];
 
-    const actionOne: IAction = {
+    const actionOne: ICoreAction = {
         type: "ACTION1",
         listener: testItemUid,
         payload: 23,
     };
 
-    const actionTwo: IAction = {
+    const actionTwo: ICoreAction = {
         type: "ACTION2",
         listener: testItemUid,
         payload: 42,

@@ -1,6 +1,6 @@
 import "web-audio-test-api";
 import TestInstrument from "../../plugins/TestInstrument";
-import { IPlugin } from "../interfaces";
+import { IPlugin } from "../../interfaces/IRegistryItems";
 
 // Tests the implemented public and
 // protected methods of the AbstractPlugin class.

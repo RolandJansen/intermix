@@ -1,9 +1,10 @@
 import "web-audio-test-api";
 import TestInstrument from "../../plugins/TestInstrument";
 import { store } from "../../store/store";
-import commonActionDefs from "../commonActionDefs";
+import commonActionDefs from "../commonPluginActionDefs";
 import AbstractRegistry from "../AbstractRegistry";
-import { IPlugin, IPluginConstructor, IState } from "../interfaces";
+import { IState } from "../../interfaces/interfaces";
+import { IPlugin, IPluginConstructor } from "../../interfaces/IRegistryItems";
 import { bindActionCreators, Reducer } from "redux";
 import rootReducer from "../../store/rootReducer";
 import combineReducersWithRoot from "../combineReducersWithRoot";

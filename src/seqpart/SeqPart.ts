@@ -1,5 +1,7 @@
 import { ActionCreatorsMapObject } from "redux";
-import { Tuple, IOscActionDef, ISeqPart, ISeqPartInitState, OscArgSequence } from "../registry/interfaces";
+import { Tuple } from "../interfaces/interfaces";
+import { IOscActionDef, OscArgSequence } from "../interfaces/IActions";
+import { ISeqPart, ISeqPartInitState } from "../interfaces/IRegistryItems";
 import { actionDefs } from "./SeqPartActionDefs";
 
 type Pattern = OscArgSequence[][];

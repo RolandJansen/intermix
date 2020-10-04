@@ -1,8 +1,8 @@
-import { IOscActionDef, reducerLogic, IState, IAction } from "./interfaces";
-import { AnyAction } from "redux";
+import { IPluginState, IState } from "../interfaces/interfaces";
+import { IOscActionDef, InternalAction, reducerLogic } from "../interfaces/IActions";
 import { deepCopy } from "../helper";
 
-const savePreset: reducerLogic = (mySubState: IState, action: AnyAction | IAction): IState => {
+const savePreset: reducerLogic = (mySubState: IState, action: InternalAction): IState => {
     const actionDefs: IOscActionDef[] = mySubState.actionDefs as IOscActionDef[];
     const newPreset: IState = {};
     const commonActionAddresses = new Set();
@@ -41,35 +41,40 @@ const savePreset: reducerLogic = (mySubState: IState, action: AnyAction | IActio
     return newSubState;
 };
 
-const loadPreset: reducerLogic = (mySubState: IState, action: AnyAction | IAction): IState => {
-    const presetName: string = action.payload as string;
-    let preset: IState = {};
+const loadPreset: reducerLogic = (mySubState: IState, action: InternalAction): IState => {
+    if (isPluginState(mySubState)) {
+        const presetName: string = action.payload as string;
+        let preset: IState = {};
 
-    if (mySubState.hasOwnProperty("presets")) {
-        preset = deepCopy(mySubState.presets.get(presetName)) as IState;
+        if (mySubState.hasOwnProperty("presets")) {
+            preset = deepCopy(mySubState.presets.get(presetName)) as IState;
+        }
+        const newSubState = Object.assign({}, preset, {
+            loadPreset: action.payload,
+        });
+
+        return newSubState;
     }
-    const newSubState = Object.assign({}, preset, {
-        loadPreset: action.payload,
-    });
-
-    return newSubState;
+    return mySubState;
 };
 
-const presetSlotName: reducerLogic = (mySubState: IState, action: AnyAction | IAction): IState => {
-    const currentSlot: number = mySubState.presetSlotNumber;
-    const presetName = action.payload;
-    let presetSlots: string[] = [];
+const presetSlotName: reducerLogic = (mySubState: IState, action: InternalAction): IState => {
+    if (isPluginState(mySubState)) {
+        const currentSlot: number = mySubState.presetSlotNumber;
+        const presetName = action.payload;
+        let presetSlots: string[] = [];
 
-    if (mySubState.hasOwnProperty("presetSlots")) {
-        presetSlots = Array.from(mySubState.presetSlots);
-    }
+        if (mySubState.hasOwnProperty("presetSlots")) {
+            presetSlots = Array.from(mySubState.presetSlots);
+        }
 
-    if (mySubState.hasOwnProperty("presets") && mySubState.presets.has(presetName)) {
-        presetSlots[currentSlot] = presetName;
-        return {
-            presetSlotName: presetName,
-            presetSlots,
-        };
+        if (mySubState.hasOwnProperty("presets") && mySubState.presets.has(presetName)) {
+            presetSlots[currentSlot] = presetName;
+            return {
+                presetSlotName: presetName,
+                presetSlots,
+            };
+        }
     }
     return {};
 };
@@ -117,5 +122,10 @@ const commonActionDefs: IOscActionDef[] = [
         description: "sets the name of a preset to the current slot",
     },
 ];
+
+const isPluginState = (value: unknown): value is IPluginState => {
+    const pluginState = value as IPluginState;
+    return pluginState.uid !== undefined && pluginState.actionDefs !== undefined;
+};
 
 export default commonActionDefs;

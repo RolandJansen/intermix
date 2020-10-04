@@ -1,14 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { AbstractControllerPlugin } from "../../registry/AbstractControllerPlugin";
-import {
-    IAction,
-    IControllerPlugin,
-    ILoop,
-    Tuple,
-    ReturnFunction,
-    IOscActionDef,
-    IPluginConstructor,
-} from "../../registry/interfaces";
+import { Tuple, ReturnFunction, ISeqPartState } from "../../interfaces/interfaces";
+import { ICoreAction, InternalAction, IOscActionDef } from "../../interfaces/IActions";
+import { IControllerPlugin, IPluginConstructor, ISeqPart } from "../../interfaces/IRegistryItems";
 import Score, { PartAndPlugin, Pattern } from "./Score";
 import seqActionDefs from "./SeqActionDefs";
 import { clock, IClockMessage } from "./clock.worker";
@@ -17,6 +11,11 @@ import { createInlineWorker } from "../../fileLoader";
 export interface IQueuePosition {
     position: number;
     timestamp: number;
+}
+
+export interface ILoop {
+    start: number;
+    end: number;
 }
 
 /**
@@ -255,8 +254,12 @@ const Plugin: IPluginConstructor = class Sequencer extends AbstractControllerPlu
         const nextStepParts = this.score.nextStepPartsInScore;
         if (nextStepParts.length !== 0) {
             nextStepParts.forEach((item: PartAndPlugin) => {
-                const pattern: Pattern = this.getGlobalState()[item[0]].pattern;
-                this.score.addPatternToRunqueue(item, pattern);
+                const seqPartState = this.getGlobalState()[item[0]];
+
+                if (isSeqPartState(seqPartState)) {
+                    const pattern: Pattern = seqPartState.pattern;
+                    this.score.addPatternToRunqueue(item, pattern);
+                }
             });
         }
     }
@@ -297,15 +300,21 @@ const Plugin: IPluginConstructor = class Sequencer extends AbstractControllerPlu
      * @param event An action object that normally holds data for an audio device
      * @param startTime time in seconds when the audio event should start
      */
-    private prepareActionForDispatching(action: IAction, startTime: number): IAction {
-        const payloadLength = action.payload.length;
-        action.payload[payloadLength - 1] = startTime;
+    private prepareActionForDispatching(action: ICoreAction, startTime: number): InternalAction {
+        if (Array.isArray(action.payload)) {
+            const payloadLength = action.payload.length;
+            action.payload[payloadLength - 1] = startTime;
 
-        if (action.payload[0] === "note") {
-            // const duration = this.getDurationTime(event.payload.steps);
-            // action.payload[payloadLength - 2] = duration;
+            if (action.payload[0] === "note") {
+                // const duration = this.getDurationTime(event.payload.steps);
+                // action.payload[payloadLength - 2] = duration;
+            }
+            return action;
         }
-        return action;
+        return {
+            listener: "none",
+            type: "none",
+        };
     }
 
     /**
@@ -316,4 +325,10 @@ const Plugin: IPluginConstructor = class Sequencer extends AbstractControllerPlu
         return steps * this.timePerStepInSec;
     }
 };
+
+const isSeqPartState = (item: unknown): item is ISeqPartState => {
+    const seqPartState = item as ISeqPartState;
+    return seqPartState.pattern !== undefined;
+};
+
 export default Plugin;

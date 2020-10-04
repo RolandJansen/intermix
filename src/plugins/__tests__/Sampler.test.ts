@@ -1,6 +1,8 @@
 /// <reference path="../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
-import { IOscActionDef, IntermixNote, IPlugin } from "../../registry/interfaces";
+import { IntermixNote } from "../../interfaces/interfaces";
+import { IOscActionDef } from "../../interfaces/IActions";
+import { IPlugin } from "../../interfaces/IRegistryItems";
 import Sampler from "../Sampler";
 
 describe("DemoSampler", () => {
