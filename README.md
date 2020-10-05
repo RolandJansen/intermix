@@ -8,7 +8,7 @@
 
 ## Warning
 
-This software is in an early stage and the API is still under development. The current release (0.7.0) is just a milestone and not ment to be used in production environments.
+This software is in an early stage and the API is still under development. The current release (0.8.0) is just a milestone and not ment to be used in production environments.
 
 ---
 

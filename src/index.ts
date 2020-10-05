@@ -98,7 +98,8 @@ export function getUnboundActionCreators(itemId: string): ActionCreatorsMapObjec
  * If the id of the output plugin is not valid, it cancels the operation.
  * @param connection Audio endpoints to be connected
  */
-export function connectPlugins(connection: [AudioEndpoint, AudioEndpoint]): void {
+export function connectPlugins(output: AudioEndpoint, input: AudioEndpoint): void {
+    const connection: [AudioEndpoint, AudioEndpoint] = [output, input];
     registry.connectAudioNodes(connection);
 }
 

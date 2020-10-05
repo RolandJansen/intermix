@@ -30,8 +30,8 @@
         "./src/index.ts",
     ],
     "typedocOptions": {
-        // "mode": "modules",
-        "mode": "library",
+        "mode": "modules",
+        // "mode": "library",
         // "entryPoint": "src/index.ts",
         "excludePrivate": true,
         "excludeProtected": true,
@@ -39,6 +39,7 @@
         "exclude": [
             "src/fileLoader.ts",
             "src/helper.ts",
+            "src/interfaces/*",
             "src/plugins/**/*",
             "src/registry/*",
             "src/seqpart/*",
@@ -46,5 +47,6 @@
         ],
         "out": "doc",
         "disableSources": true,
+        "readme": "none",
     }
 }
