@@ -38,8 +38,12 @@ module.exports = {
           title: 'Docs',
           items: [
             {
-              label: 'Messaging API',
+              label: 'API Functions',
               to: 'docs/',
+            },
+            {
+              label: 'API Messages',
+              to: 'docs/API_messages',
             },
             {
               label: 'Changelog',

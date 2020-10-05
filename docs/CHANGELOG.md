@@ -1,3 +1,19 @@
+## [0.8.0] - 2020-10-05
+
+### Added
+ - Advanced audio routing
+ - Simple delay fx plugin
+ - An `onChangeDefault()` function that handles common events for plugins
+ - Sourcemaps for non-minified bundles
+ - API functions documentation on the webpage
+
+### Changed
+ - `npm run compile` now renders the results to the dist/ folder instead of lib/
+ - Huge interface refactoring
+
+### Fixed
+ - Circular dependency: index->Sequencer->fileLoader->index
+
 ## [0.7.0] - 2020-09-22
 
 ### Added
@@ -133,6 +149,7 @@
 - Sound demo
 - Stepsequencer demo
 
+[0.8.0]: https://github.com/RolandJansen/intermix.js/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/RolandJansen/intermix.js/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/RolandJansen/intermix.js/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/RolandJansen/intermix.js/compare/v0.4.0...v0.5.0
