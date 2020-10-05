@@ -6,7 +6,7 @@ const terser = require("rollup-plugin-terser").terser;
 const liveServer = require("rollup-plugin-live-server").liveServer;
 const pkg = require("./package.json");
 
-// es2015 modules are currently not possible
+// es2015 modules are currently not possible in this config
 // should be changed with the next node lts version (>=13):
 // import ts from "@wessberg/rollup-plugin-ts";
 // import pkg from "./package.json";
@@ -22,23 +22,23 @@ const output = [
     {
         file: "dist/cjs/" + pkg.name + ".cjs.js",
         format: "cjs",
-        sourcemap: true,
+        sourcemap: false,
     },
     {
         file: "dist/cjs/" + pkg.name + ".cjs.min.js",
         format: "cjs",
-        sourcemap: true,
+        sourcemap: false,
         plugins: [terser()],
     },
     {
         file: "dist/esm/" + pkg.name + ".esm.js",
         format: "es",
-        sourcemap: true,
+        sourcemap: false,
     },
     {
         file: "dist/esm/" + pkg.name + ".esm.min.js",
         format: "es",
-        sourcemap: true,
+        sourcemap: false,
         plugins: [terser()],
     },
 ];
@@ -67,6 +67,9 @@ const config = {
 if (process.env.TARGET === "debug") {
     config.plugins = [...plugins, liveServer(liveServerConfig)];
     config.external = [];
+    config.output.forEach((item) => {
+        item.sourcemap = true;
+    });
 }
 
 module.exports = config;

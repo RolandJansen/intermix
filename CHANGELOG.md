@@ -8,16 +8,18 @@ This project adheres to [Semantic Versioning](http://semver.org/).
  - Advanced audio routing
  - Simple delay fx plugin
  - An `onChangeDefault()` function that handles common events for plugins
- - Sourcemaps for non-minified bundles
  - API functions documentation on the webpage
 
 ### Changed
  - `npm run compile` now renders the results to the dist/ folder instead of lib/
  - Huge interface refactoring
+ - The non-minified bundles (esm and cjs) are now the default in npm. The minified bundles can be used for embedding intermix into a website via script tag.
 
 ### Fixed
  - Circular dependency: index->Sequencer->fileLoader->index
 
+### Removed
+ - Source maps for even smaller package size
 
 ## [0.7.0] - 2020-09-22
 

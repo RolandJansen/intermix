@@ -104,7 +104,9 @@ export function connectPlugins(output: AudioEndpoint, input: AudioEndpoint): voi
 }
 
 // API for plugin developers
-// export * from "./registry/interfaces";
-// export { AbstractPlugin } from "./registry/AbstractPlugin";
-// export { AbstractControllerPlugin } from "./registry/AbstractControllerPlugin";
-// export { createInlineWorker, loadFileFromServer } from "./fileLoader";
+export * from "./interfaces/interfaces";
+export * from "./interfaces/IActions";
+export * from "./interfaces/IRegistryItems";
+export { AbstractPlugin } from "./registry/AbstractPlugin";
+export { AbstractControllerPlugin } from "./registry/AbstractControllerPlugin";
+export { createInlineWorker, loadFileFromServer } from "./fileLoader";

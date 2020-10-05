@@ -8,8 +8,8 @@
     "dist"
   ],
   "entry": "src/index.ts",
-  "main": "dist/cjs/intermix.cjs.min.js",
-  "module": "dist/esm/intermix.esm.min.js",
+  "main": "dist/cjs/intermix.cjs.js",
+  "module": "dist/esm/intermix.esm.js",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
