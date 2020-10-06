@@ -24,12 +24,12 @@ const output = [
         format: "cjs",
         sourcemap: false,
     },
-    {
-        file: "dist/cjs/" + pkg.name + ".cjs.min.js",
-        format: "cjs",
-        sourcemap: false,
-        plugins: [terser()],
-    },
+    // {
+    //     file: "dist/cjs/" + pkg.name + ".cjs.min.js",
+    //     format: "cjs",
+    //     sourcemap: false,
+    //     plugins: [terser()],
+    // },
     {
         file: "dist/esm/" + pkg.name + ".esm.js",
         format: "es",

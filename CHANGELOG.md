@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.8.0] - 2020-10-05
+## [0.8.0] - 2020-10-06
 
 ### Added
  - Advanced audio routing
@@ -11,15 +11,16 @@ This project adheres to [Semantic Versioning](http://semver.org/).
  - API functions documentation on the webpage
 
 ### Changed
- - `npm run compile` now renders the results to the dist/ folder instead of lib/
+ - `npm run compile` renders the results to the dist/ folder instead of lib/
+ - The non-minified bundles (esm and cjs) are now the default in npm. There's still a minified ES2015 bundle that can be used for embedding intermix into a website via script tag
  - Huge interface refactoring
- - The non-minified bundles (esm and cjs) are now the default in npm. The minified bundles can be used for embedding intermix into a website via script tag.
 
 ### Fixed
  - Circular dependency: index->Sequencer->fileLoader->index
 
 ### Removed
  - Source maps for even smaller package size
+ - CommonJS minified bundle (makes not much sense, see [this blog post](https://rolandjansen.github.io/intermix/blog/Intermix%20v0.8.0%20Released) for details)
 
 ## [0.7.0] - 2020-09-22
 
