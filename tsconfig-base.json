@@ -21,7 +21,7 @@
 
         // Output options:
         "target": "ES2015",  // ECMA Script target version
-        "sourceMap": true,   // generate source map files (*.map)
+        // "sourceMap": true,   // generate source map files (*.map)
         "declaration": true, // generate typings (*.d.ts)
 
         // Not in use but sometimes handy for config tests:

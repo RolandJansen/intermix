@@ -5,7 +5,7 @@
      */
     "extends": "./tsconfig-base.json",
     "compilerOptions": {
-        "outDir": "./lib/esm", // redirect output to this relative path
+        "outDir": "./dist/esm", // redirect output to this relative path
         "module": "ES2020",    // module system used in the output files
     }
 }
