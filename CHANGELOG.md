@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.8.1] - 2020-10-06
+
+### Fixed
+ - Rollup config error that led to sourcemaps being generated in the production build
+
 ## [0.8.0] - 2020-10-06
 
 ### Added
@@ -157,6 +162,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Sound demo
 - Stepsequencer demo
 
+[0.8.1]: https://github.com/RolandJansen/intermix.js/compare/v0.7.0...v0.8.1
 [0.8.0]: https://github.com/RolandJansen/intermix.js/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/RolandJansen/intermix.js/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/RolandJansen/intermix.js/compare/v0.5.0...v0.6.0
