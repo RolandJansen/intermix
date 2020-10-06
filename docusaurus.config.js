@@ -6,6 +6,7 @@ module.exports = {
   favicon: 'img/favicon.ico',
   organizationName: 'RolandJansen', // Usually your GitHub org/user name.
   projectName: 'intermix', // Usually your repo name.
+  onBrokenLinks: 'warn', // this can probably be removed in future versions
   themeConfig: {
     colorMode: {
       defaultMode: 'dark',
