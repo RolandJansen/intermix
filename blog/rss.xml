@@ -4,11 +4,18 @@
         <title>Intermix Blog</title>
         <link>https://rolandjansen.github.io/blog</link>
         <description>intermix Blog</description>
-        <lastBuildDate>Tue, 22 Sep 2020 00:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 06 Oct 2020 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>Copyright © 2020 Roland Jansen.</copyright>
+        <item>
+            <title><![CDATA[Intermix v0.8.0 Released]]></title>
+            <link>https://rolandjansen.github.io/intermix/blog/Intermix v0.8.0 Released</link>
+            <guid>Intermix v0.8.0 Released</guid>
+            <pubDate>Tue, 06 Oct 2020 00:00:00 GMT</pubDate>
+            <description><![CDATA[Intermix Version 0.8.0 introduces advanced audio routing and comes with a basic delay fx plugin.]]></description>
+        </item>
         <item>
             <title><![CDATA[Intermix v0.7.0 Released]]></title>
             <link>https://rolandjansen.github.io/intermix/blog/Intermix v0.7.0 Released</link>

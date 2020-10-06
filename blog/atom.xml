@@ -2,12 +2,19 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://rolandjansen.github.io/blog</id>
     <title>Intermix Blog</title>
-    <updated>2020-09-22T00:00:00.000Z</updated>
+    <updated>2020-10-06T00:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://rolandjansen.github.io/blog"/>
     <subtitle>intermix Blog</subtitle>
     <icon>https://rolandjansen.github.io/img/favicon.ico</icon>
     <rights>Copyright © 2020 Roland Jansen.</rights>
+    <entry>
+        <title type="html"><![CDATA[Intermix v0.8.0 Released]]></title>
+        <id>Intermix v0.8.0 Released</id>
+        <link href="https://rolandjansen.github.io/intermix/blog/Intermix v0.8.0 Released"/>
+        <updated>2020-10-06T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[Intermix Version 0.8.0 introduces advanced audio routing and comes with a basic delay fx plugin.]]></summary>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Intermix v0.7.0 Released]]></title>
         <id>Intermix v0.7.0 Released</id>

@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[29],{83:function(i){i.exports=JSON.parse('{"allTagsPath":"/intermix/blog/tags","slug":"intermix","name":"intermix","count":4,"permalink":"/intermix/blog/tags/intermix"}')}}]);
