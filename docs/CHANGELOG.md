@@ -1,3 +1,8 @@
+## [0.8.1] - 2020-10-06
+
+### Fixed
+ - Rollup config error that led to sourcemaps being generated in the production build
+
 ## [0.8.0] - 2020-10-06
 
 ### Added
