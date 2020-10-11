@@ -9,36 +9,33 @@
  */
 
 export interface IClockMessage {
-    interval?: number;
     command?: string;
+    intervalInMili?: number;
 }
+
+let timer: any; // should be number but typescript has a problem with the setInterval context
+let intervalInMili = 0;
 
 export function clock(e: MessageEvent): void {
     // we need an object that represents a worker context
     // to tell the compiler to use the right types.
     const ctx: Worker = self as any;
     const data = e.data as IClockMessage;
-    let timer: any; // should be number but typescript has a problem with the setInterval context
-    let interval = 0;
 
-    if (data.interval) {
-        interval = data.interval;
-        ctx.postMessage({ interval });
-        if (timer) {
+    if (data.intervalInMili) {
+        intervalInMili = data.intervalInMili;
+        if (typeof timer !== "undefined") {
             clearInterval(timer);
-            timer = setInterval(() => {
-                ctx.postMessage("tick");
-            }, interval);
         }
     }
 
     if (data.command === "start") {
         timer = setInterval(() => {
             ctx.postMessage("tick");
-        }, interval);
+        }, intervalInMili);
     } else if (data.command === "stop") {
         clearInterval(timer);
     } else if (data.command === "getIntervalInMili") {
-        ctx.postMessage({ interval });
+        ctx.postMessage({ intervalInMili });
     }
 }

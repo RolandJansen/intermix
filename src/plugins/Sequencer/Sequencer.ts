@@ -44,8 +44,17 @@ const Plugin: IPluginConstructor = class Sequencer extends AbstractControllerPlu
     private triggeredSteps: IQueuePosition[] = []; // list of steps that were triggered but are still ahead of time
     // private lastPlayedStep = 0;         // step in queue that was played (not triggered) recently (used for drawing).
     private isRunning = false; // true if sequencer is running, otherwise false
-
     private clock: Worker;
+
+    // list of all audio input nodes, if no inputs, return an empty list
+    public get inputs(): AudioNode[] {
+        return [];
+    }
+
+    // list of all audio output nodes, if no inputs, return an empty list
+    public get outputs(): AudioNode[] {
+        return [];
+    }
 
     constructor(public readonly uid: string, private ac: AudioContext) {
         super();
@@ -55,7 +64,7 @@ const Plugin: IPluginConstructor = class Sequencer extends AbstractControllerPlu
         // Initialize the timer
         this.clock = createInlineWorker(clock);
 
-        const intervalMsg: IClockMessage = { interval: this.intervalInMili };
+        const intervalMsg: IClockMessage = { intervalInMili: this.intervalInMili };
         this.clock.postMessage(intervalMsg);
         this.clock.onmessage = (e: MessageEvent): void => {
             if (e.data === "tick") {
@@ -71,16 +80,6 @@ const Plugin: IPluginConstructor = class Sequencer extends AbstractControllerPlu
      */
     public updateFrame(lastPlayedStep: number): void {
         /* nothing */
-    }
-
-    // list of all audio input nodes, if no inputs, return an empty list
-    public get inputs(): AudioNode[] {
-        return [];
-    }
-
-    // list of all audio output nodes, if no inputs, return an empty list
-    public get outputs(): AudioNode[] {
-        return [];
     }
 
     /**
@@ -166,7 +165,9 @@ const Plugin: IPluginConstructor = class Sequencer extends AbstractControllerPlu
      */
     private stop(): boolean {
         if (this.ac.state === "running" && this.isRunning) {
+            // const stopMsg: IClockMessage = { command: "stop" };
             this.halt();
+            // this.clock.postMessage(stopMsg);
             this.ac.suspend();
             return true;
         } else {
@@ -223,6 +224,8 @@ const Plugin: IPluginConstructor = class Sequencer extends AbstractControllerPlu
             this.nextStepTimeInSec = timestamp;
         }
 
+        // console.log("hello");
+        // console.log(timestamp);
         while (this.nextStepTimeInSec < limit) {
             this.addPatternsToRunqueue();
             this.sendAllActionsInNextStep();
@@ -285,7 +288,6 @@ const Plugin: IPluginConstructor = class Sequencer extends AbstractControllerPlu
         // });
 
         const nextStepActions = this.score.getAllActionsForNextStep();
-        // console.log(nextStepActions);
         nextStepActions.forEach((action) => {
             this.prepareActionForDispatching(action, this.nextStepTimeInSec);
             this.sendAction(action);
