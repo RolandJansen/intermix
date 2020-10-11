@@ -183,7 +183,8 @@ export default class Score {
      * @param pointer A runqueue pointer object
      */
     private buildActionsFromEvents(events: OscArgSequence[], pointer: IPointer): ICoreAction[] {
-        const actions: ICoreAction[] = events.map((payload: OscArgSequence) => {
+        const actions: ICoreAction[] = events.map((event: OscArgSequence) => {
+            const payload = Array.from(event);
             return {
                 listener: pointer.pluginId,
                 type: payload[0],
