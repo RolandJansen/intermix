@@ -1,7 +1,6 @@
 import Score, { IRunqueue } from "../Score";
 import { IntermixNote } from "../../../interfaces/interfaces";
 import { OscArgSequence } from "../../../interfaces/IActions";
-import { ILoop } from "../Sequencer";
 
 const partId1 = "abcd";
 const partId2 = "efgh";
@@ -74,30 +73,39 @@ describe("Loop Mode", () => {
         expect(testScore["loopActive"]).toBeFalsy();
     });
 
-    test("sets loop start- and endpoint", () => {
-        const loop: ILoop = { start: 23, end: 42 };
-        testScore.loop = loop;
-        expect(testScore["loopStart"]).toEqual(23);
-        expect(testScore["loopEnd"]).toEqual(42);
+    test("sets loop startpoint", () => {
+        testScore.loopStart = 23;
+        expect(testScore["loop"].start).toEqual(23);
     });
 
-    test("ignores a loop setting if end is set prior to start", () => {
-        const loop: ILoop = { start: 42, end: 23 }; // end < start
-        testScore.loop = loop;
-        expect(testScore["loopStart"]).toEqual(0);
-        expect(testScore["loopEnd"]).toEqual(63);
+    test("ignores loop start if its higher than loop end", () => {
+        testScore.loopStart = 5000;
+        expect(testScore["loop"].start).toEqual(0);
     });
 
-    test("ignores a loop setting if it contains no steps", () => {
-        const loop: ILoop = { start: 23, end: 23 }; // start === end
-        testScore.loop = loop;
-        expect(testScore["loopStart"]).toEqual(0);
-        expect(testScore["loopEnd"]).toEqual(63);
+    test("ignores loop start if its equal to loop end", () => {
+        testScore.loopStart = testScore["loop"].end;
+        expect(testScore["loop"].start).toEqual(0);
+    });
+
+    test("sets loop endpoint", () => {
+        testScore.loopEnd = 42;
+        expect(testScore["loop"].end).toEqual(42);
+    });
+
+    test("ignores loop end if its lower than loop start", () => {
+        testScore.loopEnd = -1;
+        expect(testScore["loop"].end).toEqual(63);
+    });
+
+    test("ignores loop end if its equal to loop start", () => {
+        testScore.loopEnd = 0;
+        expect(testScore["loop"].end).toEqual(63);
     });
 
     test("sets the pointer back to start when end of loop is reached", () => {
-        const loop: ILoop = { start: 23, end: 42 };
-        testScore.loop = loop;
+        testScore.loopStart = 23;
+        testScore.loopEnd = 42;
         testScore.activateLoop();
 
         testScore.moveScorePointerTo(42);

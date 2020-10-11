@@ -1,6 +1,6 @@
 /// <reference path="../../../../typings/web-audio-test-api.d.ts" />
 import "web-audio-test-api";
-import Sequencer, { ILoop } from "../Sequencer";
+import Sequencer from "../Sequencer";
 import SeqPart from "../../../seqpart/SeqPart";
 import { IntermixNote } from "../../../interfaces/interfaces";
 import { IOscActionDef, OscArgSequence } from "../../../interfaces/IActions";
@@ -126,15 +126,25 @@ describe("Sequencer", () => {
             expect(sequencer["score"]["queue"][23]).toHaveLength(0);
         });
 
-        test("sets the loop interval", () => {
-            const loop: ILoop = {
-                start: 23,
-                end: 42,
-            };
-            sequencer.onChange(["LOOP", loop]);
-            expect(sequencer["score"]["loopStart"]).toEqual(23);
-            expect(sequencer["score"]["loopEnd"]).toEqual(42);
+        test("sets loopStart", () => {
+            sequencer.onChange(["loopStart", 23]);
+            expect(sequencer["score"]["loop"].start).toEqual(23);
         });
+
+        test("sets loopEnd", () => {
+            sequencer.onChange(["loopEnd", 42]);
+            expect(sequencer["score"]["loop"].end).toEqual(42);
+        });
+
+        // test("sets the loop interval", () => {
+        //     const loop: ILoop = {
+        //         start: 23,
+        //         end: 42,
+        //     };
+        //     sequencer.onChange(["LOOP", loop]);
+        //     expect(sequencer["score"]["loopStart"]).toEqual(23);
+        //     expect(sequencer["score"]["loopEnd"]).toEqual(42);
+        // });
 
         test("activates loop mode", () => {
             sequencer["score"]["loopActive"] = false;

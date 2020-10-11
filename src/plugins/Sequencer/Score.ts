@@ -1,4 +1,4 @@
-import { ILoop, IQueuePosition } from "./Sequencer";
+import { IQueuePosition } from "./Sequencer";
 import { ICoreAction, OscArgSequence } from "../../interfaces/IActions";
 
 export type Pattern = OscArgSequence[][];
@@ -15,6 +15,11 @@ interface IPointer {
 
 interface IPointerTable {
     [pointerId: string]: IPointer;
+}
+
+interface ILoop {
+    start: number;
+    end: number;
 }
 
 type SeqPartID = string;
@@ -34,8 +39,10 @@ export default class Score {
     private nextStep = 0; // position in the queue that will get triggered next
     private mainQueue: PartAndPlugin[][] = []; // main queue that only holds part ids
     private loopActive = false; // play a section of the queue in a loop
-    private loopStart = 0; // first step of the loop
-    private loopEnd = 63; // last step of the loop
+    private loop: ILoop = {
+        start: 0,
+        end: 63,
+    };
 
     private runQueue: IRunqueue = {}; // table with parts that are playing or will be played shortly
     private patternPointerId = 0; // every pointer in the runqueue has a unique id
@@ -48,10 +55,15 @@ export default class Score {
         return [];
     }
 
-    public set loop(loop: ILoop) {
-        if (loop.start < loop.end) {
-            this.loopStart = loop.start;
-            this.loopEnd = loop.end;
+    public set loopStart(step: number) {
+        if (step < this.loop.end) {
+            this.loop.start = step;
+        }
+    }
+
+    public set loopEnd(step: number) {
+        if (step > this.loop.start) {
+            this.loop.end = step;
         }
     }
 
@@ -69,8 +81,8 @@ export default class Score {
     }
 
     public increaseScorePointer(): void {
-        if (this.loopActive && this.nextStep >= this.loopEnd) {
-            this.setScorePointerTo(this.loopStart);
+        if (this.loopActive && this.nextStep >= this.loop.end) {
+            this.setScorePointerTo(this.loop.start);
         } else {
             this.nextStep++;
         }

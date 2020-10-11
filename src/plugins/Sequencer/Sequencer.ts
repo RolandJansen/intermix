@@ -13,11 +13,6 @@ export interface IQueuePosition {
     timestamp: number;
 }
 
-export interface ILoop {
-    start: number;
-    end: number;
-}
-
 /**
  * The main class of the sequencer. It does the queuing of
  * parts, runs the scheduler that fires actions
@@ -119,9 +114,13 @@ const Plugin: IPluginConstructor = class Sequencer extends AbstractControllerPlu
                 this.score.removePartFromScore(toBeRemoved);
                 // this.actionCreators.QUEUE(this.score.queue);
                 return true;
-            case "LOOP":
-                const loop: ILoop = changed[1];
-                this.score.loop = loop;
+            case "loopStart":
+                const loopStart: number = changed[1];
+                this.score.loopStart = loopStart;
+                return true;
+            case "loopEnd":
+                const loopEnd: number = changed[1];
+                this.score.loopEnd = loopEnd;
                 return true;
             case "loopActive":
                 const isActive: boolean = changed[1] === 1 ? true : false;
