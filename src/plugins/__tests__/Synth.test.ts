@@ -23,13 +23,7 @@ describe("DemoSynth", () => {
     });
 
     test("has action definitions", () => {
-        const actionDef = {
-            address: "/intermix/plugin/<UID>/envAttack",
-            typeTag: ",sff",
-            value: ["Envelope Attack", 0.0, 0.0],
-            description: "Filter-Envelope Attack",
-        };
-        expect(synth.actionDefs).toContainEqual(actionDef);
+        expect(synth.actionDefs[0].typeTag).toEqual(",sff");
     });
 
     test("has zero inputs", () => {
@@ -40,8 +34,8 @@ describe("DemoSynth", () => {
         expect(synth.outputs.length).toEqual(1);
     });
 
-    test("output type is BiquadFilterNode", () => {
-        expect(synth.outputs[0]).toBeInstanceOf(BiquadFilterNode);
+    test("output type is GainNode", () => {
+        expect(synth.outputs[0]).toBeInstanceOf(GainNode);
     });
 
     describe("onChange", () => {
