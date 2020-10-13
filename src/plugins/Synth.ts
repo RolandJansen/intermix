@@ -23,13 +23,13 @@ const Plugin: IPluginConstructor = class Synth extends AbstractPlugin implements
             address: Synth.PREFIX + "envAttack",
             typeTag: ",sff",
             value: ["Envelope Attack", 0.0, 0.0],
-            description: "Filter-Envelope Attack",
+            description: "Filter-Envelope Attack: name, value, starttime",
         },
         {
             address: Synth.PREFIX + "envDecay",
             typeTag: ",sff",
             value: ["Envelope Decay", 0.0, 0.0],
-            description: "Filter-Envelope Decay",
+            description: "Filter-Envelope Decay: name, value, starttime",
         },
         {
             address: Synth.PREFIX + "stop",
@@ -41,13 +41,15 @@ const Plugin: IPluginConstructor = class Synth extends AbstractPlugin implements
     private attack: number;
     private decay: number;
     private filter: BiquadFilterNode;
+    private volume: GainNode;
     private queue: OscillatorNode[] = [];
 
     constructor(public readonly uid: string, private ac: AudioContext) {
         super();
 
-        // Create a new biquad filter
+        // Create biquad filter and gain nodes
         this.filter = this.ac.createBiquadFilter();
+        this.volume = this.ac.createGain();
 
         // Initial envelope attack value in seconds
         this.attack = 0.1;
@@ -61,7 +63,7 @@ const Plugin: IPluginConstructor = class Synth extends AbstractPlugin implements
 
     // list of all audio output nodes
     public get outputs(): AudioNode[] {
-        return [this.filter];
+        return [this.volume];
     }
 
     // list of all input nodes, if no inputs, return an empty list
@@ -76,6 +78,9 @@ const Plugin: IPluginConstructor = class Synth extends AbstractPlugin implements
             case "note":
                 const note: IntermixNote = changed[1];
                 this.handleNote(note);
+                return true;
+            case "volume":
+                this.handleVolume(changed[1]);
                 return true;
             case "stop":
                 this.stop();
@@ -100,6 +105,12 @@ const Plugin: IPluginConstructor = class Synth extends AbstractPlugin implements
         }
     }
 
+    private handleVolume(volume: number): void {
+        if (volume >= 0 && volume <= 127) {
+            this.volume.gain.value = volume / 128;
+        }
+    }
+
     // Handles attack-time-change events.
     // You could also archive this with getter/setter
     // but for the sake of consistency we use one handler
@@ -116,11 +127,12 @@ const Plugin: IPluginConstructor = class Synth extends AbstractPlugin implements
         this.decay = control[1];
     }
 
-    // Sets filtertype, quality and initial cutoff frequency
+    // Sets filtertype, quality, cutoff frequency and connect it to gain node
     private initFilter(): void {
         this.filter.type = "lowpass";
         this.filter.Q.value = 15;
         this.filter.frequency.value = 1000;
+        this.filter.connect(this.volume);
     }
 
     // Plays a note
@@ -128,14 +140,14 @@ const Plugin: IPluginConstructor = class Synth extends AbstractPlugin implements
         const freq = this.frequencyLookup[note[1]];
         const osc = this.getNewOsc(freq);
         osc.start(note[4]);
-        osc.stop(note[4] + note[3]);
+        osc.stop(note[3] + note[4]);
         this.queue.push(osc);
         this.startEnvelope(note[4]);
     }
 
     private stop(): void {
         this.queue.forEach((node) => {
-            // we can't stop a node twice so we just disconnect
+            // we can't stop a running node so we just disconnect
             node.disconnect();
         });
         this.queue = []; // release all references
