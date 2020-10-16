@@ -2,6 +2,27 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## unreleased
+
+### Added
+ - Demo: Synth track
+ - Demo: Some sliders to control synth parameters
+ - Demo: Style (it looked awful until this release)
+ - Synth: Master volume
+
+### Changed
+ - Demo: Nexus UI was replaced with custom elements
+
+### Fixed
+ - Sequencer: "loopStart" action not working
+ - Sequencer: "loopEnd" action not working
+ - Sequencer: Scheduler interval set to 1ms and not changable
+ - Sequencer: Scheduler keeps running after "stop" action
+ - Sequencer/Score: Wrong event start times (values copied by ref, not by value)
+
+### Removed
+ - Sequencer action "LOOP"
+
 ## [0.8.1] - 2020-10-06
 
 ### Fixed
@@ -111,6 +132,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Registry that generates Redux action-creators, state and reducers at runtime
 
 ### Changed
+- Nearly everything, including ...
 - Project Code migrated from Javascript (ES5) to Typescript
 - Tests migrated from Jasmine to Jest
 - Sequencer: New algorithm for frame animation that runs
@@ -119,7 +141,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Sequencer: Minor speed optimizations.
 - README.md improved.
 - CHANGELOG.md improved.
-- Refactoring of nearly everything
 
 ### Removed
 - Old Dispatcher

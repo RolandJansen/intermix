@@ -2,57 +2,70 @@
 
 <head>
     <title>Sequencer Demo</title>
-    <!-- <script type='module' src='/dist/esm/index.js'></script> -->
-    <script type='text/javascript' src='https://cdn.jsdelivr.net/npm/nexusui@2.0.13/dist/NexusUI.min.js'></script>
-    <style>
-        html {
-            font-family: Arial, Helvetica, sans-serif;
-
-        }
-
-        .button-group div {
-            /* float: left; */
-            display: inline-block;
-        }
-
-        #blink {
-            width: 20px;
-            height: 20px;
-            border-style: solid;
-        }
-
-        .note {
-            font-size: small;
-        }
-    </style>
+    <link href="demo.css" rel="stylesheet">
 </head>
 
-<!-- <body onload="init();"> -->
-
 <body>
-    <button id="resumeAudioContext">resume audio context</button>
-    <button id="getstate">get current state</button>
-    <input type="file" id="file-selector" accept=".js, .mjs">
-    <div id="sequencer"></div>
-    <div class="button-group">
-        <div id="start-button"></div>
-        <div id="stop-button"></div>
-        <!-- <div id="reset-button"></div> -->
-        <div id="set-bpm"></div>
+    <h1>intermix Test App</h1>
+    <fieldset>
+        <legend>Step Sequencer</legend>
+        <div id="sequencer"></div>
+        <div class="transport">
+            <button id="start" class="demo-button">Start</button>
+            <button id="stop" class="demo-button">Stop</button>
+            <button id="reset" class="demo-button">Reset</button>
+            <input id="bpm" type="number" value="120">
+        </div>
+    </fieldset>
+    <div class="synth-and-routing">
+        <fieldset>
+            <legend>Synth Parameter</legend>
+            <div>
+                <input type="range" id="synth-volume" name="synth-volume" min="0" max="127" value="127">
+                <label for="synth-volume">Volume</label>
+            </div>
+            <div>
+                <input type="range" id="synth-attack" name="synth-attack" min="0" max="1" step="0.01" value="0.1">
+                <label for="synth-attack">Filter Attack</label>
+            </div>
+            <div>
+                <input type="range" id="synth-decay" name="synth-decay" min="0" max="1" step="0.01" value="0.1">
+                <label for="synth-decay">Filter Decay</label>
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend>Routing</legend>
+            <div class="routing">
+                <label for="snare-out">Snare goes to</label>
+                <select name="snare-out" id="snare-out">
+                    <option value="destination">Soundcard</option>
+                    <option value="delay">Delay FX</option>
+                </select>
+            </div>
+            <div class="routing">
+                <label for="hihat-out">Hihat goes to</label>
+                <select name="hihat-out" id="hihat-out">
+                    <option value="destination">Soundcard</option>
+                    <option value="delay">Delay FX</option>
+                </select>
+            </div>
+            <div class="routing">
+                <label for="bass-out">Bass goes to</label>
+                <select name="bass-out" id="bass-out">
+                    <option value="destination">Soundcard</option>
+                    <option value="delay">Delay FX</option>
+                </select>
+            </div>
+        </fieldset>
     </div>
-    <div>
-        <span>Snare Drum goes to </span>
-        <select name="inputNodes" id="input-nodes">
-            <option value="destination">Soundcard</option>
-            <option value="delay">Delay FX</option>
-        </select>
-    </div>
-    <!-- <div id="blink"></div> -->
-    <p class="note">Note: This demo is done with NexusUI which turned out to be not ideal.
-        The sequencer UI doesn't work well together with the
-        intermix sequencer and will soon be replaced with more
-        suitable elements.
-    </p>
+    <fieldset>
+        <legend>Debugging</legend>
+        <button id="resumeAudioContext">resume audio context</button>
+        <button id="getstate">get current state</button>
+    </fieldset>
+    <footer>
+        Drumsounds sampled from a <a target="_blank" href="http://www.vintagesynth.com/casio/sk1.php">Casio SK-1</a>.
+    </footer>
 </body>
 <script>
     // redux is reading the 'process' global var
@@ -64,199 +77,266 @@
     };
 </script>
 <script type="module">
-    // import * as intermix from "intermix";
     import * as intermix from "/dist/esm/intermix.esm.js";
-    window.intermix = intermix;
+    import StepSequencer from "./StepSequencer.js";
 
-    let BPM = 120;
+    const stepmodel = [
+        [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0],
+    ];
+    const synthNotes = [41, 41, 41, 29, 41, 41, 41, 42, 41, 30, 42, 44, 41, 42, 30, 41];
+    const rownames = ["Bassdrum", "Snare", "Hihat Closed", "Hihat Open", "Bass"];
 
-    const sequencer = new Nexus.Sequencer('#sequencer', {
-        size: [540, 200],
-        rows: 4,
-        columns: 16,
-    })
-    const startButton = new Nexus.TextButton('#start-button', {
-        text: 'Start',
-    })
-    const stopButton = new Nexus.TextButton('#stop-button', {
-        text: 'Stop',
-    })
-    // const resetButton = new Nexus.TextButton('#reset-button', {
-    //     text: 'Reset',
-    // })
-    const setBpm = new Nexus.Number('#set-bpm', {
-        size: [80, 50],
-        value: BPM,
-        min: 0,
-        max: 240,
-    })
-
-    startButton.on('change', (e) => {
-        // e: true -> mousedown
-        if (e) {
-            sequencer.stepper.value = -1;
-            seqActionCreators.start();
-        }
-    })
-
-    stopButton.on('change', (e) => {
-        // e: true -> mousedown
-        if (e) {
-            seqActionCreators.stop();
-            seqActionCreators.reset();
-        }
-    })
-
-    // resetButton.on('change', (e) => {
-    //     // e: true -> mousedown
-    //     if (e) {
-    //         seqActionCreators.reset();
-    //         // sequencer.stepper.value = -1;
-    //         // const counter = new Nexus.Counter(0, 1);
-    //         // counter.value = 0;
-    //         // sequencer.stepper(counter);
-    //     }
-    // })
-
-    setBpm.on('change', (e) => {
-        // e: true -> mousedown
-        if (e) {
-            BPM = e;
-            seqActionCreators.BPM(e);
-        }
-    })
-
-    sequencer.on('change', (e) => {
-        const partId = seqPartUID[e.row];
-        const instrumentId = instrumentUID[e.row];
-        const partActionCreators = intermix.getActionCreators(partId);
-        const duration = get16thDuration(BPM);
-        if (e.state) {
-            // send an "addNote" action to the according part
-            partActionCreators.activeStep(e.column);
-            partActionCreators.addNote(["note", 40, 1, duration, 0.0]);
-        } else {
-            // send a "deleteNote" action to the according part
-            partActionCreators.activeStep(e.column);
-            partActionCreators.removeNote(["note", 40, 1, duration, 0.0]);
-        }
-    })
-
-    const fileSelector = document.getElementById("file-selector");
-    fileSelector.addEventListener("change", (event) => {
-        const file = event.target.files[0];
-        const url = URL.createObjectURL(file);
-        import(url).then((PluginModule) => {
-            intermix.addPluginClass(PluginModule.default);
-            console.log(intermix.pluginClasses);
-        });
+    const stepSequencer = new StepSequencer({
+        parent: "sequencer",
+        model: stepmodel,
+        synthNotes,
+        rownames,
     });
 
-    const inputSelector = document.getElementById("input-nodes");
-    inputSelector.addEventListener("change", (event) => {
-        const outNode = [instrumentUID[1], 0];
-        let inNode = ["destination", 0];
-        if (event.target.value === "delay") {
-            inNode = [delayUID, 0];
-        }
-
-        intermix.connectPlugins(outNode, inNode);
-    });
-
-    const selectNextSeqRow = (step) => {
-        if (step % 4 === 0) {
-            sequencer.next();
-        }
-    }
-
-    const ac = intermix.getAudioContext();
-    const instrumentUID = [];
-    const seqPartUID = [];
-    let sequencerUID = '';
-    let delayUID = '';
-
-    let synthUID = "";
-    let seqActionCreators = {};
-    let samplerActionCreators = {};
-
-    let samples = [
+    const samples = [
         "/demo/assets/Casio SK-1/skkick.wav",
         "/demo/assets/Casio SK-1/sksnare.wav",
         "/demo/assets/Casio SK-1/skclhat.wav",
         "/demo/assets/Casio SK-1/skophat.wav",
     ]
 
-    export function init() {
+    const instrumentUID = [];
+    const seqPartUID = [];
 
-        // create sampler plugins and a sequencer part for each sound
-        for (let i = 0; i < 4; i++) {
-            instrumentUID.push(intermix.addPlugin('Sampler'))
-            seqPartUID.push(intermix.addSeqPart())  // 16 steps if not stated otherwise
+    const sequencerUID = intermix.addPlugin('Sequencer');
+    const delayUID = intermix.addPlugin('Delay');
+    const synthUID = intermix.addPlugin('Synth');
+
+    const seqActionCreators = initSequencer();
+    initSamplers();
+    const synthActionCreators = initSynth();
+    initSequencerParts();
+
+    /**
+     * The callback that should be passed to the sequencer animation
+     */
+    function nextStep(step) {
+        if (step % 4 === 0) {
+            stepSequencer.next();
         }
+    }
 
-        // add a sample to each sampler
-        samples.forEach((sample, index) => {
-            addAudioDataToSampler(instrumentUID[index], sample);
-        })
+    /**
+     * create the sequencer and initialize the UI animation
+     */
+    function initSequencer() {
+        const actionCreators = intermix.getActionCreators(sequencerUID);
+        actionCreators.animate(nextStep);
+        setLoop(actionCreators);
+        return actionCreators;
+    }
 
-        // add delay fx
-        delayUID = intermix.addPlugin('Delay');
+    function setLoop(actionCreators) {
+        actionCreators.loopEnd(63);
+        actionCreators.loopActivate();
+    }
 
-        // setup the sequencer
-        sequencerUID = intermix.addPlugin('Sequencer');
-        seqActionCreators = intermix.getActionCreators(sequencerUID);
-        seqActionCreators.animate(selectNextSeqRow);  // animate the sequencer
+    /**
+     * create sequencer parts and add them to the score.
+     */
+    function initSequencerParts() {
+        createSeqParts();
+        addPartsToScore();
+        populateSeqParts();
+    }
 
-        console.log(seqActionCreators);
+    function createSeqParts() {
+        const partCount = stepmodel.length;
+        for (let i = 0; i < partCount; i++) {
+            seqPartUID.push(intermix.addSeqPart());
+        }
+    }
 
-        // setup a basic sequence
-        sequencer.matrix.populate.row(0, [1, 0, 0, 0, 0, 0, 0, 0]);
-        sequencer.matrix.populate.row(1, [0, 0, 0, 0, 1, 0, 0, 0]);
-        sequencer.matrix.populate.row(2, [0, 0, 1, 0]);
-
-        // add notes to the seqParts
-        // populateSeqParts(sequencer.matrix.pattern);
-
-        // add parts to sequencer and to the score
+    function addPartsToScore() {
         seqPartUID.forEach((seqPartId, index) => {
             seqActionCreators.addToScore([seqPartId, instrumentUID[index]])
         })
-
-        // play in loop mode
-        // seqActionCreators.loopActive();
-        seqActionCreators.loopActivate();
-
     }
 
-    const addAudioDataToSampler = (samplerUID, rawData) => {
-        intermix.loadFileFromServer(rawData).then((response) => {
-            return ac.decodeAudioData(response);
-        }).then((decoded) => {
-            // send the audio buffer to the sampler
-            const actionCreators = intermix.getActionCreators(samplerUID)
-            actionCreators.audioData(decoded)
-        })
-    }
-
-    const populateSeqParts = (matrix) => {
-        matrix.forEach((seqRow, rowIndex) => {
+    /**
+     * map step-model to sequencer parts
+     */
+    function populateSeqParts() {
+        stepmodel.forEach((seqRow, rowIndex) => {
             const seqPartId = seqPartUID[rowIndex];
-            const samplerId = instrumentUID[rowIndex];
-            const seqPartActionCreators = getActionCreators(seqPartId);
-            // const duration = get16thDuration()
+            const seqPartActionCreators = intermix.getActionCreators(seqPartId);
 
             seqRow.forEach((seqStep, stepIndex) => {
-                if (seqRow[stepIndex] === true) {
-                    seqPartActionCreators.addNote(["note", 40, 1, 1.0, 0.0]);
+                if (seqStep !== 0) {
+                    let stepNoteNumber = 49;
+                    if (rowIndex === stepmodel.length - 1) {
+                        stepNoteNumber = synthNotes[stepIndex];
+                    }
+                    seqPartActionCreators.activeStep(stepIndex);
+                    seqPartActionCreators.addNote(["note", stepNoteNumber, 1, 0.125, 0.0]);
                 }
             })
         })
     }
 
-    const get16thDuration = (bpm) => {
-        const divisor = bpm * 4;
-        return 60 / divisor;
+    /**
+     * create sampler plugins and a sequencer part for each sound
+     */
+    function initSamplers() {
+        createSamplers();
+        mapSamplesToSamplers();
     }
+
+    function createSamplers() {
+        for (let i = 0; i < 4; i++) {
+            instrumentUID.push(intermix.addPlugin('Sampler'))
+        }
+    }
+
+    /**
+     * add a sample to each sampler
+     */
+    function mapSamplesToSamplers() {
+        samples.forEach((sample, index) => {
+            addAudioDataToSampler(instrumentUID[index], sample);
+        })
+    }
+
+    /**
+     * Load audio files, decode it and send it to the sampler instances
+     */
+    function addAudioDataToSampler(samplerUID, rawData) {
+        intermix.loadFileFromServer(rawData).then((response) => {
+            const ac = intermix.getAudioContext();
+            return ac.decodeAudioData(response);
+        }).then((decoded) => {
+            const actionCreators = intermix.getActionCreators(samplerUID)
+            actionCreators.audioData(decoded)
+        })
+    }
+
+    function initSynth() {
+        instrumentUID.push(synthUID);
+        const actionCreators = intermix.getActionCreators(synthUID);
+
+        const volume = 30;
+        const attack = 0.2;
+        const volumeSlider = document.getElementById("synth-volume");
+        const attackSlider = document.getElementById("synth-attack");
+        const decaySlider = document.getElementById("synth-decay");
+
+        actionCreators.volume(volume);
+        actionCreators.envAttack(["Envelope Attack", attack, 0]);
+        volumeSlider.valueAsNumber = volume;
+        attackSlider.valueAsNumber = attack;
+
+        return actionCreators;
+    }
+
+    /**
+     * This function will be called when a cell gets clicked.
+     * It is used to modify sequencer parts
+     */
+    stepSequencer.onStepChange = (rowNumber, cellNumber, cellActive) => {
+        const seqPartId = seqPartUID[rowNumber];
+        const actionCreators = intermix.getActionCreators(seqPartId);
+        actionCreators.activeStep(cellNumber);
+
+        let noteNumber = 49;
+        if (parseInt(rowNumber) === stepmodel.length - 1) { // synth has to be treated different
+            const input = document.getElementById("note-input_" + cellNumber);
+            noteNumber = input.valueAsNumber;
+        }
+
+        if (cellActive) {
+            stepmodel[rowNumber][cellNumber] = noteNumber;
+            actionCreators.addNote(["note", noteNumber, 1, 0.125, 0.0]);
+        } else {
+            noteNumber = stepmodel[rowNumber][cellNumber];
+            actionCreators.removeNote(["note", noteNumber, 1, 0.125, 0.0]);
+        }
+    }
+
+    /**
+     * This function will be called when a note number gets changed.
+     * Modifies the synthNotes array and the corresponding sequencer part.
+     */
+    stepSequencer.onNoteChange = (stepNumber, noteNumber) => {
+        console.log("stepNumber: " + stepNumber);
+        console.log("noteNumber: " + noteNumber);
+        const oldNoteNumber = synthNotes[stepNumber];
+        synthNotes[stepNumber] = noteNumber;
+        const actionCreators = intermix.getActionCreators(seqPartUID[seqPartUID.length - 1]);
+
+        actionCreators.activeStep(stepNumber);
+        actionCreators.removeNote(["note", oldNoteNumber, 1, 1, 0]);
+        actionCreators.addNote(["note", noteNumber, 1, 0.125, 0.0]);
+    }
+
+    //===============
+    // event handler
+    //===============
+    document.getElementById("start").addEventListener("click", () => {
+        seqActionCreators.start();
+    })
+
+    document.getElementById("stop").addEventListener("click", () => {
+        seqActionCreators.stop();
+    })
+
+    document.getElementById("reset").addEventListener("click", () => {
+        // seqActionCreators.stop();
+        seqActionCreators.reset();
+        stepSequencer.reset();
+    })
+
+    document.getElementById("bpm").addEventListener("change", (event) => {
+        seqActionCreators.BPM(event.target.valueAsNumber);
+    })
+
+    document.getElementById("synth-volume").addEventListener("change", (event) => {
+        synthActionCreators.volume(event.target.valueAsNumber);
+    })
+
+    document.getElementById("synth-attack").addEventListener("change", (event) => {
+        const attack = event.target.valueAsNumber;
+        const value = ["Envelope Attack", attack, 0];
+        synthActionCreators.envAttack(value);
+    })
+
+    document.getElementById("synth-decay").addEventListener("change", (event) => {
+        const decay = event.target.valueAsNumber;
+        const value = ["Envelope Decay", decay, 0];
+        synthActionCreators.envDecay(value);
+    })
+
+    document.getElementById("snare-out").addEventListener("change", (event) => {
+        if (event.target.value === "delay") {
+            wireInstrument(instrumentUID[1], delayUID);
+        } else {
+            wireInstrument(instrumentUID[1], "destination");
+        }
+    });
+
+    document.getElementById("hihat-out").addEventListener("change", (event) => {
+        if (event.target.value === "delay") {
+            wireInstrument(instrumentUID[2], delayUID);
+        } else {
+            wireInstrument(instrumentUID[2], "destination");
+        }
+    });
+
+    document.getElementById("bass-out").addEventListener("change", (event) => {
+        if (event.target.value === "delay") {
+            wireInstrument(instrumentUID[4], delayUID);
+        } else {
+            wireInstrument(instrumentUID[4], "destination");
+        }
+    });
 
     document.getElementById('resumeAudioContext').addEventListener('click', () => {
         intermix.resumeAudioContext();
@@ -267,7 +347,11 @@
         console.log(intermix.getState());
     })
 
-    init();
+    function wireInstrument(sourceID, targetID) {
+        const outNode = [sourceID, 0];
+        const inNode = [targetID, 0];
+        intermix.connectPlugins(outNode, inNode);
+    }
 
 </script>
 

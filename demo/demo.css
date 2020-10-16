@@ -1,0 +1,95 @@
+html {
+    font-family: Arial, Helvetica, sans-serif;
+    /* min-width: 1000px; */
+}
+
+button {
+    min-width: 7em;
+    height: 3em;
+    margin: 5px;
+}
+
+fieldset {
+    margin: 5px;
+}
+
+legend {
+    background-color: #404040;
+    color: white;
+}
+
+.transport {
+    padding-top: 1em;
+}
+
+#bpm {
+    width: 4em;
+    height: 3em;
+    margin: 5px;
+}
+
+.synth-and-routing {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.synth-and-routing fieldset {
+    flex-grow: 1;
+}
+
+.routing label {
+    float: left;
+    width: 7em;
+    margin-right: 0.1em;
+}
+
+/*****************
+ * Step Sequencer
+ *****************/
+#sequencer {
+    padding: 0px;
+}
+
+.step-seq {
+    /* padding: 0px; */
+    border-spacing: 0;
+    border-collapse: collapse;
+    table-layout: fixed;
+    /* width: 800px; */
+}
+
+.seq-row {
+    margin: 0px;
+    padding: 0px;
+}
+
+.seq-step {
+    max-width: 35px;
+    min-width: 35px;
+    width: 35px;
+    height: 40px;
+    margin: 0px;
+    border: 1px solid black;
+}
+
+.seq-row-header {
+    border: 1px solid black;
+    background-color: #eaeaea;
+}
+
+.seq-header-cell {
+    border: 1px solid black;
+    background-color: #eaeaea;
+}
+
+.note-input-cell {
+    height: 30px;
+    border: 1px solid black;
+}
+
+.note-input {
+    width: 100%;
+    border: none;
+    font-size: 12px;
+}
