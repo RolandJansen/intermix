@@ -57,7 +57,7 @@ export default class StepSequencer {
         if (stepNumber >= 0 && stepNumber <= this.stepCount) {
             const column = this.stepsWithCells[stepNumber];
             column.forEach((cell) => {
-                if (cell.style.backgroundColor === seqCellPlayingColor) {
+                if (cell.style.backgroundColor === seqCellPlayingColor || cell.style.backgroundColor === seqCellColor) {
                     cell.style.backgroundColor = seqCellColor;
                 } else {
                     cell.style.backgroundColor = seqCellEmptyColor;
@@ -209,7 +209,7 @@ export default class StepSequencer {
         const seqCell = document.getElementById(seqCellId);
         let activeStatus = false;
 
-        if (seqCell.style.backgroundColor === seqCellColor) {
+        if (seqCell.style.backgroundColor === seqCellColor || seqCell.style.backgroundColor === seqCellPlayingColor) {
             seqCell.style.backgroundColor = seqCellEmptyColor;
         } else {
             seqCell.style.backgroundColor = seqCellColor;
