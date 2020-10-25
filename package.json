@@ -8,8 +8,9 @@
     "dist"
   ],
   "entry": "src/index.ts",
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
+  "main": "dist/cjs/intermix.cjs.js",
+  "module": "dist/esm/intermix.esm.js",
+  "types": "dist/esm/intermix.esm.min.d.ts",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
@@ -25,7 +26,10 @@
     "watch": "rollup --config --watch",
     "watch-test": "jest --watch",
     "test": "jest --coverage",
-    "test:all": "jest"
+    "test:all": "jest",
+    "api-diag": "api-extractor run --local --diagnostics",
+    "doc-gen": "api-documenter markdown --input-folder ./temp --output-folder ./doc",
+    "docs": "node etc/make-docs.js"
   },
   "repository": {
     "type": "git",
@@ -72,6 +76,8 @@
     ]
   },
   "devDependencies": {
+    "@microsoft/api-documenter": "^7.9.15",
+    "@microsoft/api-extractor": "^7.10.4",
     "@types/benchmark": "^1.0.31",
     "@types/jest": "^23.3.1",
     "@types/node": "^12.12.14",

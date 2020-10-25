@@ -10,5 +10,6 @@ intermix-*.tgz
 /build
 /dist
 /lib
+/temp
 /**/_site
 /coverage/
